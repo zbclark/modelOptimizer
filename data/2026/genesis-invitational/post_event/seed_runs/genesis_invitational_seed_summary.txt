@@ -1,0 +1,18 @@
+====================================================================================================
+MODEL OPTIMIZER SEED SUMMARY
+====================================================================================================
+Base: genesis_invitational
+Directory: /workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/genesis-invitational/post_event/seed_runs
+Seeds analyzed: 1
+
+Top seed ranking (sorted by correlation, then Top-20, then Top-20 Weighted):
+
+1. seed=c | corr=0.6418 | top20=65.0% | top20W=72.4% | rmse=16.01 | mae=12.65 | players=72 | rec=optimized | baseline=THE_RIVIERA_COUNTRY_CLUB | file=optimizer_genesis_invitational_seed-c_post_tournament_results.json
+
+Best seed:
+seed=c | file=optimizer_genesis_invitational_seed-c_post_tournament_results.json
+Recommendation for best seed: Use optimized weights | baseline=THE_RIVIERA_COUNTRY_CLUB
+Note: Optimized weights recommended over baseline template.
+
+Recommendation rollup (from results.json):
+- optimized: Use optimized weights | baseline=THE_RIVIERA_COUNTRY_CLUB | seeds=c | count=1
