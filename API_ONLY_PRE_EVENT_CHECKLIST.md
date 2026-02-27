@@ -24,10 +24,15 @@ Use this checklist when **no CSV inputs are available** (no config sheet, histor
 - [ ] `DATAGOLF_*_TTL_HOURS` values acceptable (default 8760 is fine).
 - [ ] Optional: set `DATAGOLF_*_TOUR` overrides if needed (default `pga`).
 - [ ] Optional: set `DATAGOLF_HISTORICAL_YEAR` or `DATAGOLF_HISTORICAL_EVENT_ID` if scoping is required.
+- [ ] Optional: set `APPROACH_DELTA_ROLLING_EVENTS` (default 4; set to 0 to disable rolling prior).
+- [ ] Optional: set `APPROACH_DELTA_PRIOR_WEIGHT` if you want a stronger/weaker delta prior.
+- [ ] Optional: set `OUTPUT_TAG` for disambiguating output filenames.
 
 ## 3) Cache Readiness
 
 - [ ] `data/cache/` exists and is writable.
+- [ ] `data/approach_snapshot/` exists (for L24/L12/YTD snapshot caching).
+- [ ] `data/approach_deltas/` exists (for generated approach delta priors).
 - [ ] If running for the first time, allow API to populate cache.
 - [ ] If running offline, ensure cache is already primed.
 
@@ -38,6 +43,7 @@ Use this checklist when **no CSV inputs are available** (no config sheet, histor
 - [ ] Confirm output directory for run results is:
   - `data/<season>/<tournament>/pre_event/` (pre-event), or
   - `data/<season>/<tournament>/post_event/` (post-event)
+- [ ] Know the output base name: derived from `--tournament` (lowercased, spaces → underscores).
 
 ## 5) Run Mode Decisions
 
@@ -50,14 +56,14 @@ Use this checklist when **no CSV inputs are available** (no config sheet, histor
 
 ## 6) Expected Outputs (Pre-event)
 
-- [ ] `data/<season>/<tournament>/pre_event/<tournament-slug>_pre_event_results.json`
-- [ ] `data/<season>/<tournament>/pre_event/<tournament-slug>_pre_event_results.txt`
-- [ ] `data/<season>/<tournament>/pre_event/<tournament-slug>_pre_event_rankings.json`
-- [ ] `data/<season>/<tournament>/pre_event/<tournament-slug>_pre_event_rankings.csv`
+- [ ] `data/<season>/<tournament>/pre_event/<output-base>_pre_event_results.json`
+- [ ] `data/<season>/<tournament>/pre_event/<output-base>_pre_event_results.txt`
+- [ ] `data/<season>/<tournament>/pre_event/<output-base>_pre_event_rankings.json`
+- [ ] `data/<season>/<tournament>/pre_event/<output-base>_pre_event_rankings.csv`
 - [ ] Optional: dry-run template outputs (if enabled)
   - [ ] `data/<season>/<tournament>/pre_event/dryrun/dryrun_weightTemplates.js`
   - [ ] `data/<season>/<tournament>/pre_event/dryrun/dryrun_deltaPlayerScores.node.js`
-  
+
 ---
 
 ## Notes

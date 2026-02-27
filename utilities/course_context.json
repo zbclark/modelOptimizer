@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-25T02:46:26.705Z",
+  "updatedAt": "2026-02-27T18:00:43.852Z",
   "sourceDir": "apps-scripts/modelOptimizer/data",
   "defaultTours": [
     "pga"
@@ -202,7 +202,8 @@
       },
       "similarCoursesWeight": null,
       "puttingCoursesWeight": null,
-      "shotDistribution": null
+      "shotDistribution": null,
+      "pastPerformanceWeight": 0.4
     },
     "10": {
       "sourcePath": null,
@@ -338,7 +339,8 @@
         "from100to150": 0.323,
         "from150to200": 0.3,
         "over200": 0.275
-      }
+      },
+      "pastPerformanceWeight": 0.3
     },
     "12": {
       "sourcePath": null,
@@ -401,7 +403,8 @@
         "from100to150": 0.178,
         "from150to200": 0.477,
         "over200": 0.14
-      }
+      },
+      "pastPerformanceWeight": 0.4
     },
     "14": {
       "sourcePath": null,
@@ -650,7 +653,8 @@
         "from100to150": 0.146,
         "from150to200": 0.354,
         "over200": 0.425
-      }
+      },
+      "pastPerformanceWeight": 0.1
     },
     "41": {
       "sourcePath": null,
@@ -810,7 +814,8 @@
         "from100to150": 0.238,
         "from150to200": 0.37,
         "over200": 0.319
-      }
+      },
+      "pastPerformanceWeight": 0.1
     }
   },
   "byCourseNum": {
@@ -880,7 +885,8 @@
       },
       "similarCoursesWeight": null,
       "puttingCoursesWeight": null,
-      "shotDistribution": null
+      "shotDistribution": null,
+      "pastPerformanceWeight": 0.4
     },
     "11": {
       "sourcePath": null,
@@ -932,7 +938,8 @@
         "from100to150": 0.323,
         "from150to200": 0.3,
         "over200": 0.275
-      }
+      },
+      "pastPerformanceWeight": 0.3
     },
     "12": {
       "sourcePath": null,
@@ -995,7 +1002,8 @@
         "from100to150": 0.178,
         "from150to200": 0.477,
         "over200": 0.14
-      }
+      },
+      "pastPerformanceWeight": 0.4
     },
     "14": {
       "sourcePath": null,
@@ -1122,7 +1130,8 @@
         "from100to150": 0.146,
         "from150to200": 0.354,
         "over200": 0.425
-      }
+      },
+      "pastPerformanceWeight": 0.1
     },
     "500": {
       "sourcePath": null,
@@ -1308,7 +1317,8 @@
         "from100to150": 0.238,
         "from150to200": 0.37,
         "over200": 0.319
-      }
+      },
+      "pastPerformanceWeight": 0.1
     },
     "714": {
       "sourcePath": null,

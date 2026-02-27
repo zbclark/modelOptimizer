@@ -592,21 +592,22 @@ const run = async () => {
   const similarEventCourseMap = buildEventCourseMap(context, similarEventIds, similarCourseMap);
   const puttingEventCourseMap = buildEventCourseMap(context, puttingEventIds, puttingCourseMap);
 
-  const lastFiveYears = buildRecentYears(PRE_TOURNAMENT_SEASON, 5);
+  const lastSixYears = buildRecentYears(PRE_TOURNAMENT_SEASON, 6);
   const recentMonthSet = buildMonthSet(3);
   const recentMonthYears = new Set(Array.from(recentMonthSet).map(key => parseInt(key.split('-')[0], 10)));
   const recentYears = Array.from(recentMonthYears).filter(year => Number.isFinite(year));
-  const yearsToFetch = Array.from(new Set([...lastFiveYears, ...recentYears])).filter(year => Number.isFinite(year));
+  const yearsToFetch = Array.from(new Set([...lastSixYears, ...recentYears])).filter(year => Number.isFinite(year));
 
   let apiPayload = await collectRecords({
     years: yearsToFetch,
     tours,
-    dataDir: DATA_DIR,
+    dataDir: null,
     datagolfApiKey: DATAGOLF_API_KEY,
     datagolfCacheDir: DATAGOLF_CACHE_DIR,
-    datagolfHistoricalTtlMs: DATAGOLF_HISTORICAL_TTL_MS,
+    datagolfHistoricalTtlMs: 0,
     getDataGolfHistoricalRounds,
-    preferApi: true
+    preferApi: true,
+    preferCache: false
   });
   let rawRows = extractHistoricalRowsFromSnapshotPayload(apiPayload);
   const targetCourseNums = new Set(courseNumList.map(value => String(value).trim()));
@@ -618,30 +619,7 @@ const run = async () => {
     return targetCourseNums.size > 0 ? targetCourseNums.has(courseKey) : true;
   });
   if (!hasTargetEventRows) {
-    const fallbackRows = [];
-    for (const tour of tours) {
-      for (const year of yearsToFetch) {
-        try {
-          const snapshot = await getDataGolfHistoricalRounds({
-            apiKey: DATAGOLF_API_KEY,
-            cacheDir: DATAGOLF_CACHE_DIR,
-            ttlMs: DATAGOLF_HISTORICAL_TTL_MS,
-            allowStale: true,
-            tour,
-            eventId: 'all',
-            year,
-            fileFormat: 'json'
-          });
-          const extracted = extractHistoricalRowsFromSnapshotPayload(snapshot?.payload);
-          if (extracted.length > 0) fallbackRows.push(...extracted);
-        } catch (error) {
-          // Ignore
-        }
-      }
-    }
-    if (fallbackRows.length > 0) {
-      rawRows = rawRows.concat(fallbackRows);
-    }
+    console.warn('ℹ️  No target-event rows found in latest API pull; continuing with available rows.');
   }
   if (rawRows.length === 0) {
     console.error('No historical data found in JSON, CSV, or API.');
@@ -661,7 +639,7 @@ const run = async () => {
       const rowEventId = String(row.event_id || '').trim();
       if (!rowEventId || !scopedEventIds.has(rowEventId)) return false;
       const rowYear = parseInt(String(row.year || row.season || '').trim(), 10);
-      if (!lastFiveYears.includes(rowYear)) return false;
+      if (!lastSixYears.includes(rowYear)) return false;
 
       const courseNum = row.course_num ? String(row.course_num).trim() : null;
       const allowedCourses = eventCourseMap.get(rowEventId)
@@ -817,7 +795,32 @@ const run = async () => {
     return acc;
   }, {});
 
-  const regressionJson = JSON.stringify(regressionMap, null, 2);
+  const regressionMeta = {
+    generatedAt: new Date().toISOString(),
+    eventId: eventId || null,
+    season: PRE_TOURNAMENT_SEASON || null,
+    mode: 'pre_event',
+    courseNum: courseNumList.length === 1 ? courseNumList[0] : courseNumList,
+    courseNameKey: contextEntry?.courseNameKey || null,
+    templateKey: contextEntry?.templateKey || null,
+    tours: tours,
+    eventScope: {
+      eventId: eventId || null,
+      similarEventIds,
+      puttingEventIds
+    },
+    yearScope: {
+      lastSixYears,
+      recentMonths: Array.from(recentMonthSet)
+    }
+  };
+
+  const regressionPayload = {
+    meta: regressionMeta,
+    ...regressionMap
+  };
+
+  const regressionJson = JSON.stringify(regressionPayload, null, 2);
   fs.writeFileSync(regressionJsonPath, regressionJson);
 
   if (SHOULD_WRITE_TEMPLATES) {
@@ -841,7 +844,7 @@ const run = async () => {
   console.log(`✅ Wrote course history regression JSON to ${regressionJsonPath}`);
   console.log(`ℹ️  Tours used: ${tours.join(', ')}`);
   console.log(`ℹ️  Event scope: ${eventId || 'n/a'} + similar (${similarEventIds.length}) + putting (${puttingEventIds.length})`);
-  console.log(`ℹ️  Year scope: last5=[${lastFiveYears.join(', ')}], recentMonths=[${Array.from(recentMonthSet).join(', ')}]`);
+  console.log(`ℹ️  Year scope: last6=[${lastSixYears.join(', ')}], recentMonths=[${Array.from(recentMonthSet).join(', ')}]`);
   if (!SHOULD_WRITE_TEMPLATES) {
     console.log('ℹ️  Skipped regression utility output (WRITE_TEMPLATES not enabled).');
   }

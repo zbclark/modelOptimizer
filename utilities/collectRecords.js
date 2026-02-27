@@ -30,7 +30,8 @@ const collectRecords = async ({
   datagolfHistoricalTtlMs,
   getDataGolfHistoricalRounds,
   includeApi = false,
-  preferApi = false
+  preferApi = false,
+  preferCache = false
 }) => {
   const allRows = [];
   const shouldFetchApi = years.length && tours.length && getDataGolfHistoricalRounds;
@@ -44,6 +45,7 @@ const collectRecords = async ({
             cacheDir: datagolfCacheDir,
             ttlMs: datagolfHistoricalTtlMs,
             allowStale: true,
+            preferCache,
             tour,
             eventId: 'all',
             year,

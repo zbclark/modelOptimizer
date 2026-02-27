@@ -5,7 +5,7 @@ const DELTA_PLAYER_SCORES = {
       "5768": {
         "name": "Hoffman, Charley",
         "deltaTrendScore": 0.5366900834779572,
-        "deltaPredictiveScore": 0.11515737573533849,
+        "deltaPredictiveScore": 0.1151573757353385,
         "deltaTrendBuckets": {
           "short": -0.24865221256628253,
           "mid": 0.985944425553575,
@@ -13,7 +13,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.4527332577541743
         },
         "deltaPredictiveBuckets": {
-          "short": -0.032185940919862446,
+          "short": -0.03218594091986245,
           "mid": 0.22738103974995935,
           "long": 0.07716301560457496,
           "veryLong": 0.16600204457420276
@@ -22,7 +22,7 @@ const DELTA_PLAYER_SCORES = {
       "6169": {
         "name": "Kuchar, Matt",
         "deltaTrendScore": 0.15595497777679188,
-        "deltaPredictiveScore": 0.03622383656900183,
+        "deltaPredictiveScore": 0.036223836569001834,
         "deltaTrendBuckets": {
           "short": -1.61957235291642,
           "mid": 0.2859830678273495,
@@ -30,7 +30,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.12339737092496744
         },
         "deltaPredictiveBuckets": {
-          "short": -0.3073466410049912,
+          "short": -0.30734664100499126,
           "mid": 0.0528722462512518,
           "long": 0.19278013423233628,
           "veryLong": -0.04128756661817874
@@ -39,7 +39,7 @@ const DELTA_PLAYER_SCORES = {
       "8480": {
         "name": "Streelman, Kevin",
         "deltaTrendScore": 1.0099163943822493,
-        "deltaPredictiveScore": 0.3313303400883785,
+        "deltaPredictiveScore": 0.33133034008837864,
         "deltaTrendBuckets": {
           "short": -0.0012744437898043076,
           "mid": 1.6659467816567706,
@@ -47,7 +47,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.3585304152130046
         },
         "deltaPredictiveBuckets": {
-          "short": 0.002676889364356283,
+          "short": 0.0026768893643562834,
           "mid": 0.435765158822124,
           "long": 0.47059587032752553,
           "veryLong": 0.1295225307484197
@@ -56,7 +56,7 @@ const DELTA_PLAYER_SCORES = {
       "8820": {
         "name": "Snedeker, Brandt",
         "deltaTrendScore": -0.5323502959980146,
-        "deltaPredictiveScore": -0.19233215925352173,
+        "deltaPredictiveScore": -0.19233215925352176,
         "deltaTrendBuckets": {
           "short": 0.5025820076873435,
           "mid": 0.38120473718207804,
@@ -64,7 +64,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.9015086895788477
         },
         "deltaPredictiveBuckets": {
-          "short": 0.10021766654363592,
+          "short": 0.10021766654363594,
           "mid": 0.087513729714929,
           "long": -0.45352046312523514,
           "veryLong": -0.31388184449097767
@@ -73,7 +73,7 @@ const DELTA_PLAYER_SCORES = {
       "9171": {
         "name": "Villegas, Camilo",
         "deltaTrendScore": 0.01609279763334891,
-        "deltaPredictiveScore": -0.012725198432082642,
+        "deltaPredictiveScore": -0.012725198432082646,
         "deltaTrendBuckets": {
           "short": -0.09877518727379805,
           "mid": 0.31610753899459715,
@@ -81,7 +81,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.30699500232810795
         },
         "deltaPredictiveBuckets": {
-          "short": -0.015051440837148882,
+          "short": -0.015051440837148886,
           "mid": 0.09733933252580253,
           "long": -0.052130199290071545,
           "veryLong": -0.1020931519538533
@@ -90,7 +90,7 @@ const DELTA_PLAYER_SCORES = {
       "10104": {
         "name": "Power, Seamus",
         "deltaTrendScore": 0.09225859024494305,
-        "deltaPredictiveScore": -0.008967265075861494,
+        "deltaPredictiveScore": -0.008967265075861496,
         "deltaTrendBuckets": {
           "short": 0.6978175816429589,
           "mid": -0.19690370856884548,
@@ -98,7 +98,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.6437986058344405
         },
         "deltaPredictiveBuckets": {
-          "short": 0.13824330343921326,
+          "short": 0.1382433034392133,
           "mid": -0.06249641675193376,
           "long": -0.12208147603299689,
           "veryLong": 0.22220400585159752
@@ -107,7 +107,7 @@ const DELTA_PLAYER_SCORES = {
       "11049": {
         "name": "Simpson, Webb",
         "deltaTrendScore": 0.9325746108611984,
-        "deltaPredictiveScore": 0.3517491902527918,
+        "deltaPredictiveScore": 0.35174919025279183,
         "deltaTrendBuckets": {
           "short": 0.4210854305193163,
           "mid": 2.0251283591640767,
@@ -115,7 +115,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.4462606023389056
         },
         "deltaPredictiveBuckets": {
-          "short": 0.08631072978660158,
+          "short": 0.08631072978660159,
           "mid": 0.7821341417523016,
           "long": 0.3608530244172479,
           "veryLong": -0.15181188081897148
@@ -124,7 +124,7 @@ const DELTA_PLAYER_SCORES = {
       "11276": {
         "name": "Horschel, Billy",
         "deltaTrendScore": 0.3640156199380845,
-        "deltaPredictiveScore": 0.01139011881100765,
+        "deltaPredictiveScore": 0.011390118811007651,
         "deltaTrendBuckets": {
           "short": -0.3022165484807682,
           "mid": 0.25959907519763936,
@@ -132,7 +132,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.8408732294569768
         },
         "deltaPredictiveBuckets": {
-          "short": -0.04453818923897509,
+          "short": -0.044538189238975096,
           "mid": 0.034473499805890984,
           "long": -0.09419654414667805,
           "veryLong": 0.29652971906052594
@@ -141,7 +141,7 @@ const DELTA_PLAYER_SCORES = {
       "11451": {
         "name": "Garnett, Brice",
         "deltaTrendScore": -0.3146366035678924,
-        "deltaPredictiveScore": 0.005227474471521439,
+        "deltaPredictiveScore": 0.00522747447152144,
         "deltaTrendBuckets": {
           "short": 2.0023482030132143,
           "mid": 0.190218427110301,
@@ -149,7 +149,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.8729132115069274
         },
         "deltaPredictiveBuckets": {
-          "short": 0.40704201400954926,
+          "short": 0.4070420140095493,
           "mid": 0.1382514059604924,
           "long": -0.12397400054614527,
           "veryLong": -0.30708684855026674
@@ -158,7 +158,7 @@ const DELTA_PLAYER_SCORES = {
       "12423": {
         "name": "Kirk, Chris",
         "deltaTrendScore": -0.22691942117790467,
-        "deltaPredictiveScore": -0.1022823344174641,
+        "deltaPredictiveScore": -0.10228233441746412,
         "deltaTrendBuckets": {
           "short": 1.5619375052604996,
           "mid": -1.0881607777045468,
@@ -166,7 +166,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.08406190270532926
         },
         "deltaPredictiveBuckets": {
-          "short": 0.3110069420339709,
+          "short": 0.31100694203397095,
           "mid": -0.3664471411583577,
           "long": -0.13333325509343713,
           "veryLong": 0.016778830657872192
@@ -182,13 +182,13 @@ const DELTA_PLAYER_SCORES = {
         },
         "deltaPredictiveBuckets": {
           "mid": -0.023288266352983183,
-          "long": 6.005692110639792
+          "long": 6.005692110639793
         }
       },
       "12426": {
         "name": "Waring, Paul",
         "deltaTrendScore": -0.004433050229062757,
-        "deltaPredictiveScore": 0.01689859623355822,
+        "deltaPredictiveScore": 0.016898596233558223,
         "deltaTrendBuckets": {
           "short": 0.280221733580226,
           "mid": -0.1671594427233876,
@@ -196,7 +196,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.17604888442012004
         },
         "deltaPredictiveBuckets": {
-          "short": 0.056644668448798854,
+          "short": 0.05664466844879887,
           "mid": -0.04991780515738216,
           "long": 0.07663391933208015,
           "veryLong": -0.05892282211960506
@@ -205,7 +205,7 @@ const DELTA_PLAYER_SCORES = {
       "12577": {
         "name": "Woodland, Gary",
         "deltaTrendScore": -0.7461567704692827,
-        "deltaPredictiveScore": -0.3446728838300413,
+        "deltaPredictiveScore": -0.34467288383004135,
         "deltaTrendBuckets": {
           "short": -0.18848102537665234,
           "mid": 0.27532156922628165,
@@ -213,7 +213,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.1854336833368198
         },
         "deltaPredictiveBuckets": {
-          "short": -0.048786332016220076,
+          "short": -0.04878633201622009,
           "mid": 0.028416446993911403,
           "long": -0.6910778770656434,
           "veryLong": -0.41553169503857035
@@ -222,7 +222,7 @@ const DELTA_PLAYER_SCORES = {
       "12808": {
         "name": "Grillo, Emiliano",
         "deltaTrendScore": 0.13832301578207243,
-        "deltaPredictiveScore": 0.07674712239576095,
+        "deltaPredictiveScore": 0.07674712239576097,
         "deltaTrendBuckets": {
           "short": -0.9177279900681764,
           "mid": 1.4822857365607516,
@@ -230,7 +230,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.0369275263346152
         },
         "deltaPredictiveBuckets": {
-          "short": -0.20241199161771542,
+          "short": -0.20241199161771545,
           "mid": 0.45437871112885675,
           "long": 0.09880693010429732,
           "veryLong": -0.3538038902686274
@@ -239,7 +239,7 @@ const DELTA_PLAYER_SCORES = {
       "12909": {
         "name": "Campos, Rafael",
         "deltaTrendScore": -0.05470842487177389,
-        "deltaPredictiveScore": 0.15218171131434435,
+        "deltaPredictiveScore": 0.15218171131434438,
         "deltaTrendBuckets": {
           "short": 1.864437347445501,
           "mid": 0.6783692775136663,
@@ -247,7 +247,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.3773635485764784
         },
         "deltaPredictiveBuckets": {
-          "short": 0.4046080171774913,
+          "short": 0.40460801717749134,
           "mid": 0.1948174529988623,
           "long": 0.2737508798125526,
           "veryLong": -0.4881499506658213
@@ -256,7 +256,7 @@ const DELTA_PLAYER_SCORES = {
       "12920": {
         "name": "Willett, Danny",
         "deltaTrendScore": 0.010449189666051337,
-        "deltaPredictiveScore": 0.00918555328176369,
+        "deltaPredictiveScore": 0.009185553281763691,
         "deltaTrendBuckets": {
           "short": 0.4330265129197879,
           "mid": 0.2189019664315018,
@@ -264,16 +264,16 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.4169903537599517
         },
         "deltaPredictiveBuckets": {
-          "short": 0.08654098448272952,
+          "short": 0.08654098448272954,
           "mid": -0.006246854681900124,
-          "long": 0.04918449821369307,
+          "long": 0.049184498213693056,
           "veryLong": -0.14432539283233325
         }
       },
       "13412": {
         "name": "Olesen, Thorbjorn",
         "deltaTrendScore": -0.10588477280523619,
-        "deltaPredictiveScore": -0.02335722330685135,
+        "deltaPredictiveScore": -0.023357223306851357,
         "deltaTrendBuckets": {
           "short": 0.05424849900401176,
           "mid": -0.010746764499483296,
@@ -281,8 +281,8 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.44960997734874597
         },
         "deltaPredictiveBuckets": {
-          "short": 0.013160119386491188,
-          "mid": -0.03199331315947972,
+          "short": 0.01316011938649119,
+          "mid": -0.03199331315947971,
           "long": 0.020715294192188937,
           "veryLong": -0.1575223394651003
         }
@@ -290,7 +290,7 @@ const DELTA_PLAYER_SCORES = {
       "13470": {
         "name": "Kizzire, Patton",
         "deltaTrendScore": 0.9360231238769523,
-        "deltaPredictiveScore": 0.43592360690395593,
+        "deltaPredictiveScore": 0.43592360690395604,
         "deltaTrendBuckets": {
           "short": -0.9955932844457537,
           "mid": 1.8206239623826503,
@@ -322,7 +322,7 @@ const DELTA_PLAYER_SCORES = {
       "13764": {
         "name": "Parry, John",
         "deltaTrendScore": -0.42444033157247846,
-        "deltaPredictiveScore": -0.20733889373932757,
+        "deltaPredictiveScore": -0.2073388937393276,
         "deltaTrendBuckets": {
           "short": -0.7831975633364193,
           "mid": 0.1955969867234913,
@@ -330,7 +330,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.3403305717698357
         },
         "deltaPredictiveBuckets": {
-          "short": -0.14521237645320878,
+          "short": -0.1452123764532088,
           "mid": 0.13220636388311338,
           "long": -0.5024055282343469,
           "veryLong": -0.11237758707095782
@@ -339,7 +339,7 @@ const DELTA_PLAYER_SCORES = {
       "13900": {
         "name": "Lowry, Shane",
         "deltaTrendScore": -0.251424586957949,
-        "deltaPredictiveScore": -0.3096294405013563,
+        "deltaPredictiveScore": -0.3096294405013564,
         "deltaTrendBuckets": {
           "short": 1.0011746696406023,
           "mid": -0.19118133910547264,
@@ -347,7 +347,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.12348935750966672
         },
         "deltaPredictiveBuckets": {
-          "short": 0.1993419512279144,
+          "short": 0.19934195122791443,
           "mid": -0.1335098845515115,
           "long": -0.7745875148358621,
           "veryLong": 0.04761584220331751
@@ -356,7 +356,7 @@ const DELTA_PLAYER_SCORES = {
       "13965": {
         "name": "Hadwin, Adam",
         "deltaTrendScore": 0.14223628527615392,
-        "deltaPredictiveScore": 0.018961394436273944,
+        "deltaPredictiveScore": 0.018961394436273947,
         "deltaTrendBuckets": {
           "short": -0.016747916842016534,
           "mid": 0.49688339466242665,
@@ -373,7 +373,7 @@ const DELTA_PLAYER_SCORES = {
       "13997": {
         "name": "Svensson, Adam",
         "deltaTrendScore": 0.9014538331069745,
-        "deltaPredictiveScore": 0.026698263071052764,
+        "deltaPredictiveScore": 0.02669826307105277,
         "deltaTrendBuckets": {
           "short": -2.018763598392392,
           "mid": 1.0058323054997849,
@@ -381,7 +381,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 2.6046514255444078
         },
         "deltaPredictiveBuckets": {
-          "short": -0.3494587536079187,
+          "short": -0.3494587536079188,
           "mid": 0.40417778217706174,
           "long": -0.42215739992057844,
           "veryLong": 0.8925414962617834
@@ -390,7 +390,7 @@ const DELTA_PLAYER_SCORES = {
       "14140": {
         "name": "Higgs, Harry",
         "deltaTrendScore": 0.16151837607905192,
-        "deltaPredictiveScore": 0.04565235095243068,
+        "deltaPredictiveScore": 0.045652350952430684,
         "deltaTrendBuckets": {
           "short": -0.12462549448699504,
           "mid": 0.08233741954930171,
@@ -398,7 +398,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.04740040893723502
         },
         "deltaPredictiveBuckets": {
-          "short": -0.021553382607590675,
+          "short": -0.02155338260759068,
           "mid": 0.018405022434783196,
           "long": 0.10278597689632375,
           "veryLong": 0.016275807501830157
@@ -407,7 +407,7 @@ const DELTA_PLAYER_SCORES = {
       "14509": {
         "name": "Dahmen, Joel",
         "deltaTrendScore": -0.03712993952174112,
-        "deltaPredictiveScore": -0.0419158947186698,
+        "deltaPredictiveScore": -0.041915894718669806,
         "deltaTrendBuckets": {
           "short": 0.38758897083578847,
           "mid": 0.3523151774351535,
@@ -415,7 +415,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.7247316804891051
         },
         "deltaPredictiveBuckets": {
-          "short": 0.06576059571049382,
+          "short": 0.06576059571049384,
           "mid": -0.03371244134972992,
           "long": -0.008523152129025532,
           "veryLong": -0.25069923516811154
@@ -424,7 +424,7 @@ const DELTA_PLAYER_SCORES = {
       "14704": {
         "name": "Putnam, Andrew",
         "deltaTrendScore": -0.31214706068621595,
-        "deltaPredictiveScore": -0.1788371571145618,
+        "deltaPredictiveScore": -0.17883715711456183,
         "deltaTrendBuckets": {
           "short": -0.16654254692365944,
           "mid": 0.12437879115772488,
@@ -441,7 +441,7 @@ const DELTA_PLAYER_SCORES = {
       "14792": {
         "name": "Saddier, Adrien",
         "deltaTrendScore": 2.8440520324021343,
-        "deltaPredictiveScore": 0.4830380045871728,
+        "deltaPredictiveScore": 0.4830380045871729,
         "deltaTrendBuckets": {
           "short": 0.21545096161939242,
           "mid": 2.549802835565552,
@@ -449,7 +449,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 6.697801525079458
         },
         "deltaPredictiveBuckets": {
-          "short": 0.046937700968212134,
+          "short": 0.04693770096821215,
           "mid": 1.22928783307316,
           "long": -0.560047819733957,
           "veryLong": 2.2777960010908904
@@ -458,7 +458,7 @@ const DELTA_PLAYER_SCORES = {
       "14926": {
         "name": "Malnati, Peter",
         "deltaTrendScore": 0.39725103520407196,
-        "deltaPredictiveScore": -0.1544646209577056,
+        "deltaPredictiveScore": -0.15446462095770563,
         "deltaTrendBuckets": {
           "short": -0.10453785455769654,
           "mid": 1.8177401154462487,
@@ -466,7 +466,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.39853430112896415
         },
         "deltaPredictiveBuckets": {
-          "short": -0.026276844512017422,
+          "short": -0.026276844512017426,
           "mid": 0.5499148961807603,
           "long": -0.8017340545370054,
           "veryLong": 0.1326384760206214
@@ -475,7 +475,7 @@ const DELTA_PLAYER_SCORES = {
       "15004": {
         "name": "Kim, Chan",
         "deltaTrendScore": 0.2560561808114424,
-        "deltaPredictiveScore": 0.06944609199383589,
+        "deltaPredictiveScore": 0.0694460919938359,
         "deltaTrendBuckets": {
           "short": 0.12449013130207869,
           "mid": 0.45337911203613,
@@ -483,7 +483,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.18366256739704023
         },
         "deltaPredictiveBuckets": {
-          "short": 0.025404100642689515,
+          "short": 0.02540410064268952,
           "mid": 0.12076966591860501,
           "long": 0.05416801349258977,
           "veryLong": 0.06361129432140425
@@ -492,7 +492,7 @@ const DELTA_PLAYER_SCORES = {
       "15310": {
         "name": "Li, Haotong",
         "deltaTrendScore": 0.20825216691214524,
-        "deltaPredictiveScore": 0.09760439190028646,
+        "deltaPredictiveScore": 0.09760439190028648,
         "deltaTrendBuckets": {
           "short": 0.6925403445276763,
           "mid": 0.017488505606181978,
@@ -500,8 +500,8 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.13327286472005498
         },
         "deltaPredictiveBuckets": {
-          "short": 0.13072439559390084,
-          "mid": 0.019783496348825487,
+          "short": 0.13072439559390087,
+          "mid": 0.019783496348825494,
           "long": 0.1937866752130637,
           "veryLong": -0.04496073526306464
         }
@@ -509,7 +509,7 @@ const DELTA_PLAYER_SCORES = {
       "15330": {
         "name": "Griffin, Lanto",
         "deltaTrendScore": 0.16151509636548558,
-        "deltaPredictiveScore": 0.06618871091400765,
+        "deltaPredictiveScore": 0.06618871091400766,
         "deltaTrendBuckets": {
           "short": 0.13349386275004957,
           "mid": 0.272992364489186,
@@ -517,7 +517,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.05091621825281716
         },
         "deltaPredictiveBuckets": {
-          "short": 0.028244441826370717,
+          "short": 0.02824444182637072,
           "mid": 0.08640817229981358,
           "long": 0.09819939232271654,
           "veryLong": -0.011855146237474279
@@ -526,7 +526,7 @@ const DELTA_PLAYER_SCORES = {
       "15470": {
         "name": "Hossler, Beau",
         "deltaTrendScore": 0.21862660823785696,
-        "deltaPredictiveScore": 0.07850496524450826,
+        "deltaPredictiveScore": 0.07850496524450827,
         "deltaTrendBuckets": {
           "short": 1.7188691029795466,
           "mid": 0.7274416795886253,
@@ -534,7 +534,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.23201272564090394
         },
         "deltaPredictiveBuckets": {
-          "short": 0.3434686805432513,
+          "short": 0.34346868054325136,
           "mid": 0.20910185791904704,
           "long": -0.05512543048890269,
           "veryLong": -0.07906036116344232
@@ -543,7 +543,7 @@ const DELTA_PLAYER_SCORES = {
       "15556": {
         "name": "Hughes, Mackenzie",
         "deltaTrendScore": 0.6117001451653131,
-        "deltaPredictiveScore": 0.3293470736269196,
+        "deltaPredictiveScore": 0.3293470736269197,
         "deltaTrendBuckets": {
           "short": 0.24088904553488732,
           "mid": 1.274866493245032,
@@ -551,7 +551,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.6228902880780632
         },
         "deltaPredictiveBuckets": {
-          "short": 0.04619093885998329,
+          "short": 0.046190938859983294,
           "mid": 0.25098772547902437,
           "long": 0.7125308079641557,
           "veryLong": -0.22022380759823496
@@ -560,7 +560,7 @@ const DELTA_PLAYER_SCORES = {
       "15651": {
         "name": "Ventura, Kris",
         "deltaTrendScore": -0.4852433260734666,
-        "deltaPredictiveScore": -0.20225999887731766,
+        "deltaPredictiveScore": -0.20225999887731771,
         "deltaTrendBuckets": {
           "short": 0.4850824951603395,
           "mid": 0.19357130789839172,
@@ -568,7 +568,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.46722302959958845
         },
         "deltaPredictiveBuckets": {
-          "short": 0.07139490901163421,
+          "short": 0.07139490901163423,
           "mid": 0.041105415491193384,
           "long": -0.4976727631548089,
           "veryLong": -0.1539427130668705
@@ -577,7 +577,7 @@ const DELTA_PLAYER_SCORES = {
       "15980": {
         "name": "Lipsky, David",
         "deltaTrendScore": -0.27808041871265365,
-        "deltaPredictiveScore": 0.043608350076477946,
+        "deltaPredictiveScore": 0.04360835007647795,
         "deltaTrendBuckets": {
           "short": 0.6700626788569984,
           "mid": 0.7376548866258431,
@@ -585,7 +585,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -2.1563073426502655
         },
         "deltaPredictiveBuckets": {
-          "short": 0.15047158761465282,
+          "short": 0.15047158761465285,
           "mid": 0.19059652064140467,
           "long": 0.2128851965767225,
           "veryLong": -0.7518842497771973
@@ -609,7 +609,7 @@ const DELTA_PLAYER_SCORES = {
       "16333": {
         "name": "Hubbard, Mark",
         "deltaTrendScore": -0.26572381962614067,
-        "deltaPredictiveScore": -0.22152200047036244,
+        "deltaPredictiveScore": -0.22152200047036247,
         "deltaTrendBuckets": {
           "short": -1.042147293998822,
           "mid": -0.5444578571883973,
@@ -617,7 +617,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.809161041980173
         },
         "deltaPredictiveBuckets": {
-          "short": -0.20961581953121217,
+          "short": -0.20961581953121222,
           "mid": -0.1432679740771069,
           "long": -0.4710545202117191,
           "veryLong": 0.26440416863966354
@@ -626,7 +626,7 @@ const DELTA_PLAYER_SCORES = {
       "16394": {
         "name": "Jaeger, Stephan",
         "deltaTrendScore": -0.4025256182559,
-        "deltaPredictiveScore": -0.16425481672500128,
+        "deltaPredictiveScore": -0.1642548167250013,
         "deltaTrendBuckets": {
           "short": -0.014229747075161284,
           "mid": 0.5974699303652613,
@@ -634,7 +634,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -2.0148244927086365
         },
         "deltaPredictiveBuckets": {
-          "short": 0.007065049590146996,
+          "short": 0.007065049590146998,
           "mid": -0.1721016353706259,
           "long": -0.02269429490695801,
           "veryLong": -0.6848560060146617
@@ -654,7 +654,7 @@ const DELTA_PLAYER_SCORES = {
       "16715": {
         "name": "Ryder, Sam",
         "deltaTrendScore": 0.36247696966137744,
-        "deltaPredictiveScore": -0.05176707967126833,
+        "deltaPredictiveScore": -0.05176707967126835,
         "deltaTrendBuckets": {
           "short": 1.73292365962461,
           "mid": 3.3532543342558183,
@@ -662,7 +662,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.3155195936720437
         },
         "deltaPredictiveBuckets": {
-          "short": 0.34212875228064793,
+          "short": 0.342128752280648,
           "mid": 0.9292502791415999,
           "long": -0.8618711148517522,
           "veryLong": -0.10339639456218615
@@ -686,7 +686,7 @@ const DELTA_PLAYER_SCORES = {
       "17032": {
         "name": "Tosti, Alejandro",
         "deltaTrendScore": -0.17524254143826734,
-        "deltaPredictiveScore": -0.3137074619882111,
+        "deltaPredictiveScore": -0.31370746198821114,
         "deltaTrendBuckets": {
           "short": 2.2795340669977264,
           "mid": 2.2265645557264944,
@@ -694,7 +694,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -2.070595310380662
         },
         "deltaPredictiveBuckets": {
-          "short": 0.4401013986854767,
+          "short": 0.4401013986854768,
           "mid": 0.5943724918500066,
           "long": -1.0785795421270878,
           "veryLong": -0.7193971675614171
@@ -703,7 +703,7 @@ const DELTA_PLAYER_SCORES = {
       "17365": {
         "name": "Mitchell, Keith",
         "deltaTrendScore": 0.2357128014576895,
-        "deltaPredictiveScore": 0.14618210962053663,
+        "deltaPredictiveScore": 0.14618210962053665,
         "deltaTrendBuckets": {
           "short": 1.0708422060432614,
           "mid": 0.8739524131516048,
@@ -711,7 +711,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.5912410438696537
         },
         "deltaPredictiveBuckets": {
-          "short": 0.21016187132171188,
+          "short": 0.2101618713217119,
           "mid": 0.14289156369551126,
           "long": 0.2616740386440717,
           "veryLong": -0.20685228444629244
@@ -720,7 +720,7 @@ const DELTA_PLAYER_SCORES = {
       "17538": {
         "name": "Homa, Max",
         "deltaTrendScore": 0.21463926289184096,
-        "deltaPredictiveScore": -0.09148782764609911,
+        "deltaPredictiveScore": -0.09148782764609914,
         "deltaTrendBuckets": {
           "short": 0.21454999053110047,
           "mid": 0.4853622036642467,
@@ -728,8 +728,8 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.4892857887562485
         },
         "deltaPredictiveBuckets": {
-          "short": 0.03733555379508283,
-          "mid": 0.0005186938245431062,
+          "short": 0.03733555379508284,
+          "mid": 0.0005186938245431303,
           "long": -0.309050751285269,
           "veryLong": 0.1701941510732872
         }
@@ -737,7 +737,7 @@ const DELTA_PLAYER_SCORES = {
       "17550": {
         "name": "Van Rooyen, Erik",
         "deltaTrendScore": -0.49167974854380836,
-        "deltaPredictiveScore": -0.08939138604533865,
+        "deltaPredictiveScore": -0.08939138604533868,
         "deltaTrendBuckets": {
           "short": 0.6219017549027858,
           "mid": -1.3798818109610862,
@@ -745,7 +745,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.072262540741892
         },
         "deltaPredictiveBuckets": {
-          "short": 0.12580653169731856,
+          "short": 0.1258065316973186,
           "mid": -0.34264791379087667,
           "long": 0.11855027745179368,
           "veryLong": -0.39548278238326323
@@ -754,7 +754,7 @@ const DELTA_PLAYER_SCORES = {
       "17606": {
         "name": "Berger, Daniel",
         "deltaTrendScore": 0.1370512358933083,
-        "deltaPredictiveScore": -0.0805164412418228,
+        "deltaPredictiveScore": -0.08051644124182282,
         "deltaTrendBuckets": {
           "short": 0.32452798585977627,
           "mid": 0.5635588296819231,
@@ -762,7 +762,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.4427640685206053
         },
         "deltaPredictiveBuckets": {
-          "short": 0.06755617146800538,
+          "short": 0.0675561714680054,
           "mid": 0.05003898794892586,
           "long": -0.3245084039739712,
           "veryLong": 0.1615586183570482
@@ -771,7 +771,7 @@ const DELTA_PLAYER_SCORES = {
       "17723": {
         "name": "Lower, Justin",
         "deltaTrendScore": 0.20265386466478671,
-        "deltaPredictiveScore": 0.08837561908963161,
+        "deltaPredictiveScore": 0.08837561908963164,
         "deltaTrendBuckets": {
           "short": -0.023779858597760856,
           "mid": 0.12490956425416777,
@@ -779,16 +779,16 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.15229033553997517
         },
         "deltaPredictiveBuckets": {
-          "short": -0.02563649400937375,
+          "short": -0.025636494009373754,
           "mid": 0.048660230892664004,
           "long": 0.21491429872744974,
-          "veryLong": -0.04811092224531764
+          "veryLong": -0.04811092224531765
         }
       },
       "17786": {
         "name": "Davis, Cam",
         "deltaTrendScore": 0.2553704020936136,
-        "deltaPredictiveScore": 0.11853201823186575,
+        "deltaPredictiveScore": 0.11853201823186577,
         "deltaTrendBuckets": {
           "short": 0.34073991386808133,
           "mid": 1.2815043345311905,
@@ -796,7 +796,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.1290938598681426
         },
         "deltaPredictiveBuckets": {
-          "short": 0.06666207137188947,
+          "short": 0.06666207137188948,
           "mid": 0.39952726693378543,
           "long": 0.14634350831026136,
           "veryLong": -0.3894099242488444
@@ -805,7 +805,7 @@ const DELTA_PLAYER_SCORES = {
       "17881": {
         "name": "Yu, Kevin",
         "deltaTrendScore": -0.702323185515374,
-        "deltaPredictiveScore": -0.29968802914208387,
+        "deltaPredictiveScore": -0.2996880291420839,
         "deltaTrendBuckets": {
           "short": -0.6541866109755072,
           "mid": -0.27545623991329155,
@@ -813,7 +813,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.078964927221319
         },
         "deltaPredictiveBuckets": {
-          "short": -0.14966912203343177,
+          "short": -0.1496691220334318,
           "mid": -0.01777634930769623,
           "long": -0.523508199068401,
           "veryLong": -0.3748235882242096
@@ -822,7 +822,7 @@ const DELTA_PLAYER_SCORES = {
       "18103": {
         "name": "Bezuidenhout, Christiaan",
         "deltaTrendScore": -0.8832164186283866,
-        "deltaPredictiveScore": -0.053536235494239894,
+        "deltaPredictiveScore": -0.0535362354942399,
         "deltaTrendBuckets": {
           "short": 0.4707064798838482,
           "mid": 0.33347258569507265,
@@ -830,7 +830,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -3.7865805187969417
         },
         "deltaPredictiveBuckets": {
-          "short": 0.10422150684856955,
+          "short": 0.10422150684856958,
           "mid": 0.20163303060302795,
           "long": 0.19078498291774273,
           "veryLong": -1.2802859295054494
@@ -839,7 +839,7 @@ const DELTA_PLAYER_SCORES = {
       "18424": {
         "name": "Roy, Kevin",
         "deltaTrendScore": 0.5010948597707605,
-        "deltaPredictiveScore": 0.12171562431951113,
+        "deltaPredictiveScore": 0.12171562431951116,
         "deltaTrendBuckets": {
           "short": 0.5182842879387255,
           "mid": 1.3354271306297987,
@@ -847,7 +847,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.6295533666466464
         },
         "deltaPredictiveBuckets": {
-          "short": 0.09254887129376793,
+          "short": 0.09254887129376795,
           "mid": 0.3498545160164168,
           "long": 0.11321593870666638,
           "veryLong": -0.2248256291837419
@@ -856,7 +856,7 @@ const DELTA_PLAYER_SCORES = {
       "18474": {
         "name": "Smalley, Alex",
         "deltaTrendScore": 0.4520785445038843,
-        "deltaPredictiveScore": 0.08335603543747487,
+        "deltaPredictiveScore": 0.08335603543747488,
         "deltaTrendBuckets": {
           "short": -0.49008657730830846,
           "mid": 0.9903108118895314,
@@ -864,7 +864,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.3510289910182277
         },
         "deltaPredictiveBuckets": {
-          "short": -0.09712256361550742,
+          "short": -0.09712256361550745,
           "mid": 0.28277766119022685,
           "long": 0.004188418883250002,
           "veryLong": 0.12055446591221917
@@ -873,7 +873,7 @@ const DELTA_PLAYER_SCORES = {
       "18554": {
         "name": "Rai, Aaron",
         "deltaTrendScore": -0.35903429601945797,
-        "deltaPredictiveScore": -0.31388445854381897,
+        "deltaPredictiveScore": -0.313884458543819,
         "deltaTrendBuckets": {
           "short": -2.0257807423617535,
           "mid": 0.4959424050692792,
@@ -881,7 +881,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.3997745814466666
         },
         "deltaPredictiveBuckets": {
-          "short": -0.4175358698934525,
+          "short": -0.4175358698934526,
           "mid": 0.08066709523868881,
           "long": -0.712895311210898,
           "veryLong": 0.11815171316818968
@@ -890,7 +890,7 @@ const DELTA_PLAYER_SCORES = {
       "18586": {
         "name": "Smith, Jordan",
         "deltaTrendScore": -0.3068697813616758,
-        "deltaPredictiveScore": -0.05131004988809276,
+        "deltaPredictiveScore": -0.05131004988809277,
         "deltaTrendBuckets": {
           "short": 1.3151746696406026,
           "mid": -0.7573823218622715,
@@ -898,7 +898,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.5545894371377093
         },
         "deltaPredictiveBuckets": {
-          "short": 0.24633969651730647,
+          "short": 0.24633969651730653,
           "mid": -0.2575825673649839,
           "long": 0.02476175297936914,
           "veryLong": -0.18791940818174
@@ -907,7 +907,7 @@ const DELTA_PLAYER_SCORES = {
       "19428": {
         "name": "Zalatoris, Will",
         "deltaTrendScore": -0.21856203931979978,
-        "deltaPredictiveScore": -0.022704722745535005,
+        "deltaPredictiveScore": -0.022704722745535012,
         "deltaTrendBuckets": {
           "short": -0.26399521645203794,
           "mid": 0.785953507015006,
@@ -915,7 +915,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.3703367456423896
         },
         "deltaPredictiveBuckets": {
-          "short": -0.05830506650978672,
+          "short": -0.058305066509786736,
           "mid": 0.24293161780658687,
           "long": -0.015999217675596904,
           "veryLong": -0.4667513716699639
@@ -924,7 +924,7 @@ const DELTA_PLAYER_SCORES = {
       "19477": {
         "name": "Schenk, Adam",
         "deltaTrendScore": -0.44190283598272917,
-        "deltaPredictiveScore": -0.12968549826391387,
+        "deltaPredictiveScore": -0.1296854982639139,
         "deltaTrendBuckets": {
           "short": 0.6259059580422524,
           "mid": 1.0372610191019935,
@@ -932,7 +932,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -2.5118241549642684
         },
         "deltaPredictiveBuckets": {
-          "short": 0.12608982187077547,
+          "short": 0.1260898218707755,
           "mid": 0.17510526265132553,
           "long": -0.15785486825061656,
           "veryLong": -0.8498262631233707
@@ -941,7 +941,7 @@ const DELTA_PLAYER_SCORES = {
       "19729": {
         "name": "Kanaya, Takumi",
         "deltaTrendScore": -0.4841349012638671,
-        "deltaPredictiveScore": -0.07403377545726378,
+        "deltaPredictiveScore": -0.07403377545726379,
         "deltaTrendBuckets": {
           "short": -0.3168340996128266,
           "mid": 1.7801940418309925,
@@ -958,7 +958,7 @@ const DELTA_PLAYER_SCORES = {
       "19840": {
         "name": "Ramey, Chad",
         "deltaTrendScore": -0.7013115399211793,
-        "deltaPredictiveScore": -0.167137494792645,
+        "deltaPredictiveScore": -0.16713749479264503,
         "deltaTrendBuckets": {
           "short": -0.44645077224139373,
           "mid": -0.5689988274342404,
@@ -966,7 +966,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.7563334086875562
         },
         "deltaPredictiveBuckets": {
-          "short": -0.09195323853659261,
+          "short": -0.09195323853659262,
           "mid": -0.08939096169254118,
           "long": -0.08136128056917936,
           "veryLong": -0.5973272124774738
@@ -975,7 +975,7 @@ const DELTA_PLAYER_SCORES = {
       "19846": {
         "name": "Bauchou, Zach",
         "deltaTrendScore": -0.7496919064535235,
-        "deltaPredictiveScore": -0.08368161088045116,
+        "deltaPredictiveScore": -0.08368161088045119,
         "deltaTrendBuckets": {
           "short": 0.32602396683780793,
           "mid": -1.411812982532484,
@@ -983,7 +983,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.6398721052169826
         },
         "deltaPredictiveBuckets": {
-          "short": 0.07281942614066869,
+          "short": 0.0728194261406687,
           "mid": -0.1903920411963997,
           "long": -0.018434009190674696,
           "veryLong": -0.22275754028846734
@@ -992,7 +992,7 @@ const DELTA_PLAYER_SCORES = {
       "19872": {
         "name": "Riley, Davis",
         "deltaTrendScore": -2.4916291101784527,
-        "deltaPredictiveScore": -0.663863471626369,
+        "deltaPredictiveScore": -0.6638634716263693,
         "deltaTrendBuckets": {
           "short": -0.06136666210756617,
           "mid": -2.121469184415301,
@@ -1000,7 +1000,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -3.522983396878311
         },
         "deltaPredictiveBuckets": {
-          "short": -0.005203008391888179,
+          "short": -0.00520300839188818,
           "mid": -0.42245468897442073,
           "long": -0.885210657290233,
           "veryLong": -1.192234706495092
@@ -1009,7 +1009,7 @@ const DELTA_PLAYER_SCORES = {
       "19960": {
         "name": "Pavon, Matthieu",
         "deltaTrendScore": -0.5758304160024786,
-        "deltaPredictiveScore": -0.20752246840800173,
+        "deltaPredictiveScore": -0.20752246840800176,
         "deltaTrendBuckets": {
           "short": -0.14217837303257266,
           "mid": -0.09151709970132828,
@@ -1017,7 +1017,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.8195816767776267
         },
         "deltaPredictiveBuckets": {
-          "short": -0.02898176616047757,
+          "short": -0.028981766160477575,
           "mid": -0.03438285307662902,
           "long": -0.23558160042315912,
           "veryLong": -0.6197762278686046
@@ -1026,7 +1026,7 @@ const DELTA_PLAYER_SCORES = {
       "20706": {
         "name": "Wallace, Matt",
         "deltaTrendScore": 0.12435759087700586,
-        "deltaPredictiveScore": 0.07605295645235349,
+        "deltaPredictiveScore": 0.0760529564523535,
         "deltaTrendBuckets": {
           "short": 1.1995014571584879,
           "mid": 0.24533505279839632,
@@ -1034,7 +1034,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.3524537556768714
         },
         "deltaPredictiveBuckets": {
-          "short": 0.2489068798129284,
+          "short": 0.24890687981292842,
           "mid": 0.09475899916598612,
           "long": 0.07077735168180722,
           "veryLong": -0.11904295557905614
@@ -1043,7 +1043,7 @@ const DELTA_PLAYER_SCORES = {
       "20722": {
         "name": "Schmid, Matti",
         "deltaTrendScore": -1.263801009486312,
-        "deltaPredictiveScore": -0.5336805604757906,
+        "deltaPredictiveScore": -0.5336805604757907,
         "deltaTrendBuckets": {
           "short": -0.37890639466374854,
           "mid": 0.18070877367452756,
@@ -1051,7 +1051,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -2.1945456498120643
         },
         "deltaPredictiveBuckets": {
-          "short": -0.08961173842505135,
+          "short": -0.08961173842505138,
           "mid": -0.14739197811959995,
           "long": -0.8851766278223009,
           "veryLong": -0.7653965737709443
@@ -1060,7 +1060,7 @@ const DELTA_PLAYER_SCORES = {
       "20766": {
         "name": "Brown, Dan",
         "deltaTrendScore": -0.09149501898238922,
-        "deltaPredictiveScore": -0.10036079713576788,
+        "deltaPredictiveScore": -0.10036079713576791,
         "deltaTrendBuckets": {
           "short": 2.3919277102095777,
           "mid": -0.1409956236284867,
@@ -1068,7 +1068,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.2662976595203888
         },
         "deltaPredictiveBuckets": {
-          "short": 0.46857445941241116,
+          "short": 0.4685744594124112,
           "mid": -0.11976684914475275,
           "long": -0.39058668900494653,
           "veryLong": 0.09252581747601901
@@ -1107,7 +1107,7 @@ const DELTA_PLAYER_SCORES = {
       "21407": {
         "name": "Reitan, Kristoffer",
         "deltaTrendScore": -1.0731733578563445,
-        "deltaPredictiveScore": -0.41969286735491834,
+        "deltaPredictiveScore": -0.41969286735491845,
         "deltaTrendBuckets": {
           "short": -2.240667557444661,
           "mid": -0.329171267460844,
@@ -1115,7 +1115,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.9615313592776782
         },
         "deltaPredictiveBuckets": {
-          "short": -0.4522314639140665,
+          "short": -0.4522314639140666,
           "mid": -0.11963175442793911,
           "long": -0.6449748567110133,
           "veryLong": -0.33699608709801787
@@ -1124,7 +1124,7 @@ const DELTA_PLAYER_SCORES = {
       "21412": {
         "name": "Capan III, Frankie",
         "deltaTrendScore": -0.25786678888659187,
-        "deltaPredictiveScore": -0.09285695406495409,
+        "deltaPredictiveScore": -0.09285695406495412,
         "deltaTrendBuckets": {
           "short": 0.20372160031422767,
           "mid": 0.191185154636309,
@@ -1132,7 +1132,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.5877594513312959
         },
         "deltaPredictiveBuckets": {
-          "short": 0.03924863272920467,
+          "short": 0.039248632729204674,
           "mid": 0.071622942073675,
           "long": -0.21646224249580226,
           "veryLong": -0.19980747870957574
@@ -1141,7 +1141,7 @@ const DELTA_PLAYER_SCORES = {
       "21688": {
         "name": "Kim, S.H.",
         "deltaTrendScore": -0.24511673438332693,
-        "deltaPredictiveScore": -0.14930528470073937,
+        "deltaPredictiveScore": -0.1493052847007394,
         "deltaTrendBuckets": {
           "short": -3.0188609334231145,
           "mid": 0.5004012285213177,
@@ -1149,7 +1149,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.2180067647846103
         },
         "deltaPredictiveBuckets": {
-          "short": -0.6291326564434342,
+          "short": -0.6291326564434343,
           "mid": 0.26913875422548067,
           "long": -0.2702534410747244,
           "veryLong": -0.08319674690111432
@@ -1158,7 +1158,7 @@ const DELTA_PLAYER_SCORES = {
       "21756": {
         "name": "Cole, Eric",
         "deltaTrendScore": -1.6490701085413042,
-        "deltaPredictiveScore": -0.24580162288347213,
+        "deltaPredictiveScore": -0.24580162288347218,
         "deltaTrendBuckets": {
           "short": -0.30564649966332785,
           "mid": -2.4274559564746596,
@@ -1166,7 +1166,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -3.1398176173670103
         },
         "deltaPredictiveBuckets": {
-          "short": -0.027741489624396813,
+          "short": -0.027741489624396817,
           "mid": -0.7199342261352442,
           "long": 0.3157837069227809,
           "veryLong": -1.0688700156488529
@@ -1175,7 +1175,7 @@ const DELTA_PLAYER_SCORES = {
       "21883": {
         "name": "Ewart, A.J.",
         "deltaTrendScore": -0.26850917018814996,
-        "deltaPredictiveScore": -0.2431381089257092,
+        "deltaPredictiveScore": -0.24313810892570925,
         "deltaTrendBuckets": {
           "short": -0.6934933612490533,
           "mid": -1.0632334850751044,
@@ -1183,7 +1183,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 1.542177018537136
         },
         "deltaPredictiveBuckets": {
-          "short": -0.1226267848768209,
+          "short": -0.12262678487682091,
           "mid": -0.2177599667186282,
           "long": -0.6137945885184044,
           "veryLong": 0.5324706886724827
@@ -1192,29 +1192,29 @@ const DELTA_PLAYER_SCORES = {
       "21889": {
         "name": "Kang, Jeffrey",
         "deltaTrendScore": -0.7496362842038139,
-        "deltaPredictiveScore": -0.5901348277848901,
+        "deltaPredictiveScore": -0.5901348277848902,
         "deltaTrendBuckets": {
           "long": -0.7496362842038139
         },
         "deltaPredictiveBuckets": {
-          "long": -0.5901348277848901
+          "long": -0.5901348277848902
         }
       },
       "21943": {
         "name": "Lebioda, Hank",
         "deltaTrendScore": -0.9331337010064255,
-        "deltaPredictiveScore": -0.7346395294511096,
+        "deltaPredictiveScore": -0.7346395294511098,
         "deltaTrendBuckets": {
           "long": -0.9331337010064255
         },
         "deltaPredictiveBuckets": {
-          "long": -0.7346395294511096
+          "long": -0.7346395294511098
         }
       },
       "21944": {
         "name": "Moore, Taylor",
         "deltaTrendScore": -0.011607411898120482,
-        "deltaPredictiveScore": 0.0648106829634356,
+        "deltaPredictiveScore": 0.06481068296343562,
         "deltaTrendBuckets": {
           "short": -0.8581461892938304,
           "mid": -0.11354124828502608,
@@ -1222,7 +1222,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.30637748100961076
         },
         "deltaPredictiveBuckets": {
-          "short": -0.15169913691258544,
+          "short": -0.15169913691258546,
           "mid": -0.06426263521069514,
           "long": 0.3062739568544809,
           "veryLong": -0.10377956052613246
@@ -1231,7 +1231,7 @@ const DELTA_PLAYER_SCORES = {
       "22002": {
         "name": "Dumont De Chassart, Adrien",
         "deltaTrendScore": -0.17225632310551484,
-        "deltaPredictiveScore": -0.08785960380509186,
+        "deltaPredictiveScore": -0.08785960380509188,
         "deltaTrendBuckets": {
           "short": -0.3952863184917095,
           "mid": -0.3671109689292425,
@@ -1239,7 +1239,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.4719554865745716
         },
         "deltaPredictiveBuckets": {
-          "short": -0.11401999668000273,
+          "short": -0.11401999668000275,
           "mid": -0.17056332209696065,
           "long": -0.11774185281069507,
           "veryLong": 0.15896426257409868
@@ -1248,7 +1248,7 @@ const DELTA_PLAYER_SCORES = {
       "22051": {
         "name": "Wise, Aaron",
         "deltaTrendScore": 0.39923114747703137,
-        "deltaPredictiveScore": 0.10731110558466114,
+        "deltaPredictiveScore": 0.10731110558466117,
         "deltaTrendBuckets": {
           "short": 0.2900297604017614,
           "mid": 0.48161382727830704,
@@ -1256,7 +1256,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.6296659959016291
         },
         "deltaPredictiveBuckets": {
-          "short": 0.05391073915507657,
+          "short": 0.053910739155076576,
           "mid": 0.1823430515844964,
           "long": 0.032460000539782076,
           "veryLong": 0.22113613724180567
@@ -1265,7 +1265,7 @@ const DELTA_PLAYER_SCORES = {
       "22833": {
         "name": "Echavarria, Nico",
         "deltaTrendScore": 0.26971390197891026,
-        "deltaPredictiveScore": -0.01729059276775275,
+        "deltaPredictiveScore": -0.017290592767752754,
         "deltaTrendBuckets": {
           "short": -0.18493930961198538,
           "mid": 1.3772529545780288,
@@ -1273,7 +1273,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.2361345329275454
         },
         "deltaPredictiveBuckets": {
-          "short": -0.022289522905233023,
+          "short": -0.022289522905233027,
           "mid": 0.40086302150042014,
           "long": -0.2781940040486964,
           "veryLong": -0.07797243285332393
@@ -1282,18 +1282,18 @@ const DELTA_PLAYER_SCORES = {
       "22985": {
         "name": "Smotherman, Austin",
         "deltaTrendScore": -0.10407281049471696,
-        "deltaPredictiveScore": -0.0826961267201841,
+        "deltaPredictiveScore": -0.08269612672018412,
         "deltaTrendBuckets": {
           "long": -0.10407281049471696
         },
         "deltaPredictiveBuckets": {
-          "long": -0.0826961267201841
+          "long": -0.08269612672018412
         }
       },
       "23504": {
         "name": "Hoey, Rico",
         "deltaTrendScore": 0.22506475988513874,
-        "deltaPredictiveScore": -0.00862180370374809,
+        "deltaPredictiveScore": -0.008621803703748092,
         "deltaTrendBuckets": {
           "short": 0.6344563536318488,
           "mid": 1.0456998376958289,
@@ -1301,7 +1301,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.3220012565035191
         },
         "deltaPredictiveBuckets": {
-          "short": 0.13460588734398898,
+          "short": 0.134605887343989,
           "mid": 0.21117086822029416,
           "long": -0.1792946540382108,
           "veryLong": -0.10366360656487439
@@ -1310,7 +1310,7 @@ const DELTA_PLAYER_SCORES = {
       "23505": {
         "name": "McGreevy, Max",
         "deltaTrendScore": -0.644354942181361,
-        "deltaPredictiveScore": -0.11662591677157462,
+        "deltaPredictiveScore": -0.11662591677157463,
         "deltaTrendBuckets": {
           "short": 0.4142081001178348,
           "mid": -1.1459179861136133,
@@ -1318,7 +1318,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.575060726167259
         },
         "deltaPredictiveBuckets": {
-          "short": 0.08201249085653087,
+          "short": 0.08201249085653088,
           "mid": -0.2582935217804203,
           "long": -0.06790629925717885,
           "veryLong": -0.19559369118731293
@@ -1327,7 +1327,7 @@ const DELTA_PLAYER_SCORES = {
       "23602": {
         "name": "Hojgaard, Nicolai",
         "deltaTrendScore": -0.06315261021977579,
-        "deltaPredictiveScore": 0.10898818342738335,
+        "deltaPredictiveScore": 0.10898818342738337,
         "deltaTrendBuckets": {
           "short": -0.1276950540779391,
           "mid": -0.8564347143869033,
@@ -1335,7 +1335,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.5724293085181762
         },
         "deltaPredictiveBuckets": {
-          "short": -0.03169744542634103,
+          "short": -0.03169744542634104,
           "mid": -0.16680347018425415,
           "long": 0.4688363560025774,
           "veryLong": -0.18193289585577418
@@ -1344,7 +1344,7 @@ const DELTA_PLAYER_SCORES = {
       "23656": {
         "name": "Young, Carson",
         "deltaTrendScore": -0.2683699192747244,
-        "deltaPredictiveScore": -0.10347019134603076,
+        "deltaPredictiveScore": -0.10347019134603079,
         "deltaTrendBuckets": {
           "short": -0.05958120809134992,
           "mid": 0.037724396853565365,
@@ -1352,7 +1352,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.626280929983559
         },
         "deltaPredictiveBuckets": {
-          "short": -0.011841452226070104,
+          "short": -0.011841452226070106,
           "mid": -0.05795952853465366,
           "long": -0.1280321852887784,
           "veryLong": -0.21361566047881703
@@ -1361,7 +1361,7 @@ const DELTA_PLAYER_SCORES = {
       "23816": {
         "name": "Valimaki, Sami",
         "deltaTrendScore": 0.647806349812446,
-        "deltaPredictiveScore": 0.17659660789975087,
+        "deltaPredictiveScore": 0.1765966078997509,
         "deltaTrendBuckets": {
           "short": 0.4908644421765843,
           "mid": 0.48490702563342597,
@@ -1369,7 +1369,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.44468132013847167
         },
         "deltaPredictiveBuckets": {
-          "short": 0.10424742057403394,
+          "short": 0.10424742057403395,
           "mid": 0.05876038992489793,
           "long": 0.29804913823397644,
           "veryLong": 0.14687674275401846
@@ -1378,7 +1378,7 @@ const DELTA_PLAYER_SCORES = {
       "23838": {
         "name": "Hojgaard, Rasmus",
         "deltaTrendScore": 0.639352713685593,
-        "deltaPredictiveScore": 0.12915310176704786,
+        "deltaPredictiveScore": 0.1291531017670479,
         "deltaTrendBuckets": {
           "short": 1.2677254439861967,
           "mid": 0.45239947075797066,
@@ -1386,7 +1386,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.6155429070308873
         },
         "deltaPredictiveBuckets": {
-          "short": 0.24756656484214576,
+          "short": 0.24756656484214581,
           "mid": 0.19308356362439485,
           "long": -0.004034329663087477,
           "veryLong": 0.23584045861679478
@@ -1395,7 +1395,7 @@ const DELTA_PLAYER_SCORES = {
       "23841": {
         "name": "Neergaard-Petersen, Rasmus",
         "deltaTrendScore": -0.5103457148671324,
-        "deltaPredictiveScore": -0.3389198790511409,
+        "deltaPredictiveScore": -0.33891987905114096,
         "deltaTrendBuckets": {
           "short": 0.07210516265465886,
           "mid": -0.1543478735396541,
@@ -1403,7 +1403,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.5026304057656105
         },
         "deltaPredictiveBuckets": {
-          "short": 0.0025739371241356706,
+          "short": 0.002573937124135671,
           "mid": -0.5683260139009638,
           "long": -0.3816124299941712,
           "veryLong": -0.1778129072059469
@@ -1412,7 +1412,7 @@ const DELTA_PLAYER_SCORES = {
       "24304": {
         "name": "Vilips, Karl",
         "deltaTrendScore": 0.5293719499166557,
-        "deltaPredictiveScore": -0.02376780609133729,
+        "deltaPredictiveScore": -0.023767806091337298,
         "deltaTrendBuckets": {
           "short": -0.6701728495076176,
           "mid": 2.299388660274455,
@@ -1420,7 +1420,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.6021598745520917
         },
         "deltaPredictiveBuckets": {
-          "short": -0.14751726787541566,
+          "short": -0.1475172678754157,
           "mid": 0.9037215638202859,
           "long": -0.6976973788677446,
           "veryLong": 0.19842557751079629
@@ -1429,7 +1429,7 @@ const DELTA_PLAYER_SCORES = {
       "24342": {
         "name": "Higgo, Garrick",
         "deltaTrendScore": -0.18863585779662956,
-        "deltaPredictiveScore": -0.09342033393356185,
+        "deltaPredictiveScore": -0.09342033393356187,
         "deltaTrendBuckets": {
           "short": -0.2974253166820975,
           "mid": -0.8366101902748243,
@@ -1437,7 +1437,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.02487501164054165
         },
         "deltaPredictiveBuckets": {
-          "short": -0.08756840934017246,
+          "short": -0.08756840934017247,
           "mid": -0.31660027277342256,
           "long": 0.023897999351543672,
           "veryLong": -0.008502376477896775
@@ -1453,13 +1453,13 @@ const DELTA_PLAYER_SCORES = {
         },
         "deltaPredictiveBuckets": {
           "mid": -1.8543290794207445,
-          "long": -0.2891517500618379
+          "long": -0.28915175006183796
         }
       },
       "24550": {
         "name": "Ghim, Doug",
         "deltaTrendScore": -0.08817577108689861,
-        "deltaPredictiveScore": -0.28610154171534197,
+        "deltaPredictiveScore": -0.286101541715342,
         "deltaTrendBuckets": {
           "short": 0.8935350927952191,
           "mid": 2.0906461873373527,
@@ -1467,7 +1467,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.4566676156799766
         },
         "deltaPredictiveBuckets": {
-          "short": 0.18660126859482237,
+          "short": 0.1866012685948224,
           "mid": 0.5210068936564071,
           "long": -1.078720448135642,
           "veryLong": -0.15911704576463323
@@ -1476,7 +1476,7 @@ const DELTA_PLAYER_SCORES = {
       "24766": {
         "name": "Kim, Tom",
         "deltaTrendScore": 0.2747217725758138,
-        "deltaPredictiveScore": 0.10526755551252913,
+        "deltaPredictiveScore": 0.10526755551252916,
         "deltaTrendBuckets": {
           "short": 0.12120635889234826,
           "mid": 0.2878234080947401,
@@ -1484,7 +1484,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.2462614897192099
         },
         "deltaPredictiveBuckets": {
-          "short": 0.0321041591643421,
+          "short": 0.03210415916434211,
           "mid": 0.00957522217281911,
           "long": 0.27825727164348,
           "veryLong": -0.09328566500175058
@@ -1504,7 +1504,7 @@ const DELTA_PLAYER_SCORES = {
       "25002": {
         "name": "Wu, Dylan",
         "deltaTrendScore": 0.24271356885398376,
-        "deltaPredictiveScore": -0.05360696410497337,
+        "deltaPredictiveScore": -0.05360696410497338,
         "deltaTrendBuckets": {
           "short": 1.3562574856914396,
           "mid": 0.012130037452946687,
@@ -1512,7 +1512,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 1.47310891260485
         },
         "deltaPredictiveBuckets": {
-          "short": 0.252446903623378,
+          "short": 0.25244690362337807,
           "mid": 0.10734461659875222,
           "long": -0.5063308783128004,
           "veryLong": 0.5054622598766098
@@ -1521,7 +1521,7 @@ const DELTA_PLAYER_SCORES = {
       "25003": {
         "name": "Walker, Danny",
         "deltaTrendScore": -0.026791759871359202,
-        "deltaPredictiveScore": 0.056081524182291384,
+        "deltaPredictiveScore": 0.0560815241822914,
         "deltaTrendBuckets": {
           "short": 0.5120637625199898,
           "mid": 0.31552940780278144,
@@ -1529,8 +1529,8 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.8696751432292548
         },
         "deltaPredictiveBuckets": {
-          "short": 0.1205388995766248,
-          "mid": 0.04304500324557147,
+          "short": 0.12053889957662482,
+          "mid": 0.04304500324557148,
           "long": 0.17402674769027315,
           "veryLong": -0.28668180083772327
         }
@@ -1538,7 +1538,7 @@ const DELTA_PLAYER_SCORES = {
       "25094": {
         "name": "Fishburn, Patrick",
         "deltaTrendScore": 0.2335348871098668,
-        "deltaPredictiveScore": 0.07902644744583481,
+        "deltaPredictiveScore": 0.07902644744583483,
         "deltaTrendBuckets": {
           "short": 0.1057243989002046,
           "mid": 0.009607416923873435,
@@ -1546,7 +1546,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": 0.08987562099750866
         },
         "deltaPredictiveBuckets": {
-          "short": 0.02094165124541756,
+          "short": 0.020941651245417563,
           "mid": -0.010106042919939249,
           "long": 0.18181335574743085,
           "veryLong": 0.0321997534515659
@@ -1555,7 +1555,7 @@ const DELTA_PLAYER_SCORES = {
       "25157": {
         "name": "Hodges, Lee",
         "deltaTrendScore": -1.7502888595370738,
-        "deltaPredictiveScore": -0.5153529941391101,
+        "deltaPredictiveScore": -0.5153529941391102,
         "deltaTrendBuckets": {
           "short": 0.262070922060432,
           "mid": 0.146199415561573,
@@ -1563,7 +1563,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -3.5530555942073985
         },
         "deltaPredictiveBuckets": {
-          "short": 0.04297343684381932,
+          "short": 0.042973436843819324,
           "mid": 0.056974065785672615,
           "long": -0.8567299588369597,
           "veryLong": -1.2134819179163068
@@ -1579,7 +1579,7 @@ const DELTA_PLAYER_SCORES = {
           "long": 0.2661922614799979
         },
         "deltaPredictiveBuckets": {
-          "short": 0.06788967809029124,
+          "short": 0.06788967809029126,
           "mid": 0.6155331812748035,
           "long": 0.14703023298299045
         }
@@ -1594,13 +1594,13 @@ const DELTA_PLAYER_SCORES = {
         },
         "deltaPredictiveBuckets": {
           "mid": 1.758121576342969,
-          "long": -0.5973070730178516
+          "long": -0.5973070730178517
         }
       },
       "25908": {
         "name": "Whaley, Vince",
         "deltaTrendScore": -1.7113708074339256,
-        "deltaPredictiveScore": -0.31236338762721017,
+        "deltaPredictiveScore": -0.3123633876272103,
         "deltaTrendBuckets": {
           "short": -0.273266744171367,
           "mid": 0.20683315118834947,
@@ -1617,7 +1617,7 @@ const DELTA_PLAYER_SCORES = {
       "26649": {
         "name": "Thorbjornsen, Michael",
         "deltaTrendScore": -0.39837869413536464,
-        "deltaPredictiveScore": -0.06598097504704926,
+        "deltaPredictiveScore": -0.06598097504704928,
         "deltaTrendBuckets": {
           "short": 0.9268444996212444,
           "mid": -0.327114963570571,
@@ -1625,7 +1625,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.179271978014562
         },
         "deltaPredictiveBuckets": {
-          "short": 0.17459589321437724,
+          "short": 0.17459589321437727,
           "mid": -0.02293336183547461,
           "long": -0.06105280801954942,
           "veryLong": -0.39838266630881924
@@ -1634,7 +1634,7 @@ const DELTA_PLAYER_SCORES = {
       "26653": {
         "name": "Eckroat, Austin",
         "deltaTrendScore": -0.19156173743711927,
-        "deltaPredictiveScore": 0.1679274674098448,
+        "deltaPredictiveScore": 0.16792746740984482,
         "deltaTrendBuckets": {
           "short": -0.4677781015907748,
           "mid": -0.31684933187660425,
@@ -1642,7 +1642,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.4985541889074088
         },
         "deltaPredictiveBuckets": {
-          "short": -0.0848076904035979,
+          "short": -0.08480769040359791,
           "mid": -0.028223903557157846,
           "long": 0.6791035477216012,
           "veryLong": -0.5326451562563225
@@ -1651,7 +1651,7 @@ const DELTA_PLAYER_SCORES = {
       "26657": {
         "name": "Fisk, Steven",
         "deltaTrendScore": -0.41637554251140413,
-        "deltaPredictiveScore": -0.05420963729667962,
+        "deltaPredictiveScore": -0.05420963729667963,
         "deltaTrendBuckets": {
           "short": -0.3266824183570407,
           "mid": -1.0565751874666787,
@@ -1659,7 +1659,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.5945211257245794
         },
         "deltaPredictiveBuckets": {
-          "short": -0.08524993242896278,
+          "short": -0.0852499324289628,
           "mid": -0.31356528182179516,
           "long": 0.19332944745324998,
           "veryLong": -0.199788142032726
@@ -1668,7 +1668,7 @@ const DELTA_PLAYER_SCORES = {
       "26850": {
         "name": "Svensson, Jesper",
         "deltaTrendScore": -0.02949490466004744,
-        "deltaPredictiveScore": 0.019819694812506023,
+        "deltaPredictiveScore": 0.019819694812506027,
         "deltaTrendBuckets": {
           "short": -0.025102797183177428,
           "mid": -0.014642081165021895,
@@ -1676,7 +1676,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.24886061718481134
         },
         "deltaPredictiveBuckets": {
-          "short": -0.00463612391428633,
+          "short": -0.0046361239142863305,
           "mid": -0.010674949961357056,
           "long": 0.09338698426492568,
           "veryLong": -0.08918198219720813
@@ -1685,7 +1685,7 @@ const DELTA_PLAYER_SCORES = {
       "27164": {
         "name": "Phillips, Chandler",
         "deltaTrendScore": -0.982703284991063,
-        "deltaPredictiveScore": -0.24115022626958071,
+        "deltaPredictiveScore": -0.24115022626958077,
         "deltaTrendBuckets": {
           "short": -0.34841466943018207,
           "mid": -0.38821091870789576,
@@ -1693,7 +1693,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -2.2788798325111848
         },
         "deltaPredictiveBuckets": {
-          "short": -0.0837608373440011,
+          "short": -0.08376083734400111,
           "mid": -0.09177045071597649,
           "long": -0.19131068310144392,
           "veryLong": -0.788526200182447
@@ -1702,7 +1702,7 @@ const DELTA_PLAYER_SCORES = {
       "27183": {
         "name": "Salinda, Isaiah",
         "deltaTrendScore": -0.12636862130269924,
-        "deltaPredictiveScore": -0.04337410449199313,
+        "deltaPredictiveScore": -0.04337410449199314,
         "deltaTrendBuckets": {
           "short": 0.25931136899250967,
           "mid": -0.8421042361359667,
@@ -1710,7 +1710,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.014911450917410085
         },
         "deltaPredictiveBuckets": {
-          "short": 0.0636531221922463,
+          "short": 0.06365312219224631,
           "mid": -0.2702426753234407,
           "long": 0.05671789001108567,
           "veryLong": -0.011174033201277871
@@ -1719,7 +1719,7 @@ const DELTA_PLAYER_SCORES = {
       "27364": {
         "name": "Thompson, Davis",
         "deltaTrendScore": -0.3476180947020536,
-        "deltaPredictiveScore": 0.0020949761146091075,
+        "deltaPredictiveScore": 0.002094976114609108,
         "deltaTrendBuckets": {
           "short": -0.14709853442471127,
           "mid": -1.0202257435299271,
@@ -1727,7 +1727,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.8260866832221019
         },
         "deltaPredictiveBuckets": {
-          "short": -0.019003110455300915,
+          "short": -0.01900311045530092,
           "mid": -0.2219311462610882,
           "long": 0.2750017108354465,
           "veryLong": -0.27971267539011946
@@ -1736,7 +1736,7 @@ const DELTA_PLAYER_SCORES = {
       "27819": {
         "name": "Castillo, Ricky",
         "deltaTrendScore": -1.378788286199151,
-        "deltaPredictiveScore": -0.21676879152245812,
+        "deltaPredictiveScore": -0.21676879152245818,
         "deltaTrendBuckets": {
           "short": 0.04865936158572498,
           "mid": -1.3345911589533173,
@@ -1744,7 +1744,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -2.5572963951440384
         },
         "deltaPredictiveBuckets": {
-          "short": -0.02993326814707691,
+          "short": -0.029933268147076912,
           "mid": -0.3573542296449314,
           "long": 0.06187935651041471,
           "veryLong": -0.8702675370151228
@@ -1753,7 +1753,7 @@ const DELTA_PLAYER_SCORES = {
       "28159": {
         "name": "Meissner, Mac",
         "deltaTrendScore": -0.033391527741569116,
-        "deltaPredictiveScore": 0.09966922287010238,
+        "deltaPredictiveScore": 0.0996692228701024,
         "deltaTrendBuckets": {
           "short": 0.3439210293746313,
           "mid": -0.8072088352282366,
@@ -1761,7 +1761,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.08533882879296124
         },
         "deltaPredictiveBuckets": {
-          "short": 0.07231465087241401,
+          "short": 0.07231465087241402,
           "mid": -0.21815324164631641,
           "long": 0.37693691307177357,
           "veryLong": -0.023297003172987673
@@ -1770,7 +1770,7 @@ const DELTA_PLAYER_SCORES = {
       "28270": {
         "name": "Dunlap, Nick",
         "deltaTrendScore": 0.5846900847673899,
-        "deltaPredictiveScore": 0.10546251830121912,
+        "deltaPredictiveScore": 0.10546251830121915,
         "deltaTrendBuckets": {
           "short": 1.0623433791347527,
           "mid": 2.9755596996788065,
@@ -1778,7 +1778,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.23404153344715145
         },
         "deltaPredictiveBuckets": {
-          "short": 0.2297515135013688,
+          "short": 0.22975151350136885,
           "mid": 0.8339014888115003,
           "long": -0.3692854575185762,
           "veryLong": -0.08410389518921484
@@ -1787,7 +1787,7 @@ const DELTA_PLAYER_SCORES = {
       "28469": {
         "name": "Highsmith, Joe",
         "deltaTrendScore": -0.30297920411839985,
-        "deltaPredictiveScore": -0.13567671255193742,
+        "deltaPredictiveScore": -0.13567671255193745,
         "deltaTrendBuckets": {
           "short": -0.22826769106135852,
           "mid": -0.17871303746754752,
@@ -1795,7 +1795,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.11599872865057607
         },
         "deltaPredictiveBuckets": {
-          "short": -0.047486080906557315,
+          "short": -0.04748608090655732,
           "mid": -0.003107183482882233,
           "long": -0.29935214759052836,
           "veryLong": -0.04040592519002184
@@ -1804,7 +1804,7 @@ const DELTA_PLAYER_SCORES = {
       "29197": {
         "name": "Brennan, Michael",
         "deltaTrendScore": -0.24330508845484097,
-        "deltaPredictiveScore": -0.016090657969231918,
+        "deltaPredictiveScore": -0.01609065796923192,
         "deltaTrendBuckets": {
           "short": -0.21373917038408707,
           "mid": 0.7055568679652209,
@@ -1812,7 +1812,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -1.2605640130733928
         },
         "deltaPredictiveBuckets": {
-          "short": -0.02880971905388512,
+          "short": -0.028809719053885127,
           "mid": 0.16200363138602533,
           "long": 0.04970652258983941,
           "veryLong": -0.452570101990244
@@ -1821,7 +1821,7 @@ const DELTA_PLAYER_SCORES = {
       "29279": {
         "name": "Suber, Jackson",
         "deltaTrendScore": 0.2936630574336957,
-        "deltaPredictiveScore": 0.1162223543753384,
+        "deltaPredictiveScore": 0.11622235437533843,
         "deltaTrendBuckets": {
           "short": -2.835704207347866,
           "mid": 0.14333928646249472,
@@ -1829,7 +1829,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.11912415541414283
         },
         "deltaPredictiveBuckets": {
-          "short": -0.5608791946499164,
+          "short": -0.5608791946499165,
           "mid": -0.009145819895911478,
           "long": 0.5348462238973422,
           "veryLong": -0.04062340340681287
@@ -1838,7 +1838,7 @@ const DELTA_PLAYER_SCORES = {
       "29767": {
         "name": "Gerard, Ryan",
         "deltaTrendScore": 0.5104869971356951,
-        "deltaPredictiveScore": 0.3158377003416538,
+        "deltaPredictiveScore": 0.31583770034165387,
         "deltaTrendBuckets": {
           "short": -0.554599570743203,
           "mid": 0.8488216938401455,
@@ -1846,7 +1846,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.22264911194488088
         },
         "deltaPredictiveBuckets": {
-          "short": -0.1040549330371433,
+          "short": -0.10405493303714332,
           "mid": 0.28424344576882155,
           "long": 0.6533986535286427,
           "veryLong": -0.06013644352890253
@@ -1855,7 +1855,7 @@ const DELTA_PLAYER_SCORES = {
       "29770": {
         "name": "Mouw, William",
         "deltaTrendScore": 0.3701528041934774,
-        "deltaPredictiveScore": 0.22345580514529945,
+        "deltaPredictiveScore": 0.2234558051452995,
         "deltaTrendBuckets": {
           "short": -0.555191476937968,
           "mid": 1.4174562733628722,
@@ -1881,13 +1881,13 @@ const DELTA_PLAYER_SCORES = {
         "deltaPredictiveBuckets": {
           "mid": 0.8167795074337617,
           "long": 0.17258350468866948,
-          "veryLong": -0.0411340677731769
+          "veryLong": -0.041134067773176894
         }
       },
       "30814": {
         "name": "Sargent, Gordon",
         "deltaTrendScore": 0.2505390990862134,
-        "deltaPredictiveScore": 0.09687309650329974,
+        "deltaPredictiveScore": 0.09687309650329975,
         "deltaTrendBuckets": {
           "short": -0.4984847392896227,
           "mid": 0.482836371106059,
@@ -1895,7 +1895,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.23400778195412567
         },
         "deltaPredictiveBuckets": {
-          "short": -0.08429070856674199,
+          "short": -0.084290708566742,
           "mid": 0.13646930379124045,
           "long": 0.21215410722992536,
           "veryLong": -0.08096157651667464
@@ -1904,7 +1904,7 @@ const DELTA_PLAYER_SCORES = {
       "31343": {
         "name": "Ford, David",
         "deltaTrendScore": 0.16040516949086359,
-        "deltaPredictiveScore": 0.2744201646017483,
+        "deltaPredictiveScore": 0.27442016460174834,
         "deltaTrendBuckets": {
           "short": -0.5271213492130292,
           "mid": 2.6403471013159794,
@@ -1912,7 +1912,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -2.085370005870881
         },
         "deltaPredictiveBuckets": {
-          "short": -0.0883926193078215,
+          "short": -0.08839261930782151,
           "mid": 0.9344405083945242,
           "long": 0.3531597086782746,
           "veryLong": -0.7075658762981014
@@ -1921,7 +1921,7 @@ const DELTA_PLAYER_SCORES = {
       "32055": {
         "name": "Shipley, Neal",
         "deltaTrendScore": -1.2908348926133635,
-        "deltaPredictiveScore": -0.8638572401047817,
+        "deltaPredictiveScore": -0.8638572401047816,
         "deltaTrendBuckets": {
           "mid": 0.39781517439526437,
           "long": -6.302610759502603,
@@ -1936,7 +1936,7 @@ const DELTA_PLAYER_SCORES = {
       "32152": {
         "name": "Brown, Blades",
         "deltaTrendScore": -0.38140102513646434,
-        "deltaPredictiveScore": -0.08662578531878672,
+        "deltaPredictiveScore": -0.08662578531878673,
         "deltaTrendBuckets": {
           "short": -0.23952693902028405,
           "mid": -0.5450834114201517,
@@ -1944,7 +1944,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.5011431946140862
         },
         "deltaPredictiveBuckets": {
-          "short": -0.045640248317174996,
+          "short": -0.045640248317175,
           "mid": -0.15546229050946897,
           "long": -0.024805641523009878,
           "veryLong": -0.16548695416691167
@@ -1953,7 +1953,7 @@ const DELTA_PLAYER_SCORES = {
       "32330": {
         "name": "Clanton, Luke",
         "deltaTrendScore": 0.026183250789457876,
-        "deltaPredictiveScore": 0.014455479011387376,
+        "deltaPredictiveScore": 0.014455479011387379,
         "deltaTrendBuckets": {
           "short": 0.163946139494431,
           "mid": 0.23747724288108615,
@@ -1961,7 +1961,7 @@ const DELTA_PLAYER_SCORES = {
           "veryLong": -0.2576810775428656
         },
         "deltaPredictiveBuckets": {
-          "short": 0.028495720073541758,
+          "short": 0.02849572007354176,
           "mid": 0.08213857610793457,
           "long": 0.002718186801109065,
           "veryLong": -0.08801336602341822
@@ -1970,7 +1970,7 @@ const DELTA_PLAYER_SCORES = {
       "32457": {
         "name": "Keefer, Johnny",
         "deltaTrendScore": -0.6408484601903536,
-        "deltaPredictiveScore": -0.1961167927591014,
+        "deltaPredictiveScore": -0.19611679275910146,
         "deltaTrendBuckets": {
           "short": 0.28896740594226084,
           "mid": -1.259239861213233,

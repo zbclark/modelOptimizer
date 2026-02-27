@@ -7,7 +7,11 @@ This repo generates a **formatting schema** for the *Player Ranking Model* ranki
   - `apps-scripts/modelOptimizer/utilities/ranking_formatting_schema.json`
   - `apps-scripts/modelOptimizer/utilities/ranking_formatting_schema.csv`
 
-> This guide assumes you want the formatter **inside the spreadsheet** (bound script), not as an Apps Script library.
+The formatter is intended for the Node export at:
+
+- `data/<season>/<tournament>/pre_event/<output-base>_pre_event_rankings.csv`
+
+> This guide assumes you want the formatter **inside the spreadsheet** (bound script), not as a standalone library.
 
 ---
 
@@ -33,7 +37,7 @@ These are encoded in `ranking_formatting_schema.json`:
 
 ## 2) Add the bound formatter (no library required)
 
-1. In the Google Sheet: **Extensions → Apps Script**
+1. In the Google Sheet: **Extensions → Script editor**
 2. Create a new script file (e.g. `PlayerRankingModelFormatter.bound.gs`)
 3. Copy/paste the contents of:
 

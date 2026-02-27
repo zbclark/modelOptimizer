@@ -8,6 +8,7 @@ This folder now centers on **`core/optimizer.js`**, which runs a full, end‑to�
 2. **Current‑season baseline** (template comparison)
 3. **Weight optimization** (randomized search with KPI blend)
 4. **Multi‑year validation** (current‑season approach metrics against historical seasons)
+5. **Validation reporting outputs** (calibration, metric analysis, delta trends, template correlations)
 
 It produces JSON + text summaries and can optionally write optimized templates back into production loaders.
 
@@ -154,24 +155,24 @@ node scripts/summarizeSeedResults.js --tournament "[tournament name]"
 
 ## End-to-end workflow (seed runs → monitor → compare → dry-run → writeback)
 
-1) Kick off the seed runs (same tests for all seeds):
+1. Kick off the seed runs (same tests for all seeds):
 
 - `cd apps-scripts/modelOptimizer`
 - `for seed in a b c d e; do LOGGING_ENABLED=1 OPT_TESTS=10000 OPT_SEED=$seed node core/optimizer.js --event 7 --season 2026 --name "Genesis Invitational" --post --outputDir data/2026/genesis-invitational/post_event/seed_runs > data/2026/genesis-invitational/post_event/seed_runs/genesis_seed-${seed}_LOEO_run.log 2>&1; done`
 
-1) Monitor logs (recommended):
+1. Monitor logs (recommended):
 
 - `tail -F data/[season]/[tournament-slug]/post_event/seed_runs/[tournament-slug]_seed-[seed]_run.log` — follow live output as each seed runs.
 
-1) Summarize and compare seed results:
+1. Summarize and compare seed results:
 
 - `node scripts/summarizeSeedResults.js --tournament "[tournament name]"` — compare seeds and pick the best.
 
-1) Dry-run the winning seed (same seed + same tests):
+1. Dry-run the winning seed (same seed + same tests):
 
 - `OPT_TESTS=[tests] OPT_SEED=[winning-seed] node core/optimizer.js --event [event id] --season [season] --tournament "[tournament name]" --dryRun --writeTemplates` — generate dry-run template outputs.
 
-1) Write back (only after verifying dry-run outputs):
+1. Write back (only after verifying dry-run outputs):
 
 - `OPT_TESTS=[tests] OPT_SEED=[winning-seed] node core/optimizer.js --event [event id] --season [season] --tournament "[tournament name]" --writeTemplates` — write the templates to the loaders.
 
@@ -235,20 +236,35 @@ Outputs are written under the per-tournament data directory:
 
 > Note: the legacy `apps-scripts/modelOptimizer/output/` folder should not be used.
 
+**Output base name rules:**
+
+- `outputBaseName` is derived from `--tournament` (or `event_<eventId>` fallback), lowercased, spaces → underscores, non‑alphanumeric stripped, and leading `optimizer_` removed.
+- If `OPT_SEED` is set, a suffix `_seed-<seed>` is appended.
+- If `OUTPUT_TAG` is set, a suffix `_<tag>` is appended.
+
+Example: `"Genesis Invitational"` → `genesis_invitational`, then `genesis_invitational_seed-a_experiment`
+
 **Full optimization run (current results exist):**
 
-- `<tournament-slug>_post_event_results.json`
-- `<tournament-slug>_post_event_results.txt`
+- `<output-base>_post_event_results.json`
+- `<output-base>_post_event_results.txt`
 
 **Seeded run (reproducible):**
 
-- `<tournament-slug>_seed-<OPT_SEED>_post_event_results.json`
-- `<tournament-slug>_seed-<OPT_SEED>_post_event_results.txt`
+- `<output-base>_post_event_results.json`
+- `<output-base>_post_event_results.txt`
 
 **Pre‑event mode (no results file):**
 
-- `<tournament-slug>_pre_event_results.json`
-- `<tournament-slug>_pre_event_results.txt`
+- `<output-base>_pre_event_results.json`
+- `<output-base>_pre_event_results.txt`
+- `<output-base>_pre_event_rankings.json`
+- `<output-base>_pre_event_rankings.csv`
+
+**Results snapshot (post‑event evaluation input):**
+
+- `<tournament-slug>_results.json` (normalized results used for evaluation)
+- Optional: `<tournament-slug>_results.csv` (human‑readable export)
 
 **Dry‑run template previews (only when `--writeTemplates` is used in dry‑run mode):**
 
@@ -326,6 +342,17 @@ The JSON/text outputs include:
 - Optimized weights + objective scores
 - Multi‑year validation results
 - Final recommendation
+
+**Post‑event validation outputs (written under `data/<season>/validation_outputs/`):**
+
+- `Processing_Log.json`
+- `Calibration_Report.json`
+- `Model_Delta_Trends.json` / `Model_Delta_Trends.csv`
+- `Weight_Templates.json` / `Weight_Templates.csv`
+- `Weight_Calibration_Guide.json`
+- `Course_Type_Classification.json`
+- `metric_analysis/<tournament-slug>_metric_analysis.json`
+- `template_correlation_summaries/<TEMPLATE>_Correlation_Summary.json` / `.csv`
 
 ## Troubleshooting
 

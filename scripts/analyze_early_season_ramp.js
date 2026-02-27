@@ -163,16 +163,17 @@ const loadHistoricalRowsFromApi = async ({ years, tour }) => {
 
   for (const year of years) {
     try {
-      const snapshot = await getDataGolfHistoricalRounds({
+      let snapshot = await getDataGolfHistoricalRounds({
         apiKey: datagolfApiKey,
         cacheDir: datagolfCacheDir,
+        ttlMs: 0,
         allowStale: true,
         tour: resolvedTour,
         eventId: 'all',
         year,
         fileFormat: 'json'
       });
-      const rawRows = extractHistoricalRowsFromSnapshotPayload(snapshot?.payload);
+      let rawRows = extractHistoricalRowsFromSnapshotPayload(snapshot?.payload);
       if (debugApi) {
         const payload = snapshot?.payload;
         const payloadType = Array.isArray(payload) ? 'array' : (payload === null ? 'null' : typeof payload);
@@ -213,48 +214,25 @@ const main = async () => {
   let rows = [];
   let sourceMeta = { historicalCsv: null, historicalJson: null, api: null, metric };
 
-  // 1. Try cache JSON first
-  const cacheDir = datagolfCacheDir || path.resolve(ROOT_DIR, 'data', 'cache');
-  const jsonFiles = fs.existsSync(cacheDir)
-    ? fs.readdirSync(cacheDir).filter(file => file.toLowerCase().includes('historical_rounds') && file.endsWith('.json'))
-    : [];
-  let historicalJsonPath = jsonFiles.length ? path.resolve(cacheDir, jsonFiles[0]) : null;
-
-  if (historicalJsonPath) {
-    const payload = JSON.parse(fs.readFileSync(historicalJsonPath, 'utf8'));
-    rows = extractHistoricalRowsFromSnapshotPayload(payload);
-    sourceMeta.historicalJson = historicalJsonPath;
-    console.log(`✓ Loaded historical data JSON: ${path.basename(historicalJsonPath)} (${rows.length} rows)`);
+  if (apiYears.length === 0) {
+    console.error('❌ API-only mode requires --apiYears (for example: --apiYears 2022-2026).');
+    process.exit(1);
   }
 
-  // 2. Try CSV if JSON failed
+  const apiResult = await loadHistoricalRowsFromApi({ years: apiYears, tour: apiTour });
+  if (apiResult.rows.length > 0) {
+    rows = apiResult.rows;
+    sourceMeta.api = apiResult.meta;
+    console.log(`✓ Loaded historical rounds from API: ${rows.length} rows (${apiTour}, ${apiYears.join(', ')})`);
+  } else if (apiResult.meta?.source === 'missing-key') {
+    console.warn('ℹ️  DataGolf API key missing; no historical data retrieved.');
+  } else {
+    console.warn('ℹ️  DataGolf historical rounds API returned no rows.');
+    sourceMeta.api = apiResult.meta;
+  }
+
   if (rows.length === 0) {
-    let historicalCsvPath = findHistoricalCsv(DATA_DIR);
-    if (historicalCsvPath) {
-      rows = loadCsv(historicalCsvPath, { skipFirstColumn: true });
-      sourceMeta.historicalCsv = historicalCsvPath;
-      console.log(`✓ Loaded historical data CSV: ${path.basename(historicalCsvPath)} (${rows.length} rows)`);
-    }
-  }
-
-  // 3. Try API if JSON and CSV failed and years specified
-  if (rows.length === 0 && apiYears.length > 0) {
-    const apiResult = await loadHistoricalRowsFromApi({ years: apiYears, tour: apiTour });
-    if (apiResult.rows.length > 0) {
-      rows = apiResult.rows;
-      sourceMeta.api = apiResult.meta;
-      console.log(`✓ Loaded historical rounds from API: ${rows.length} rows (${apiTour}, ${apiYears.join(', ')})`);
-    } else if (apiResult.meta?.source === 'missing-key') {
-      console.warn('ℹ️  DataGolf API key missing; no historical data found in cache or CSV.');
-    } else {
-      console.warn('ℹ️  DataGolf historical rounds API returned no rows; no historical data found in cache or CSV.');
-      sourceMeta.api = apiResult.meta;
-    }
-  }
-
-  // 4. Error if all sources failed
-  if (rows.length === 0) {
-    console.error(`❌ No historical data available (no JSON + no CSV + API empty in ${DATA_DIR}).`);
+    console.error('❌ No historical data available from API.');
     process.exit(1);
   }
 

@@ -432,6 +432,81 @@ const resolveRankingPath = (dir, candidates, suffix) => {
   return null;
 };
 
+const resolveTop20BlendPath = (dir, candidates) => {
+  if (!dir) return null;
+  const direct = resolveExistingPath(dir, candidates, '_top20_template_blend.json');
+  if (direct) return direct;
+  const fallback = path.resolve(dir, 'top20_template_blend.json');
+  return fs.existsSync(fallback) ? fallback : null;
+};
+
+const loadTop20BlendOutput = filePath => {
+  if (!filePath || !fs.existsSync(filePath)) return null;
+  try {
+    const payload = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    if (!payload || typeof payload !== 'object') return null;
+    const signalMap = payload.signalMap && typeof payload.signalMap === 'object'
+      ? payload.signalMap
+      : null;
+    const blendedGroups = payload.blendedGroups && typeof payload.blendedGroups === 'object'
+      ? payload.blendedGroups
+      : null;
+    const blendedMetrics = payload.blendedMetrics && typeof payload.blendedMetrics === 'object'
+      ? payload.blendedMetrics
+      : null;
+    return {
+      sourcePath: filePath,
+      meta: payload.meta || null,
+      signalMap,
+      blendedGroups,
+      blendedMetrics
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
+const normalizeBlendMetricLabel = label => String(label || '')
+  .replace(/^(Scoring|Course Management):\s*/i, '')
+  .trim();
+
+const computeTemplateAlignmentFromBlend = (blendOutput, templatesByType = {}) => {
+  if (!blendOutput || !blendOutput.signalMap) return null;
+  const signalEntries = Object.entries(blendOutput.signalMap)
+    .map(([label, value]) => [normalizeBlendMetricLabel(label), value])
+    .filter(([label]) => !!label);
+  if (!signalEntries.length) return null;
+
+  const scores = {};
+  ['POWER', 'TECHNICAL', 'BALANCED'].forEach(type => {
+    const template = templatesByType[type];
+    if (!template) return;
+    const flatMetrics = flattenTemplateMetricWeights(template);
+    const weightMap = new Map();
+    let total = 0;
+    flatMetrics.forEach(entry => {
+      const label = normalizeBlendMetricLabel(entry.metric);
+      if (!label) return;
+      const weight = Math.abs(entry.weight || 0);
+      if (!weight) return;
+      weightMap.set(label, weight);
+      total += weight;
+    });
+    if (!total) return;
+    let dot = 0;
+    signalEntries.forEach(([label, value]) => {
+      const weight = weightMap.get(label) || 0;
+      if (!weight) return;
+      dot += value * (weight / total);
+    });
+    scores[type] = dot;
+  });
+
+  const ordered = Object.entries(scores).sort((a, b) => (b[1] || 0) - (a[1] || 0));
+  const recommendedType = ordered[0]?.[0] || null;
+  return { scores, recommendedType };
+};
+
 const readJsonFile = filePath => {
   if (!filePath || !fs.existsSync(filePath)) return null;
   try {
@@ -2180,18 +2255,24 @@ const buildCorrelationSummary = metricAnalyses => {
   return metrics;
 };
 
-const buildCourseTypeClassificationEntries = ({ metricAnalyses, season }) => {
+const buildCourseTypeClassificationEntries = ({ metricAnalyses, season, top20BlendByTournament = new Map() }) => {
   const entries = [];
   (metricAnalyses || []).forEach(analysis => {
     if (!analysis?.tournament || !analysis?.courseType) return;
     const baseName = formatTournamentDisplayName(analysis.tournament);
     const displayName = baseName && season ? `${baseName} (${season})` : baseName || analysis.tournament;
+    const blendInfo = top20BlendByTournament.get(analysis.tournament) || null;
+    const blendType = blendInfo?.recommendedType || null;
+    const resolvedCourseType = blendType || analysis.courseType;
+    const resolvedSource = blendType ? 'top20_blend' : (analysis.courseTypeSource || analysis.source || 'metric_analysis');
     entries.push({
       tournament: analysis.tournament,
       displayName,
       eventId: analysis.eventId || null,
-      courseType: analysis.courseType,
-      source: analysis.courseTypeSource || analysis.source || 'metric_analysis'
+      courseType: resolvedCourseType,
+      source: resolvedSource,
+      alignmentScores: blendInfo?.scores || null,
+      blendSource: blendInfo?.sourcePath || null
     });
   });
   return entries;
@@ -2274,6 +2355,127 @@ const writeCorrelationSummary = (outputDir, name, metrics, options = {}) => {
 };
 
 const normalizeMetricAlias = metricName => normalizeMetricLabel(metricName);
+
+const computeTop20BlendShare = count => {
+  if (!Number.isFinite(count) || count <= 0) return 0;
+  if (count < 3) return 0;
+  if (count >= 15) return 0.7;
+  if (count >= 10) {
+    const span = 15 - 10;
+    return 0.5 + ((count - 10) / span) * (0.7 - 0.5);
+  }
+  if (count >= 5) {
+    const span = 10 - 5;
+    return 0.3 + ((count - 5) / span) * (0.5 - 0.3);
+  }
+  const span = 5 - 3;
+  return 0.2 + ((count - 3) / span) * (0.3 - 0.2);
+};
+
+const normalizeGroupWeights = groupWeights => {
+  const entries = Object.entries(groupWeights || {});
+  const total = entries.reduce((sum, [, value]) => sum + Math.abs(value || 0), 0);
+  if (!total) return {};
+  return entries.reduce((acc, [key, value]) => {
+    acc[key] = (value || 0) / total;
+    return acc;
+  }, {});
+};
+
+const normalizeMetricWeightsByGroup = metricWeights => {
+  const updated = { ...(metricWeights || {}) };
+  const groupTotals = {};
+  Object.entries(updated).forEach(([key, value]) => {
+    const [group] = key.split('::');
+    if (!group) return;
+    groupTotals[group] = (groupTotals[group] || 0) + Math.abs(value || 0);
+  });
+  Object.entries(updated).forEach(([key, value]) => {
+    const [group] = key.split('::');
+    const total = groupTotals[group] || 0;
+    if (!total) return;
+    updated[key] = (value || 0) / total;
+  });
+  return updated;
+};
+
+const buildTemplateMapsFromRecommended = recommended => {
+  const metricWeights = {};
+  const groupTotals = {};
+  (recommended || []).forEach(entry => {
+    const metricName = normalizeMetricAlias(entry.metric);
+    const group = getMetricGroup(metricName) || '__UNGROUPED__';
+    const weight = typeof entry.recommendedWeight === 'number' ? entry.recommendedWeight : 0;
+    metricWeights[`${group}::${metricName}`] = weight;
+    groupTotals[group] = (groupTotals[group] || 0) + Math.abs(weight || 0);
+  });
+  const groupWeights = normalizeGroupWeights(groupTotals);
+  return {
+    groupWeights,
+    metricWeights: normalizeMetricWeightsByGroup(metricWeights)
+  };
+};
+
+const aggregateTop20BlendByType = (top20BlendByTournament, type) => {
+  const entries = Array.from(top20BlendByTournament.entries())
+    .filter(([, blend]) => blend?.recommendedType === type)
+    .map(([, blend]) => blend);
+  if (!entries.length) return null;
+
+  const groupTotals = {};
+  const groupWeights = {};
+  const metricTotals = {};
+  const metricWeights = {};
+
+  entries.forEach(blend => {
+    const weight = Math.abs(blend?.scores?.[type] || 0) || 1;
+    const groups = blend?.blendedGroups || {};
+    const metrics = blend?.blendedMetrics || {};
+    Object.entries(groups).forEach(([group, value]) => {
+      groupTotals[group] = (groupTotals[group] || 0) + weight;
+      groupWeights[group] = (groupWeights[group] || 0) + weight * (value || 0);
+    });
+    Object.entries(metrics).forEach(([key, value]) => {
+      metricTotals[key] = (metricTotals[key] || 0) + weight;
+      metricWeights[key] = (metricWeights[key] || 0) + weight * (value || 0);
+    });
+  });
+
+  Object.entries(groupWeights).forEach(([group, value]) => {
+    const total = groupTotals[group] || 0;
+    groupWeights[group] = total ? value / total : 0;
+  });
+  Object.entries(metricWeights).forEach(([key, value]) => {
+    const total = metricTotals[key] || 0;
+    metricWeights[key] = total ? value / total : 0;
+  });
+
+  return {
+    count: entries.length,
+    groupWeights: normalizeGroupWeights(groupWeights),
+    metricWeights: normalizeMetricWeightsByGroup(metricWeights)
+  };
+};
+
+const blendTemplateMaps = (baseline, overlay, share) => {
+  if (!overlay || !share) return baseline;
+  const blendedGroups = { ...(baseline.groupWeights || {}) };
+  Object.entries(overlay.groupWeights || {}).forEach(([group, value]) => {
+    const base = typeof blendedGroups[group] === 'number' ? blendedGroups[group] : 0;
+    blendedGroups[group] = (1 - share) * base + share * (value || 0);
+  });
+
+  const blendedMetrics = { ...(baseline.metricWeights || {}) };
+  Object.entries(overlay.metricWeights || {}).forEach(([key, value]) => {
+    const base = typeof blendedMetrics[key] === 'number' ? blendedMetrics[key] : 0;
+    blendedMetrics[key] = (1 - share) * base + share * (value || 0);
+  });
+
+  return {
+    groupWeights: normalizeGroupWeights(blendedGroups),
+    metricWeights: normalizeMetricWeightsByGroup(blendedMetrics)
+  };
+};
 
 const getMetricGroupings = () => ({
   'Driving Performance': [
@@ -2475,7 +2677,8 @@ const writeWeightTemplatesOutput = (outputDir, summariesByType, templatesByType,
 
   const output = {
     generatedAt: new Date().toISOString(),
-    templates: {}
+    templates: {},
+    derivedTemplates: {}
   };
 
   const toCsvRow = values => values
@@ -2486,15 +2689,30 @@ const writeWeightTemplatesOutput = (outputDir, summariesByType, templatesByType,
   const typeOrder = ['POWER', 'TECHNICAL', 'BALANCED'];
   const configInfo = options.configInfo || new Map();
   const typeTournaments = options.typeTournaments || {};
+  const top20BlendByTournament = options.top20BlendByTournament || new Map();
 
   typeOrder.forEach(type => {
     const summary = summariesByType[type] || [];
     const template = templatesByType[type] || null;
     const recommended = buildRecommendedWeights(summary, template);
+    const baselineTemplateMaps = buildTemplateMapsFromRecommended(recommended);
+    const top20Aggregate = aggregateTop20BlendByType(top20BlendByTournament, type);
+    const blendShare = top20Aggregate ? computeTop20BlendShare(top20Aggregate.count) : 0;
+    const blendedTemplateMaps = top20Aggregate
+      ? blendTemplateMaps(baselineTemplateMaps, top20Aggregate, blendShare)
+      : baselineTemplateMaps;
+
+    const blendedMetricMap = blendedTemplateMaps.metricWeights || {};
     output.templates[type] = recommended.reduce((acc, entry) => {
+      const metricName = normalizeMetricAlias(entry.metric);
+      const groupName = getMetricGroup(metricName) || '__UNGROUPED__';
+      const blendedKey = `${groupName}::${metricName}`;
+      const blendedWeight = typeof blendedMetricMap[blendedKey] === 'number'
+        ? blendedMetricMap[blendedKey]
+        : entry.recommendedWeight;
       acc[entry.metric] = {
         templateWeight: entry.templateWeight,
-        recommendedWeight: entry.recommendedWeight,
+        recommendedWeight: blendedWeight,
         correlation: entry.correlation
       };
       return acc;
@@ -2533,7 +2751,13 @@ const writeWeightTemplatesOutput = (outputDir, summariesByType, templatesByType,
 
     recommended.forEach(entry => {
       const templateWeight = Number(entry.templateWeight) || 0;
-      const recommendedWeight = Number(entry.recommendedWeight) || 0;
+      const metricName = normalizeMetricAlias(entry.metric);
+      const groupName = getMetricGroup(metricName) || '__UNGROUPED__';
+      const blendedKey = `${groupName}::${metricName}`;
+      const blendedWeight = typeof blendedMetricMap[blendedKey] === 'number'
+        ? blendedMetricMap[blendedKey]
+        : entry.recommendedWeight;
+      const recommendedWeight = Number(blendedWeight) || 0;
       const configValues = configBuckets[entry.metric] || [];
       const configWeight = configValues.length > 0
         ? configValues.reduce((sum, value) => sum + value, 0) / configValues.length
@@ -2558,6 +2782,44 @@ const writeWeightTemplatesOutput = (outputDir, summariesByType, templatesByType,
 
     lines.push('');
   });
+
+  if (top20BlendByTournament.size > 0) {
+    top20BlendByTournament.forEach((blend, slug) => {
+      const recommendedType = blend?.recommendedType;
+      if (!recommendedType) return;
+      const summary = summariesByType[recommendedType] || [];
+      const template = templatesByType[recommendedType] || null;
+      const baselineRecommended = buildRecommendedWeights(summary, template);
+      const baselineMaps = buildTemplateMapsFromRecommended(baselineRecommended);
+      const blendShare = 0.5;
+      const tournamentOverlay = {
+        groupWeights: blend?.blendedGroups || {},
+        metricWeights: blend?.blendedMetrics || {}
+      };
+      const tournamentMaps = blendTemplateMaps(baselineMaps, tournamentOverlay, blendShare);
+      const nestedMetrics = {};
+      Object.entries(tournamentMaps.metricWeights || {}).forEach(([key, value]) => {
+        const [group, metric] = key.split('::');
+        if (!group || !metric) return;
+        if (!nestedMetrics[group]) nestedMetrics[group] = {};
+        nestedMetrics[group][metric] = { weight: value };
+      });
+
+      output.derivedTemplates[slug] = {
+        sourcePath: blend.sourcePath || null,
+        meta: blend.meta || null,
+        alignmentScores: blend.scores || null,
+        signalMap: blend.signalMap || null,
+        blendedGroups: blend.blendedGroups || null,
+        blendedMetrics: blend.blendedMetrics || null,
+        tournamentTemplate: {
+          groupWeights: tournamentMaps.groupWeights || {},
+          metricWeights: nestedMetrics
+        }
+      };
+    });
+  }
+
 
   fs.writeFileSync(jsonPath, JSON.stringify(output, null, 2));
   fs.writeFileSync(csvPath, lines.join('\n'));
@@ -3882,11 +4144,36 @@ const runValidation = async ({
     ? [...existingMetricAnalyses.filter(entry => entry?.tournament !== metricAnalysis.tournament), metricAnalysis]
     : existingMetricAnalyses;
 
+  const top20BlendByTournament = new Map();
+  const templatesByType = {
+    POWER: WEIGHT_TEMPLATES?.POWER || null,
+    TECHNICAL: WEIGHT_TEMPLATES?.TECHNICAL || null,
+    BALANCED: WEIGHT_TEMPLATES?.BALANCED || null
+  };
+  allMetricAnalyses.forEach(entry => {
+    const tournamentSlug = entry?.tournament || null;
+    if (!tournamentSlug) return;
+    const blendPath = resolveTop20BlendPath(outputDir, [tournamentSlug]);
+    const blendOutput = loadTop20BlendOutput(blendPath);
+    if (!blendOutput) return;
+    const alignment = computeTemplateAlignmentFromBlend(blendOutput, templatesByType);
+    if (!alignment) return;
+    top20BlendByTournament.set(tournamentSlug, {
+      ...alignment,
+      sourcePath: blendOutput.sourcePath,
+      meta: blendOutput.meta || null,
+      signalMap: blendOutput.signalMap || null,
+      blendedGroups: blendOutput.blendedGroups || null,
+      blendedMetrics: blendOutput.blendedMetrics || null
+    });
+  });
+
   const classificationPayload = {
     generatedAt: new Date().toISOString(),
     entries: buildCourseTypeClassificationEntries({
       metricAnalyses: allMetricAnalyses,
-      season
+      season,
+      top20BlendByTournament
     })
   };
   const classificationJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.courseTypeClassification}.json`);
@@ -3949,11 +4236,7 @@ const runValidation = async ({
     TECHNICAL: byType.TECHNICAL.length,
     BALANCED: byType.BALANCED.length
   };
-  const templatesByType = {
-    POWER: WEIGHT_TEMPLATES?.POWER || null,
-    TECHNICAL: WEIGHT_TEMPLATES?.TECHNICAL || null,
-    BALANCED: WEIGHT_TEMPLATES?.BALANCED || null
-  };
+  
 
   const weightCalibrationJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.weightCalibrationGuide}.json`);
   const weightCalibrationCsvPath = path.resolve(outputDir, `${OUTPUT_NAMES.weightCalibrationGuide}.csv`);
@@ -3974,7 +4257,8 @@ const runValidation = async ({
   trackOutput('weightTemplates.csv', weightTemplatesCsvPath);
   const weightTemplatesOutputs = writeWeightTemplatesOutput(outputDir, summariesByType, templatesByType, {
     configInfo,
-    typeTournaments
+    typeTournaments,
+    top20BlendByTournament
   });
   recordOutput('weightTemplates.json', weightTemplatesOutputs?.jsonPath);
   recordOutput('weightTemplates.csv', weightTemplatesOutputs?.csvPath);

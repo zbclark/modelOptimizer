@@ -15,7 +15,9 @@ const DEFAULT_BLEND_OPTIONS = {
   }
 };
 
-const normalizeLabel = (label) => String(label || '').trim().toLowerCase();
+const normalizeMetricLabel = (label) => String(label || '')
+  .replace(/^(Scoring|Course Management):\s*/i, '')
+  .trim();
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -39,19 +41,19 @@ const buildSignalMap = (top20Correlations = [], top20Logistic = null, metricLabe
   if (corrEntries.length) {
     const total = corrEntries.reduce((sum, entry) => sum + Math.abs(entry.correlation), 0) || 0;
     corrEntries.forEach(entry => {
-      const key = normalizeLabel(entry.label);
+      const key = normalizeMetricLabel(entry.label);
       if (!key) return;
-      const value = Math.abs(entry.correlation);
+      const value = entry.correlation;
       corrMap[key] = total > 0 ? value / total : value;
     });
   }
 
   const logisticMap = {};
   if (top20Logistic && top20Logistic.success && Array.isArray(top20Logistic.weights) && metricLabels.length) {
-    const weights = top20Logistic.weights.map(value => Math.abs(value || 0));
-    const total = weights.reduce((sum, value) => sum + value, 0) || 0;
+    const weights = top20Logistic.weights.map(value => Number(value) || 0);
+    const total = weights.reduce((sum, value) => sum + Math.abs(value), 0) || 0;
     weights.forEach((value, idx) => {
-      const key = normalizeLabel(metricLabels[idx]);
+      const key = normalizeMetricLabel(metricLabels[idx]);
       if (!key) return;
       logisticMap[key] = total > 0 ? value / total : value;
     });
@@ -73,7 +75,7 @@ const buildMetricLabelToGroupMap = (metricConfig) => {
   if (!metricConfig || !Array.isArray(metricConfig.groups)) return map;
   metricConfig.groups.forEach(group => {
     group.metrics.forEach(metric => {
-      map[normalizeLabel(metric.name)] = group.name;
+      map[normalizeMetricLabel(metric.name)] = group.name;
     });
   });
   return map;
@@ -95,7 +97,7 @@ const buildSuggestedMetricWeights = (metricConfig, signalMap = {}) => {
   const metricWeights = {};
   metricConfig.groups.forEach(group => {
     const groupEntries = group.metrics.map(metric => {
-      const key = normalizeLabel(metric.name);
+      const key = normalizeMetricLabel(metric.name);
       return { name: metric.name, weight: signalMap[key] || 0 };
     });
     const total = groupEntries.reduce((sum, entry) => sum + Math.abs(entry.weight), 0);
@@ -128,11 +130,29 @@ const applyMetricGuardrails = (baseline, suggested, guardrails) => {
 
   Object.entries(suggested || {}).forEach(([key, value]) => {
     const baseValue = typeof baseline?.[key] === 'number' ? baseline[key] : 0;
-    const clamped = clamp(value, baseValue - maxShift, baseValue + maxShift);
-    output[key] = clamp(clamped, 0, 1);
+    const baseAbs = Math.abs(baseValue || 0);
+    const targetAbs = Math.abs(value || 0);
+    const clampedAbs = clamp(targetAbs, Math.max(0, baseAbs - maxShift), baseAbs + maxShift);
+    const signed = (value || 0) < 0 ? -clampedAbs : clampedAbs;
+    output[key] = clamp(signed, -1, 1);
   });
 
   return output;
+};
+
+const renormalizeMetricWeights = (metricConfig, metricWeights = {}) => {
+  if (!metricConfig || !Array.isArray(metricConfig.groups)) return { ...metricWeights };
+  const updated = { ...metricWeights };
+  metricConfig.groups.forEach(group => {
+    const keys = group.metrics.map(metric => `${group.name}::${metric.name}`);
+    const total = keys.reduce((sum, key) => sum + Math.abs(updated[key] || 0), 0);
+    if (!total) return;
+    keys.forEach(key => {
+      const value = updated[key] || 0;
+      updated[key] = value / total;
+    });
+  });
+  return updated;
 };
 
 const blendTemplateWeights = ({
@@ -170,7 +190,8 @@ const blendTemplateWeights = ({
   });
 
   const blendedGroups = applyGroupGuardrails(baselineGroupWeights, blendedGroupsRaw, resolvedOptions.guardrails);
-  const blendedMetrics = applyMetricGuardrails(baselineMetricWeights, blendedMetricRaw, resolvedOptions.guardrails);
+  const clampedMetrics = applyMetricGuardrails(baselineMetricWeights, blendedMetricRaw, resolvedOptions.guardrails);
+  const blendedMetrics = renormalizeMetricWeights(metricConfig, clampedMetrics);
 
   return {
     options: resolvedOptions,

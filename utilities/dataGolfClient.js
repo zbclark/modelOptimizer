@@ -265,6 +265,7 @@ const getDataGolfHistoricalRounds = async (options = {}) => {
     cacheDir,
     ttlMs = DEFAULT_TTL_MS,
     allowStale = true,
+    preferCache = false,
     tour = 'pga',
     eventId = 'all',
     year,
@@ -282,6 +283,10 @@ const getDataGolfHistoricalRounds = async (options = {}) => {
 
   if (cachePath && isFresh(cachePath, ttlMs)) {
     return { source: 'cache', path: cachePath, payload: readJson(cachePath) };
+  }
+
+  if (cachePath && preferCache && allowStale && fs.existsSync(cachePath)) {
+    return { source: 'cache-stale', path: cachePath, payload: readJson(cachePath) };
   }
 
   if (!apiKey) {
