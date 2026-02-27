@@ -25,6 +25,10 @@ const PRE_TOURNAMENT_SEASON = (() => {
   const raw = parseInt(String(process.env.PRE_TOURNAMENT_SEASON || '').trim(), 10);
   return Number.isNaN(raw) ? null : raw;
 })();
+const COURSE_HISTORY_DECAY_LAMBDA = (() => {
+  const raw = parseFloat(String(process.env.COURSE_HISTORY_DECAY_LAMBDA || '').trim());
+  return Number.isNaN(raw) ? 0.25 : Math.max(0, raw);
+})();
 
 const DEBUG = (() => {
   const debugFlags = [
@@ -259,17 +263,40 @@ const computeRegression = (pairs) => {
   if (n < 3) return null;
   const xs = pairs.map(p => p.priorStarts);
   const ys = pairs.map(p => p.finishPosition);
-  const meanX = xs.reduce((sum, v) => sum + v, 0) / n;
-  const meanY = ys.reduce((sum, v) => sum + v, 0) / n;
+
+  const dates = pairs.map(p => {
+    const parsed = parseDate(p.eventCompleted);
+    if (parsed) return parsed;
+    const year = Number(p.year);
+    return Number.isFinite(year) ? new Date(year, 11, 31) : null;
+  });
+
+  const validDates = dates.filter(date => date instanceof Date && !Number.isNaN(date.getTime()));
+  const maxDate = validDates.length
+    ? new Date(Math.max(...validDates.map(date => date.getTime())))
+    : null;
+
+  const weights = pairs.map((_, i) => {
+    if (!maxDate || COURSE_HISTORY_DECAY_LAMBDA <= 0) return 1;
+    const date = dates[i];
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return 1;
+    const ageYears = (maxDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+    return Math.exp(-COURSE_HISTORY_DECAY_LAMBDA * ageYears);
+  });
+
+  const weightSum = weights.reduce((sum, w) => sum + w, 0) || 1;
+  const meanX = xs.reduce((sum, v, i) => sum + (weights[i] * v), 0) / weightSum;
+  const meanY = ys.reduce((sum, v, i) => sum + (weights[i] * v), 0) / weightSum;
   let sxx = 0;
   let syy = 0;
   let sxy = 0;
   for (let i = 0; i < n; i++) {
     const dx = xs[i] - meanX;
     const dy = ys[i] - meanY;
-    sxx += dx * dx;
-    syy += dy * dy;
-    sxy += dx * dy;
+    const w = weights[i];
+    sxx += w * dx * dx;
+    syy += w * dy * dy;
+    sxy += w * dx * dy;
   }
   const slope = sxx === 0 ? 0 : sxy / sxx;
   const intercept = meanY - slope * meanX;
@@ -626,32 +653,23 @@ const run = async () => {
     ...similarEventIds,
     ...puttingEventIds
   ].filter(Boolean).map(String));
-  const similarPuttingEventIds = new Set(
-    [...similarEventIds, ...puttingEventIds].filter(Boolean).map(String)
-  );
 
   const filteredRows = rawRows
     .map(normalizeHistoricalRow)
     .filter(Boolean)
     .filter(row => {
       const rowEventId = String(row.event_id || '').trim();
-      if (!rowEventId) return false;
+      if (!rowEventId || !scopedEventIds.has(rowEventId)) return false;
       const rowYear = parseInt(String(row.year || row.season || '').trim(), 10);
-      const inRecentMonths = isRowInRecentMonths(row, recentMonthSet);
-      if (inRecentMonths) return true;
-      if (rowEventId === eventId && lastFiveYears.includes(rowYear)) {
-        const courseNum = row.course_num ? String(row.course_num).trim() : null;
-        const allowedCourses = eventCourseMap.get(rowEventId)
-          || similarEventCourseMap.get(rowEventId)
-          || puttingEventCourseMap.get(rowEventId)
-          || null;
-        if (!allowedCourses || allowedCourses.length === 0) return true;
-        return courseNum ? allowedCourses.includes(courseNum) : false;
-      }
-      if (similarPuttingEventIds.has(rowEventId)) {
-        return false;
-      }
-      return false;
+      if (!lastFiveYears.includes(rowYear)) return false;
+
+      const courseNum = row.course_num ? String(row.course_num).trim() : null;
+      const allowedCourses = eventCourseMap.get(rowEventId)
+        || similarEventCourseMap.get(rowEventId)
+        || puttingEventCourseMap.get(rowEventId)
+        || null;
+      if (!allowedCourses || allowedCourses.length === 0) return true;
+      return courseNum ? allowedCourses.includes(courseNum) : false;
     });
 
   if (!filteredRows.length) {

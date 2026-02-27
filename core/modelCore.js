@@ -61,6 +61,23 @@ const console = DEBUG_LOGGING
       error: () => {}
     };
 
+const parseEnvFlag = (value, defaultValue = false) => {
+  if (value === undefined || value === null || value === '') return defaultValue;
+  const normalized = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'y', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'n', 'off'].includes(normalized)) return false;
+  return defaultValue;
+};
+
+const getEnvFlag = (name, defaultValue = false) => parseEnvFlag(process.env[name], defaultValue);
+
+const getEnvNumber = (name, defaultValue) => {
+  const rawValue = process.env[name];
+  if (rawValue === undefined || rawValue === null || rawValue === '') return defaultValue;
+  const parsed = Number.parseFloat(rawValue);
+  return Number.isFinite(parsed) ? parsed : defaultValue;
+};
+
 // Constants from results.js
 const METRIC_MAX_VALUES = {
   'Approach <100 Prox': 40,                             // Avg: 16ft from <100y
@@ -145,27 +162,28 @@ function normalizeApproachSG(perShotValue) {
  * Calculates Birdie Chances Created using clean metrics
  * NO CHANGES NEEDED - pure calculation, takes metrics array and weights
  */
-function calculateBCC(metrics, courseSetupWeights) {
+function computeBccComponents(metrics, courseSetupWeights) {
+  if (!Array.isArray(metrics) || !courseSetupWeights) return null;
   // Define metric indices for easier reference (BEFORE BCC insertion)
   const DRIVING_ACCURACY_INDEX = 2;    // Driving accuracy percentage
-    
+
   // GIR indices for different distances
   const GIR_UNDER_100_INDEX = 16;      // Approach <100 GIR
-  const GIR_FW_100_TO_150_INDEX = 19;  // Approach <150 FW GIR  
+  const GIR_FW_100_TO_150_INDEX = 19;  // Approach <150 FW GIR
   const GIR_ROUGH_100_TO_150_INDEX = 22; // Approach <150 Rough GIR
   const GIR_ROUGH_OVER_150_INDEX = 25; // Approach >150 Rough GIR
   const GIR_FW_150_TO_200_INDEX = 28;  // Approach <200 FW GIR
   const GIR_FW_OVER_200_INDEX = 31;    // Approach >200 FW GIR
-    
+
   // SG indices
   const SG_PUTTING_INDEX = 7;          // SG Putting
   const SG_UNDER_100_INDEX = 17;       // Approach <100 SG
   const SG_FW_100_TO_150_INDEX = 20;   // Approach <150 FW SG
-  const SG_ROUGH_100_TO_150_INDEX = 23; // Approach <150 Rough SG  
+  const SG_ROUGH_100_TO_150_INDEX = 23; // Approach <150 Rough SG
   const SG_ROUGH_OVER_150_INDEX = 26;  // Approach >150 Rough SG
   const SG_FW_150_TO_200_INDEX = 29;   // Approach <200 FW SG
   const SG_FW_OVER_200_INDEX = 32;     // Approach >200 FW SG
-    
+
   // Proximity indices
   const PROX_UNDER_100_INDEX = 18;     // Approach <100 Prox
   const PROX_FW_100_TO_150_INDEX = 21; // Approach <150 FW Prox
@@ -173,27 +191,29 @@ function calculateBCC(metrics, courseSetupWeights) {
   const PROX_ROUGH_OVER_150_INDEX = 27; // Approach >150 Rough Prox
   const PROX_FW_150_TO_200_INDEX = 30; // Approach <200 FW Prox
   const PROX_FW_OVER_200_INDEX = 33;   // Approach >200 FW Prox
-  
+
+  const BIRDIES_OR_BETTER_INDEX = 13;  // Birdies or Better
+  const SCORING_AVG_INDEX = 12;        // Scoring Average
+
   // Get player's actual driving accuracy (use 0.6 as default if missing)
-  const drivingAccuracy = metrics[DRIVING_ACCURACY_INDEX] || 0.6;
+  const drivingAccuracy = Number.isFinite(metrics[DRIVING_ACCURACY_INDEX])
+    ? metrics[DRIVING_ACCURACY_INDEX]
+    : 0.6;
   const fairwayPercent = drivingAccuracy;
   const roughPercent = 1 - fairwayPercent;
-    
-  // Extract putting
-  const sgPutting = isNaN(metrics[SG_PUTTING_INDEX]) ? 0 : metrics[SG_PUTTING_INDEX];
-    
-  // Calculate weighted GIR by distance (higher is better)
-  const girUnder100 = isNaN(metrics[GIR_UNDER_100_INDEX]) ? 0 : metrics[GIR_UNDER_100_INDEX];
-  const girFW100to150 = isNaN(metrics[GIR_FW_100_TO_150_INDEX]) ? 0 : metrics[GIR_FW_100_TO_150_INDEX];
-  const girFW150to200 = isNaN(metrics[GIR_FW_150_TO_200_INDEX]) ? 0 : metrics[GIR_FW_150_TO_200_INDEX];
-  const girFWOver200 = isNaN(metrics[GIR_FW_OVER_200_INDEX]) ? 0 : metrics[GIR_FW_OVER_200_INDEX];
-    
-  // Include rough approaches
-  const girRough100to150 = isNaN(metrics[GIR_ROUGH_100_TO_150_INDEX]) ? 0 : metrics[GIR_ROUGH_100_TO_150_INDEX];
-  const girRoughOver150 = isNaN(metrics[GIR_ROUGH_OVER_150_INDEX]) ? 0 : metrics[GIR_ROUGH_OVER_150_INDEX];
-    
-  // Calculate weighted GIR - using player's actual fairway/rough percentages
-  const weightedGIR = 
+
+  const sgPutting = Number.isFinite(metrics[SG_PUTTING_INDEX]) ? metrics[SG_PUTTING_INDEX] : 0;
+  const birdiesOrBetter = Number.isFinite(metrics[BIRDIES_OR_BETTER_INDEX]) ? metrics[BIRDIES_OR_BETTER_INDEX] : null;
+  const scoringAvg = Number.isFinite(metrics[SCORING_AVG_INDEX]) ? metrics[SCORING_AVG_INDEX] : null;
+
+  const girUnder100 = Number.isFinite(metrics[GIR_UNDER_100_INDEX]) ? metrics[GIR_UNDER_100_INDEX] : 0;
+  const girFW100to150 = Number.isFinite(metrics[GIR_FW_100_TO_150_INDEX]) ? metrics[GIR_FW_100_TO_150_INDEX] : 0;
+  const girFW150to200 = Number.isFinite(metrics[GIR_FW_150_TO_200_INDEX]) ? metrics[GIR_FW_150_TO_200_INDEX] : 0;
+  const girFWOver200 = Number.isFinite(metrics[GIR_FW_OVER_200_INDEX]) ? metrics[GIR_FW_OVER_200_INDEX] : 0;
+  const girRough100to150 = Number.isFinite(metrics[GIR_ROUGH_100_TO_150_INDEX]) ? metrics[GIR_ROUGH_100_TO_150_INDEX] : 0;
+  const girRoughOver150 = Number.isFinite(metrics[GIR_ROUGH_OVER_150_INDEX]) ? metrics[GIR_ROUGH_OVER_150_INDEX] : 0;
+
+  const weightedGIR =
     (girUnder100 * courseSetupWeights.under100) +
     (girFW100to150 * courseSetupWeights.from100to150 * fairwayPercent) +
     (girRough100to150 * courseSetupWeights.from100to150 * roughPercent) +
@@ -201,68 +221,137 @@ function calculateBCC(metrics, courseSetupWeights) {
     (girRoughOver150 * (courseSetupWeights.from150to200 + courseSetupWeights.over200) * roughPercent) +
     (girFWOver200 * courseSetupWeights.over200 * fairwayPercent);
 
-  // Get raw SG Approach metrics
-  const sgUnder100_raw = metrics[SG_UNDER_100_INDEX] || 0;
-  const sgFW100to150_raw = metrics[SG_FW_100_TO_150_INDEX] || 0;
-  const sgFW150to200_raw = metrics[SG_FW_150_TO_200_INDEX] || 0;
-  const sgFWOver200_raw = metrics[SG_FW_OVER_200_INDEX] || 0;
-  const sgRough100to150_raw = metrics[SG_ROUGH_100_TO_150_INDEX] || 0;
-  const sgRoughOver150_raw = metrics[SG_ROUGH_OVER_150_INDEX] || 0;
-  
-  // Convert from per-shot to per-round values
-  const sgUnder100 = normalizeApproachSG(sgUnder100_raw);
-  const sgFW100to150 = normalizeApproachSG(sgFW100to150_raw);
-  const sgFW150to200 = normalizeApproachSG(sgFW150to200_raw);
-  const sgFWOver200 = normalizeApproachSG(sgFWOver200_raw);
-  const sgRough100to150 = normalizeApproachSG(sgRough100to150_raw);
-  const sgRoughOver150 = normalizeApproachSG(sgRoughOver150_raw);
-    
-  // Calculate weighted approach SG - using player's actual fairway/rough percentages
-  const weightedApproachSG = 
+  const sgUnder100 = normalizeApproachSG(metrics[SG_UNDER_100_INDEX] || 0);
+  const sgFW100to150 = normalizeApproachSG(metrics[SG_FW_100_TO_150_INDEX] || 0);
+  const sgFW150to200 = normalizeApproachSG(metrics[SG_FW_150_TO_200_INDEX] || 0);
+  const sgFWOver200 = normalizeApproachSG(metrics[SG_FW_OVER_200_INDEX] || 0);
+  const sgRough100to150 = normalizeApproachSG(metrics[SG_ROUGH_100_TO_150_INDEX] || 0);
+  const sgRoughOver150 = normalizeApproachSG(metrics[SG_ROUGH_OVER_150_INDEX] || 0);
+
+  const weightedApproachSG =
     (sgUnder100 * courseSetupWeights.under100) +
     (sgFW100to150 * courseSetupWeights.from100to150 * fairwayPercent) +
     (sgRough100to150 * courseSetupWeights.from100to150 * roughPercent) +
     (sgFW150to200 * courseSetupWeights.from150to200 * fairwayPercent) +
     (sgRoughOver150 * (courseSetupWeights.from150to200 + courseSetupWeights.over200) * roughPercent) +
     (sgFWOver200 * courseSetupWeights.over200 * fairwayPercent);
-    
-  // Get proximity metrics (lower is better)
+
   const proxUnder100 = metrics[PROX_UNDER_100_INDEX] || 0;
   const proxFW100to150 = metrics[PROX_FW_100_TO_150_INDEX] || 0;
   const proxFW150to200 = metrics[PROX_FW_150_TO_200_INDEX] || 0;
   const proxFWOver200 = metrics[PROX_FW_OVER_200_INDEX] || 0;
   const proxRough100to150 = metrics[PROX_ROUGH_100_TO_150_INDEX] || 0;
   const proxRoughOver150 = metrics[PROX_ROUGH_OVER_150_INDEX] || 0;
-    
-  // Calculate weighted proximity - using player's actual fairway/rough percentages
-  const weightedProximity = 
+
+  const weightedProximity =
     (proxUnder100 * courseSetupWeights.under100) +
     (proxFW100to150 * courseSetupWeights.from100to150 * fairwayPercent) +
     (proxRough100to150 * courseSetupWeights.from100to150 * roughPercent) +
     (proxFW150to200 * courseSetupWeights.from150to200 * fairwayPercent) +
     (proxRoughOver150 * (courseSetupWeights.from150to200 + courseSetupWeights.over200) * roughPercent) +
     (proxFWOver200 * courseSetupWeights.over200 * fairwayPercent);
-    
-  // Retrieve scoring average to factor in overall player performance
-  const scoringAvg = metrics[12] || 72;
-    
-  // Hardcoded, statistically-determined component weights
-  const girWeight = 0.40;      // GIR is the strongest predictor
-  const approachWeight = 0.30; // Approach quality
-  const puttingWeight = 0.25;  // Putting importance
-  const scoringWeight = 0.05;  // Overall scoring ability
-    
-  // Calculate component values
-  const girComponent = weightedGIR;
-  const approachComponent = weightedApproachSG - (weightedProximity / 30); // Scaled proximity penalty
-  const puttingComponent = sgPutting;
-  const scoringComponent = 74 - scoringAvg; // 74 is max value from METRIC_MAX_VALUES
-    
-  // Final formula
-  return (girComponent * girWeight) + 
-         (approachComponent * approachWeight) + 
-         (puttingComponent * puttingWeight) + 
-         (scoringComponent * scoringWeight);
+
+  return {
+    drivingAccuracy,
+    fairwayPercent,
+    roughPercent,
+    weightedGIR,
+    weightedApproachSG,
+    weightedProximity,
+    sgPutting,
+    birdiesOrBetter,
+    scoringAvg
+  };
+}
+
+function buildBccComponentStats(allMetricValues, courseSetupWeights) {
+  if (!allMetricValues || !courseSetupWeights) return null;
+  const buckets = {
+    weightedGIR: [],
+    weightedApproachSG: [],
+    weightedProximity: [],
+    sgPutting: [],
+    birdiesOrBetter: [],
+    scoringAvg: []
+  };
+
+  Object.values(allMetricValues).forEach(metrics => {
+    const components = computeBccComponents(metrics, courseSetupWeights);
+    if (!components) return;
+    if (Number.isFinite(components.weightedGIR)) buckets.weightedGIR.push(components.weightedGIR);
+    if (Number.isFinite(components.weightedApproachSG)) buckets.weightedApproachSG.push(components.weightedApproachSG);
+    if (Number.isFinite(components.weightedProximity)) buckets.weightedProximity.push(components.weightedProximity);
+    if (Number.isFinite(components.sgPutting)) buckets.sgPutting.push(components.sgPutting);
+    if (Number.isFinite(components.birdiesOrBetter)) buckets.birdiesOrBetter.push(components.birdiesOrBetter);
+    if (Number.isFinite(components.scoringAvg)) buckets.scoringAvg.push(components.scoringAvg);
+  });
+
+  const computeStats = values => {
+    if (!values.length) return { mean: 0, stdDev: 1 };
+    const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
+    const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
+    const stdDev = Math.sqrt(variance) || 1;
+    return { mean, stdDev };
+  };
+
+  return {
+    weightedGIR: computeStats(buckets.weightedGIR),
+    weightedApproachSG: computeStats(buckets.weightedApproachSG),
+    weightedProximity: computeStats(buckets.weightedProximity),
+    sgPutting: computeStats(buckets.sgPutting),
+    birdiesOrBetter: computeStats(buckets.birdiesOrBetter),
+    scoringAvg: computeStats(buckets.scoringAvg)
+  };
+}
+
+function calculateBCC(metrics, courseSetupWeights, options = {}) {
+  const { componentStats = null } = options;
+  const components = computeBccComponents(metrics, courseSetupWeights);
+  if (!components) return 0;
+
+  // Option A: z-score blend (relative to field strength)
+  if (componentStats) {
+    const safeZ = (value, stats, invert = false) => {
+      if (!stats || !Number.isFinite(value)) return 0;
+      const stdDev = Number.isFinite(stats.stdDev) && stats.stdDev > 0 ? stats.stdDev : 1;
+      const z = (value - stats.mean) / stdDev;
+      return invert ? -z : z;
+    };
+
+    const zGIR = safeZ(components.weightedGIR, componentStats.weightedGIR, false);
+    const zApproach = safeZ(components.weightedApproachSG, componentStats.weightedApproachSG, false);
+    const zProx = safeZ(components.weightedProximity, componentStats.weightedProximity, true);
+    const zPutting = safeZ(components.sgPutting, componentStats.sgPutting, false);
+
+    const hasBirdies = Number.isFinite(components.birdiesOrBetter);
+    const anchorValue = hasBirdies ? components.birdiesOrBetter : components.scoringAvg;
+    const anchorStats = hasBirdies ? componentStats.birdiesOrBetter : componentStats.scoringAvg;
+    const anchorInvert = !hasBirdies; // scoring average lower is better
+    const zAnchor = safeZ(anchorValue, anchorStats, anchorInvert);
+
+    const girWeight = 0.35;
+    const approachWeight = 0.35;
+    const proxWeight = 0.15;
+    const puttingWeight = 0.10;
+    const anchorWeight = 0.05;
+
+    return (zGIR * girWeight) +
+           (zApproach * approachWeight) +
+           (zProx * proxWeight) +
+           (zPutting * puttingWeight) +
+           (zAnchor * anchorWeight);
+  }
+
+  // Fallback: legacy formula (kept for safety if stats unavailable)
+  const girComponent = components.weightedGIR;
+  const approachComponent = components.weightedApproachSG - (components.weightedProximity / 30);
+  const puttingComponent = components.sgPutting;
+  const scoringComponent = Number.isFinite(components.scoringAvg) ? (74 - components.scoringAvg) : 0;
+
+  return (girComponent * 0.40) +
+         (approachComponent * 0.30) +
+         (puttingComponent * 0.25) +
+         (scoringComponent * 0.05);
 }
 
 // ============================================================================
@@ -869,6 +958,12 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     'Birdie Chances Created',
     ...traceMetricNames.slice(14)
   ];
+
+  const useGroupScoreZ = getEnvFlag('MODEL_GROUP_SCORE_Z', false);
+  const useBccPrestandardized = getEnvFlag('MODEL_BCC_PRESTANDARDIZED', false);
+  const useMetricShrinkage = getEnvFlag('MODEL_SHRINKAGE', false);
+  const shrinkageMin = getEnvNumber('MODEL_SHRINKAGE_MIN', 0.4);
+  const shrinkageMax = getEnvNumber('MODEL_SHRINKAGE_MAX', 1.0);
  
   console.log(`** CURRENT_EVENT_ID = "${CURRENT_EVENT_ID}" **`);
 
@@ -978,7 +1073,7 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
   // 2. Calculate Group Statistics (Mean and Standard Deviation)
   const groupStats = {};
   const problematicMetrics = new Set(['Approach >200 FW Prox']);
-  
+
   // Read course setup weights from configuration
   const courseSetupWeights = {
     under100: config.courseSetupWeights?.under100,
@@ -986,9 +1081,9 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     from150to200: config.courseSetupWeights?.from150to200,
     over200: config.courseSetupWeights?.over200
   };
-  
+
   console.log("Course setup weights:", courseSetupWeights);
-  
+
   // Ensure weights sum to 1.0
   const totalWeight = Object.values(courseSetupWeights).reduce((sum, w) => sum + (typeof w === 'number' ? w : 0), 0);
   if (Math.abs(totalWeight - 1.0) > 0.01 && totalWeight > 0) {
@@ -997,13 +1092,15 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       courseSetupWeights[key] /= totalWeight;
     });
   }
- 
+
+  const bccComponentStats = buildBccComponentStats(allMetricValues, courseSetupWeights);
+
   // First, we should create a version of allMetricValues that includes BCC at index 14
   const metricsWithBCC = {};
   for (const [dgId, metrics] of Object.entries(allMetricValues)) {
     // Calculate BCC for this player
     const player = players[dgId];
-    const bcc = calculateBCC(metrics, courseSetupWeights);
+    const bcc = calculateBCC(metrics, courseSetupWeights, { componentStats: bccComponentStats });
     
     // Insert BCC at position 14
     metricsWithBCC[dgId] = [
@@ -1149,6 +1246,23 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       });
     }
   }
+
+  const computeMetricZScore = (value, metricName, metricStats, shrinkageAlpha) => {
+    if (!metricStats) return 0;
+    if (useBccPrestandardized && metricName === 'Birdie Chances Created') {
+      return value;
+    }
+
+    let adjustedValue = value;
+    if (useMetricShrinkage && Number.isFinite(shrinkageAlpha) && shrinkageAlpha < 1) {
+      const mean = Number.isFinite(metricStats.mean) ? metricStats.mean : 0;
+      adjustedValue = (shrinkageAlpha * value) + ((1 - shrinkageAlpha) * mean);
+    }
+
+    const stdDev = metricStats.stdDev || 0.001;
+    const mean = Number.isFinite(metricStats.mean) ? metricStats.mean : 0;
+    return (adjustedValue - mean) / stdDev;
+  };
  
   const processedPlayers = Object.entries(players).map(([dgId, data]) => {
     // Optional similar course IDs (unused in scoring, retained for parity with GAS logs)
@@ -1196,6 +1310,18 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       data.puttingRounds,
       approachMetrics  // Pass the computed array, not the raw object
     );
+
+    const totalMetricsCount = groups.reduce((sum, group) => sum + group.metrics.length, 0);
+    const nonZeroMetricsCount = groups.reduce((sum, group) => {
+      const count = group.metrics.filter(metric => metricsWithData.has(metric.index)).length;
+      return sum + count;
+    }, 0);
+    const dataCoverage = totalMetricsCount > 0 ? (nonZeroMetricsCount / totalMetricsCount) : 0.5;
+    const boundedShrinkageMin = Math.max(0, Math.min(1, shrinkageMin));
+    const boundedShrinkageMax = Math.max(boundedShrinkageMin, Math.min(1, shrinkageMax));
+    const shrinkageAlpha = useMetricShrinkage
+      ? Math.max(boundedShrinkageMin, Math.min(boundedShrinkageMax, dataCoverage))
+      : 1.0;
  
     // Create safe metrics array with exactly 34 elements
     const safeMetrics = [
@@ -1222,7 +1348,7 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
 
  
     // Calculate Birdie Chances Created using the helper function
-    const birdieChancesCreated = calculateBCC(cleanMetrics, courseSetupWeights);
+    const birdieChancesCreated = calculateBCC(cleanMetrics, courseSetupWeights, { componentStats: bccComponentStats });
  
     // Create a new array with the Birdie Chances Created metric inserted at position 14
     const updatedMetrics = [
@@ -1258,8 +1384,6 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     }
  
     // Calculate Group Scores
-    let totalMetricsCount = 0;
-    let nonZeroMetricsCount = 0;
     const groupScores = {};
     
     for (const group of groups) {
@@ -1320,7 +1444,7 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
         metricsProcessed++;
         
         const stdDev = metricStats.stdDev || 0.001; // Ensure non-zero
-        let zScore = (value - metricStats.mean) / stdDev;
+        let zScore = computeMetricZScore(value, metric.name, metricStats, shrinkageAlpha);
 
         if (shouldTracePlayer(data.name)) {
           traceLog(`  [TRACE METRIC] ${group.name} :: ${metric.name} | raw=${adjustedMetrics[metric.index]?.toFixed?.(4)}, trans=${value?.toFixed?.(4)}, mean=${metricStats.mean.toFixed(4)}, stdDev=${stdDev.toFixed(4)}, z=${zScore.toFixed(4)}, weight=${metric.weight.toFixed(6)}`);
@@ -1339,12 +1463,6 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
           if (absZScore > 2.0) {
             zScore *= Math.pow(absZScore / 2.0, 0.75);
           }
-        }
-        
-        totalMetricsCount++;
-        // Check if this metric has actual data (not just default/zero value)
-        if (metricsWithData.has(metric.index)) {
-          nonZeroMetricsCount++;
         }
         
         // Only apply weights if metric is significant
@@ -1423,10 +1541,6 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       weightedScore = 0;
     }
     
-    // Calculate data coverage with validation
-    const dataCoverage = nonZeroMetricsCount > 0 && totalMetricsCount > 0 ? 
-                         nonZeroMetricsCount / totalMetricsCount : 0.5;
-    
     // Get confidence factor with safety checks
     let confidenceFactor;
     try {
@@ -1493,7 +1607,7 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
           const metricStats = groupStats[group.name]?.[metric.name];
           if (!metricStats) continue;
           
-          let zScore = (value - metricStats.mean) / (metricStats.stdDev || 0.001);
+          let zScore = computeMetricZScore(value, metric.name, metricStats, shrinkageAlpha);
           zScore *= coverageDampingFactor;
           
           // Apply scoring differential penalties
@@ -1548,6 +1662,8 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       console.log(`${data.name}: Recalculated weighted score with dampening: ${weightedScore.toFixed(3)}`);
     }
     
+    let deltaBonus = 0;
+
     // Apply bucket delta bonus to weighted score (pre-refinement)
     const deltaEntry = deltaScoresById[String(dgId)] || null;
     if (deltaEntry?.deltaTrendBuckets || deltaEntry?.deltaPredictiveBuckets) {
@@ -1583,7 +1699,8 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
           && deltaEntry.deltaPredictiveScore > 0
           && deltaEntry.deltaTrendScore > 0;
         const gatedBoost = hasBothUp ? DELTA_BOTH_UP_BOOST : 0;
-        weightedScore += (cappedBonus + gatedBoost);
+        deltaBonus = cappedBonus + gatedBoost;
+        weightedScore += deltaBonus;
       }
     }
 
@@ -1793,9 +1910,69 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       hasRecentTop10: hasRecentTop10,
       confidenceFactor: confidenceFactor,
       groupScoresBeforeDampening: groupScoresBeforeDampening,
-      groupScoresAfterDampening: groupScoresAfterDampening
+      groupScoresAfterDampening: groupScoresAfterDampening,
+      deltaBonus: deltaBonus
     };
   });
+
+  if (useGroupScoreZ) {
+    const groupScoreStats = {};
+    groups.forEach(group => {
+      const scores = processedPlayers
+        .map(player => player.groupScores?.[group.name])
+        .filter(score => typeof score === 'number' && !isNaN(score));
+      if (!scores.length) {
+        groupScoreStats[group.name] = { mean: 0, stdDev: 1 };
+        return;
+      }
+      const mean = scores.reduce((sum, value) => sum + value, 0) / scores.length;
+      const variance = scores.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / scores.length;
+      const stdDev = Math.sqrt(variance) || 1;
+      groupScoreStats[group.name] = { mean, stdDev };
+    });
+
+    processedPlayers.forEach(player => {
+      let weightedScore = 0;
+      let totalWeightUsed = 0;
+      const standardizedGroupScores = {};
+
+      groups.forEach(group => {
+        const score = player.groupScores?.[group.name];
+        const stats = groupScoreStats[group.name];
+        if (typeof score !== 'number' || isNaN(score) || !stats) return;
+        const z = (score - stats.mean) / (stats.stdDev || 1);
+        standardizedGroupScores[group.name] = z;
+        if (typeof group.weight === 'number' && group.weight > 0) {
+          weightedScore += z * group.weight;
+          totalWeightUsed += group.weight;
+        }
+      });
+
+      if (totalWeightUsed > 0) {
+        weightedScore = weightedScore / totalWeightUsed;
+      } else {
+        weightedScore = 0;
+      }
+
+      const deltaBonus = typeof player.deltaBonus === 'number' ? player.deltaBonus : 0;
+      weightedScore += deltaBonus;
+
+      const dataCoverageMultiplier = player.dataCoverage < 0.70
+        ? Math.max(0.4, 0.7 + (player.dataCoverage / 0.70) * 0.3)
+        : 1.0;
+      const confidenceFactor = typeof player.confidenceFactor === 'number' ? player.confidenceFactor : 1.0;
+      const refinedWeightedScore = weightedScore * confidenceFactor * dataCoverageMultiplier;
+      const pastPerformanceMultiplier = typeof player.pastPerformanceMultiplier === 'number'
+        ? player.pastPerformanceMultiplier
+        : 1.0;
+      const finalScore = refinedWeightedScore * pastPerformanceMultiplier;
+
+      player.groupScoresStandardized = standardizedGroupScores;
+      player.weightedScore = weightedScore;
+      player.refinedWeightedScore = refinedWeightedScore;
+      player.finalScore = finalScore;
+    });
+  }
 
   cacheGroupStats(groupStats);
 
