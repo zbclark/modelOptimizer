@@ -258,6 +258,10 @@ Enable with `CONFIG_PARSER_WARN_BLANKS=true`.
 
 ## File-by-File Reference
 
+### `core/modelOptimizer.js`
+
+### `core/modelCore.js`
+
 ### `utilities/`
 
 | File | Status | Notes |
@@ -299,15 +303,11 @@ Enable with `CONFIG_PARSER_WARN_BLANKS=true`.
 
 ## Migration Readiness Notes
 
-1. **`results.js` remains source of truth** per `MODEL_VALIDATION_STATUS.md`. Any migration of `parity_modelcore.js` or related scripts to use the consolidated pipeline should go through `core/modelCore.js` (already a port of `results.js`).
-2. **Approach snapshot leakage flag** (open task in `MODEL_VALIDATION_STATUS.md`): `approachDelta.js` does not currently emit any leakage flag on its rows. There is still no row-level leakage annotation in the delta outputs.
-3. **API → CSV fallback ordering**: `analyze_course_history_impact.js` now prefers API/cache via `collectRecords({ preferApi: true })`, while `analyze_early_season_ramp.js` still uses cache JSON → CSV → API. These orderings should be unified in a shared data-loading utility.
-4. **Course context portability**: `course_context.json` cannot be committed and reused across machines without regeneration. Consider adding `build_course_context.js` to pre-run scripts or a Makefile target, and documenting that `course_context.json` is a build artifact.
+1. **Approach snapshot leakage flag** (open task in `MODEL_VALIDATION_STATUS.md`): `approachDelta.js` does not currently emit any leakage flag on its rows. There is still no row-level leakage annotation in the delta outputs.
+2. **API → CSV fallback ordering**: `analyze_course_history_impact.js` now prefers API/cache via `collectRecords({ preferApi: true })`, while `analyze_early_season_ramp.js` still uses cache JSON → CSV → API. These orderings should be unified in a shared data-loading utility.
+3. **Course context portability**: `course_context.json` cannot be committed and reused across machines without regeneration. Consider adding `build_course_context.js` to pre-run scripts or a Makefile target, and documenting that `course_context.json` is a build artifact.
 
 ---
 
 ## Unanswered Questions / Follow-ups
 
-1. **MetricConfigBuilder rough-cell mapping**: confirm the correct rough approach cell locations in the Configuration Sheet so we can fix the duplicate references in `utilities/metricConfigBuilder.js`.
-2. **Course context `sourcePath` policy**: decide whether to strip, make repo-relative, or regenerate on demand.
-3. **Course-history regression expectations**: decide whether near-zero slopes are acceptable or if the regression should be tuned to yield signal for more courses.
