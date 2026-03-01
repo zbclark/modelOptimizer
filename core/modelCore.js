@@ -826,7 +826,7 @@ function calculateHistoricalAverages(historicalRounds, similarRounds = [], putti
 }
 
 // ============================================================================
-// FUNCTION 6: calculateMetricsWithData (line ~2436 in results.js)
+// FUNCTION 6: calculateMetricsWithData
 // ============================================================================
 /**
  * Calculates which metrics have actual tournament/approach data (vs. defaults)
@@ -874,7 +874,7 @@ function calculateMetricsWithData(historicalRounds, similarRounds, puttingRounds
     }
   }
   
-  // Check approach metrics (16-33)
+  // Check approach metrics (17-34 after BCC insertion)
   // approachMetrics is an array of 18 values from getApproachMetrics function
   // Only count as having data if the value is non-zero (zeros are default padding)
   if (Array.isArray(approachMetrics) && approachMetrics.length >= 18) {
@@ -882,7 +882,7 @@ function calculateMetricsWithData(historicalRounds, similarRounds, puttingRounds
       const value = approachMetrics[i];
       // Non-zero approach metrics indicate real data was available
       if (typeof value === 'number' && !isNaN(value) && value !== 0) {
-        metricsWithData.add(16 + i); // Approach metrics start at index 16
+        metricsWithData.add(17 + i); // Approach metrics start at index 17
       }
     }
   }
@@ -964,6 +964,7 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
   const useMetricShrinkage = getEnvFlag('MODEL_SHRINKAGE', false);
   const shrinkageMin = getEnvNumber('MODEL_SHRINKAGE_MIN', 0.4);
   const shrinkageMax = getEnvNumber('MODEL_SHRINKAGE_MAX', 1.0);
+  const approachCoverageWeight = getEnvNumber('MODEL_APPROACH_COVERAGE_WEIGHT', 0.8);
  
   console.log(`** CURRENT_EVENT_ID = "${CURRENT_EVENT_ID}" **`);
 
@@ -1247,22 +1248,88 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     }
   }
 
-  const computeMetricZScore = (value, metricName, metricStats, shrinkageAlpha) => {
+  const computeMetricZScore = (value, metricName, metricStats, shrinkageAlpha, recencyFactor = 1) => {
     if (!metricStats) return 0;
     if (useBccPrestandardized && metricName === 'Birdie Chances Created') {
       return value;
     }
 
     let adjustedValue = value;
+    if (Number.isFinite(recencyFactor) && recencyFactor >= 0 && recencyFactor < 1) {
+      const mean = Number.isFinite(metricStats.mean) ? metricStats.mean : 0;
+      adjustedValue = (recencyFactor * adjustedValue) + ((1 - recencyFactor) * mean);
+    }
     if (useMetricShrinkage && Number.isFinite(shrinkageAlpha) && shrinkageAlpha < 1) {
       const mean = Number.isFinite(metricStats.mean) ? metricStats.mean : 0;
-      adjustedValue = (shrinkageAlpha * value) + ((1 - shrinkageAlpha) * mean);
+      adjustedValue = (shrinkageAlpha * adjustedValue) + ((1 - shrinkageAlpha) * mean);
     }
 
     const stdDev = metricStats.stdDev || 0.001;
     const mean = Number.isFinite(metricStats.mean) ? metricStats.mean : 0;
     return (adjustedValue - mean) / stdDev;
   };
+
+  const computeCourseFitMultiplier = (metrics, groupsList, stats) => {
+    if (!metrics || !Array.isArray(groupsList) || !stats) return 1.0;
+
+    const allMetrics = [];
+    groupsList.forEach(group => {
+      group.metrics.forEach(metric => {
+        allMetrics.push({
+          name: metric.name,
+          index: metric.index,
+          weight: metric.weight,
+          group: group.name
+        });
+      });
+    });
+
+    const keyMetrics = allMetrics
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 5);
+
+    const strengths = [];
+    const weaknesses = [];
+
+    keyMetrics.forEach(metric => {
+      if (!metrics[metric.index] || !stats[metric.group] || !stats[metric.group][metric.name]) return;
+      const playerValue = metrics[metric.index];
+      const mean = stats[metric.group][metric.name].mean;
+      const stdDev = stats[metric.group][metric.name].stdDev || 0.001;
+      const zScore = (playerValue - mean) / stdDev;
+
+      const isNegativeMetric = metric.name.includes('Poor') ||
+        metric.name.includes('Scoring Average') ||
+        metric.name.includes('Prox');
+      const adjustedZScore = isNegativeMetric ? -zScore : zScore;
+
+      if (adjustedZScore >= 0.75) {
+        strengths.push({ weight: metric.weight, score: adjustedZScore });
+      } else if (adjustedZScore <= -0.75) {
+        weaknesses.push({ weight: metric.weight, score: adjustedZScore });
+      }
+    });
+
+    const totalKeyWeight = keyMetrics.reduce((sum, m) => sum + m.weight, 0);
+    const playerStrengthWeight = strengths.reduce((sum, s) => sum + s.weight, 0);
+    const fitPercentage = totalKeyWeight > 0 ? (playerStrengthWeight / totalKeyWeight) * 100 : 0;
+
+    const poorFitMultiplier = getEnvNumber('MODEL_COURSE_FIT_POOR_MULT', 0.8);
+    const goodFitMultiplier = getEnvNumber('MODEL_COURSE_FIT_GOOD_MULT', 0.95);
+    const strongFitMultiplier = getEnvNumber('MODEL_COURSE_FIT_STRONG_MULT', 1.0);
+
+    if (fitPercentage >= 50) {
+      return strongFitMultiplier;
+    }
+    if (fitPercentage >= 25) {
+      return goodFitMultiplier;
+    }
+    if (weaknesses.length > 0 && weaknesses.some(w => w.weight > 0.1)) {
+      return poorFitMultiplier;
+    }
+    return 1.0;
+  };
+
  
   const processedPlayers = Object.entries(players).map(([dgId, data]) => {
     // Optional similar course IDs (unused in scoring, retained for parity with GAS logs)
@@ -1311,12 +1378,26 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       approachMetrics  // Pass the computed array, not the raw object
     );
 
+    const APPROACH_METRIC_START_INDEX = 17;
     const totalMetricsCount = groups.reduce((sum, group) => sum + group.metrics.length, 0);
     const nonZeroMetricsCount = groups.reduce((sum, group) => {
       const count = group.metrics.filter(metric => metricsWithData.has(metric.index)).length;
       return sum + count;
     }, 0);
-    const dataCoverage = totalMetricsCount > 0 ? (nonZeroMetricsCount / totalMetricsCount) : 0.5;
+    const totalApproachMetricsCount = groups.reduce((sum, group) => {
+      const count = group.metrics.filter(metric => metric.index >= APPROACH_METRIC_START_INDEX).length;
+      return sum + count;
+    }, 0);
+    const approachMetricsWithDataCount = groups.reduce((sum, group) => {
+      const count = group.metrics.filter(metric => metric.index >= APPROACH_METRIC_START_INDEX && metricsWithData.has(metric.index)).length;
+      return sum + count;
+    }, 0);
+    const baseCoverage = totalMetricsCount > 0 ? (nonZeroMetricsCount / totalMetricsCount) : 0.5;
+    const approachCoverage = totalApproachMetricsCount > 0
+      ? (approachMetricsWithDataCount / totalApproachMetricsCount)
+      : baseCoverage;
+    const boundedApproachWeight = Math.max(0, Math.min(1, approachCoverageWeight));
+    const dataCoverage = (baseCoverage * (1 - boundedApproachWeight)) + (approachCoverage * boundedApproachWeight);
     const boundedShrinkageMin = Math.max(0, Math.min(1, shrinkageMin));
     const boundedShrinkageMax = Math.max(boundedShrinkageMin, Math.min(1, shrinkageMax));
     const shrinkageAlpha = useMetricShrinkage
@@ -1554,113 +1635,13 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       confidenceFactor = 1.0;
     }
     
+
+    
     console.log(`Data coverage: ${dataCoverage}, Confidence factor: ${confidenceFactor}`);
     
-    // Capture group scores BEFORE dampening for debug
+    // Capture group scores for debug (no coverage dampening applied)
     const groupScoresBeforeDampening = {...groupScores};
-    let groupScoresAfterDampening = null;
-    
-    // Unified dampening based on data coverage (smooth, no hard cliffs)
-    const coverageDampingFactor = dataCoverage < 0.70
-      ? Math.exp(-1.5 * (1.0 - dataCoverage))
-      : 1.0;
-    
-    if (coverageDampingFactor < 1.0) {
-      console.log(`${data.name}: Applying coverage dampening factor of ${coverageDampingFactor.toFixed(3)} (coverage: ${dataCoverage.toFixed(3)})`);
-      
-      // Recalculate all group scores with dampened z-scores
-      for (const group of groups) {
-        let groupScore = 0;
-        let totalWeight = 0;
-        
-        for (const metric of group.metrics) {
-          let value = adjustedMetrics[metric.index];
-          
-          // Apply same transformations as main calculation
-          if (metric.name === 'Poor Shots') {
-            const maxPoorShots = METRIC_MAX_VALUES['Poor Shots'] || 12;
-            value = maxPoorShots - value;
-          } else if (metric.name.includes('Prox') ||
-                    metric.name === 'Fairway Proximity' ||
-                    metric.name === 'Rough Proximity') {
-            // Get the base metric name (strip group prefixes like "Course Management: " or "Scoring: ")
-            let baseMetricName = metric.name;
-            if (metric.name.includes(':')) {
-              baseMetricName = metric.name.split(':')[1].trim();
-            }
-            const maxProxValue = METRIC_MAX_VALUES[baseMetricName] ||
-                                 (baseMetricName === 'Fairway Proximity' ? 60 :
-                                 baseMetricName === 'Rough Proximity' ? 80 :
-                                 baseMetricName === 'Approach <100 Prox' ? 40 :
-                                 baseMetricName === 'Approach <150 FW Prox' ? 50 :
-                                 baseMetricName === 'Approach <150 Rough Prox' ? 60 :
-                                 baseMetricName === 'Approach >150 Rough Prox' ? 75 :
-                                 baseMetricName === 'Approach <200 FW Prox' ? 65 :
-                                 baseMetricName === 'Approach >200 FW Prox' ? 90 : 60);
-            value = maxProxValue - value;
-            value = Math.max(0, value);
-          } else if (metric.name === 'Scoring Average') {
-            const maxScore = METRIC_MAX_VALUES['Scoring Average'] || 74;
-            value = maxScore - value;
-          }
-          
-          const metricStats = groupStats[group.name]?.[metric.name];
-          if (!metricStats) continue;
-          
-          let zScore = computeMetricZScore(value, metric.name, metricStats, shrinkageAlpha);
-          zScore *= coverageDampingFactor;
-          
-          // Apply scoring differential penalties
-          if (metric.name.includes('Score') || 
-              metric.name.includes('Birdie') || 
-              metric.name.includes('Par')) {
-            const absZScore = Math.abs(zScore);
-            if (absZScore > 2.0) {
-              zScore *= Math.pow(absZScore / 2.0, 0.75);
-            }
-          }
-          
-          if (metric.weight && typeof value === 'number' && !isNaN(value)) {
-            groupScore += zScore * metric.weight;
-            totalWeight += Math.abs(metric.weight);
-          }
-        }
-        
-        if (totalWeight > 0) {
-          groupScore = groupScore / totalWeight;
-        }
-        
-        // Update the group score with dampened value
-        groupScores[group.name] = groupScore;
-        console.log(`  Recalculated group ${group.name}: ${groupScore.toFixed(3)} (dampened)`);
-      }
-      
-      // Capture group scores AFTER dampening for debug
-      groupScoresAfterDampening = {...groupScores};
-      
-      // Recalculate weighted score with dampened group scores
-      weightedScore = 0;
-      let totalWeightUsed = 0;
-      
-      for (const group of groups) {
-        const groupScore = groupScores[group.name];
-        const groupWeight = group.weight || 0;
-        
-        if (typeof groupWeight === 'number' && groupWeight > 0 && 
-            typeof groupScore === 'number' && !isNaN(groupScore)) {
-          weightedScore += groupScore * groupWeight;
-          totalWeightUsed += groupWeight;
-        }
-      }
-      
-      if (totalWeightUsed > 0) {
-        weightedScore = weightedScore / totalWeightUsed;
-      } else {
-        weightedScore = 0;
-      }
-      
-      console.log(`${data.name}: Recalculated weighted score with dampening: ${weightedScore.toFixed(3)}`);
-    }
+    const groupScoresAfterDampening = null;
     
     let deltaBonus = 0;
 
@@ -1704,12 +1685,14 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       }
     }
 
-    // Refined score: apply confidence and coverage multipliers
-    // Use smoother degradation curve for low-coverage players
-    const dataCoverageMultiplier = dataCoverage < 0.70
-      ? Math.max(0.4, 0.7 + (dataCoverage / 0.70) * 0.3) // Smooth curve from 0.4 to 1.0
-      : 1.0;
-    const refinedWeightedScore = weightedScore * confidenceFactor * dataCoverageMultiplier;
+    const courseFitMultiplier = computeCourseFitMultiplier(updatedMetrics, groups, groupStats);
+
+    if (Number.isFinite(courseFitMultiplier) && courseFitMultiplier > 0 && courseFitMultiplier < 1) {
+      weightedScore *= courseFitMultiplier;
+    }
+
+    // Refined score: apply confidence multiplier only
+    const refinedWeightedScore = weightedScore * confidenceFactor;
     
     // Defaults retained for debug fields
     const isLowConfidencePlayer = false;
@@ -1957,11 +1940,8 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       const deltaBonus = typeof player.deltaBonus === 'number' ? player.deltaBonus : 0;
       weightedScore += deltaBonus;
 
-      const dataCoverageMultiplier = player.dataCoverage < 0.70
-        ? Math.max(0.4, 0.7 + (player.dataCoverage / 0.70) * 0.3)
-        : 1.0;
       const confidenceFactor = typeof player.confidenceFactor === 'number' ? player.confidenceFactor : 1.0;
-      const refinedWeightedScore = weightedScore * confidenceFactor * dataCoverageMultiplier;
+      const refinedWeightedScore = weightedScore * confidenceFactor;
       const pastPerformanceMultiplier = typeof player.pastPerformanceMultiplier === 'number'
         ? player.pastPerformanceMultiplier
         : 1.0;
@@ -2053,7 +2033,7 @@ function validateKpiWeights(normalizedKpis) {
 }
 
 // ============================================================================
-// FUNCTION 9: getCoverageConfidence (line ~1230 in results.js)
+// FUNCTION 9: getCoverageConfidence
 // ============================================================================
 /**
  * Computes confidence factor based on data coverage
@@ -2068,12 +2048,29 @@ function getCoverageConfidence(dataCoverage) {
   // Ensure coverage is between 0 and 1
   const validCoverage = Math.max(0, Math.min(1, dataCoverage));
   
-  // Use a simple curve where confidence increases with data coverage
-  // This gives 0.6 at 50% coverage, 0.8 at 75% coverage, 1.0 at 100% coverage
-  const confidence = Math.pow(validCoverage, 0.5);
+  const confidenceExponent = getEnvNumber('MODEL_COVERAGE_EXP', 3.0);
+  const confidenceFloor = getEnvNumber('MODEL_CONFIDENCE_FLOOR', 0.2);
+
+  // Steeper curve to reward higher coverage more aggressively
+  const boundedExponent = Number.isFinite(confidenceExponent) && confidenceExponent > 0 ? confidenceExponent : 2.0;
+  const boundedFloor = Math.max(0, Math.min(0.9, Number.isFinite(confidenceFloor) ? confidenceFloor : 0.3));
+
+  // Full weight for strong coverage
+  if (validCoverage >= 0.7) {
+    return 1.0;
+  }
+
+  const confidence = Math.pow(validCoverage, boundedExponent);
   
-  // Ensure we never return less than 0.5 confidence
-  const finalConfidence = 0.5 + (confidence * 0.5);
+  // Ensure we never return less than the configured floor
+  let finalConfidence = boundedFloor + (confidence * (1 - boundedFloor));
+
+  // Hard clamps for very low coverage
+  if (validCoverage < 0.1) {
+    finalConfidence = Math.min(finalConfidence, 0.35);
+  } else if (validCoverage < 0.2) {
+    finalConfidence = Math.min(finalConfidence, 0.5);
+  }
   
   // Final validation to ensure no NaN is returned
   if (isNaN(finalConfidence)) {

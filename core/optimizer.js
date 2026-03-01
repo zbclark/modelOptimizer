@@ -1720,8 +1720,6 @@ function buildSheetLikeRankingCsv(ranking, groups) {
 
   const rows = [];
   const blankRow = Array(headers.length).fill('');
-  rows.push(blankRow, blankRow, blankRow, blankRow);
-  rows.push(headers);
 
   // Add a dedicated median row for quick filtering/benchmarking in Sheets.
   // NOTE: Leave DG ID blank so downstream parsers (validationRunner) skip this row.
@@ -1771,7 +1769,9 @@ function buildSheetLikeRankingCsv(ranking, groups) {
     ...medianTrailingValues
   ];
 
+  rows.push(blankRow, blankRow, blankRow);
   rows.push(medianRow);
+  rows.push(headers);
 
   players.forEach(player => {
     if (!player.metrics) player.metrics = Array(35).fill(0);
