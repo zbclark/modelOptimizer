@@ -30,6 +30,7 @@ const METRIC_DEFS = [
   { key: 'under_150_rgh_poor_shot_avoid_rate', isPercent: true },
   { key: 'under_150_rgh_proximity_per_shot', isPercent: false },
   { key: 'under_150_rgh_sg_per_shot', isPercent: false },
+  { key: 'under_150_rgh_shot_count', isPercent: false },
   { key: 'over_150_rgh_gir_rate', isPercent: true },
   { key: 'over_150_rgh_good_shot_rate', isPercent: true },
   { key: 'over_150_rgh_low_data_indicator', isPercent: false },

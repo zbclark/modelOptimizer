@@ -1,36 +1,32 @@
 {
-  "generatedAt": "2026-03-02T04:40:23.250Z",
-  "tournament": "att_pebble_beach_pro-am",
-  "eventId": "5",
+  "generatedAt": "2026-03-02T22:31:06.876Z",
+  "tournament": "sony_open_seed-e",
+  "eventId": "6",
   "season": 2026,
-  "skipMetricAnalysis": false,
+  "skipMetricAnalysis": true,
   "dataProcessed": {
-    "predictionsCount": 80,
-    "resultsCount": 80,
-    "metricAnalysis": {
-      "metrics": 43,
-      "top10Finishers": 13,
-      "totalFinishers": 80
-    },
+    "predictionsCount": 120,
+    "resultsCount": 120,
+    "metricAnalysis": null,
     "modelDeltaTrends": {
       "metrics": 11,
-      "totalSamples": 5830,
+      "totalSamples": 4510,
       "tournamentCount": 5,
       "source": "season_aggregate"
     }
   },
   "inputs": {
-    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/pebble-beach/pre_event/pebble-beach_pre_event_rankings.json",
-    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/pebble-beach/pre_event/pebble-beach_pre_event_rankings.csv",
-    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/pebble-beach/post_event/pebble-beach_results.json",
-    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/pebble-beach/post_event/pebble-beach_results.csv",
-    "configCsvPath": null
+    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/sony-open/pre_event/sony_open_pre_event_rankings.json",
+    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/sony-open/pre_event/sony_open_pre_event_rankings.csv",
+    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/sony-open/post_event/sony_open_seed-e_post_event_results.json",
+    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/sony-open/post_event/sony-open_results.csv",
+    "configCsvPath": "/workspaces/modelOptimizer/data/2026/sony-open/inputs/Sony Open (2026) - Configuration Sheet (1).csv"
   },
   "sources": {
-    "rankings": "results_json",
+    "rankings": "json",
     "results": "json",
     "resultsGeneratedFrom": "existing_json",
-    "config": "none"
+    "config": "config_csv"
   },
   "outputs": [
     {
@@ -43,20 +39,6 @@
     {
       "label": "calibrationReport.csv",
       "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Calibration_Report.csv",
-      "existedBefore": true,
-      "written": true,
-      "overwritten": true
-    },
-    {
-      "label": "metricAnalysis.json",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/att_pebble_beach_pro-am_metric_analysis.json",
-      "existedBefore": true,
-      "written": true,
-      "overwritten": true
-    },
-    {
-      "label": "metricAnalysis.csv",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/att_pebble_beach_pro-am_metric_analysis.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true

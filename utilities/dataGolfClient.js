@@ -30,6 +30,24 @@ const writeJson = (filePath, payload) => {
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
 };
 
+const normalizeNameForMatch = value => String(value || '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '')
+  .trim();
+
+const isFieldUpdateMatch = (payload, expectedEventId, expectedEventName) => {
+  if (!payload) return false;
+  const expectedId = expectedEventId ? String(expectedEventId).trim() : null;
+  const actualId = payload?.event_id ? String(payload.event_id).trim() : null;
+  if (expectedId && actualId && expectedId !== actualId) return false;
+
+  const expectedName = expectedEventName ? normalizeNameForMatch(expectedEventName) : null;
+  const actualName = payload?.event_name ? normalizeNameForMatch(payload.event_name) : null;
+  if (expectedName && actualName && expectedName !== actualName) return false;
+
+  return true;
+};
+
 const isFresh = (filePath, ttlMs) => {
   if (!filePath || !fs.existsSync(filePath)) return false;
   try {
@@ -151,19 +169,39 @@ const getDataGolfFieldUpdates = async (options = {}) => {
     cacheDir,
     ttlMs = DEFAULT_TTL_MS,
     allowStale = true,
+    preferCache = false,
+    cacheSlug = null,
     tour = 'pga',
-    fileFormat = 'json'
+    fileFormat = 'json',
+    expectedEventId = null,
+    expectedEventName = null
   } = options;
 
   const safeTour = String(tour || 'pga').trim().toLowerCase() || 'pga';
   const safeFormat = String(fileFormat || 'json').trim().toLowerCase() || 'json';
+  const safeSlug = cacheSlug
+    ? String(cacheSlug).trim().toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '')
+    : null;
   const cacheSuffix = `${safeTour}_${safeFormat}`.replace(/[^a-z0-9._-]/g, '_');
+  const cacheFileName = safeSlug
+    ? `datagolf_${safeSlug}_field_updates_${cacheSuffix}.json`
+    : `datagolf_field_updates_${cacheSuffix}.json`;
   const cachePath = cacheDir
-    ? path.resolve(cacheDir, `datagolf_field_updates_${cacheSuffix}.json`)
+    ? path.resolve(cacheDir, cacheFileName)
     : null;
 
   if (cachePath && isFresh(cachePath, ttlMs)) {
-    return { source: 'cache', path: cachePath, payload: readJson(cachePath) };
+    const cachedPayload = readJson(cachePath);
+    if (isFieldUpdateMatch(cachedPayload, expectedEventId, expectedEventName)) {
+      return { source: 'cache', path: cachePath, payload: cachedPayload };
+    }
+  }
+
+  if (cachePath && preferCache && allowStale && fs.existsSync(cachePath)) {
+    const cachedPayload = readJson(cachePath);
+    if (isFieldUpdateMatch(cachedPayload, expectedEventId, expectedEventName)) {
+      return { source: 'cache-stale', path: cachePath, payload: cachedPayload };
+    }
   }
 
   if (!apiKey) {
@@ -175,6 +213,10 @@ const getDataGolfFieldUpdates = async (options = {}) => {
 
   const endpoint = `https://feeds.datagolf.com/field-updates?tour=${safeTour}&file_format=${safeFormat}&key=${apiKey}`;
   const payload = await fetchJsonWithRetry(endpoint);
+
+  if (!isFieldUpdateMatch(payload, expectedEventId, expectedEventName)) {
+    return { source: 'api-mismatch', path: cachePath, payload: null };
+  }
 
   if (cachePath) {
     writeJson(cachePath, payload);

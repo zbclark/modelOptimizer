@@ -5,6 +5,7 @@ const { parse } = require('csv-parse/sync');
 const { loadCsv } = require('../utilities/csvLoader');
 const { getSharedConfig, loadConfigCells, getCell } = require('../utilities/configParser');
 const { WEIGHT_TEMPLATES } = require('../utilities/weightTemplates');
+const { METRIC_DEFS, loadApproachCsv } = require('../utilities/approachDelta');
 const {
   getDataGolfHistoricalRounds,
   getDataGolfLiveTournamentStats
@@ -16,6 +17,7 @@ const TEMPLATE_CORRELATION_DIR_NAME = 'template_correlation_summaries';
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATAGOLF_CACHE_DIR = path.resolve(ROOT_DIR, 'data', 'cache');
 const METRIC_ANALYSIS_VERSION = 3;
+const EVENT_ONLY_LOW_DATA_THRESHOLD = 0;
 const DATAGOLF_API_KEY = String(process.env.DATAGOLF_API_KEY || '').trim();
 const DATAGOLF_HISTORICAL_TTL_HOURS = (() => {
   const raw = parseFloat(String(process.env.DATAGOLF_HISTORICAL_TTL_HOURS || '').trim());
@@ -112,6 +114,187 @@ const METRIC_ORDER = [
   'Course Management: Approach <200 FW Prox',
   'Course Management: Approach >200 FW Prox'
 ];
+
+const APPROACH_EVENT_METRIC_MAP = {
+  'Approach <100 GIR': '50_100_fw_gir_rate',
+  'Approach <100 SG': '50_100_fw_sg_per_shot',
+  'Approach <100 Prox': '50_100_fw_proximity_per_shot',
+  'Approach <150 FW GIR': '100_150_fw_gir_rate',
+  'Approach <150 FW SG': '100_150_fw_sg_per_shot',
+  'Approach <150 FW Prox': '100_150_fw_proximity_per_shot',
+  'Approach <150 Rough GIR': 'under_150_rgh_gir_rate',
+  'Approach <150 Rough SG': 'under_150_rgh_sg_per_shot',
+  'Approach <150 Rough Prox': 'under_150_rgh_proximity_per_shot',
+  'Approach <200 FW GIR': '150_200_fw_gir_rate',
+  'Approach <200 FW SG': '150_200_fw_sg_per_shot',
+  'Approach <200 FW Prox': '150_200_fw_proximity_per_shot',
+  'Approach >150 Rough GIR': 'over_150_rgh_gir_rate',
+  'Approach >150 Rough SG': 'over_150_rgh_sg_per_shot',
+  'Approach >150 Rough Prox': 'over_150_rgh_proximity_per_shot',
+  'Approach >200 FW GIR': 'over_200_fw_gir_rate',
+  'Approach >200 FW SG': 'over_200_fw_sg_per_shot',
+  'Approach >200 FW Prox': 'over_200_fw_proximity_per_shot'
+};
+
+const parseApproachNumber = (value, isPercent = false) => {
+  if (value === null || value === undefined || value === '') return null;
+  const cleaned = String(value).replace(/[%,$]/g, '').trim();
+  if (!cleaned) return null;
+  const parsed = Number(cleaned);
+  if (!Number.isFinite(parsed)) return null;
+  if (isPercent) return parsed > 1 ? parsed / 100 : parsed;
+  return parsed;
+};
+
+const buildApproachIndex = rows => {
+  const index = new Map();
+  (rows || []).forEach(row => {
+    const dgId = row?.dg_id !== undefined && row?.dg_id !== null
+      ? String(row.dg_id).split('.')[0].trim()
+      : '';
+    if (!dgId) return;
+    const metrics = {};
+    (METRIC_DEFS || []).forEach(def => {
+      metrics[def.key] = parseApproachNumber(row?.[def.key], def.isPercent);
+    });
+    index.set(dgId, { dgId, metrics });
+  });
+  return index;
+};
+
+const resolveShotCountKey = metricKey => {
+  const suffixes = ['gir_rate', 'good_shot_rate', 'poor_shot_avoid_rate', 'proximity_per_shot', 'sg_per_shot'];
+  const suffixMatch = suffixes.find(suffix => metricKey.endsWith(`_${suffix}`));
+  if (!suffixMatch) return null;
+  return metricKey.replace(new RegExp(`_${suffixMatch}$`), '_shot_count');
+};
+
+const computeEventOnlyApproachRows = ({ beforeRows, afterRows }) => {
+  const beforeIndex = buildApproachIndex(beforeRows || []);
+  const afterIndex = buildApproachIndex(afterRows || []);
+  const allIds = new Set([...beforeIndex.keys(), ...afterIndex.keys()]);
+  const rows = [];
+  let playersWithShots = 0;
+
+  allIds.forEach(dgId => {
+    const before = beforeIndex.get(dgId);
+    const after = afterIndex.get(dgId);
+    if (!before && !after) return;
+
+    const row = { dg_id: dgId };
+    let hasShots = false;
+
+    (METRIC_DEFS || []).forEach(def => {
+      const key = def.key;
+      const beforeValue = before?.metrics?.[key] ?? null;
+      const afterValue = after?.metrics?.[key] ?? null;
+
+      if (key.endsWith('_shot_count')) {
+        const deltaShots = (afterValue ?? 0) - (beforeValue ?? 0);
+        if (deltaShots > 0) {
+          row[key] = deltaShots;
+          hasShots = true;
+        } else {
+          row[key] = null;
+        }
+        return;
+      }
+
+      if (key.endsWith('_low_data_indicator')) {
+        const bucket = key.replace('_low_data_indicator', '');
+        const shotKey = `${bucket}_shot_count`;
+        const beforeShots = before?.metrics?.[shotKey] ?? null;
+        const afterShots = after?.metrics?.[shotKey] ?? null;
+        const deltaShots = (afterShots ?? 0) - (beforeShots ?? 0);
+        const flag = (beforeValue === 1 || afterValue === 1 || (deltaShots > 0 && deltaShots < EVENT_ONLY_LOW_DATA_THRESHOLD)) ? 1 : 0;
+        row[key] = flag;
+        return;
+      }
+
+      const shotCountKey = resolveShotCountKey(key);
+      if (!shotCountKey) {
+        row[key] = afterValue ?? beforeValue ?? null;
+        return;
+      }
+
+      const beforeShots = before?.metrics?.[shotCountKey] ?? null;
+      const afterShots = after?.metrics?.[shotCountKey] ?? null;
+      const deltaShots = (afterShots ?? 0) - (beforeShots ?? 0);
+      const hasAfterShots = typeof afterShots === 'number' && Number.isFinite(afterShots) && afterShots > 0;
+      const hasBeforeShots = typeof beforeShots === 'number' && Number.isFinite(beforeShots) && beforeShots > 0;
+      if (!hasAfterShots || afterValue === null) {
+        row[key] = null;
+        return;
+      }
+
+      if (!hasBeforeShots || beforeValue === null || deltaShots <= 0) {
+        row[key] = afterValue;
+        hasShots = true;
+        return;
+      }
+
+      const eventValue = ((afterValue * afterShots) - (beforeValue * beforeShots)) / deltaShots;
+      row[key] = Number.isFinite(eventValue) ? eventValue : null;
+      if (deltaShots > 0) hasShots = true;
+    });
+
+    if (hasShots) {
+      playersWithShots += 1;
+      rows.push(row);
+    }
+  });
+
+  return { rows, playersWithShots };
+};
+
+const loadSeasonManifestEntries = (dataRootDir, season) => {
+  if (!dataRootDir || !season) return [];
+  const manifestPath = path.resolve(dataRootDir, String(season), SEASON_MANIFEST_NAME);
+  if (!fs.existsSync(manifestPath)) return [];
+  try {
+    const raw = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const entries = Array.isArray(raw) ? raw : (Array.isArray(raw?.entries) ? raw.entries : []);
+    return entries
+      .map(entry => ({
+        eventId: entry?.eventId !== undefined && entry?.eventId !== null ? String(entry.eventId).trim() : null,
+        tournamentSlug: String(entry?.tournamentSlug || '').trim(),
+        tournamentName: String(entry?.tournamentName || '').trim(),
+        date: String(entry?.date || '').trim()
+      }))
+      .filter(entry => entry.date && (entry.eventId || entry.tournamentSlug || entry.tournamentName));
+  } catch (error) {
+    return [];
+  }
+};
+
+const resolveManifestEntryForEvent = (entries, { eventId, tournamentSlug, tournamentName }) => {
+  if (!Array.isArray(entries) || entries.length === 0) return null;
+  const eventIdStr = String(eventId || '').trim();
+  const slug = slugifyTournament(tournamentSlug || tournamentName);
+  return entries.find(entry => (eventIdStr && entry.eventId === eventIdStr)
+    || (slug && slugifyTournament(entry.tournamentSlug || entry.tournamentName) === slug)) || null;
+};
+
+const resolveNextManifestEntry = (entries, currentEntry) => {
+  if (!Array.isArray(entries) || entries.length === 0 || !currentEntry?.date) return null;
+  const sorted = entries
+    .map(entry => ({ ...entry, time: Date.parse(`${entry.date}T00:00:00Z`) }))
+    .filter(entry => typeof entry.time === 'number' && !Number.isNaN(entry.time))
+    .sort((a, b) => a.time - b.time);
+  const currentTime = Date.parse(`${currentEntry.date}T00:00:00Z`);
+  if (Number.isNaN(currentTime)) return null;
+  const currentIndex = sorted.findIndex(entry => entry.time === currentTime && entry.eventId === currentEntry.eventId);
+  if (currentIndex === -1) return sorted.find(entry => entry.time > currentTime) || null;
+  return sorted[currentIndex + 1] || null;
+};
+
+const resolveApproachCsvForEntry = (dataRootDir, season, entry) => {
+  if (!entry) return null;
+  const tournamentDir = resolveTournamentDir(dataRootDir, season, entry.tournamentName, entry.tournamentSlug);
+  const inputsDir = tournamentDir ? path.resolve(tournamentDir, 'inputs') : null;
+  const approachPath = resolveInputCsvPath({ inputsDir, season, suffix: 'Approach Skill' });
+  return approachPath && fs.existsSync(approachPath) ? approachPath : null;
+};
 
 const METRIC_ALIASES = {
   'Poor Shots': 'Poor Shot Avoidance',
@@ -435,6 +618,21 @@ const resolveExistingPath = (dir, candidates = [], suffix) => {
     if (fs.existsSync(filePath)) return filePath;
   }
   return null;
+};
+
+const resolveExistingPathMulti = (dir, candidates = [], suffixes = []) => {
+  for (const suffix of suffixes) {
+    const direct = resolveExistingPath(dir, candidates, suffix);
+    if (direct) return direct;
+  }
+  return null;
+};
+
+const resolveResultsPath = (dir, candidates, primarySlug, suffixes = []) => {
+  if (!dir || !suffixes.length) return null;
+  const existing = resolveExistingPathMulti(dir, candidates, suffixes);
+  if (existing) return existing;
+  return path.resolve(dir, `${primarySlug}${suffixes[0]}`);
 };
 
 const resolveInputCsvPath = ({ inputsDir, season, suffix }) => {
@@ -1733,7 +1931,8 @@ const buildMetricAnalysis = ({
   eventId,
   season,
   tournamentSlug,
-  courseType
+  courseType,
+  approachEventOnlyMap = null
 }) => {
   const extracted = extractRankingMetrics(rankingsCsvPath);
   let metricLabels = Array.isArray(extracted.metricLabels) ? extracted.metricLabels : [];
@@ -1784,9 +1983,15 @@ const buildMetricAnalysis = ({
       const dgId = String(player.dgId);
       const fromResults = resultsMetricMap.get(dgId)?.[label];
       const fromHistory = historyMetricMap.get(dgId)?.[label];
-      const raw = typeof fromResults === 'number'
-        ? fromResults
-        : (typeof fromHistory === 'number' ? fromHistory : player.metrics?.[label]);
+      const approachKey = APPROACH_EVENT_METRIC_MAP[label];
+      const fromApproach = approachKey && approachEventOnlyMap
+        ? parseApproachNumber(approachEventOnlyMap.get(dgId)?.[approachKey], false)
+        : null;
+      const raw = typeof fromApproach === 'number'
+        ? fromApproach
+        : (typeof fromResults === 'number'
+          ? fromResults
+          : (typeof fromHistory === 'number' ? fromHistory : player.metrics?.[label]));
       const rounded = roundMetricValueForAnalysis(raw);
       if (typeof rounded !== 'number' || Number.isNaN(rounded)) return;
       values.push(rounded);
@@ -1908,6 +2113,24 @@ const getConfigMetricWeights = configCsvPath => {
   } catch (error) {
     return {};
   }
+};
+
+const buildConfigWeightsFromTemplate = template => {
+  if (!template) return {};
+  const weights = {};
+  const flat = flattenTemplateMetricWeights(template);
+  flat.forEach(entry => {
+    const weight = typeof entry.weight === 'number' && !Number.isNaN(entry.weight) ? entry.weight : null;
+    if (weight === null) return;
+    const groupName = entry.groupName || null;
+    const metricName = entry.metric || null;
+    if (!metricName) return;
+    const key = (groupName === 'Scoring' || groupName === 'Course Management')
+      ? `${groupName}: ${metricName}`
+      : metricName;
+    weights[key] = weight;
+  });
+  return weights;
 };
 
 const getTemplateWeightForMetric = (courseType, metricName) => {
@@ -2305,6 +2528,14 @@ const buildCorrelationSummary = metricAnalyses => {
 
 const buildCourseTypeClassificationEntries = ({ metricAnalyses, season, top20BlendByTournament = new Map() }) => {
   const entries = [];
+  const byKey = new Map();
+  const normalizeKey = value => String(value || '').trim().toLowerCase().replace(/_/g, '-');
+  const sourcePriority = source => {
+    const normalized = String(source || '').trim().toLowerCase();
+    if (normalized === 'top20_blend') return 3;
+    if (normalized === 'config_csv') return 2;
+    return 1;
+  };
   (metricAnalyses || []).forEach(analysis => {
     if (!analysis?.tournament || !analysis?.courseType) return;
     const baseName = formatTournamentDisplayName(analysis.tournament);
@@ -2313,7 +2544,7 @@ const buildCourseTypeClassificationEntries = ({ metricAnalyses, season, top20Ble
     const blendType = blendInfo?.recommendedType || null;
     const resolvedCourseType = blendType || analysis.courseType;
     const resolvedSource = blendType ? 'top20_blend' : (analysis.courseTypeSource || analysis.source || 'metric_analysis');
-    entries.push({
+    const entry = {
       tournament: analysis.tournament,
       displayName,
       eventId: analysis.eventId || null,
@@ -2321,37 +2552,83 @@ const buildCourseTypeClassificationEntries = ({ metricAnalyses, season, top20Ble
       source: resolvedSource,
       alignmentScores: blendInfo?.scores || null,
       blendSource: blendInfo?.sourcePath || null
-    });
+    };
+
+    const key = entry.eventId ? String(entry.eventId).trim() : normalizeKey(entry.tournament);
+    const existing = byKey.get(key);
+    if (!existing) {
+      byKey.set(key, entry);
+      return;
+    }
+
+    const existingPriority = sourcePriority(existing.source);
+    const entryPriority = sourcePriority(entry.source);
+    if (entryPriority > existingPriority) {
+      byKey.set(key, entry);
+      return;
+    }
+
+    if (entryPriority === existingPriority) {
+      const existingBlend = !!existing.blendSource;
+      const entryBlend = !!entry.blendSource;
+      if (entryBlend && !existingBlend) {
+        byKey.set(key, entry);
+      }
+    }
   });
-  return entries;
+  return Array.from(byKey.values());
 };
 
 const collectTournamentConfigInfo = ({ dataRootDir, season }) => {
   const configInfo = new Map();
+  const eventMap = loadSeasonManifest(dataRootDir, season);
+  const courseContextPath = path.resolve(__dirname, '..', 'utilities', 'course_context.json');
+  const courseContext = courseContextPath && fs.existsSync(courseContextPath)
+    ? readJsonFile(courseContextPath)
+    : null;
   const tournamentDirs = listSeasonTournamentDirs(dataRootDir, season);
   tournamentDirs.forEach(tournamentDir => {
     const slug = path.basename(tournamentDir);
     const inputsDir = path.resolve(tournamentDir, 'inputs');
-    if (!fs.existsSync(inputsDir)) return;
-    const files = fs.readdirSync(inputsDir).filter(file => file.toLowerCase().includes('configuration sheet'));
-    if (files.length === 0) return;
-
-    const seasonTag = season ? `(${season})` : null;
-    const preferred = seasonTag
-      ? files.find(file => file.includes(seasonTag))
-      : null;
-    const configFile = preferred || files[0];
-    if (!configFile) return;
-
-    const configCsvPath = path.resolve(inputsDir, configFile);
     const displayName = inferTournamentNameFromInputs(inputsDir, season, formatTournamentDisplayName(slug));
-    configInfo.set(slug, {
-      slug,
-      displayName: displayName && season ? `${displayName} (${season})` : displayName,
-      configCsvPath,
-      templateName: getConfigTemplateName(configCsvPath) || null,
-      configWeights: getConfigMetricWeights(configCsvPath)
-    });
+    if (fs.existsSync(inputsDir)) {
+      const files = fs.readdirSync(inputsDir).filter(file => file.toLowerCase().includes('configuration sheet'));
+      if (files.length > 0) {
+        const seasonTag = season ? `(${season})` : null;
+        const preferred = seasonTag
+          ? files.find(file => file.includes(seasonTag))
+          : null;
+        const configFile = preferred || files[0];
+        if (configFile) {
+          const configCsvPath = path.resolve(inputsDir, configFile);
+          configInfo.set(slug, {
+            slug,
+            displayName: displayName && season ? `${displayName} (${season})` : displayName,
+            configCsvPath,
+            templateName: getConfigTemplateName(configCsvPath) || null,
+            configWeights: getConfigMetricWeights(configCsvPath)
+          });
+          return;
+        }
+      }
+    }
+
+    const eventId = eventMap.get(slug) || null;
+    const contextEntry = eventId && courseContext?.byEventId
+      ? courseContext.byEventId[String(eventId).trim()]
+      : null;
+    const templateKey = contextEntry?.templateKey || null;
+    const template = templateKey ? WEIGHT_TEMPLATES?.[templateKey] : null;
+    const fallbackWeights = buildConfigWeightsFromTemplate(template);
+    if (templateKey && template) {
+      configInfo.set(slug, {
+        slug,
+        displayName: displayName && season ? `${displayName} (${season})` : displayName,
+        configCsvPath: null,
+        templateName: templateKey,
+        configWeights: fallbackWeights
+      });
+    }
   });
 
   return configInfo;
@@ -2874,6 +3151,82 @@ const writeWeightTemplatesOutput = (outputDir, summariesByType, templatesByType,
   return { jsonPath, csvPath };
 };
 
+const buildBlendedTemplateMapsByType = ({ summariesByType, templatesByType, top20BlendByTournament }) => {
+  const blendedByType = {};
+  const typeOrder = ['POWER', 'TECHNICAL', 'BALANCED'];
+  typeOrder.forEach(type => {
+    const summary = summariesByType[type] || [];
+    const template = templatesByType[type] || null;
+    if (!template) return;
+    if (!summary.length) return;
+    const recommended = buildRecommendedWeights(summary, template);
+    const baselineTemplateMaps = buildTemplateMapsFromRecommended(recommended);
+    const top20Aggregate = aggregateTop20BlendByType(top20BlendByTournament, type);
+    const blendShare = top20Aggregate ? computeTop20BlendShare(top20Aggregate.count) : 0;
+    blendedByType[type] = top20Aggregate
+      ? blendTemplateMaps(baselineTemplateMaps, top20Aggregate, blendShare)
+      : baselineTemplateMaps;
+  });
+  return blendedByType;
+};
+
+const buildNestedMetricWeights = (flatMetricWeights = {}) => {
+  const nested = {};
+  Object.entries(flatMetricWeights).forEach(([key, value]) => {
+    const [group, metric] = key.split('::');
+    if (!group || !metric) return;
+    if (!nested[group]) nested[group] = {};
+    nested[group][metric] = { weight: value };
+  });
+  return nested;
+};
+
+const formatWeightTemplatesFile = (templates = {}) => {
+  return `const WEIGHT_TEMPLATES = ${JSON.stringify(templates, null, 2)};\n\nmodule.exports = { WEIGHT_TEMPLATES };\n`;
+};
+
+const updateBaselineTemplatesFile = ({ blendedTemplatesByType, logger = console, dryRun = false, outputDir = null }) => {
+  if (!blendedTemplatesByType || Object.keys(blendedTemplatesByType).length === 0) return null;
+  const templatePath = path.resolve(__dirname, '..', 'utilities', 'weightTemplates.js');
+  let existingTemplates = {};
+  try {
+    // eslint-disable-next-line global-require, import/no-dynamic-require
+    existingTemplates = require(templatePath)?.WEIGHT_TEMPLATES || {};
+  } catch (error) {
+    logger.warn(`⚠️  Unable to load existing baseline templates: ${error.message}`);
+    existingTemplates = {};
+  }
+
+  const updated = { ...existingTemplates };
+  ['POWER', 'TECHNICAL', 'BALANCED'].forEach(type => {
+    const maps = blendedTemplatesByType[type];
+    if (!maps) return;
+    const groupWeights = maps.groupWeights || {};
+    const metricWeights = buildNestedMetricWeights(maps.metricWeights || {});
+    const existing = updated[type] || { name: type };
+    updated[type] = {
+      ...existing,
+      name: existing.name || type,
+      groupWeights,
+      metricWeights
+    };
+  });
+
+  const payload = formatWeightTemplatesFile(updated);
+  if (dryRun) {
+    const baseName = path.basename(templatePath, path.extname(templatePath));
+    const dryRunName = `dryrun_${baseName}${path.extname(templatePath) || '.js'}`;
+    const targetDir = outputDir ? path.resolve(outputDir, 'dryrun') : path.resolve(path.dirname(templatePath), 'dryrun');
+    ensureDirectory(targetDir);
+    const dryRunPath = path.resolve(targetDir, dryRunName);
+    fs.writeFileSync(dryRunPath, payload);
+    return dryRunPath;
+  }
+
+  fs.writeFileSync(templatePath, payload);
+  return templatePath;
+};
+
 const extractModelDeltasFromResults = resultsPayload => {
   if (!Array.isArray(resultsPayload) || resultsPayload.length === 0) return {};
   const sample = resultsPayload.find(entry => entry && typeof entry === 'object');
@@ -3391,12 +3744,10 @@ const buildSeasonCalibrationData = ({ season, dataRootDir, logger = console }) =
         || path.resolve(preEventDir, `${primarySlug}_pre_event_rankings.csv`)
       : null;
     const resultsJsonPath = postEventDir
-      ? resolveExistingPath(postEventDir, slugCandidates, '_results.json')
-        || path.resolve(postEventDir, `${primarySlug}_results.json`)
+      ? resolveResultsPath(postEventDir, slugCandidates, primarySlug, ['_results.json', '_post_event_results.json'])
       : null;
     const resultsCsvPath = postEventDir
-      ? resolveExistingPath(postEventDir, slugCandidates, '_results.csv')
-        || path.resolve(postEventDir, `${primarySlug}_results.csv`)
+      ? resolveResultsPath(postEventDir, slugCandidates, primarySlug, ['_results.csv', '_post_event_results.csv'])
       : null;
     const legacyResultsJsonPath = postEventDir ? path.resolve(postEventDir, 'tournament_results.json') : null;
     const legacyResultsCsvPath = postEventDir ? path.resolve(postEventDir, 'tournament_results.csv') : null;
@@ -3864,6 +4215,36 @@ const loadTournamentResultsFromHistoricalApi = async (eventId, season) => {
   });
 
   if (!snapshot?.payload) return { source: snapshot?.source || 'missing', results: [] };
+
+  const directEvent = snapshot.payload?.[eventIdStr] || null;
+  const directScores = Array.isArray(directEvent?.scores) ? directEvent.scores : null;
+  if (directScores && directScores.length > 0) {
+    const resultsByPlayer = {};
+    directScores.forEach(entry => {
+      const dgId = String(entry?.dg_id || '').trim();
+      if (!dgId) return;
+      const finishPosition = normalizeFinishPosition(entry?.fin_text ?? entry?.finish ?? entry?.position);
+      if (!finishPosition || Number.isNaN(finishPosition)) return;
+      const playerName = String(entry?.player_name || entry?.name || '').trim();
+      if (!resultsByPlayer[dgId] || finishPosition < resultsByPlayer[dgId].finishPosition) {
+        resultsByPlayer[dgId] = { finishPosition, playerName };
+      }
+    });
+
+    const results = Object.entries(resultsByPlayer).map(([dgId, entry]) => ({
+      dgId,
+      playerName: entry.playerName || 'Unknown',
+      finishPosition: entry.finishPosition
+    }));
+
+    return {
+      source: snapshot.source || 'historical_api',
+      results: applyFinishFallback(results),
+      snapshot,
+      usedPayload: 'event_scores'
+    };
+  }
+
   const rows = extractHistoricalRowsFromSnapshotPayload(snapshot.payload)
     .map(normalizeHistoricalRoundRow)
     .filter(Boolean);
@@ -4188,6 +4569,27 @@ const ensureTournamentResults = async ({
 
   const fromApi = await loadTournamentResultsFromHistoricalApi(eventId, season);
   if (fromApi.results.length > 0) {
+    if (fromApi.usedPayload === 'event_scores') {
+      const eventKey = String(eventId || '').trim();
+      const directEvent = eventKey ? (fromApi.snapshot?.payload?.[eventKey] || null) : null;
+      buildPayloadAndWrite({
+        source: fromApi.source,
+        results: fromApi.results,
+        eventName: directEvent?.event_name || null,
+        courseName: directEvent?.course_name || null,
+        lastUpdated: fromApi.snapshot?.payload?.last_updated || null,
+        apiSnapshots: {
+          dataGolfHistoricalRounds: {
+            source: fromApi.snapshot?.source || null,
+            path: fromApi.snapshot?.path || null,
+            lastUpdated: fromApi.snapshot?.payload?.last_updated || null
+          }
+        }
+      });
+      logger.log(`✓ Tournament results sourced from DataGolf historical rounds (${fromApi.results.length} players).`);
+      return { source: fromApi.source, path: resultsJsonPath };
+    }
+
     const rows = extractHistoricalRowsFromSnapshotPayload(fromApi.snapshot?.payload)
       .map(normalizeHistoricalRoundRow)
       .filter(Boolean);
@@ -4280,7 +4682,7 @@ const loadTournamentConfig = ({ configCsvPath, courseContextPath, eventId }) => 
   };
 };
 
-const runSeasonValidation = async ({ season, dataRootDir, logger = console } = {}) => {
+const runSeasonValidation = async ({ season, dataRootDir, logger = console, writeTemplates = false, dryRun = false, dryRunDir = null } = {}) => {
   if (!season || !dataRootDir) {
     throw new Error('validationRunner: season and dataRootDir are required');
   }
@@ -4302,7 +4704,11 @@ const runSeasonValidation = async ({ season, dataRootDir, logger = console } = {
         tournamentSlug,
         tournamentDir,
         eventId: manifestEventMap.get(tournamentSlug) || null,
-        logger
+        logger,
+        writeTemplates,
+        dryRun,
+        dryRunDir,
+        scopeSeason: true
       });
       results.push({ tournament: tournamentSlug, status: 'ok', outputDir: validationResult.outputDir });
     } catch (error) {
@@ -4325,17 +4731,30 @@ const runValidation = async ({
   tournamentSlug,
   tournamentDir,
   eventId,
-  logger = console
+  logger = console,
+  writeTemplates = false,
+  dryRun = false,
+  dryRunDir = null,
+  scopeSeason = false
 } = {}) => {
   if (!season || !dataRootDir) {
     throw new Error('validationRunner: season and dataRootDir are required');
   }
 
-  const resolvedSlug = tournamentSlug || slugifyTournament(tournamentName);
+  const manifestEntries = loadSeasonManifestEntries(dataRootDir, season);
+  const manifestMatch = resolveManifestEntryForEvent(manifestEntries, {
+    eventId,
+    tournamentSlug,
+    tournamentName
+  });
+  const manifestSlug = manifestMatch?.tournamentSlug
+    ? slugifyTournament(manifestMatch.tournamentSlug)
+    : null;
+  const resolvedSlug = tournamentSlug || manifestSlug || slugifyTournament(tournamentName);
   const outputDir = getValidationOutputDir(dataRootDir, season);
   const resolvedTournamentDir = tournamentDir || resolveTournamentDir(dataRootDir, season, tournamentName, resolvedSlug);
   const slugCandidates = buildSlugCandidates({
-    tournamentSlug,
+    tournamentSlug: resolvedSlug,
     tournamentName,
     tournamentDir: resolvedTournamentDir
   });
@@ -4353,12 +4772,10 @@ const runValidation = async ({
     : null;
   const resultsBaseName = primarySlug;
   const resultsJsonPath = postEventDir
-    ? resolveExistingPath(postEventDir, slugCandidates, '_results.json')
-      || path.resolve(postEventDir, `${resultsBaseName}_results.json`)
+    ? resolveResultsPath(postEventDir, slugCandidates, resultsBaseName, ['_results.json', '_post_event_results.json'])
     : null;
   const resultsCsvPath = postEventDir
-    ? resolveExistingPath(postEventDir, slugCandidates, '_results.csv')
-      || path.resolve(postEventDir, `${resultsBaseName}_results.csv`)
+    ? resolveResultsPath(postEventDir, slugCandidates, resultsBaseName, ['_results.csv', '_post_event_results.csv'])
     : null;
   const resultsZScoreCsvPath = postEventDir
     ? resolveExistingPath(postEventDir, slugCandidates, '_results_zscores.csv')
@@ -4456,12 +4873,14 @@ const runValidation = async ({
     predictions: predictionsResult.predictions,
     results: resultsResult.results
   });
-  const seasonCalibration = buildSeasonCalibrationData({
-    season,
-    dataRootDir,
-    logger
-  });
-  const calibrationReportData = seasonCalibration.tournaments.length > 0
+  const seasonCalibration = scopeSeason
+    ? buildSeasonCalibrationData({
+        season,
+        dataRootDir,
+        logger
+      })
+    : null;
+  const calibrationReportData = scopeSeason && seasonCalibration?.tournaments?.length > 0
     ? seasonCalibration
     : tournamentCalibration;
   const calibrationJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.calibrationReport}.json`);
@@ -4477,6 +4896,36 @@ const runValidation = async ({
   const courseType = config.courseType || null;
   const courseTypeSource = config.source || null;
   if (!skipMetricAnalysis && resolvedSlug) {
+    const manifestEntries = loadSeasonManifestEntries(dataRootDir, season);
+    const currentEntry = resolveManifestEntryForEvent(manifestEntries, {
+      eventId: config.eventId || eventId,
+      tournamentSlug: resolvedSlug,
+      tournamentName: tournamentName || resolvedSlug
+    });
+    const nextEntry = resolveNextManifestEntry(manifestEntries, currentEntry);
+    const preApproachPath = resolveApproachCsvForEntry(dataRootDir, season, currentEntry);
+    const postApproachPath = resolveApproachCsvForEntry(dataRootDir, season, nextEntry);
+    let approachEventOnlyMap = null;
+
+    if (preApproachPath && postApproachPath) {
+      const beforeRows = loadApproachCsv(preApproachPath);
+      const afterRows = loadApproachCsv(postApproachPath);
+      const eventOnly = computeEventOnlyApproachRows({ beforeRows, afterRows });
+      if (eventOnly.rows.length > 0) {
+        approachEventOnlyMap = new Map();
+        eventOnly.rows.forEach(row => {
+          const dgId = String(row?.dg_id || '').trim();
+          if (!dgId) return;
+          approachEventOnlyMap.set(dgId, row);
+        });
+        logger.log(`✓ Event-only approach metrics loaded for ${resolvedSlug} (${eventOnly.rows.length} rows; pre=${path.basename(preApproachPath)}, post=${path.basename(postApproachPath)}).`);
+      } else {
+        logger.log(`ℹ️  Event-only approach metrics unavailable for ${resolvedSlug} (no overlapping rows).`);
+      }
+    } else {
+      logger.log(`ℹ️  Event-only approach metrics unavailable for ${resolvedSlug} (missing pre/post approach CSVs).`);
+    }
+
     const metricAnalysisDir = getMetricAnalysisDir(outputDir) || outputDir;
     const metricJsonPath = path.resolve(metricAnalysisDir, `${resolvedSlug}_metric_analysis.json`);
     const metricCsvPath = path.resolve(metricAnalysisDir, `${resolvedSlug}_metric_analysis.csv`);
@@ -4494,7 +4943,8 @@ const runValidation = async ({
       eventId: config.eventId || eventId,
       season,
       tournamentSlug: resolvedSlug,
-      courseType
+      courseType,
+      approachEventOnlyMap
     });
     if (metricAnalysis) {
       metricAnalysis.eventId = config.eventId || eventId || null;
@@ -4515,16 +4965,18 @@ const runValidation = async ({
   }
 
   const metricAnalysisDir = getMetricAnalysisDir(outputDir);
-  const existingMetricAnalyses = metricAnalysisDir && fs.existsSync(metricAnalysisDir)
+  const existingMetricAnalyses = scopeSeason && metricAnalysisDir && fs.existsSync(metricAnalysisDir)
     ? fs.readdirSync(metricAnalysisDir)
         .filter(name => name.endsWith('_metric_analysis.json'))
         .map(name => readJsonFile(path.resolve(metricAnalysisDir, name)))
         .filter(Boolean)
     : [];
 
-  const allMetricAnalyses = metricAnalysis
-    ? [...existingMetricAnalyses.filter(entry => entry?.tournament !== metricAnalysis.tournament), metricAnalysis]
-    : existingMetricAnalyses;
+  const allMetricAnalyses = scopeSeason
+    ? (metricAnalysis
+        ? [...existingMetricAnalyses.filter(entry => entry?.tournament !== metricAnalysis.tournament), metricAnalysis]
+        : existingMetricAnalyses)
+    : (metricAnalysis ? [metricAnalysis] : []);
 
   const top20BlendByTournament = new Map();
   const templatesByType = {
@@ -4644,6 +5096,28 @@ const runValidation = async ({
   });
   recordOutput('weightTemplates.json', weightTemplatesOutputs?.jsonPath);
   recordOutput('weightTemplates.csv', weightTemplatesOutputs?.csvPath);
+
+  const blendedByType = buildBlendedTemplateMapsByType({
+    summariesByType,
+    templatesByType,
+    top20BlendByTournament
+  });
+  const shouldWriteTemplates = !!writeTemplates;
+  const shouldDryRunTemplates = !!dryRun && !shouldWriteTemplates;
+  if (shouldWriteTemplates || shouldDryRunTemplates) {
+    const updatedPath = updateBaselineTemplatesFile({
+      blendedTemplatesByType: blendedByType,
+      logger,
+      dryRun: shouldDryRunTemplates,
+      outputDir: dryRunDir || outputDir
+    });
+    if (updatedPath) {
+      const label = shouldWriteTemplates ? '✓ Updated baseline templates' : '🧪 Dry-run template output saved';
+      logger.log(`${label}: ${updatedPath}`);
+    }
+  } else {
+    logger.log('ℹ️  Baseline templates update skipped (writeTemplates=false, dryRun=false).');
+  }
 
   const modelDeltaTrends = buildModelDeltaTrends({ resultsJsonPath, season, dataRootDir });
   const modelDeltaJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.modelDeltaTrends}.json`);

@@ -31,10 +31,25 @@ const collectRecords = async ({
   getDataGolfHistoricalRounds,
   includeApi = false,
   preferApi = false,
-  preferCache = false
+  preferCache = false,
+  returnMeta = false
 }) => {
   const allRows = [];
   const shouldFetchApi = years.length && tours.length && getDataGolfHistoricalRounds;
+  const meta = {
+    years,
+    tours,
+    dataDir,
+    preferApi,
+    preferCache,
+    includeApi,
+    ttlMs: datagolfHistoricalTtlMs,
+    refreshPolicy: datagolfHistoricalTtlMs === 0 ? 'force-refresh' : (preferCache ? 'prefer-cache' : 'default'),
+    api: { cache: 0, cacheStale: 0, api: 0, missingKey: 0, missingYear: 0, errors: 0 },
+    csv: { files: 0, rows: 0 },
+    rowsFromApi: 0,
+    rowsFromCsv: 0
+  };
 
   const fetchApiRows = async () => {
     for (const tour of tours) {
@@ -51,10 +66,20 @@ const collectRecords = async ({
             year,
             fileFormat: 'json'
           });
+          const source = apiSnapshot?.source || 'unknown';
+          if (source === 'cache') meta.api.cache += 1;
+          else if (source === 'cache-stale') meta.api.cacheStale += 1;
+          else if (source === 'api') meta.api.api += 1;
+          else if (source === 'missing-key') meta.api.missingKey += 1;
+          else if (source === 'missing-year') meta.api.missingYear += 1;
+
           const apiRows = extractHistoricalRowsFromSnapshotPayload(apiSnapshot?.payload);
-          if (apiRows.length > 0) allRows.push(...apiRows);
+          if (apiRows.length > 0) {
+            allRows.push(...apiRows);
+            meta.rowsFromApi += apiRows.length;
+          }
         } catch (error) {
-          // Ignore
+          meta.api.errors += 1;
         }
       }
     }
@@ -66,11 +91,14 @@ const collectRecords = async ({
 
   if (!preferApi && dataDir && fs.existsSync(dataDir)) {
     const files = walkDir(dataDir).filter(isHistoricalFile);
+    meta.csv.files += files.length;
     for (const filePath of files) {
       try {
         const rows = loadCsv(filePath, { skipFirstColumn: true })
           .filter(Boolean);
         allRows.push(...rows);
+        meta.csv.rows += rows.length;
+        meta.rowsFromCsv += rows.length;
       } catch (err) {
         // Ignore
       }
@@ -83,18 +111,21 @@ const collectRecords = async ({
 
   if (preferApi && allRows.length === 0 && dataDir && fs.existsSync(dataDir)) {
     const files = walkDir(dataDir).filter(isHistoricalFile);
+    meta.csv.files += files.length;
     for (const filePath of files) {
       try {
         const rows = loadCsv(filePath, { skipFirstColumn: true })
           .filter(Boolean);
         allRows.push(...rows);
+        meta.csv.rows += rows.length;
+        meta.rowsFromCsv += rows.length;
       } catch (err) {
         // Ignore
       }
     }
   }
 
-  return allRows;
+  return returnMeta ? { rows: allRows, meta } : allRows;
 };
 
 module.exports = collectRecords;

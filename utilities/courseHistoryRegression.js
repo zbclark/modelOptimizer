@@ -1,174 +1,80 @@
-const fs = require('fs');
-const path = require('path');
-
-// Embedded fallback (may be stale if you have newer per-run regression JSON artifacts).
-const DEFAULT_COURSE_HISTORY_REGRESSION = {
-  "4": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
-  },
-  "5": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
-  },
+const COURSE_HISTORY_REGRESSION = {
   "6": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
+    "slope": -2.9499471277248888,
+    "pValue": 0.0000020149212760500745
   },
-  "104": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
+  "12": {
+    "slope": -5.381344994887318,
+    "pValue": 5.027533944712559e-11
   },
-  "202": {
-    "slope": 0,
-    "pValue": 1
+  "21": {
+    "slope": -1.2133482129250956,
+    "pValue": 0.15870370594050387
   },
-  "232": {
-    "slope": 0,
-    "pValue": 1
+  "513": {
+    "slope": -4.416275951939989,
+    "pValue": 0.00007413247547050084
   },
-  "233": {
-    "slope": 0,
-    "pValue": 1
-  },
-  "500": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
-  },
-  "510": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
-  },
-  "704": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
-  },
-  "765": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
+  "752": {
+    "slope": -1.8447598786549433,
+    "pValue": 0.016142659832632633
   },
   "776": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
+    "slope": -0.33544069592176845,
+    "pValue": 0.6172683979708227
   },
-  "889": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
-  },
-  "919": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
-  },
-  "922": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
-  },
-  "927": {
-    "slope": 0,
-    "pValue": 0.9999999989999999
-  },
-  "928": {
-    "slope": -0.5343137254901987,
-    "pValue": 0.8565280126019332
-  }
-};
-
-let ACTIVE_REGRESSION_MAP = null;
-let ACTIVE_REGRESSION_META = { source: 'embedded', path: null };
-let LAST_ENV_FINGERPRINT = null;
-
-function readJsonFile(filePath) {
-  if (!filePath || !fs.existsSync(filePath)) return null;
-  try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (error) {
-    return null;
-  }
-}
-
-function normalizeRegressionMap(payload) {
-  if (!payload || typeof payload !== 'object') return null;
-  const map = {};
-  Object.entries(payload).forEach(([courseNum, entry]) => {
-    if (!courseNum) return;
-    if (!entry || typeof entry !== 'object') return;
-    const slope = Number(entry.slope);
-    const pValue = Number(entry.pValue);
-    if (!Number.isFinite(slope) || !Number.isFinite(pValue)) return;
-    map[String(courseNum).trim()] = { slope, pValue };
-  });
-  return Object.keys(map).length > 0 ? map : null;
-}
-
-function getCandidatePaths() {
-  const candidates = [];
-  const add = (value) => {
-    if (!value) return;
-    const resolved = path.resolve(String(value));
-    if (!candidates.includes(resolved)) candidates.push(resolved);
-  };
-
-  // Explicit file path wins.
-  add(process.env.COURSE_HISTORY_REGRESSION_JSON);
-
-  // Optimizer sets PRE_TOURNAMENT_OUTPUT_DIR to the regression output directory.
-  const outDir = String(process.env.PRE_TOURNAMENT_OUTPUT_DIR || '').trim();
-  if (outDir) {
-    add(path.join(outDir, 'course_history_regression.json'));
-    add(path.join(outDir, 'course_history_regression', 'course_history_regression.json'));
-  }
-
-  // Conventional fallbacks.
-  const ROOT_DIR = path.resolve(__dirname, '..');
-  add(path.join(ROOT_DIR, 'output', 'course_history_regression.json'));
-  add(path.join(ROOT_DIR, 'output', 'course_history_regression', 'course_history_regression.json'));
-
-  return candidates;
-}
-
-function maybeReloadRegressionMap() {
-  const fingerprint = [
-    String(process.env.COURSE_HISTORY_REGRESSION_JSON || '').trim(),
-    String(process.env.PRE_TOURNAMENT_OUTPUT_DIR || '').trim()
-  ].join('|');
-  if (fingerprint === LAST_ENV_FINGERPRINT && ACTIVE_REGRESSION_MAP) return;
-  LAST_ENV_FINGERPRINT = fingerprint;
-
-  for (const candidate of getCandidatePaths()) {
-    const payload = readJsonFile(candidate);
-    const normalized = normalizeRegressionMap(payload);
-    if (normalized) {
-      ACTIVE_REGRESSION_MAP = normalized;
-      ACTIVE_REGRESSION_META = { source: 'json', path: candidate };
-      return;
+  "meta": {
+    "generatedAt": "2026-03-02T19:53:39.403Z",
+    "eventId": "6",
+    "season": 2026,
+    "mode": "pre_event",
+    "courseNum": "6",
+    "courseNameKey": "WAIALAE_COUNTRY_CLUB",
+    "templateKey": "WAIALAE_COUNTRY_CLUB",
+    "tours": [
+      "pga"
+    ],
+    "eventScope": {
+      "eventId": "6",
+      "similarEventIds": [
+        "12",
+        "21",
+        "493",
+        "549",
+        "13"
+      ],
+      "puttingEventIds": [
+        "493",
+        "549",
+        "12",
+        "13",
+        "27",
+        "533"
+      ]
+    },
+    "yearScope": {
+      "lastSixYears": [
+        2026,
+        2025,
+        2024,
+        2023,
+        2022,
+        2021
+      ],
+      "recentMonths": [
+        "2026-3",
+        "2026-2",
+        "2026-1",
+        "2025-12"
+      ]
     }
   }
-
-  ACTIVE_REGRESSION_MAP = DEFAULT_COURSE_HISTORY_REGRESSION;
-  ACTIVE_REGRESSION_META = { source: 'embedded', path: null };
-}
-
-function getCourseHistoryRegressionMap() {
-  maybeReloadRegressionMap();
-  return ACTIVE_REGRESSION_MAP || DEFAULT_COURSE_HISTORY_REGRESSION;
-}
-
-function getCourseHistoryRegressionMeta() {
-  maybeReloadRegressionMap();
-  return ACTIVE_REGRESSION_META;
-}
+};
 
 function getCourseHistoryRegression(courseNum) {
   if (courseNum === null || courseNum === undefined) return null;
   const key = String(courseNum).trim();
-  const map = getCourseHistoryRegressionMap();
-  return map[key] || null;
+  return COURSE_HISTORY_REGRESSION[key] || null;
 }
 
-module.exports = {
-  // Backwards-compatible export name (note: may be stale if you don't point to a JSON artifact).
-  COURSE_HISTORY_REGRESSION: DEFAULT_COURSE_HISTORY_REGRESSION,
-  getCourseHistoryRegression,
-  getCourseHistoryRegressionMap,
-  getCourseHistoryRegressionMeta
-};
+module.exports = { COURSE_HISTORY_REGRESSION, getCourseHistoryRegression };

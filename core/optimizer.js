@@ -12,8 +12,9 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { spawnSync } = require('child_process');
 const { parse } = require('csv-parse/sync');
-require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '..', '.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const { setupLogging } = require('../utilities/logging');
 const { loadCsv } = require('../utilities/csvLoader');
@@ -23,7 +24,7 @@ const { getSharedConfig } = require('../utilities/configParser');
 const { buildMetricGroupsFromConfig } = require('../utilities/metricConfigBuilder');
 const { WEIGHT_TEMPLATES } = require('../utilities/weightTemplates');
 const { getDeltaPlayerScoresForEvent } = require('../utilities/deltaPlayerScores');
-const { loadApproachCsv, computeApproachDeltas, extractApproachRowsFromJson } = require('../utilities/approachDelta');
+const { METRIC_DEFS, loadApproachCsv, computeApproachDeltas, extractApproachRowsFromJson } = require('../utilities/approachDelta');
 const { blendTemplateWeights } = require('../utilities/top20TemplateBlend');
 const {
   getDataGolfRankings,
@@ -61,6 +62,8 @@ const APPROACH_SNAPSHOT_DIR = path.resolve(ROOT_DIR, 'data', 'approach_snapshot'
 const APPROACH_SNAPSHOT_L24_PATH = path.resolve(APPROACH_SNAPSHOT_DIR, 'approach_l24.json');
 const APPROACH_SNAPSHOT_L12_PATH = path.resolve(APPROACH_SNAPSHOT_DIR, 'approach_l12.json');
 const APPROACH_SNAPSHOT_YTD_LATEST_PATH = path.resolve(APPROACH_SNAPSHOT_DIR, 'approach_ytd_latest.json');
+const APPROACH_EVENT_ONLY_PRE = String(process.env.APPROACH_EVENT_ONLY_PRE || '').trim();
+const APPROACH_EVENT_ONLY_POST = String(process.env.APPROACH_EVENT_ONLY_POST || '').trim();
 const APPROACH_L12_REFRESH_MONTH = (() => {
   const raw = parseInt(String(process.env.APPROACH_L12_REFRESH_MONTH || '').trim(), 10);
   if (Number.isNaN(raw)) return 12;
@@ -212,14 +215,14 @@ const buildFeatureVector = (player, metricSpecs) => {
   if (specs.length === 0) return null;
 
   let validCount = 0;
-  const features = specs.map(({ label, index }) => {
-    const rawValue = player.metrics[index];
-    if (typeof rawValue === 'number' && !Number.isNaN(rawValue)) {
-      validCount += 1;
-      return LOWER_BETTER_GENERATED_METRICS.has(label) ? -rawValue : rawValue;
-    }
-    return 0;
-  });
+    const features = specs.map(({ label, index }) => {
+      const rawValue = player.metrics[index];
+      if (typeof rawValue === 'number' && !Number.isNaN(rawValue)) {
+        validCount += 1;
+        return LOWER_BETTER_GENERATED_METRICS.has(label) ? -rawValue : rawValue;
+      }
+      return 0;
+    });
 
   const coverage = validCount / specs.length;
   if (coverage < MIN_METRIC_COVERAGE) return null;
@@ -241,6 +244,7 @@ let WRITE_TEMPLATES = false;
 let OVERRIDE_DIR = null;
 let OVERRIDE_DATA_DIR = null;
 let OVERRIDE_OUTPUT_DIR = null;
+let OVERRIDE_API_YEARS = null;
 let OVERRIDE_ROLLING_DELTAS = null;
 let OVERRIDE_APPROACH_DELTA_CURRENT = null;
 let OVERRIDE_APPROACH_DELTA_PREVIOUS = null;
@@ -276,6 +280,9 @@ for (let i = 0; i < args.length; i++) {
   }
   if ((args[i] === '--dataDir' || args[i] === '--data-dir') && args[i + 1]) {
     OVERRIDE_DATA_DIR = String(args[i + 1]).trim();
+  }
+  if ((args[i] === '--apiYears' || args[i] === '--api-years') && args[i + 1]) {
+    OVERRIDE_API_YEARS = String(args[i + 1]).trim();
   }
   if ((args[i] === '--outputDir' || args[i] === '--output-dir') && args[i + 1]) {
     OVERRIDE_OUTPUT_DIR = String(args[i + 1]).trim();
@@ -458,10 +465,10 @@ function findValidationFileByKeywords(dirs, keywords = []) {
 
 function parseCsvRows(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
-  return parse(content, {
-    relax_column_count: true,
-    skip_empty_lines: false
-  });
+    return parse(content, {
+      relax_column_count: true,
+      skip_empty_lines: false
+    });
 }
 
 function normalizeNameForMatch(value) {
@@ -506,7 +513,7 @@ function evaluateFieldIntegrity({ fieldData, fieldIdSet, approachRows, minPlayer
 
   if (Array.isArray(approachRows) && approachRows.length > 0 && fieldIdSet?.size) {
     const overlapCount = approachRows.reduce((count, row) => {
-      const dgId = String(row?.dg_id || row?.['dg_id'] || '').trim();
+      const dgId = normalizeDgIdValue(row?.dg_id ?? row?.['dg_id'] ?? row?.dgId);
       if (!dgId) return count;
       return fieldIdSet.has(dgId) ? count + 1 : count;
     }, 0);
@@ -663,7 +670,7 @@ const computeWeatherWavePenalties = async ({
     cacheDir,
     ttlMs: WEATHER_TTL_HOURS * 60 * 60 * 1000,
     allowStale: true,
-    timeformat: 'timestamp',
+    timeformat: 'timestamp_utc',
     tz: 'UTC',
     windspeed: 'mph',
     precipitationamount: 'mm',
@@ -1804,6 +1811,13 @@ function normalizeTemplateKey(value) {
     .replace(/^_+|_+$/g, '');
 }
 
+function normalizeDgIdValue(value) {
+  if (value === null || value === undefined) return null;
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
+  return trimmed.split('.')[0].trim();
+}
+
 const APPROACH_GROUPS = new Set([
   'Approach - Short (<100)',
   'Approach - Mid (100-150)',
@@ -1888,7 +1902,126 @@ const APPROACH_BUCKET_LABELS = new Set([
   'Approach <200 FW GIR', 'Approach <200 FW SG', 'Approach <200 FW Prox',
   'Approach >200 FW GIR', 'Approach >200 FW SG', 'Approach >200 FW Prox'
 ]);
-const TOP20_METRIC_LABELS = GENERATED_METRIC_LABELS.filter(label => !APPROACH_BUCKET_LABELS.has(label));
+let TOP20_METRIC_LABELS = GENERATED_METRIC_LABELS.filter(label => !APPROACH_BUCKET_LABELS.has(label));
+
+const APPROACH_BUCKET_SUFFIXES = [
+  'gir_rate',
+  'good_shot_rate',
+  'poor_shot_avoid_rate',
+  'proximity_per_shot',
+  'sg_per_shot'
+];
+const EVENT_ONLY_LOW_DATA_THRESHOLD = 20;
+
+const parseApproachNumber = (value, isPercent = false) => {
+  if (value === null || value === undefined || value === '') return null;
+  const cleaned = String(value).replace(/[%,$]/g, '').trim();
+  if (!cleaned) return null;
+  const parsed = Number(cleaned);
+  if (!Number.isFinite(parsed)) return null;
+  if (isPercent) return parsed > 1 ? parsed / 100 : parsed;
+  return parsed;
+};
+
+const buildApproachIndex = rows => {
+  const index = new Map();
+  (rows || []).forEach(row => {
+    const dgId = row?.dg_id !== undefined && row?.dg_id !== null
+      ? String(row.dg_id).split('.')[0].trim()
+      : '';
+    if (!dgId) return;
+    const metrics = {};
+    (METRIC_DEFS || []).forEach(def => {
+      metrics[def.key] = parseApproachNumber(row?.[def.key], def.isPercent);
+    });
+    index.set(dgId, { dgId, playerName: row?.player_name || row?.playerName || null, metrics });
+  });
+  return index;
+};
+
+const resolveShotCountKey = metricKey => {
+  const suffixMatch = APPROACH_BUCKET_SUFFIXES.find(suffix => metricKey.endsWith(`_${suffix}`));
+  if (!suffixMatch) return null;
+  return metricKey.replace(new RegExp(`_${suffixMatch}$`), '_shot_count');
+};
+
+const computeEventOnlyApproachRows = ({ beforeRows, afterRows }) => {
+  const beforeIndex = buildApproachIndex(beforeRows);
+  const afterIndex = buildApproachIndex(afterRows);
+  const allIds = new Set([...beforeIndex.keys(), ...afterIndex.keys()]);
+  const rows = [];
+  let playersWithShots = 0;
+
+  allIds.forEach(dgId => {
+    const before = beforeIndex.get(dgId);
+    const after = afterIndex.get(dgId);
+    if (!before && !after) return;
+
+    const row = { dg_id: dgId, player_name: after?.playerName || before?.playerName || null };
+    let hasShots = false;
+
+    (METRIC_DEFS || []).forEach(def => {
+      const key = def.key;
+      const beforeValue = before?.metrics?.[key] ?? null;
+      const afterValue = after?.metrics?.[key] ?? null;
+
+      if (key.endsWith('_shot_count')) {
+        const deltaShots = (afterValue ?? 0) - (beforeValue ?? 0);
+        if (deltaShots > 0) {
+          row[key] = deltaShots;
+          hasShots = true;
+        } else {
+          row[key] = null;
+        }
+        return;
+      }
+
+      if (key.endsWith('_low_data_indicator')) {
+        const bucket = key.replace('_low_data_indicator', '');
+        const shotKey = `${bucket}_shot_count`;
+        const beforeShots = before?.metrics?.[shotKey] ?? null;
+        const afterShots = after?.metrics?.[shotKey] ?? null;
+        const deltaShots = (afterShots ?? 0) - (beforeShots ?? 0);
+        const flag = (beforeValue === 1 || afterValue === 1 || (deltaShots > 0 && deltaShots < EVENT_ONLY_LOW_DATA_THRESHOLD)) ? 1 : 0;
+        row[key] = flag;
+        return;
+      }
+
+      const shotCountKey = resolveShotCountKey(key);
+      if (!shotCountKey) {
+        row[key] = afterValue ?? beforeValue ?? null;
+        return;
+      }
+
+      const beforeShots = before?.metrics?.[shotCountKey] ?? null;
+      const afterShots = after?.metrics?.[shotCountKey] ?? null;
+      const deltaShots = (afterShots ?? 0) - (beforeShots ?? 0);
+      const hasAfterShots = typeof afterShots === 'number' && Number.isFinite(afterShots) && afterShots > 0;
+      const hasBeforeShots = typeof beforeShots === 'number' && Number.isFinite(beforeShots) && beforeShots > 0;
+      if (!hasAfterShots || afterValue === null) {
+        row[key] = null;
+        return;
+      }
+
+      if (!hasBeforeShots || beforeValue === null || deltaShots <= 0) {
+        row[key] = afterValue;
+        hasShots = true;
+        return;
+      }
+
+      const eventValue = ((afterValue * afterShots) - (beforeValue * beforeShots)) / deltaShots;
+      row[key] = Number.isFinite(eventValue) ? eventValue : null;
+      if (deltaShots > 0) hasShots = true;
+    });
+
+    if (hasShots) {
+      playersWithShots += 1;
+      rows.push(row);
+    }
+  });
+
+  return { rows, playersWithShots };
+};
 
 const SHEET_LIKE_METRIC_LABELS = GENERATED_METRIC_LABELS;
 const SHEET_LIKE_PERCENTAGE_INDICES = new Set([
@@ -2241,6 +2374,8 @@ function deriveBirdiesOrBetterFromRow(row) {
 
 function buildHistoricalMetricSamples(rawHistoryData, eventId) {
   const samples = [];
+  const cutSamples = [];
+  const maxFinishByYear = new Map();
   const eventIdStr = String(eventId || '').trim();
 
   rawHistoryData.forEach(row => {
@@ -2250,8 +2385,12 @@ function buildHistoricalMetricSamples(rawHistoryData, eventId) {
     const year = parseInt(String(row['year'] || row['season'] || '').trim());
     if (Number.isNaN(year)) return;
 
-    const finishPosition = parseFinishPosition(row['fin_text']);
-    if (!finishPosition || Number.isNaN(finishPosition)) return;
+    const finishInfo = parseFinishStatus(row['fin_text']);
+    const finishPosition = finishInfo.position;
+    if (typeof finishPosition === 'number' && !Number.isNaN(finishPosition)) {
+      const currentMax = maxFinishByYear.get(year) || 0;
+      if (finishPosition > currentMax) maxFinishByYear.set(year, finishPosition);
+    }
 
     const derivedBirdiesOrBetter = deriveBirdiesOrBetterFromRow(row);
 
@@ -2280,7 +2419,23 @@ function buildHistoricalMetricSamples(rawHistoryData, eventId) {
       roughProx: row.prox_rgh ? cleanMetricValue(row.prox_rgh) : null
     };
 
-    samples.push({ year, finishPosition, metrics });
+    if (typeof finishPosition === 'number' && !Number.isNaN(finishPosition)) {
+      samples.push({ year, finishPosition, metrics });
+      return;
+    }
+    if (finishInfo.isCut) {
+      cutSamples.push({ year, metrics });
+    }
+  });
+
+  cutSamples.forEach(sample => {
+    const maxFinish = maxFinishByYear.get(sample.year);
+    if (!Number.isFinite(maxFinish)) return;
+    samples.push({
+      year: sample.year,
+      finishPosition: maxFinish + 1,
+      metrics: sample.metrics
+    });
   });
 
   return samples;
@@ -3306,18 +3461,35 @@ function resolveIncludeCurrentEventRounds(fallback) {
 }
 
 function buildResultsFromRows(rows) {
-  const resultsByPlayer = new Map();
+  const numericResults = new Map();
+  const cutIds = new Set();
+
   rows.forEach(row => {
     const dgId = String(row['dg_id'] || '').trim();
     if (!dgId) return;
-    const finishPosition = parseFinishPosition(row['fin_text']);
-    if (!finishPosition || Number.isNaN(finishPosition)) return;
-    const existing = resultsByPlayer.get(dgId);
-    if (!existing || finishPosition < existing) {
-      resultsByPlayer.set(dgId, finishPosition);
+    const finishInfo = parseFinishStatus(row['fin_text']);
+    if (typeof finishInfo.position === 'number' && !Number.isNaN(finishInfo.position)) {
+      const existing = numericResults.get(dgId);
+      if (!existing || finishInfo.position < existing) {
+        numericResults.set(dgId, finishInfo.position);
+      }
+      return;
+    }
+    if (finishInfo.isCut) {
+      cutIds.add(dgId);
     }
   });
-  return Array.from(resultsByPlayer.entries()).map(([dgId, finishPosition]) => ({ dgId, finishPosition }));
+
+  const positions = Array.from(numericResults.values());
+  const fallback = positions.length ? Math.max(...positions) + 1 : null;
+  const results = Array.from(numericResults.entries()).map(([dgId, finishPosition]) => ({ dgId, finishPosition }));
+  if (Number.isFinite(fallback)) {
+    cutIds.forEach(dgId => {
+      if (!numericResults.has(dgId)) results.push({ dgId, finishPosition: fallback });
+    });
+  }
+
+  return results;
 }
 
 function pickFirstValue(row, keys) {
@@ -3334,19 +3506,37 @@ function pickFirstValue(row, keys) {
 }
 
 function buildResultsFromResultRows(rows) {
-  const resultsByPlayer = new Map();
+  const numericResults = new Map();
+  const cutIds = new Set();
+
   rows.forEach(row => {
     const dgId = pickFirstValue(row, ['DG ID', 'dgId', 'dg_id', 'dg id', 'Player ID', 'player_id']);
     if (!dgId) return;
     const finishRaw = pickFirstValue(row, ['Finish Position', 'finishPosition', 'finish', 'fin_text', 'fin', 'Finish']);
-    const finishPosition = parseFinishPosition(finishRaw);
-    if (!finishPosition || Number.isNaN(finishPosition)) return;
-    const existing = resultsByPlayer.get(String(dgId).trim());
-    if (!existing || finishPosition < existing) {
-      resultsByPlayer.set(String(dgId).trim(), finishPosition);
+    const finishInfo = parseFinishStatus(finishRaw);
+    if (typeof finishInfo.position === 'number' && !Number.isNaN(finishInfo.position)) {
+      const key = String(dgId).trim();
+      const existing = numericResults.get(key);
+      if (!existing || finishInfo.position < existing) {
+        numericResults.set(key, finishInfo.position);
+      }
+      return;
+    }
+    if (finishInfo.isCut) {
+      cutIds.add(String(dgId).trim());
     }
   });
-  return Array.from(resultsByPlayer.entries()).map(([dgId, finishPosition]) => ({ dgId, finishPosition }));
+
+  const positions = Array.from(numericResults.values());
+  const fallback = positions.length ? Math.max(...positions) + 1 : null;
+  const results = Array.from(numericResults.entries()).map(([dgId, finishPosition]) => ({ dgId, finishPosition }));
+  if (Number.isFinite(fallback)) {
+    cutIds.forEach(dgId => {
+      if (!numericResults.has(dgId)) results.push({ dgId, finishPosition: fallback });
+    });
+  }
+
+  return results;
 }
 
 function loadResultsFromJsonFile(filePath, options = {}) {
@@ -3795,12 +3985,23 @@ function calculateTopNWeightedScoreFromActualRanks(predictions, actualRankMap, n
   return (dcg / idcg) * 100;
 }
 
-function parseFinishPosition(posValue) {
+function parseFinishStatus(posValue) {
   const posStr = String(posValue || '').trim().toUpperCase();
-  if (!posStr) return null;
-  if (posStr.startsWith('T')) return parseInt(posStr.substring(1));
-  if (posStr === 'CUT' || posStr === 'WD' || posStr === 'DQ') return null;
-  return parseInt(posStr);
+  if (!posStr) return { position: null, isCut: false, status: null };
+  if (posStr.startsWith('T') && posStr.length > 1) {
+    const tied = parseInt(posStr.substring(1), 10);
+    if (Number.isFinite(tied)) return { position: tied, isCut: false, status: 'FINISHED' };
+  }
+  const parsed = parseInt(posStr, 10);
+  if (Number.isFinite(parsed)) return { position: parsed, isCut: false, status: 'FINISHED' };
+  if (['CUT', 'MC', 'WD', 'DQ'].includes(posStr)) {
+    return { position: null, isCut: true, status: posStr };
+  }
+  return { position: null, isCut: false, status: 'UNKNOWN' };
+}
+
+function parseFinishPosition(posValue) {
+  return parseFinishStatus(posValue).position;
 }
 
 function buildFinishPositionMap(results) {
@@ -4062,6 +4263,22 @@ function loadCourseHistoryRegressionMap(options = {}) {
   addCandidate(OUTPUT_DIR ? path.resolve(OUTPUT_DIR, 'course_history_regression.json') : null);
   addCandidate(path.resolve(ROOT_DIR, 'output', 'course_history_regression.json'));
 
+  const preTournamentOutputDir = String(process.env.PRE_TOURNAMENT_OUTPUT_DIR || '').trim();
+  if (preTournamentOutputDir) {
+    addCandidate(path.resolve(preTournamentOutputDir, 'course_history_regression.json'));
+  }
+
+  const addSiblingPreEvent = dirPath => {
+    if (!dirPath) return;
+    const normalized = path.resolve(dirPath);
+    const base = path.basename(normalized);
+    if (base !== 'post_event') return;
+    const sibling = path.resolve(path.dirname(normalized), 'pre_event', 'course_history_regression.json');
+    addCandidate(sibling);
+  };
+  addSiblingPreEvent(outputDir);
+  addSiblingPreEvent(OUTPUT_DIR);
+
   for (const filePath of candidates) {
     if (!fs.existsSync(filePath)) continue;
     const payload = readJsonFile(filePath);
@@ -4116,7 +4333,7 @@ function loadRampSummary(options = {}) {
 }
 
 function ensureEarlySeasonRampSummary(options = {}) {
-  const { outputDir = null, metric = 'sg_total', dataDir = null } = options;
+  const { outputDir = null, metric = 'sg_total', dataDir = null, apiYears = null } = options;
   if (!outputDir) return loadRampSummary({ outputDir, metric });
   const existing = loadRampSummary({ outputDir, metric });
   if (existing) return existing;
@@ -4132,6 +4349,9 @@ function ensureEarlySeasonRampSummary(options = {}) {
       '--metric',
       String(metric || 'sg_total').trim().toLowerCase()
     ];
+    if (apiYears) {
+      scriptArgs.push('--apiYears', String(apiYears).trim());
+    }
     if (dataDir) {
       scriptArgs.push('--dataDir', dataDir);
     }
@@ -4358,6 +4578,149 @@ function normalizeHistoricalRoundRow(row) {
   };
 }
 
+function parseDateToUtcMs(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return NaN;
+  const parsed = Date.parse(`${raw}T00:00:00Z`);
+  return Number.isNaN(parsed) ? NaN : parsed;
+}
+
+function resolveApproachOverrideEntry(rawPath, sourceLabel) {
+  if (!rawPath) return null;
+  const resolved = path.isAbsolute(rawPath)
+    ? rawPath
+    : path.resolve(ROOT_DIR, rawPath);
+  if (!fs.existsSync(resolved)) return null;
+  let time = 0;
+  try {
+    time = fs.statSync(resolved).mtimeMs || 0;
+  } catch (error) {
+    time = 0;
+  }
+  return {
+    path: resolved,
+    time,
+    date: null,
+    source: sourceLabel || 'approach_override',
+    priority: 9
+  };
+}
+
+function loadSeasonManifestEntries(dataRootDir, season) {
+  if (!dataRootDir || !season) return [];
+  const manifestPath = path.resolve(dataRootDir, String(season), 'manifest.json');
+  if (!fs.existsSync(manifestPath)) return [];
+  try {
+    const raw = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const entries = Array.isArray(raw) ? raw : (Array.isArray(raw?.entries) ? raw.entries : []);
+    return entries
+      .map(entry => ({
+        eventId: entry?.eventId !== undefined && entry?.eventId !== null ? String(entry.eventId).trim() : null,
+        tournamentSlug: String(entry?.tournamentSlug || '').trim(),
+        tournamentName: String(entry?.tournamentName || '').trim(),
+        date: String(entry?.date || '').trim()
+      }))
+      .filter(entry => entry.date && (entry.eventId || entry.tournamentSlug || entry.tournamentName));
+  } catch (error) {
+    return [];
+  }
+}
+
+function resolveEventStartDateFromManifest({ dataRootDir, season, eventId, tournamentSlug, tournamentName }) {
+  const entries = loadSeasonManifestEntries(dataRootDir, season);
+  if (!entries.length) return null;
+  const eventIdStr = String(eventId || '').trim();
+  const slug = normalizeTournamentSlug(tournamentSlug || tournamentName);
+  const match = entries.find(entry => (eventIdStr && entry.eventId === eventIdStr)
+    || (slug && normalizeTournamentSlug(entry.tournamentSlug || entry.tournamentName) === slug));
+  if (!match?.date) return null;
+  const parsed = parseDateToUtcMs(match.date);
+  if (Number.isNaN(parsed)) return null;
+  return { date: match.date, time: parsed };
+}
+
+function resolveManifestEntryForEvent(entries, { eventId, tournamentSlug, tournamentName }) {
+  if (!Array.isArray(entries) || entries.length === 0) return null;
+  const eventIdStr = String(eventId || '').trim();
+  const slug = normalizeTournamentSlug(tournamentSlug || tournamentName);
+  return entries.find(entry => (eventIdStr && entry.eventId === eventIdStr)
+    || (slug && normalizeTournamentSlug(entry.tournamentSlug || entry.tournamentName) === slug)) || null;
+}
+
+function resolveNextManifestEntry(entries, currentEntry) {
+  if (!Array.isArray(entries) || entries.length === 0 || !currentEntry?.date) return null;
+  const sorted = entries
+    .map(entry => ({ ...entry, time: parseDateToUtcMs(entry.date) }))
+    .filter(entry => typeof entry.time === 'number' && !Number.isNaN(entry.time))
+    .sort((a, b) => a.time - b.time);
+  const currentTime = parseDateToUtcMs(currentEntry.date);
+  if (Number.isNaN(currentTime)) return null;
+  const currentIndex = sorted.findIndex(entry => entry.time === currentTime && entry.eventId === currentEntry.eventId);
+  if (currentIndex === -1) return sorted.find(entry => entry.time > currentTime) || null;
+  return sorted[currentIndex + 1] || null;
+}
+
+function resolveApproachCsvForEntry(entry, season) {
+  if (!entry) return null;
+  let approachPath = resolveTournamentFile('Approach Skill', entry.tournamentName, season, entry.tournamentSlug);
+  if (!approachPath || !fs.existsSync(approachPath)) {
+    const slugFallback = resolveTournamentFile('Approach Skill', entry.tournamentSlug, season, null);
+    if (slugFallback && fs.existsSync(slugFallback)) {
+      approachPath = slugFallback;
+    }
+  }
+  if (!approachPath || !fs.existsSync(approachPath)) {
+    const tournamentDir = resolveTournamentDir(season, entry.tournamentName, entry.tournamentSlug);
+    const inputsDir = tournamentDir ? path.resolve(tournamentDir, 'inputs') : null;
+    const searchDir = inputsDir && fs.existsSync(inputsDir) ? inputsDir : (tournamentDir && fs.existsSync(tournamentDir) ? tournamentDir : null);
+    if (searchDir) {
+      const candidates = fs.readdirSync(searchDir)
+        .filter(name => name.toLowerCase().endsWith('.csv') && name.toLowerCase().includes('approach skill'))
+        .map(name => ({
+          name,
+          path: path.resolve(searchDir, name),
+          mtimeMs: (() => {
+            try {
+              return fs.statSync(path.resolve(searchDir, name)).mtimeMs || 0;
+            } catch (error) {
+              return 0;
+            }
+          })()
+        }))
+        .sort((a, b) => (b.mtimeMs || 0) - (a.mtimeMs || 0));
+      if (candidates.length > 0) {
+        approachPath = candidates[0].path;
+      }
+    }
+  }
+  if (!approachPath || !fs.existsSync(approachPath)) return null;
+  const time = parseDateToUtcMs(entry.date);
+  if (Number.isNaN(time)) return null;
+  return {
+    path: approachPath,
+    time,
+    date: entry.date,
+    source: 'approach_csv_manifest',
+    priority: 1
+  };
+}
+
+function buildManifestApproachCsvFallback({ dataRootDir, season, eventId, tournamentSlug, tournamentName }) {
+  const entries = loadSeasonManifestEntries(dataRootDir, season);
+  if (!entries.length) return { pre: null, post: null, currentEntry: null, nextEntry: null, entries };
+  const currentEntry = resolveManifestEntryForEvent(entries, { eventId, tournamentSlug, tournamentName });
+  if (!currentEntry) return { pre: null, post: null, currentEntry: null, nextEntry: null, entries };
+  const nextEntry = resolveNextManifestEntry(entries, currentEntry);
+  const pre = resolveApproachCsvForEntry(currentEntry, season);
+  const post = resolveApproachCsvForEntry(nextEntry, season);
+  return { pre, post, currentEntry, nextEntry, entries };
+}
+
+function hasSnapshotArchiveForDate(candidates, date) {
+  if (!date) return false;
+  return (candidates || []).some(entry => entry?.source === 'snapshot_archive' && entry?.date === date);
+}
+
 function listApproachSnapshotArchives() {
   if (!APPROACH_SNAPSHOT_DIR || !fs.existsSync(APPROACH_SNAPSHOT_DIR)) return [];
   const entries = [];
@@ -4382,6 +4745,71 @@ function listApproachSnapshotArchives() {
   return entries;
 }
 
+function buildApproachSnapshotCandidates({ dataRootDir, season, manifestEntries = null }) {
+  const entries = Array.isArray(manifestEntries) && manifestEntries.length
+    ? manifestEntries
+    : loadSeasonManifestEntries(dataRootDir, season);
+  const candidates = [];
+  const seen = new Set();
+
+  listApproachSnapshotArchives()
+    .filter(entry => entry.period === 'ytd')
+    .forEach(entry => {
+      if (!entry?.path || seen.has(entry.path)) return;
+      seen.add(entry.path);
+      candidates.push({
+        path: entry.path,
+        time: entry.time || 0,
+        date: entry.name.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null,
+        source: 'snapshot_archive',
+        priority: 3
+      });
+    });
+
+  if (APPROACH_SNAPSHOT_YTD_LATEST_PATH && fs.existsSync(APPROACH_SNAPSHOT_YTD_LATEST_PATH)) {
+    const latestTime = resolveApproachSnapshotTimestamp(APPROACH_SNAPSHOT_YTD_LATEST_PATH);
+    if (!seen.has(APPROACH_SNAPSHOT_YTD_LATEST_PATH)) {
+      seen.add(APPROACH_SNAPSHOT_YTD_LATEST_PATH);
+      candidates.push({
+        path: APPROACH_SNAPSHOT_YTD_LATEST_PATH,
+        time: latestTime || 0,
+        date: null,
+        source: 'snapshot_latest',
+        priority: 2
+      });
+    }
+  }
+
+  entries.forEach(entry => {
+    const eventTime = parseDateToUtcMs(entry.date);
+    if (Number.isNaN(eventTime)) return;
+    const approachPath = resolveTournamentFile('Approach Skill', entry.tournamentName, season, entry.tournamentSlug);
+    if (!approachPath || !fs.existsSync(approachPath) || seen.has(approachPath)) return;
+    seen.add(approachPath);
+    candidates.push({
+      path: approachPath,
+      time: eventTime,
+      date: entry.date,
+      source: 'approach_csv',
+      priority: 1
+    });
+  });
+
+  return candidates.filter(entry => typeof entry.time === 'number' && entry.time > 0);
+}
+
+function selectApproachSnapshotsForEvent({ eventDateMs, candidates }) {
+  if (!eventDateMs || Number.isNaN(eventDateMs)) return { pre: null, post: null };
+  const valid = (candidates || []).filter(entry => typeof entry?.time === 'number' && entry.time > 0);
+  const pre = valid
+    .filter(entry => entry.time <= eventDateMs)
+    .sort((a, b) => (b.time - a.time) || ((b.priority || 0) - (a.priority || 0)))[0] || null;
+  const post = valid
+    .filter(entry => entry.time > eventDateMs)
+    .sort((a, b) => (a.time - b.time) || ((b.priority || 0) - (a.priority || 0)))[0] || null;
+  return { pre, post };
+}
+
 function resolveLatestApproachArchiveYear(period) {
   const normalized = String(period || '').trim().toLowerCase();
   if (!normalized) return null;
@@ -4391,6 +4819,18 @@ function resolveLatestApproachArchiveYear(period) {
   if (!latest?.time) return null;
   const year = new Date(latest.time).getUTCFullYear();
   return Number.isNaN(year) ? null : year;
+}
+
+function resolveLatestApproachSnapshotArchive(period) {
+  const normalized = String(period || '').trim().toLowerCase();
+  if (!normalized) return null;
+  const entries = listApproachSnapshotArchives().filter(entry => entry.period === normalized);
+  if (entries.length === 0) return null;
+  const latest = entries[0];
+  if (!latest?.path || !fs.existsSync(latest.path)) return null;
+  const snapshot = loadApproachSnapshotFromDisk(latest.path);
+  if (!snapshot?.payload) return null;
+  return { ...snapshot, source: 'snapshot_archive', path: latest.path };
 }
 
 function pruneApproachSnapshotArchives() {
@@ -4825,7 +5265,9 @@ function selectOptimizableGroups(groupWeightsArray, minFixedCount = 3) {
 }
 
 function deriveResultsFromHistory(rawHistoryData, eventId, season = null, nameLookup = {}) {
-  const resultsByPlayer = {};
+  const numericResults = new Map();
+  const cutPlayers = new Map();
+  let maxFinish = 0;
   const eventIdStr = String(eventId || '').trim();
 
   rawHistoryData.forEach(row => {
@@ -4839,17 +5281,33 @@ function deriveResultsFromHistory(rawHistoryData, eventId, season = null, nameLo
       if (rowSeason !== season && rowYear !== season) return;
     }
 
-    const finishPosition = parseFinishPosition(row['fin_text']);
-    if (!finishPosition || Number.isNaN(finishPosition)) return;
+    const finishInfo = parseFinishStatus(row['fin_text']);
+    if (typeof finishInfo.position === 'number' && !Number.isNaN(finishInfo.position)) {
+      const existing = numericResults.get(dgId);
+      if (!existing || finishInfo.position < existing.finishPosition) {
+        const playerName = String(row['player_name'] || '').trim() || nameLookup[dgId] || 'Unknown';
+        numericResults.set(dgId, { finishPosition: finishInfo.position, playerName });
+      }
+      if (finishInfo.position > maxFinish) maxFinish = finishInfo.position;
+      return;
+    }
 
-    const playerName = String(row['player_name'] || '').trim() || nameLookup[dgId] || 'Unknown';
-
-    if (!resultsByPlayer[dgId] || finishPosition < resultsByPlayer[dgId].finishPosition) {
-      resultsByPlayer[dgId] = { finishPosition, playerName };
+    if (finishInfo.isCut && !numericResults.has(dgId)) {
+      const playerName = String(row['player_name'] || '').trim() || nameLookup[dgId] || 'Unknown';
+      cutPlayers.set(dgId, playerName);
     }
   });
 
-  return Object.entries(resultsByPlayer).map(([dgId, entry]) => ({
+  const fallback = Number.isFinite(maxFinish) && maxFinish > 0 ? maxFinish + 1 : null;
+  if (Number.isFinite(fallback)) {
+    cutPlayers.forEach((playerName, dgId) => {
+      if (!numericResults.has(dgId)) {
+        numericResults.set(dgId, { finishPosition: fallback, playerName });
+      }
+    });
+  }
+
+  return Array.from(numericResults.entries()).map(([dgId, entry]) => ({
     dgId,
     finishPosition: entry.finishPosition,
     playerName: entry.playerName
@@ -4857,30 +5315,52 @@ function deriveResultsFromHistory(rawHistoryData, eventId, season = null, nameLo
 }
 
 function buildResultsByYear(rawHistoryData, eventId) {
-  const resultsByYear = {};
+  const numericByYear = new Map();
+  const cutByYear = new Map();
+  const maxByYear = new Map();
+
   rawHistoryData.forEach(row => {
     const year = parseInt(String(row['year'] || row['season'] || '').trim());
     if (Number.isNaN(year)) return;
     const eventIdStr = String(eventId || '').trim();
     const rowEventId = String(row['event_id'] || '').trim();
     if (eventIdStr && rowEventId !== eventIdStr) return;
-    const finishPosition = parseFinishPosition(row['fin_text']);
-    if (!finishPosition || Number.isNaN(finishPosition)) return;
     const dgId = String(row['dg_id'] || '').trim();
     if (!dgId) return;
-    if (!resultsByYear[year]) resultsByYear[year] = [];
-    resultsByYear[year].push({ dgId, finishPosition });
+
+    const finishInfo = parseFinishStatus(row['fin_text']);
+    if (typeof finishInfo.position === 'number' && !Number.isNaN(finishInfo.position)) {
+      if (!numericByYear.has(year)) numericByYear.set(year, new Map());
+      const yearMap = numericByYear.get(year);
+      const existing = yearMap.get(dgId);
+      if (!existing || finishInfo.position < existing) {
+        yearMap.set(dgId, finishInfo.position);
+      }
+      const currentMax = maxByYear.get(year) || 0;
+      if (finishInfo.position > currentMax) maxByYear.set(year, finishInfo.position);
+      return;
+    }
+
+    if (finishInfo.isCut) {
+      if (!cutByYear.has(year)) cutByYear.set(year, new Set());
+      cutByYear.get(year).add(dgId);
+    }
   });
 
-  Object.keys(resultsByYear).forEach(year => {
-    const deduped = new Map();
-    resultsByYear[year].forEach(result => {
-      const existing = deduped.get(result.dgId);
-      if (!existing || result.finishPosition < existing.finishPosition) {
-        deduped.set(result.dgId, result);
-      }
-    });
-    resultsByYear[year] = Array.from(deduped.values());
+  const resultsByYear = {};
+  const allYears = new Set([...numericByYear.keys(), ...cutByYear.keys()]);
+  Array.from(allYears).forEach(year => {
+    const yearMap = numericByYear.get(year) || new Map();
+    const positions = Array.from(yearMap.values());
+    const fallback = positions.length ? Math.max(...positions) + 1 : null;
+    const results = Array.from(yearMap.entries()).map(([dgId, finishPosition]) => ({ dgId, finishPosition }));
+    if (Number.isFinite(fallback)) {
+      const cutSet = cutByYear.get(year) || new Set();
+      cutSet.forEach(dgId => {
+        if (!yearMap.has(dgId)) results.push({ dgId, finishPosition: fallback });
+      });
+    }
+    resultsByYear[year] = results;
   });
 
   return resultsByYear;
@@ -5214,6 +5694,26 @@ function upsertTemplateInFile(filePath, template, options = {}) {
         }
 
         if (char === '"' || char === "'") {
+          if (depth === 1 && key === null) {
+            const quoteChar = char;
+            const start = i;
+            let j = i + 1;
+            while (j < content.length) {
+              if (content[j] === quoteChar && content[j - 1] !== '\\') break;
+              j += 1;
+            }
+            if (j < content.length) {
+              const possibleKey = content.slice(start + 1, j);
+              const afterKey = content.slice(j + 1).trimStart();
+              if (afterKey.startsWith(':')) {
+                key = possibleKey;
+                keyStart = start;
+                keyEnd = j + 1;
+                i = j + 1;
+                continue;
+              }
+            }
+          }
           inString = true;
           stringChar = char;
           i += 1;
@@ -5525,7 +6025,10 @@ async function runAdaptiveOptimizer() {
         const validationResult = await runSeasonValidation({
           season: CURRENT_SEASON,
           dataRootDir: DATA_ROOT_DIR,
-          logger: console
+          logger: console,
+          writeTemplates: WRITE_TEMPLATES,
+          dryRun: DRY_RUN,
+          dryRunDir: validationOutputsDir
         });
         console.log(`✅ Validation outputs written to: ${validationResult.outputDir}`);
         return;
@@ -5540,7 +6043,10 @@ async function runAdaptiveOptimizer() {
         tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
         tournamentSlug: null,
         tournamentDir,
-        eventId: CURRENT_EVENT_ID
+        eventId: CURRENT_EVENT_ID,
+        writeTemplates: WRITE_TEMPLATES,
+        dryRun: DRY_RUN,
+        dryRunDir: validationOutputsDir
       });
       console.log(`✅ Validation outputs written to: ${validationResult.outputDir}`);
       return;
@@ -5591,6 +6097,14 @@ async function runAdaptiveOptimizer() {
     : preEventOutputDir;
   if (preferredOutputDir) {
     OUTPUT_DIR = preferredOutputDir;
+  }
+
+  const seedRunsDir = (!OVERRIDE_OUTPUT_DIR && OPT_SEED_RAW && preferPostEventOutputDir && postEventOutputDir)
+    ? path.resolve(postEventOutputDir, 'seed_runs')
+    : null;
+  if (seedRunsDir) {
+    ensureDirectory(seedRunsDir);
+    OUTPUT_DIR = seedRunsDir;
   }
 
   requiredFiles[0].path = CONFIG_PATH;
@@ -5659,10 +6173,12 @@ async function runAdaptiveOptimizer() {
   const parentRegressionDir = seedRunsParentDir ? path.resolve(seedRunsParentDir, 'course_history_regression') : null;
   const parentHasRamp = parentAnalysisDir && fs.existsSync(path.resolve(parentAnalysisDir, 'early_season_ramp_sg_total.json'));
   const parentHasRegression = parentRegressionDir && fs.existsSync(path.resolve(parentRegressionDir, 'course_history_regression.json'));
-  const analysisOutputDir = outputDir
+  const SHOULD_RUN_PRE_EVENT_ARTIFACTS = FORCE_RUN_MODE === 'pre'
+    || (!FORCE_RUN_MODE && !POST_TOURNAMENT_HINT);
+  const analysisOutputDir = (outputDir && SHOULD_RUN_PRE_EVENT_ARTIFACTS)
     ? path.resolve((isSeedRunDir && parentHasRamp) ? seedRunsParentDir : outputDir, 'analysis')
     : null;
-  const regressionOutputDir = outputDir
+  const regressionOutputDir = (outputDir && SHOULD_RUN_PRE_EVENT_ARTIFACTS)
     ? path.resolve((isSeedRunDir && parentHasRegression) ? seedRunsParentDir : outputDir, 'course_history_regression')
     : null;
   const dryRunOutputDir = outputDir
@@ -5682,13 +6198,12 @@ async function runAdaptiveOptimizer() {
   process.env.PRE_TOURNAMENT_EVENT_ID = String(CURRENT_EVENT_ID || '');
   process.env.PRE_TOURNAMENT_SEASON = String(CURRENT_SEASON || '');
 
-  const SHOULD_RUN_PRE_EVENT_ARTIFACTS = FORCE_RUN_MODE === 'pre'
-    || (!FORCE_RUN_MODE && !POST_TOURNAMENT_HINT);
   const rampSummary = SHOULD_RUN_PRE_EVENT_ARTIFACTS
     ? ensureEarlySeasonRampSummary({
         outputDir: analysisOutputDir || outputDir,
         metric: 'sg_total',
-        dataDir: DATA_DIR || DATA_ROOT_DIR
+        dataDir: DATA_DIR || DATA_ROOT_DIR,
+        apiYears: OVERRIDE_API_YEARS
       })
     : null;
   const rampPlayers = Array.isArray(rampSummary?.payload?.players)
@@ -6031,14 +6546,40 @@ async function runAdaptiveOptimizer() {
   logSnapshotFreshness({ label: 'DataGolf approach skill', snapshot: approachSkillSnapshot, ttlHours: DATAGOLF_APPROACH_TTL_HOURS });
 
   ensureDirectory(APPROACH_SNAPSHOT_DIR);
-  let approachSnapshotL24 = { source: 'csv_primary', path: APPROACH_SNAPSHOT_L24_PATH, payload: null };
-  let approachSnapshotL12 = { source: 'csv_primary', path: APPROACH_SNAPSHOT_L12_PATH, payload: null };
-  let approachSnapshotYtd = { source: 'csv_primary', path: APPROACH_SNAPSHOT_YTD_LATEST_PATH, payload: null };
+  let approachSnapshotL24 = loadApproachSnapshotFromDisk(APPROACH_SNAPSHOT_L24_PATH);
+  let approachSnapshotL12 = loadApproachSnapshotFromDisk(APPROACH_SNAPSHOT_L12_PATH);
+  let approachSnapshotYtd = loadApproachSnapshotFromDisk(APPROACH_SNAPSHOT_YTD_LATEST_PATH);
+
+  if (!approachSnapshotL12?.payload) {
+    const latestL12Archive = listApproachSnapshotArchives().find(entry => entry.period === 'l12');
+    if (latestL12Archive?.path && fs.existsSync(latestL12Archive.path)) {
+      approachSnapshotL12 = loadApproachSnapshotFromDisk(latestL12Archive.path);
+      if (approachSnapshotL12?.payload) {
+        console.log(`ℹ️  Loaded L12 approach snapshot from archive (${path.basename(latestL12Archive.path)}).`);
+      }
+    }
+  }
 
   if (shouldFetchApi) {
-    approachSnapshotL24 = { source: 'unavailable', path: APPROACH_SNAPSHOT_L24_PATH, payload: null };
-    approachSnapshotL12 = { source: 'unavailable', path: APPROACH_SNAPSHOT_L12_PATH, payload: null };
-    approachSnapshotYtd = { source: 'unavailable', path: APPROACH_SNAPSHOT_YTD_LATEST_PATH, payload: null };
+    if (!approachSnapshotL24?.payload) {
+      try {
+        approachSnapshotL24 = await getOrCreateApproachSnapshot({
+          period: 'l24',
+          snapshotPath: APPROACH_SNAPSHOT_L24_PATH,
+          apiKey: DATAGOLF_API_KEY,
+          cacheDir: null,
+          ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
+          season: CURRENT_SEASON,
+          eventId: CURRENT_EVENT_ID,
+          isPostTournament: POST_TOURNAMENT_HINT
+        });
+        if (approachSnapshotL24?.payload?.last_updated) {
+          console.log(`✓ Approach snapshot l24 ready (${approachSnapshotL24.source}, updated ${approachSnapshotL24.payload.last_updated})`);
+        }
+      } catch (error) {
+        console.warn(`ℹ️  Approach snapshot l24 fetch failed: ${error.message}`);
+      }
+    }
 
     if (SHOULD_FETCH_APPROACH_ARCHIVES) {
       try {
@@ -6059,7 +6600,11 @@ async function runAdaptiveOptimizer() {
         console.warn(`ℹ️  Approach snapshot l12 fetch failed: ${error.message}`);
       }
     } else {
-      console.log('ℹ️  Skipping L12 approach snapshot (not end-of-season post-tournament run).');
+      if (approachSnapshotL12?.payload) {
+        console.log('ℹ️  Skipping L12 approach snapshot refresh (not end-of-season post-tournament run; cached snapshot found).');
+      } else {
+        console.log('ℹ️  Skipping L12 approach snapshot (not end-of-season post-tournament run).');
+      }
     }
 
     if (SHOULD_REFRESH_YTD) {
@@ -6076,7 +6621,11 @@ async function runAdaptiveOptimizer() {
         console.warn(`ℹ️  Approach snapshot ytd fetch failed: ${error.message}`);
       }
     } else {
-      console.log('ℹ️  Skipping YTD approach snapshot refresh (post-tournament run).');
+      if (approachSnapshotYtd?.payload) {
+        console.log('ℹ️  Skipping YTD approach snapshot refresh (post-tournament run; cached snapshot found).');
+      } else {
+        console.log('ℹ️  Skipping YTD approach snapshot refresh (post-tournament run).');
+      }
     }
   }
 
@@ -6090,13 +6639,18 @@ async function runAdaptiveOptimizer() {
       const fieldTtlMs = IS_POST_TOURNAMENT_RUN
         ? DATAGOLF_FIELD_TTL_HOURS * 60 * 60 * 1000
         : 0;
+      const fieldCacheSlug = normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback);
       fieldUpdatesSnapshot = await getDataGolfFieldUpdates({
         apiKey: DATAGOLF_API_KEY,
         cacheDir: DATAGOLF_CACHE_DIR,
         ttlMs: fieldTtlMs,
         allowStale: true,
+        preferCache: true,
         tour: DATAGOLF_FIELD_TOUR,
-        fileFormat: 'json'
+        cacheSlug: fieldCacheSlug,
+        fileFormat: 'json',
+        expectedEventId: CURRENT_EVENT_ID,
+        expectedEventName: TOURNAMENT_NAME || tournamentNameFallback
       });
 
       if (fieldUpdatesSnapshot?.payload?.event_name) {
@@ -6113,10 +6667,12 @@ async function runAdaptiveOptimizer() {
     }
   }
 
+  let fieldUpdatesMismatch = false;
   if (fieldUpdatesSnapshot?.payload?.event_name && TOURNAMENT_NAME) {
     const expected = normalizeNameForMatch(TOURNAMENT_NAME);
     const actual = normalizeNameForMatch(fieldUpdatesSnapshot.payload.event_name);
     if (expected && actual && expected !== actual) {
+      fieldUpdatesMismatch = true;
       console.warn(`⚠️  Field updates event mismatch: expected ${TOURNAMENT_NAME}, got ${fieldUpdatesSnapshot.payload.event_name}`);
     }
   }
@@ -6124,8 +6680,47 @@ async function runAdaptiveOptimizer() {
     const expectedId = String(CURRENT_EVENT_ID).trim();
     const actualId = String(fieldUpdatesSnapshot.payload.event_id).trim();
     if (expectedId && actualId && expectedId !== actualId) {
+      fieldUpdatesMismatch = true;
       console.warn(`⚠️  Field updates event_id mismatch: expected ${expectedId}, got ${actualId}`);
     }
+  }
+  if (fieldUpdatesMismatch && shouldFetchApi && DATAGOLF_API_KEY) {
+    console.warn('⚠️  Field updates cache mismatch; retrying DataGolf API for expected event.');
+    try {
+      const fieldCacheSlug = normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback);
+      const refreshed = await getDataGolfFieldUpdates({
+        apiKey: DATAGOLF_API_KEY,
+        cacheDir: DATAGOLF_CACHE_DIR,
+        ttlMs: 0,
+        allowStale: false,
+        preferCache: false,
+        tour: DATAGOLF_FIELD_TOUR,
+        cacheSlug: fieldCacheSlug,
+        fileFormat: 'json',
+        expectedEventId: CURRENT_EVENT_ID,
+        expectedEventName: TOURNAMENT_NAME || tournamentNameFallback
+      });
+      if (refreshed?.payload?.event_name) {
+        fieldUpdatesSnapshot = refreshed;
+        fieldUpdatesMismatch = false;
+        if (TOURNAMENT_NAME) {
+          const expected = normalizeNameForMatch(TOURNAMENT_NAME);
+          const actual = normalizeNameForMatch(refreshed.payload.event_name);
+          if (expected && actual && expected !== actual) fieldUpdatesMismatch = true;
+        }
+        if (refreshed?.payload?.event_id && CURRENT_EVENT_ID) {
+          const expectedId = String(CURRENT_EVENT_ID).trim();
+          const actualId = String(refreshed.payload.event_id).trim();
+          if (expectedId && actualId && expectedId !== actualId) fieldUpdatesMismatch = true;
+        }
+      }
+    } catch (error) {
+      console.warn(`ℹ️  Field updates API retry failed: ${error.message}`);
+    }
+  }
+  if (fieldUpdatesMismatch && (FORCE_RUN_MODE === 'pre' || !POST_TOURNAMENT_HINT)) {
+    console.warn('⚠️  Field updates mismatch during pre-tournament run; ignoring field updates payload for weather calculations.');
+    fieldUpdatesSnapshot = { ...fieldUpdatesSnapshot, payload: null };
   }
 
   logSnapshotFreshness({ label: 'DataGolf field updates', snapshot: fieldUpdatesSnapshot, ttlHours: DATAGOLF_FIELD_TTL_HOURS });
@@ -6258,6 +6853,7 @@ async function runAdaptiveOptimizer() {
   if (validationCourseType) {
     if (!applyValidationOutputs) {
       console.log('ℹ️  Validation outputs loaded for reporting only (no template/constraint influence).');
+      console.log('   To apply validation templates/constraints, set APPLY_VALIDATION_OUTPUTS=true.');
     } else {
       const validationWeightsForType = validationData.weightTemplates[validationCourseType] || [];
       const validationSummaryForType = validationData.typeSummaries[validationCourseType] || [];
@@ -6282,6 +6878,7 @@ async function runAdaptiveOptimizer() {
       validationTemplateName = `VALIDATION_${validationCourseType}`;
       templateConfigs[validationTemplateName] = validationTemplateConfig;
       console.log(`✓ Loaded validation template: ${validationTemplateName}`);
+      console.log('ℹ️  Validation template is included in Step 1d template testing.');
     }
   }
 
@@ -6327,6 +6924,23 @@ async function runAdaptiveOptimizer() {
     const dgId = row && (row['dg_id'] || row.dg_id || row.dgId || row['DG ID']);
     return String(dgId || '').trim().length > 0;
   });
+  if (fieldCsvRows.length > 0) {
+    const normalizedCsvField = fieldCsvRows
+      .map(normalizeFieldRow)
+      .filter(Boolean);
+    fieldUpdatesSnapshot = {
+      source: 'csv_field',
+      path: FIELD_PATH,
+      payload: {
+        event_id: CURRENT_EVENT_ID ? String(CURRENT_EVENT_ID).trim() : null,
+        event_name: TOURNAMENT_NAME || tournamentNameFallback || null,
+        tour: DATAGOLF_FIELD_TOUR || null,
+        field: normalizedCsvField
+      }
+    };
+    fieldUpdatesMismatch = false;
+    console.log(`✓ Field updates sourced from Tournament Field CSV (${normalizedCsvField.length} players).`);
+  }
   if (fieldCsvRows.length > 0) {
     console.log(`✓ Loaded field (CSV): ${fieldData.length} players`);
   } else if (fieldApiRows.length > 0) {
@@ -6374,14 +6988,46 @@ async function runAdaptiveOptimizer() {
   }
   const fieldIdSetForDelta = new Set(
     fieldData
-      .map(row => String(row?.['dg_id'] || '').trim())
+      .map(row => normalizeDgIdValue(row?.['dg_id'] ?? row?.dg_id ?? row?.dgId ?? row?.['DG ID']))
       .filter(Boolean)
   );
   const countApproachRowsInField = rows => (rows || []).reduce((count, row) => {
-    const dgId = String(row?.dg_id || row?.['dg_id'] || '').trim();
+    const dgId = normalizeDgIdValue(row?.dg_id ?? row?.['dg_id'] ?? row?.dgId);
     if (!dgId) return count;
     return fieldIdSetForDelta.has(dgId) ? count + 1 : count;
   }, 0);
+
+    const formatApproachSourceDetail = (sourceKey, rows) => {
+      const rowCount = Array.isArray(rows) ? rows.length : 0;
+      if (sourceKey === 'event_only') {
+        const preName = approachEventOnlyMeta?.pre?.path ? path.basename(approachEventOnlyMeta.pre.path) : 'n/a';
+        const postName = approachEventOnlyMeta?.post?.path ? path.basename(approachEventOnlyMeta.post.path) : 'n/a';
+        const overlapPct = typeof approachEventOnlyMeta?.fieldOverlapPct === 'number'
+          ? `${(approachEventOnlyMeta.fieldOverlapPct * 100).toFixed(1)}%`
+          : 'n/a';
+        return `event_only (rows=${rowCount}, pre=${preName}, post=${postName}, overlap=${overlapPct})`;
+      }
+      if (sourceKey === 'snapshot_ytd') {
+        const ytdLabel = approachSnapshotYtd?.path ? path.basename(approachSnapshotYtd.path) : 'approach_ytd_latest.json';
+        return `snapshot_ytd (rows=${rowCount}, file=${ytdLabel})`;
+      }
+      if (sourceKey === 'api_fallback') {
+        const period = String(approachSkillSnapshot?.payload?.time_period || DATAGOLF_APPROACH_PERIOD || '').trim().toLowerCase() || 'unknown';
+        return `approach_skill_api (rows=${rowCount}, period=${period})`;
+      }
+      if (sourceKey === 'csv_primary') {
+        const csvName = APPROACH_PATH ? path.basename(APPROACH_PATH) : 'approach.csv';
+        return `csv_primary (rows=${rowCount}, file=${csvName})`;
+      }
+      return `${sourceKey || 'none'} (rows=${rowCount})`;
+    };
+
+    const formatHistorySourceDetail = meta => {
+      if (!meta) return 'unknown';
+      const api = meta.api || {};
+      const csv = meta.csv || {};
+      return `refreshPolicy=${meta.refreshPolicy}, api(cache=${api.cache || 0}, stale=${api.cacheStale || 0}, api=${api.api || 0}, missingKey=${api.missingKey || 0}, missingYear=${api.missingYear || 0}, errors=${api.errors || 0}), csv(files=${csv.files || 0}, rows=${csv.rows || 0})`;
+    };
   
 
   // Use robust, merged-source loader for historical rounds
@@ -6404,7 +7050,7 @@ async function runAdaptiveOptimizer() {
   const historyTtlMs = IS_POST_TOURNAMENT_RUN
     ? 0
     : DATAGOLF_HISTORICAL_TTL_HOURS * 60 * 60 * 1000;
-  let historyData = await collectRecords({
+  const historyCollection = await collectRecords({
     years: lastFiveYears,
     tours,
     dataDir: DATA_DIR || DATA_ROOT_DIR,
@@ -6413,14 +7059,19 @@ async function runAdaptiveOptimizer() {
     datagolfHistoricalTtlMs: historyTtlMs,
     getDataGolfHistoricalRounds,
     preferApi: true,
-    preferCache: historyPreferCache
+    preferCache: historyPreferCache,
+    returnMeta: true
   });
-  historyData = extractHistoricalRowsFromSnapshotPayload(historyData);
+  let historyData = extractHistoricalRowsFromSnapshotPayload(historyCollection?.rows || historyCollection);
+  const historyMeta = historyCollection?.meta || null;
   if (!historyData || historyData.length === 0) {
     console.error('❌ Unable to load historical rounds (no data found in JSON, CSV, or API).');
     process.exit(1);
   }
   console.log(`✓ Loaded history (robust merged-source): ${historyData.length} rounds`);
+  if (historyMeta) {
+    console.log(`ℹ️  History source: refreshPolicy=${historyMeta.refreshPolicy}, api(cache=${historyMeta.api.cache}, stale=${historyMeta.api.cacheStale}, api=${historyMeta.api.api}, missingKey=${historyMeta.api.missingKey}, missingYear=${historyMeta.api.missingYear}, errors=${historyMeta.api.errors}), csv(files=${historyMeta.csv.files}, rows=${historyMeta.csv.rows})`);
+  }
 
   const eventIdStr = String(CURRENT_EVENT_ID);
   const seasonStr = String(effectiveSeason);
@@ -6515,21 +7166,30 @@ async function runAdaptiveOptimizer() {
   console.log(`✓ Loaded approach: ${approachData.length} rows (source: ${approachSourceLabel})`);
 
   const hasApproachCsv = approachCsvRows.length > 0;
-  const approachSnapshotRows = hasApproachCsv
-    ? { l24: [], l12: [], ytd: [] }
-    : {
-        l24: extractApproachRowsFromJson(approachSnapshotL24?.payload),
-        l12: extractApproachRowsFromJson(approachSnapshotL12?.payload),
-        ytd: extractApproachRowsFromJson(approachSnapshotYtd?.payload)
-      };
+  const approachSnapshotRows = {
+    l24: extractApproachRowsFromJson(approachSnapshotL24?.payload),
+    l12: extractApproachRowsFromJson(approachSnapshotL12?.payload),
+    ytd: extractApproachRowsFromJson(approachSnapshotYtd?.payload)
+  };
+  const approachSkillPeriod = String(approachSkillSnapshot?.payload?.time_period || '').trim().toLowerCase();
 
-  if (!hasApproachCsv && approachSkillRows.length > 0) {
-    const skillPeriod = String(approachSkillSnapshot?.payload?.time_period || '').trim().toLowerCase();
-    if (skillPeriod === 'l12' && approachSnapshotRows.l12.length === 0) {
+  if (approachSnapshotRows.l12.length === 0) {
+    const latestL12 = resolveLatestApproachSnapshotArchive('l12');
+    if (latestL12?.payload) {
+      approachSnapshotRows.l12 = extractApproachRowsFromJson(latestL12.payload);
+      if (approachSnapshotRows.l12.length > 0) {
+        approachSnapshotL12 = latestL12;
+        console.log(`ℹ️  Loaded L12 approach snapshot from archive for validation (${path.basename(latestL12.path)}).`);
+      }
+    }
+  }
+
+  if (approachSkillRows.length > 0) {
+    if (approachSkillPeriod === 'l12' && approachSnapshotRows.l12.length === 0) {
       approachSnapshotRows.l12 = approachSkillRows;
-    } else if (skillPeriod === 'l24' && approachSnapshotRows.l24.length === 0) {
+    } else if (approachSkillPeriod === 'l24' && approachSnapshotRows.l24.length === 0) {
       approachSnapshotRows.l24 = approachSkillRows;
-    } else if (skillPeriod === 'ytd' && approachSnapshotRows.ytd.length === 0) {
+    } else if (approachSkillPeriod === 'ytd' && approachSnapshotRows.ytd.length === 0) {
       approachSnapshotRows.ytd = approachSkillRows;
     }
   }
@@ -6544,6 +7204,8 @@ async function runAdaptiveOptimizer() {
     approachDataCurrentSource = 'api_fallback';
   }
 
+  let approachEventOnlyAvailable = false;
+
   if (hasApproachCsv) {
     const fieldCount = countApproachRowsInField(approachData);
     console.log(`✓ Using approach CSV as primary for current season (${approachData.length} rows, field overlap ${fieldCount}/${fieldIdSetForDelta.size || 'n/a'})`);
@@ -6553,11 +7215,16 @@ async function runAdaptiveOptimizer() {
     console.log(`✓ Using YTD approach snapshot for current season (${approachSnapshotRows.ytd.length} rows, file: ${ytdLabel}, field overlap ${fieldCount}/${fieldIdSetForDelta.size || 'n/a'})`);
   } else if (approachSkillRows.length > 0) {
     const fieldCount = countApproachRowsInField(approachSkillRows);
-    const skillPeriod = String(approachSkillSnapshot?.payload?.time_period || DATAGOLF_APPROACH_PERIOD || '').trim().toLowerCase() || 'unknown';
+    const skillPeriod = approachSkillPeriod || String(DATAGOLF_APPROACH_PERIOD || '').trim().toLowerCase() || 'unknown';
     console.log(`✓ Using approach skill snapshot as fallback for current season (${approachSkillRows.length} rows, period: ${skillPeriod}, field overlap ${fieldCount}/${fieldIdSetForDelta.size || 'n/a'})`);
   } else {
     console.log('ℹ️  Approach data unavailable (no CSV or snapshots).');
   }
+
+  console.log('ℹ️  Approach usage summary:');
+  console.log(`   - Current-season rankings (baseline/optimization): ${approachDataCurrentSource}`);
+  console.log(`   - Step 1b (event-only correlations): ${approachEventOnlyAvailable ? 'event_only' : 'latest_snapshot_fallback'}`);
+  console.log(`   - Step 1c (event+similar+putting correlations): latest snapshot (${approachDataCurrentSource})`);
 
   const fieldIntegritySummary = evaluateFieldIntegrity({
     fieldData,
@@ -6591,7 +7258,9 @@ async function runAdaptiveOptimizer() {
       if (approachDataCurrent.length > 0) {
         meta.period = 'ytd';
         meta.source = approachDataCurrentSource;
-        meta.leakageFlag = approachDataCurrentSource === 'snapshot_ytd' ? 'as_of_date' : 'approximation';
+        const isYtdSnapshot = approachDataCurrentSource === 'snapshot_ytd'
+          || (approachDataCurrentSource === 'api_fallback' && approachSkillPeriod === 'ytd');
+        meta.leakageFlag = isYtdSnapshot ? 'as_of_date' : 'approximation';
         return { rows: approachDataCurrent, meta };
       }
       return { rows: [], meta };
@@ -6698,6 +7367,237 @@ async function runAdaptiveOptimizer() {
   } else {
     OUTPUT_DIR = postEventOutputDir;
     ensureDirectory(OUTPUT_DIR);
+  }
+
+  let approachDataForTop20 = approachDataCurrent;
+  let approachDataForTop20Source = approachDataCurrentSource;
+  let approachEventOnlyMeta = null;
+
+  if (HAS_CURRENT_RESULTS) {
+    const overridePre = resolveApproachOverrideEntry(APPROACH_EVENT_ONLY_PRE, 'approach_override_pre');
+    const overridePost = resolveApproachOverrideEntry(APPROACH_EVENT_ONLY_POST, 'approach_override_post');
+    const hasOverridePair = !!(overridePre && overridePost);
+    const eventDateInfo = resolveEventStartDateFromManifest({
+      dataRootDir: DATA_ROOT_DIR,
+      season: effectiveSeason,
+      eventId: CURRENT_EVENT_ID,
+      tournamentSlug: normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
+      tournamentName: TOURNAMENT_NAME || tournamentNameFallback
+    });
+    if (overridePre || overridePost || eventDateInfo?.time) {
+      const candidates = buildApproachSnapshotCandidates({
+        dataRootDir: DATA_ROOT_DIR,
+        season: effectiveSeason
+      });
+      const ytdCandidates = candidates.filter(entry => entry?.source === 'snapshot_archive' || entry?.source === 'snapshot_latest');
+      const manifestFallback = buildManifestApproachCsvFallback({
+        dataRootDir: DATA_ROOT_DIR,
+        season: effectiveSeason,
+        eventId: CURRENT_EVENT_ID,
+        tournamentSlug: normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
+        tournamentName: TOURNAMENT_NAME || tournamentNameFallback
+      });
+      if (manifestFallback?.currentEntry || manifestFallback?.nextEntry) {
+        const currentLabel = manifestFallback.currentEntry
+          ? `${manifestFallback.currentEntry.eventId || 'n/a'}:${manifestFallback.currentEntry.tournamentSlug || manifestFallback.currentEntry.tournamentName || 'unknown'}@${manifestFallback.currentEntry.date || 'n/a'}`
+          : 'none';
+        const nextLabel = manifestFallback.nextEntry
+          ? `${manifestFallback.nextEntry.eventId || 'n/a'}:${manifestFallback.nextEntry.tournamentSlug || manifestFallback.nextEntry.tournamentName || 'unknown'}@${manifestFallback.nextEntry.date || 'n/a'}`
+          : 'none';
+        const manifestPreLabel = manifestFallback.pre?.path
+          ? `${path.basename(manifestFallback.pre.path)} (${manifestFallback.pre.source || 'approach_csv'})`
+          : 'none';
+        const manifestPostLabel = manifestFallback.post?.path
+          ? `${path.basename(manifestFallback.post.path)} (${manifestFallback.post.source || 'approach_csv'})`
+          : 'none';
+        console.log(`ℹ️  Manifest approach entries: current=${currentLabel}, next=${nextLabel}.`);
+        console.log(`ℹ️  Manifest approach CSVs: pre=${manifestPreLabel}, post=${manifestPostLabel}.`);
+      } else {
+        console.log('ℹ️  Manifest approach entries: none found for event-only fallback.');
+      }
+      let pre = null;
+      let post = null;
+      if (eventDateInfo?.time) {
+        ({ pre, post } = selectApproachSnapshotsForEvent({
+          eventDateMs: eventDateInfo.time,
+          candidates: ytdCandidates
+        }));
+      }
+      if (!pre || !post) {
+        pre = null;
+        post = null;
+        const preHasSnapshot = hasSnapshotArchiveForDate(ytdCandidates, manifestFallback?.currentEntry?.date);
+        const postHasSnapshot = hasSnapshotArchiveForDate(ytdCandidates, manifestFallback?.nextEntry?.date);
+        if ((!pre || (manifestFallback?.currentEntry?.date && !preHasSnapshot)) && manifestFallback?.pre) {
+          pre = manifestFallback.pre;
+        }
+        if ((!post || (manifestFallback?.nextEntry?.date && !postHasSnapshot)) && manifestFallback?.post) {
+          post = manifestFallback.post;
+        }
+      }
+
+      if (overridePre) {
+        pre = overridePre;
+      }
+      if (overridePost) {
+        post = overridePost;
+      }
+      if (overridePre || overridePost) {
+        console.log(`ℹ️  Using approach event-only override snapshots: pre=${overridePre ? path.basename(overridePre.path) : 'auto'}, post=${overridePost ? path.basename(overridePost.path) : 'auto'}.`);
+      }
+
+      if (!pre?.path || !post?.path) {
+        let csvPre = manifestFallback?.pre || null;
+        let csvPost = manifestFallback?.post || null;
+        if (!csvPre || !csvPost) {
+          const currentCsvPath = APPROACH_PATH && fs.existsSync(APPROACH_PATH)
+            ? APPROACH_PATH
+            : null;
+          const previousCsvPath = resolvePreviousApproachCsv(effectiveSeason, currentCsvPath);
+          if (!csvPre && previousCsvPath) {
+            csvPre = {
+              path: previousCsvPath,
+              time: (() => {
+                try {
+                  return fs.statSync(previousCsvPath).mtimeMs || 0;
+                } catch (error) {
+                  return 0;
+                }
+              })(),
+              date: null,
+              source: 'approach_csv_auto',
+              priority: 5
+            };
+          }
+          if (!csvPost && currentCsvPath) {
+            csvPost = {
+              path: currentCsvPath,
+              time: (() => {
+                try {
+                  return fs.statSync(currentCsvPath).mtimeMs || 0;
+                } catch (error) {
+                  return 0;
+                }
+              })(),
+              date: null,
+              source: 'approach_csv_auto',
+              priority: 5
+            };
+          }
+        }
+        if (csvPre?.path || csvPost?.path) {
+          if (!pre?.path && csvPre?.path) pre = csvPre;
+          if (!post?.path && csvPost?.path) post = csvPost;
+          if (pre?.path && post?.path) {
+            console.log(`ℹ️  Using approach CSVs for event-only fallback: pre=${path.basename(pre.path)}, post=${path.basename(post.path)}.`);
+          }
+        }
+      }
+
+      if (pre?.path || post?.path) {
+        const preLabel = pre?.path ? `${path.basename(pre.path)} (${pre.source || 'unknown'})` : 'none';
+        const postLabel = post?.path ? `${path.basename(post.path)} (${post.source || 'unknown'})` : 'none';
+        console.log(`ℹ️  Event-only snapshot selection: pre=${preLabel}, post=${postLabel}.`);
+      }
+
+      const allowCsvPair = pre?.source === 'approach_csv_auto' && post?.source === 'approach_csv_auto';
+      if (pre?.path && post?.path && (hasOverridePair || post.time > pre.time || allowCsvPair)) {
+        const beforeRows = loadApproachCsv(pre.path);
+        const afterRows = loadApproachCsv(post.path);
+        const eventOnlyResult = computeEventOnlyApproachRows({ beforeRows, afterRows });
+        const overlapCount = countApproachRowsInField(eventOnlyResult.rows);
+        const overlapPct = fieldIdSetForDelta.size ? overlapCount / fieldIdSetForDelta.size : 0;
+        const minApproachOverlapPct = Math.max(0, Math.min(1, getEnvNumberValue('MODEL_FIELD_MIN_APPROACH_OVERLAP', 0.4)));
+        const minPlayers = Math.max(20, Math.floor(getEnvNumberValue('MODEL_FIELD_MIN_PLAYERS', 70)));
+
+        approachEventOnlyMeta = {
+          pre: { path: pre.path, date: pre.date || null, source: pre.source || null },
+          post: { path: post.path, date: post.date || null, source: post.source || null },
+          playersWithShots: eventOnlyResult.playersWithShots,
+          rows: eventOnlyResult.rows.length,
+          fieldOverlap: overlapCount,
+          fieldOverlapPct: overlapPct
+        };
+
+        if (eventOnlyResult.rows.length > 0 && overlapPct >= minApproachOverlapPct && eventOnlyResult.playersWithShots >= minPlayers) {
+          approachEventOnlyAvailable = true;
+          approachDataForTop20 = eventOnlyResult.rows;
+          approachDataForTop20Source = 'event_only';
+          console.log(`✓ Event-only approach metrics enabled (pre=${path.basename(pre.path)}, post=${path.basename(post.path)}, overlap ${(overlapPct * 100).toFixed(1)}%).`);
+        } else {
+          console.log(`ℹ️  Event-only approach metrics unavailable (overlap ${(overlapPct * 100).toFixed(1)}%, players ${eventOnlyResult.playersWithShots}).`);
+        }
+      } else if (!pre?.path || !post?.path) {
+        console.log('ℹ️  Event-only approach metrics unavailable (missing pre/post snapshot sources).');
+      } else if (!hasOverridePair) {
+        console.log('ℹ️  Event-only approach metrics unavailable (pre/post snapshot timestamps not ordered).');
+      }
+    } else {
+      console.log('ℹ️  Event-only approach metrics unavailable (event start date not found in manifest).');
+    }
+  }
+
+  if (HAS_CURRENT_RESULTS && !approachEventOnlyAvailable && shouldFetchApi && DATAGOLF_API_KEY) {
+    try {
+      const refreshed = await refreshYtdApproachSnapshot({
+        apiKey: DATAGOLF_API_KEY,
+        cacheDir: null,
+        ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000
+      });
+      if (refreshed?.payload) {
+        approachSnapshotYtd = refreshed;
+        approachSnapshotRows.ytd = extractApproachRowsFromJson(refreshed.payload);
+        const candidates = buildApproachSnapshotCandidates({
+          dataRootDir: DATA_ROOT_DIR,
+          season: effectiveSeason
+        });
+        const eventDateInfo = resolveEventStartDateFromManifest({
+          dataRootDir: DATA_ROOT_DIR,
+          season: effectiveSeason,
+          eventId: CURRENT_EVENT_ID,
+          tournamentSlug: normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
+          tournamentName: TOURNAMENT_NAME || tournamentNameFallback
+        });
+        if (eventDateInfo?.time) {
+          const manifestFallback = buildManifestApproachCsvFallback({
+            dataRootDir: DATA_ROOT_DIR,
+            season: effectiveSeason,
+            eventId: CURRENT_EVENT_ID,
+            tournamentSlug: normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
+            tournamentName: TOURNAMENT_NAME || tournamentNameFallback
+          });
+          let { pre, post } = selectApproachSnapshotsForEvent({
+            eventDateMs: eventDateInfo.time,
+            candidates
+          });
+          const preHasSnapshot = hasSnapshotArchiveForDate(candidates, manifestFallback?.currentEntry?.date);
+          const postHasSnapshot = hasSnapshotArchiveForDate(candidates, manifestFallback?.nextEntry?.date);
+          if ((!pre || (manifestFallback?.currentEntry?.date && !preHasSnapshot)) && manifestFallback?.pre) {
+            pre = manifestFallback.pre;
+          }
+          if ((!post || (manifestFallback?.nextEntry?.date && !postHasSnapshot)) && manifestFallback?.post) {
+            post = manifestFallback.post;
+          }
+          if (pre?.path && post?.path && post.time > pre.time) {
+            const beforeRows = loadApproachCsv(pre.path);
+            const afterRows = loadApproachCsv(post.path);
+            const eventOnlyResult = computeEventOnlyApproachRows({ beforeRows, afterRows });
+            const overlapCount = countApproachRowsInField(eventOnlyResult.rows);
+            const overlapPct = fieldIdSetForDelta.size ? overlapCount / fieldIdSetForDelta.size : 0;
+            const minApproachOverlapPct = Math.max(0, Math.min(1, getEnvNumberValue('MODEL_FIELD_MIN_APPROACH_OVERLAP', 0.4)));
+            const minPlayers = Math.max(20, Math.floor(getEnvNumberValue('MODEL_FIELD_MIN_PLAYERS', 70)));
+            if (eventOnlyResult.rows.length > 0 && overlapPct >= minApproachOverlapPct && eventOnlyResult.playersWithShots >= minPlayers) {
+              approachEventOnlyAvailable = true;
+              approachDataForTop20 = eventOnlyResult.rows;
+              approachDataForTop20Source = 'event_only';
+              console.log(`✓ Event-only approach metrics enabled after snapshot refresh (pre=${path.basename(pre.path)}, post=${path.basename(post.path)}, overlap ${(overlapPct * 100).toFixed(1)}%).`);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.warn(`ℹ️  Event-only approach refresh failed: ${error.message}`);
+    }
   }
 
   if (!HAS_CURRENT_RESULTS && !APPROACH_DELTA_PATH) {
@@ -6983,18 +7883,34 @@ async function runAdaptiveOptimizer() {
   };
 
   const buildEventResultsFromRows = eventRows => {
-    const resultsByPlayer = new Map();
+    const numericResults = new Map();
+    const cutIds = new Set();
+
     eventRows.forEach(row => {
       const dgId = String(row['dg_id'] || '').trim();
       if (!dgId) return;
-      const finishPosition = parseFinishPosition(row['fin_text']);
-      if (!finishPosition || Number.isNaN(finishPosition)) return;
-      const existing = resultsByPlayer.get(dgId);
-      if (!existing || finishPosition < existing) {
-        resultsByPlayer.set(dgId, finishPosition);
+      const finishInfo = parseFinishStatus(row['fin_text']);
+      if (typeof finishInfo.position === 'number' && !Number.isNaN(finishInfo.position)) {
+        const existing = numericResults.get(dgId);
+        if (!existing || finishInfo.position < existing) {
+          numericResults.set(dgId, finishInfo.position);
+        }
+        return;
+      }
+      if (finishInfo.isCut) {
+        cutIds.add(dgId);
       }
     });
-    return resultsByPlayer;
+
+    const positions = Array.from(numericResults.values());
+    const fallback = positions.length ? Math.max(...positions) + 1 : null;
+    if (Number.isFinite(fallback)) {
+      cutIds.forEach(dgId => {
+        if (!numericResults.has(dgId)) numericResults.set(dgId, fallback);
+      });
+    }
+
+    return numericResults;
   };
 
   const buildEventSamples = eventRows => {
@@ -7005,7 +7921,7 @@ async function runAdaptiveOptimizer() {
 
     const ranking = runRanking({
       roundsRawData: eventRows,
-      approachRawData: approachDataCurrent,
+      approachRawData: approachDataForTop20,
       groupWeights: currentTemplate.groupWeights,
       metricWeights: currentTemplate.metricWeights,
       includeCurrentEventRounds: true
@@ -7220,8 +8136,9 @@ async function runAdaptiveOptimizer() {
   const historicalMetricCorrelations = computeHistoricalMetricCorrelations(historicalMetricSamples);
 
   console.log('---');
-  console.log('STEP 1b: CURRENT-SEASON (EVENT + SIMILAR + PUTTING) METRIC CORRELATIONS');
-  console.log('Correlate generatePlayerRankings metrics for current season using event + similar/putting courses');
+  console.log('STEP 1b: CURRENT-SEASON (EVENT ONLY) METRIC CORRELATIONS');
+  console.log('Correlate current-season event-only metrics (event rounds only; event-only approach when available)');
+  console.log(`Data usage (Step 1b): event rounds=${roundsByYear[effectiveSeason]?.length || 0}, results=${resultsCurrent.length}, approach=${formatApproachSourceDetail(approachEventOnlyAvailable ? 'event_only' : approachDataCurrentSource, approachEventOnlyAvailable ? approachDataForTop20 : approachDataCurrent)}, history=${formatHistorySourceDetail(historyMeta)}`);
   console.log('---');
 
   const currentSeasonRounds = roundsByYear[effectiveSeason] || [];
@@ -7232,6 +8149,10 @@ async function runAdaptiveOptimizer() {
     if (Number.isNaN(year)) return false;
     return String(year) === String(effectiveSeason);
   });
+  let eventOnlyGeneratedMetricCorrelations = [];
+  let eventOnlyGeneratedTop20Correlations = [];
+  let eventOnlyGeneratedTop20Logistic = null;
+  let eventOnlyGeneratedTop20CvSummary = null;
   let currentGeneratedMetricCorrelations = [];
   let currentGeneratedTop20Correlations = [];
   let currentGeneratedTop20Logistic = null;
@@ -7290,6 +8211,91 @@ async function runAdaptiveOptimizer() {
       );
     }
   }
+
+  const eventOnlyRoundsFilter = rows => rows.filter(row => {
+    const dgId = String(row['dg_id'] || '').trim();
+    if (!field2026DgIds.has(dgId)) return false;
+    const year = parseInt(String(row['year'] || row['season'] || '').trim());
+    if (Number.isNaN(year)) return false;
+    if (String(year) !== String(effectiveSeason)) return false;
+    const eventId = String(row['event_id'] || '').trim();
+    return eventId === String(CURRENT_EVENT_ID);
+  });
+
+  if (HAS_CURRENT_RESULTS) {
+    let eventOnlyRounds = eventOnlyRoundsFilter(historyData);
+
+    if (eventOnlyRounds.length === 0 && shouldFetchApi) {
+      try {
+        const eventSnapshot = await getDataGolfHistoricalRounds({
+          apiKey: DATAGOLF_API_KEY,
+          cacheDir: DATAGOLF_CACHE_DIR,
+          ttlMs: 0,
+          allowStale: true,
+          tour: DATAGOLF_HISTORICAL_TOUR,
+          eventId: String(CURRENT_EVENT_ID),
+          year: effectiveSeason,
+          fileFormat: 'json'
+        });
+        const eventRows = extractHistoricalRowsFromSnapshotPayload(eventSnapshot?.payload)
+          .map(normalizeHistoricalRoundRow)
+          .filter(Boolean);
+        if (eventRows.length > 0) {
+          historyData = historyData.concat(eventRows);
+          eventOnlyRounds = eventOnlyRoundsFilter(historyData);
+          console.log(`✓ Loaded ${eventRows.length} event rounds for Step 1b (event-only).`);
+        }
+      } catch (error) {
+        console.warn(`ℹ️  Step 1b event rounds fetch failed: ${error.message}`);
+      }
+    }
+
+    let eventOnlyApproachRows = approachEventOnlyAvailable ? approachDataForTop20 : [];
+    if (!approachEventOnlyAvailable && approachDataCurrent.length > 0) {
+      eventOnlyApproachRows = approachDataCurrent;
+      console.warn('ℹ️  Step 1b event-only approach unavailable; falling back to latest approach snapshot.');
+    }
+
+    if (eventOnlyRounds.length > 0 && eventOnlyApproachRows.length > 0) {
+      const eventOnlyTemplate = templateConfigs[CURRENT_EVENT_ID] || Object.values(templateConfigs)[0];
+      if (eventOnlyTemplate) {
+        const eventOnlyRanking = runRanking({
+          roundsRawData: eventOnlyRounds,
+          approachRawData: eventOnlyApproachRows,
+          groupWeights: eventOnlyTemplate.groupWeights,
+          metricWeights: eventOnlyTemplate.metricWeights,
+          includeCurrentEventRounds: true
+        });
+        eventOnlyGeneratedMetricCorrelations = computeGeneratedMetricCorrelations(eventOnlyRanking.players, resultsCurrent);
+        const eventOnlyMetricSpecs = GENERATED_METRIC_LABELS
+          .map((label, index) => ({ label, index }))
+          .filter(spec => spec.index >= 0);
+        eventOnlyGeneratedTop20Correlations = computeGeneratedMetricTopNCorrelationsForLabels(
+          eventOnlyRanking.players,
+          resultsCurrent,
+          eventOnlyMetricSpecs,
+          20
+        );
+        eventOnlyGeneratedTop20Logistic = trainTopNLogisticModel(
+          eventOnlyRanking.players,
+          resultsCurrent,
+          GENERATED_METRIC_LABELS,
+          { topN: 20 }
+        );
+        console.log(`✓ Computed ${eventOnlyGeneratedMetricCorrelations.length} event-only metric correlations (${CURRENT_SEASON}).`);
+      }
+    } else if (eventOnlyRounds.length === 0) {
+      console.warn(`⚠️  No current-season event rounds found; skipping Step 1b event-only correlations.`);
+    } else {
+      console.warn('⚠️  Step 1b event-only approach data unavailable; skipping Step 1b correlations.');
+    }
+  }
+
+  console.log('---');
+  console.log('STEP 1c: CURRENT-SEASON (EVENT + SIMILAR + PUTTING) METRIC CORRELATIONS');
+  console.log('Correlate generatePlayerRankings metrics for current season using event + similar/putting courses (latest approach snapshot)');
+  console.log(`Data usage (Step 1c): rounds=${currentSeasonRoundsAllEvents.length}, events=event+similar+putting, approach=${formatApproachSourceDetail(approachDataCurrentSource, approachDataCurrent)}, history=${formatHistorySourceDetail(historyMeta)}`);
+  console.log('---');
 
   if (!HAS_CURRENT_RESULTS) {
     const currentTemplate = templateConfigs[CURRENT_EVENT_ID] || Object.values(templateConfigs)[0];
@@ -7495,6 +8501,10 @@ async function runAdaptiveOptimizer() {
         ...puttingCourseIds.map(String)
       ]);
       const eventIdListForMetrics = Array.from(eventIdSetForMetrics.values());
+      const includeApproachBuckets = approachDataCurrent.length > 0;
+      TOP20_METRIC_LABELS = includeApproachBuckets
+        ? GENERATED_METRIC_LABELS.slice()
+        : GENERATED_METRIC_LABELS.filter(label => !APPROACH_BUCKET_LABELS.has(label));
       const top20MetricSpecs = TOP20_METRIC_LABELS
         .map(label => ({ label, index: GENERATED_METRIC_LABELS.indexOf(label) }))
         .filter(spec => spec.index >= 0);
@@ -7513,9 +8523,12 @@ async function runAdaptiveOptimizer() {
       });
 
       if (roundsForMetrics.length > 0) {
-        console.log(`ℹ️  Using ${roundsForMetrics.length} current-season rounds (season=${effectiveSeason}, event + similar + putting) for metric correlations.`);
+        console.log(`ℹ️  Using ${roundsForMetrics.length} current-season rounds (field-filtered; season=${effectiveSeason}, event + similar + putting) for metric correlations.`);
+        if (currentSeasonRoundsAllEvents.length > 0) {
+          console.log(`   Total current-season rounds (all players): ${currentSeasonRoundsAllEvents.length}`);
+        }
       } else {
-        console.warn('⚠️  No current-season rounds found for event + similar + putting courses; skipping Step 1b correlations.');
+        console.warn('⚠️  No current-season rounds found for event + similar + putting courses; skipping Step 1c correlations.');
       }
       if (roundsForMetrics.length > 0) {
         const currentRankingForMetrics = runRanking({
@@ -7700,7 +8713,7 @@ async function runAdaptiveOptimizer() {
       console.log(`✓ Computed ${currentGeneratedMetricCorrelations.length} metric correlations for ${CURRENT_SEASON} (event + similar + putting)`);
     }
   } else {
-    console.warn(`⚠️  No ${CURRENT_SEASON} rounds found (event + similar + putting); skipping Step 1b correlations.`);
+    console.warn(`⚠️  No ${CURRENT_SEASON} rounds found (event + similar + putting); skipping Step 1c correlations.`);
   }
 
   if (currentGeneratedTop20Correlations.length > 0 || (currentGeneratedTop20Logistic && currentGeneratedTop20Logistic.success)) {
@@ -8328,8 +9341,9 @@ async function runAdaptiveOptimizer() {
   }
 
   console.log('---');
-  console.log('STEP 1c: CURRENT-SEASON TEMPLATE BASELINE');
+  console.log('STEP 1d: CURRENT-SEASON TEMPLATE BASELINE');
   console.log(`Compare baseline templates for ${CURRENT_SEASON} only`);
+  console.log(`Data usage (Step 1d): rounds=${currentSeasonRoundsAllEvents.length}, results=${resultsCurrent.length}, approach=${formatApproachSourceDetail(approachDataCurrentSource, approachDataCurrent)}, validationTemplates=${applyValidationOutputs ? 'enabled' : 'reporting_only'}, history=${formatHistorySourceDetail(historyMeta)}`);
   console.log('---');
 
   const templateResults = [];
@@ -8447,6 +9461,7 @@ async function runAdaptiveOptimizer() {
   console.log('---');
   console.log('STEP 2: TOP-20 GROUP WEIGHT TUNING');
   console.log(`Tune lower-importance groups for Top-20 outcomes (event ${CURRENT_EVENT_ID}, all years)`);
+  console.log(`Data usage (Step 2): roundsByYear=${Object.keys(roundsByYear).length} years, resultsByYear=${Object.keys(resultsByYear).length} years, approach=${formatApproachSourceDetail(approachDataCurrentSource, approachDataCurrent)}, history=${formatHistorySourceDetail(historyMeta)}`);
   console.log('---');
 
   const step2BaseTemplate = optimizationTemplate;
@@ -8543,6 +9558,7 @@ async function runAdaptiveOptimizer() {
   console.log('STEP 3: WEIGHT OPTIMIZATION');
   console.log('Randomized search starting from best template baseline');
   console.log('Using current season results for optimization (current-year field only)');
+  console.log(`Data usage (Step 3): rounds=${getCurrentSeasonRoundsForRanking(resolveIncludeCurrentEventRounds(currentEventRoundsDefaults.currentSeasonOptimization)).length}, results=${resultsCurrent.length}, approach=${formatApproachSourceDetail(approachDataCurrentSource, approachDataCurrent)}, history=${formatHistorySourceDetail(historyMeta)}`);
   console.log('---');
 
   // Random search from best template
@@ -8655,6 +9671,7 @@ async function runAdaptiveOptimizer() {
   console.log('---');
   console.log('STEP 4a/4b: MULTI-YEAR VALIDATION');
   console.log('Test baseline vs optimized weights across all available years');
+  console.log(`Data usage (Step 4): years=${validationYears.length}, approachPolicy=${VALIDATION_APPROACH_MODE}, snapshots=current:${approachDataCurrentSource}/last:${approachSnapshotRows.l12.length ? 'l12' : 'none'}/older:${approachSnapshotRows.l24.length ? 'l24' : 'none'}, history=${formatHistorySourceDetail(historyMeta)}`);
   console.log('---');
 
   const skillRatingsValidationValue = buildSkillRatingsValidation(
@@ -9604,9 +10621,13 @@ async function runAdaptiveOptimizer() {
   const validationTemplateSourceLabel = validationData?.weightTemplatesPath
     ? path.basename(validationData.weightTemplatesPath)
     : null;
-  const validationTypeToUpdate = validationCourseType && STANDARD_TEMPLATES.has(validationCourseType)
-    ? validationCourseType
-    : null;
+  const standardTemplateKey = (() => {
+    const rawKey = courseContextEntry?.templateKey || courseContextEntry?.courseType || null;
+    if (!rawKey) return null;
+    const normalized = String(rawKey).trim().toUpperCase();
+    return STANDARD_TEMPLATES.has(normalized) ? normalized : null;
+  })();
+  const validationTypeToUpdate = standardTemplateKey;
   const validationTemplateResult = validationTemplateName
     ? templateResults.find(result => result.name === validationTemplateName)
     : null;
@@ -9653,7 +10674,7 @@ async function runAdaptiveOptimizer() {
     });
   });
   textLines.push('');
-  textLines.push(`STEP 1b: CURRENT-SEASON GENERATED METRICS (${CURRENT_SEASON}, event + similar + putting)`);
+  textLines.push(`STEP 1b: CURRENT-SEASON EVENT-ONLY METRICS (${CURRENT_SEASON}, event only)`);
   textLines.push('Functions: runRanking (optimizer.js) -> buildPlayerData (utilities/dataPrep.js) -> generatePlayerRankings (modelCore.js)');
   textLines.push('Additional: computeGeneratedMetricCorrelations, computeGeneratedMetricTopNCorrelations, trainTopNLogisticModel, crossValidateTopNLogisticByEvent, buildSuggestedMetricWeights, buildSuggestedGroupWeights (optimizer.js)');
   textLines.push(`APPROACH DELTA PRIOR (${APPROACH_DELTA_PRIOR_LABEL}):`);
@@ -9705,13 +10726,34 @@ async function runAdaptiveOptimizer() {
     });
   }
   textLines.push('');
-  textLines.push(`CURRENT-SEASON means season ${CURRENT_SEASON} only (event + similar + putting events).`);
+  textLines.push(`EVENT-ONLY means season ${CURRENT_SEASON} only (current event rounds only).`);
   const reportSimilarCourseIds = normalizeIdList(sharedConfig.similarCourseIds);
   const reportPuttingCourseIds = normalizeIdList(sharedConfig.puttingCourseIds);
   const reportSimilarBlend = clamp01(sharedConfig.similarCoursesWeight, 0.3);
   const reportPuttingBlend = clamp01(sharedConfig.puttingCoursesWeight, 0.35);
   const reportEventIds = [String(CURRENT_EVENT_ID), ...reportSimilarCourseIds.map(String), ...reportPuttingCourseIds.map(String)];
   const reportEventIdList = Array.from(new Set(reportEventIds)).join(', ');
+  textLines.push(`EVENT-ONLY GENERATED METRIC CORRELATIONS (${CURRENT_SEASON}, event only):`);
+  if (eventOnlyGeneratedMetricCorrelations.length === 0) {
+    textLines.push(`  No ${CURRENT_SEASON} event-only metric correlations computed.`);
+  } else {
+    eventOnlyGeneratedMetricCorrelations.forEach(entry => {
+      textLines.push(`  ${entry.index}. ${entry.label}: Corr=${entry.correlation.toFixed(4)}, Samples=${entry.samples}`);
+    });
+  }
+  textLines.push('');
+  textLines.push(`EVENT-ONLY GENERATED METRIC TOP-20 SIGNAL (${CURRENT_SEASON}, event only):`);
+  if (eventOnlyGeneratedTop20Correlations.length === 0) {
+    textLines.push(`  No ${CURRENT_SEASON} event-only top-20 correlations computed.`);
+  } else {
+    eventOnlyGeneratedTop20Correlations.forEach(entry => {
+      textLines.push(`  ${entry.index}. ${entry.label}: Corr=${entry.correlation.toFixed(4)}, Samples=${entry.samples}`);
+    });
+  }
+  textLines.push('');
+  textLines.push('');
+  textLines.push(`STEP 1c: CURRENT-SEASON GENERATED METRICS (${CURRENT_SEASON}, event + similar + putting)`);
+  textLines.push(`CURRENT-SEASON means season ${CURRENT_SEASON} only (event + similar + putting events).`);
   textLines.push(`Metric events (current season): [${reportEventIdList}]`);
   textLines.push(`Blend settings: similarCourseEvents=${reportSimilarCourseIds.length}, similarBlend=${reportSimilarBlend.toFixed(2)}, puttingCourseEvents=${reportPuttingCourseIds.length}, puttingBlend=${reportPuttingBlend.toFixed(2)} (SG Putting only)`);
   textLines.push(`CURRENT-SEASON GENERATED METRIC CORRELATIONS (${CURRENT_SEASON}, event + similar + putting):`);
@@ -9803,7 +10845,7 @@ async function runAdaptiveOptimizer() {
     });
   }
   textLines.push('');
-  textLines.push(`STEP 1c: CURRENT-YEAR TEMPLATE BASELINE (${CURRENT_SEASON})`);
+  textLines.push(`STEP 1d: CURRENT-YEAR TEMPLATE BASELINE (${CURRENT_SEASON})`);
   textLines.push('Functions: runRanking, evaluateRankings, computeTemplateCorrelationAlignment (optimizer.js)');
   textLines.push('PAST PERFORMANCE WEIGHTING (course history regression):');
   textLines.push(`  Enabled: ${pastPerformanceWeightSummary.enabled ? 'yes' : 'no'}`);
@@ -9870,7 +10912,7 @@ async function runAdaptiveOptimizer() {
     }
     textLines.push('');
   }
-  textLines.push('TEMPLATES TESTED (Step 1c):');
+  textLines.push('TEMPLATES TESTED (Step 1d):');
   Object.keys(templateConfigs).sort().forEach(name => {
     textLines.push(`  - ${name}`);
   });
@@ -10286,7 +11328,8 @@ async function runAdaptiveOptimizer() {
     console.log('ℹ️  Event template not written (optimized weights match baseline).');
   }
 
-  const validationTemplatesToWrite = ((WRITE_VALIDATION_TEMPLATES || WRITE_TEMPLATES || allowDryRunTemplateOutputs) && validationTypeToUpdate && shouldUpdateStandardTemplate)
+  const allowStandardTemplateUpdates = WRITE_VALIDATION_TEMPLATES && !(OPT_SEED_RAW || isSeedRunDir);
+  const validationTemplatesToWrite = (allowStandardTemplateUpdates && validationTypeToUpdate && shouldUpdateStandardTemplate)
     ? [buildValidationTemplateForType({
         type: validationTypeToUpdate,
         metricConfig,
@@ -10388,12 +11431,39 @@ async function runAdaptiveOptimizer() {
         tournamentName: TOURNAMENT_NAME,
         tournamentSlug: outputBaseName,
         tournamentDir,
-        eventId: CURRENT_EVENT_ID
+        eventId: CURRENT_EVENT_ID,
+        writeTemplates: WRITE_TEMPLATES,
+        dryRun: DRY_RUN,
+        dryRunDir: validationOutputsDir
       });
       console.log(`✅ Validation outputs written to: ${validationResult.outputDir}`);
     }
   } catch (error) {
     console.warn(`⚠️  Validation runner failed: ${error.message}`);
+  }
+
+  const shouldSummarizeSeeds = !!OPT_SEED_RAW || (OUTPUT_DIR && path.basename(OUTPUT_DIR) === 'seed_runs');
+  if (shouldSummarizeSeeds) {
+    const summaryScript = path.resolve(ROOT_DIR, 'scripts', 'summarizeSeedResults.js');
+    if (!fs.existsSync(summaryScript)) {
+      console.warn(`⚠️  Seed summary script not found: ${summaryScript}`);
+    } else {
+      const summaryArgs = [
+        summaryScript,
+        '--tournament', TOURNAMENT_NAME || tournamentNameFallback,
+        '--event', String(CURRENT_EVENT_ID || ''),
+        '--season', String(CURRENT_SEASON || ''),
+        '--outputDir', OUTPUT_DIR
+      ];
+      const summaryResult = spawnSync('node', summaryArgs, { stdio: 'inherit' });
+      if (summaryResult.error) {
+        console.warn(`⚠️  Seed summary failed: ${summaryResult.error.message}`);
+      } else if (summaryResult.status !== 0) {
+        console.warn(`⚠️  Seed summary exited with code ${summaryResult.status}`);
+      }
+    }
+  } else {
+    console.log('ℹ️  Seed summary skipped (not a seed run).');
   }
 }
 

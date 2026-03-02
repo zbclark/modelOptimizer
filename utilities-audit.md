@@ -402,3 +402,45 @@ Enable with `CONFIG_PARSER_WARN_BLANKS=true`.
 
 1. **Approach snapshot leakage flag** (open task in `MODEL_VALIDATION_STATUS.md`): `approachDelta.js` does not currently emit any leakage flag on its rows. There is still no row-level leakage annotation in the delta outputs.
 2. **Course context portability**: `course_context.json` cannot be committed and reused across machines without regeneration. Consider adding `build_course_context.js` to pre-run scripts or a Makefile target, and documenting that `course_context.json` is a build artifact.
+
+---
+
+## New TODOs (2026-03-02)
+
+### P0 — Must-fix (protect baseline templates)
+
+- [x] **Revert `utilities/weightTemplates.js` to last committed version.**
+  - This file must never change without explicit template-write flags.
+
+### P1 — Correctness (dry-run + validation integrity)
+
+- [ ] **Dry-run output creation:** confirm dry-run template output is generated only when explicitly enabled (no baseline writes otherwise).
+- [ ] **Template duplication guard:** ensure template upserts handle quoted keys and do not create duplicate course templates (e.g., `WAIALAE_COUNTRY_CLUB`).
+- [ ] **Validation outputs integrity:** confirm POWER/TECHNICAL/BALANCED recommendations are populated (non-zero) when metric summaries exist; skip updates when summaries are empty.
+
+### P2 — Verification / audit
+
+- [ ] **Re-run a dry-run validation** and confirm:
+  - `utilities/weightTemplates.js` remains unchanged.
+  - `dryrun_weightTemplates.js` contains only expected templates (no duplicates).
+  - `Weight_Templates.json` contains non-zero template/recommended weights for POWER/TECHNICAL/BALANCED.
+
+---
+
+## Cleanup before next run (recommended deletes)
+
+If you want a clean run with fresh artifacts, remove these paths before re-running:
+
+- `data/2026/*/post_event/dryrun/`
+- `data/2026/*/post_event/seed_runs/`
+- `data/2026/*/post_event/archive/` (backup artifacts)
+- `data/2026/*/post_event/*_results*.{json,txt,csv}` (prior outputs)
+- `data/2026/*/pre_event/analysis/`
+- `data/2026/*/pre_event/course_history_regression/`
+- `data/2026/validation_outputs/*`
+  - including `metric_analysis/` and `template_correlation_summaries/`
+
+Optional (only if you want fresh API/cache pulls):
+
+- `data/cache/*`
+- `data/approach_snapshot/approach_ytd_latest.json`

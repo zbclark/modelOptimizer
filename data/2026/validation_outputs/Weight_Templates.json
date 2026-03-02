@@ -1,154 +1,154 @@
 {
-  "generatedAt": "2026-03-02T04:40:23.227Z",
+  "generatedAt": "2026-03-02T22:31:06.850Z",
   "templates": {
     "POWER": {
       "Driving Distance": {
-        "templateWeight": 0.404,
-        "recommendedWeight": 0.4646595827855405,
-        "correlation": 0.3486879454857024
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "Driving Accuracy": {
-        "templateWeight": 0.123,
-        "recommendedWeight": 0.05910586387044445,
-        "correlation": 0.044353980855388955
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "SG OTT": {
-        "templateWeight": 0.472,
-        "recommendedWeight": 0.4762345533440151,
-        "correlation": 0.35737398759613664
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "Approach <100 GIR": {
-        "templateWeight": 0.14,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <100 SG": {
-        "templateWeight": 0.33,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <100 Prox": {
-        "templateWeight": 0.53,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW GIR": {
-        "templateWeight": 0.12,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW SG": {
-        "templateWeight": 0.32,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW Prox": {
-        "templateWeight": 0.56,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 Rough GIR": {
-        "templateWeight": 0.12,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 Rough SG": {
-        "templateWeight": 0.32,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 Rough Prox": {
-        "templateWeight": 0.56,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW GIR": {
-        "templateWeight": 0.11,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW SG": {
-        "templateWeight": 0.3,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW Prox": {
-        "templateWeight": 0.59,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >150 Rough GIR": {
-        "templateWeight": 0.11,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >150 Rough SG": {
-        "templateWeight": 0.3,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >150 Rough Prox": {
-        "templateWeight": 0.59,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW GIR": {
-        "templateWeight": 0.1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW SG": {
-        "templateWeight": 0.25,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW Prox": {
-        "templateWeight": 0.65,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "SG Putting": {
-        "templateWeight": 1,
-        "recommendedWeight": 1,
-        "correlation": 0.5030514850891533
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "SG Around Green": {
-        "templateWeight": 1,
-        "recommendedWeight": 1,
-        "correlation": 0.270312600101133
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "SG T2G": {
-        "templateWeight": 0.2,
-        "recommendedWeight": 1,
-        "correlation": 0.5817452686031851
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "Scoring Average": {
-        "templateWeight": 0.1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Birdie Chances Created": {
-        "templateWeight": 0.1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <100 SG": {
-        "templateWeight": 0.15,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <150 FW SG": {
-        "templateWeight": 0.15,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <150 Rough SG": {
-        "templateWeight": 0.15,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <200 FW SG": {
-        "templateWeight": 0.05,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
@@ -158,99 +158,99 @@
         "correlation": 0
       },
       "Scoring: Approach >150 Rough SG": {
-        "templateWeight": 0.1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scrambling": {
-        "templateWeight": 0.12,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Great Shots": {
-        "templateWeight": 0.08,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Poor Shot Avoidance": {
-        "templateWeight": 0.08,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <100 Prox": {
-        "templateWeight": 0.1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <150 FW Prox": {
-        "templateWeight": 0.1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <150 Rough Prox": {
-        "templateWeight": 0.15,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach >150 Rough Prox": {
-        "templateWeight": 0.2,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <200 FW Prox": {
-        "templateWeight": 0.12,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach >200 FW Prox": {
-        "templateWeight": 0.05,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       }
     },
     "TECHNICAL": {
       "Driving Distance": {
-        "templateWeight": 0.11474316210807203,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Driving Accuracy": {
-        "templateWeight": 0.28739159439626416,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "SG OTT": {
-        "templateWeight": 0.5978652434956637,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <100 GIR": {
-        "templateWeight": 0.12888443362451668,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <100 SG": {
-        "templateWeight": 0.09351281684089932,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <100 Prox": {
-        "templateWeight": 0.777602749534584,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW GIR": {
-        "templateWeight": 0.11734028683181226,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW SG": {
-        "templateWeight": 0.19335071707953064,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW Prox": {
-        "templateWeight": 0.6893089960886571,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
@@ -270,17 +270,17 @@
         "correlation": 0
       },
       "Approach <200 FW GIR": {
-        "templateWeight": 0.10435349747268874,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW SG": {
-        "templateWeight": 0.3277352030001631,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW Prox": {
-        "templateWeight": 0.5679112995271483,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
@@ -300,57 +300,57 @@
         "correlation": 0
       },
       "Approach >200 FW GIR": {
-        "templateWeight": 0.09394081728511038,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW SG": {
-        "templateWeight": 0.15089243776420855,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW Prox": {
-        "templateWeight": 0.755166744950681,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "SG Putting": {
-        "templateWeight": 1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "SG Around Green": {
-        "templateWeight": 1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "SG T2G": {
-        "templateWeight": 0.40277466994853434,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring Average": {
-        "templateWeight": 0.18550011188185275,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Birdie Chances Created": {
-        "templateWeight": 0.18371000223763706,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <100 SG": {
-        "templateWeight": 0.06645782054150817,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <150 FW SG": {
-        "templateWeight": 0.14499888118147236,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <150 Rough SG": {
-        "templateWeight": 0.0165585142089953,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
@@ -370,254 +370,254 @@
         "correlation": 0
       },
       "Scrambling": {
-        "templateWeight": 0.12983536340516666,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Great Shots": {
-        "templateWeight": 0.10708071208673539,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Poor Shot Avoidance": {
-        "templateWeight": 0.06715031454959175,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <100 Prox": {
-        "templateWeight": 0.10279748360326597,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <150 FW Prox": {
-        "templateWeight": 0.12434747691072147,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <150 Rough Prox": {
-        "templateWeight": 0.1489760406906706,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach >150 Rough Prox": {
-        "templateWeight": 0.25351358586534606,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <200 FW Prox": {
-        "templateWeight": 0.08914469281220723,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach >200 FW Prox": {
-        "templateWeight": 0.05715433007629502,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       }
     },
     "BALANCED": {
       "Driving Distance": {
-        "templateWeight": 0.061,
-        "recommendedWeight": 0.2796379631161987,
-        "correlation": 0.20555049572093573
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "Driving Accuracy": {
-        "templateWeight": 0.41,
-        "recommendedWeight": 0.35223725161742403,
-        "correlation": 0.25891528058104135
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "SG OTT": {
-        "templateWeight": 0.529,
-        "recommendedWeight": 0.36812478526637726,
-        "correlation": 0.2705935605289195
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "Approach <100 GIR": {
-        "templateWeight": 0.12,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <100 SG": {
-        "templateWeight": 0.34,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <100 Prox": {
-        "templateWeight": 0.54,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW GIR": {
-        "templateWeight": 0.1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW SG": {
-        "templateWeight": 0.3,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW Prox": {
-        "templateWeight": 0.6,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 Rough GIR": {
-        "templateWeight": 0.1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 Rough SG": {
-        "templateWeight": 0.3,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 Rough Prox": {
-        "templateWeight": 0.6,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW GIR": {
-        "templateWeight": 0.09,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW SG": {
-        "templateWeight": 0.28,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW Prox": {
-        "templateWeight": 0.63,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >150 Rough GIR": {
-        "templateWeight": 0.09,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >150 Rough SG": {
-        "templateWeight": 0.28,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >150 Rough Prox": {
-        "templateWeight": 0.63,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW GIR": {
-        "templateWeight": 0.09,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW SG": {
-        "templateWeight": 0.24,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW Prox": {
-        "templateWeight": 0.67,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "SG Putting": {
-        "templateWeight": 1,
-        "recommendedWeight": 1,
-        "correlation": 0.40505366022132433
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "SG Around Green": {
-        "templateWeight": 1,
-        "recommendedWeight": 1,
-        "correlation": 0.23647801488618642
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "SG T2G": {
-        "templateWeight": 0.19,
-        "recommendedWeight": 1,
-        "correlation": 0.5394862900411047
+        "templateWeight": 0,
+        "recommendedWeight": 0,
+        "correlation": 0
       },
       "Scoring Average": {
-        "templateWeight": 0.11,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Birdie Chances Created": {
-        "templateWeight": 0.1,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <100 SG": {
-        "templateWeight": 0.15,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <150 FW SG": {
-        "templateWeight": 0.15,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <150 Rough SG": {
-        "templateWeight": 0.15,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <200 FW SG": {
-        "templateWeight": 0.07,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach >200 FW SG": {
-        "templateWeight": 0.03,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach >150 Rough SG": {
-        "templateWeight": 0.05,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Scrambling": {
-        "templateWeight": 0.12,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Great Shots": {
-        "templateWeight": 0.08,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Poor Shot Avoidance": {
-        "templateWeight": 0.08,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <100 Prox": {
-        "templateWeight": 0.12,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <150 FW Prox": {
-        "templateWeight": 0.12,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <150 Rough Prox": {
-        "templateWeight": 0.16,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach >150 Rough Prox": {
-        "templateWeight": 0.18,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <200 FW Prox": {
-        "templateWeight": 0.11,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach >200 FW Prox": {
-        "templateWeight": 0.03,
+        "templateWeight": 0,
         "recommendedWeight": 0,
         "correlation": 0
       }

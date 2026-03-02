@@ -154,9 +154,6 @@ const normalizeHistoricalRoundRow = row => {
 };
 
 const loadHistoricalRowsFromApi = async ({ years, tour }) => {
-  if (!datagolfApiKey) {
-    return { rows: [], meta: { source: 'missing-key', years, tour } };
-  }
   const resolvedTour = String(tour || 'pga').trim().toLowerCase() || 'pga';
   const rows = [];
   const yearSummaries = [];
@@ -196,7 +193,7 @@ const loadHistoricalRowsFromApi = async ({ years, tour }) => {
   return {
     rows,
     meta: {
-      source: 'datagolf_api',
+      source: datagolfApiKey ? 'datagolf_api' : 'cache_only',
       tour: resolvedTour,
       years,
       cacheDir: datagolfCacheDir,
@@ -232,7 +229,7 @@ const main = async () => {
   }
 
   if (rows.length === 0) {
-    console.error('❌ No historical data available from API.');
+    console.error('❌ No historical data available from cache or API.');
     process.exit(1);
   }
 
