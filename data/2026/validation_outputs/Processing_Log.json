@@ -1,142 +1,160 @@
 {
-  "generatedAt": "2026-02-25T22:26:42.201Z",
-  "tournament": "genesis_invitational_seed-smoke",
-  "eventId": "7",
+  "generatedAt": "2026-03-02T04:40:23.250Z",
+  "tournament": "att_pebble_beach_pro-am",
+  "eventId": "5",
   "season": 2026,
-  "skipMetricAnalysis": true,
+  "skipMetricAnalysis": false,
   "dataProcessed": {
-    "predictionsCount": 72,
-    "resultsCount": 72,
-    "metricAnalysis": null,
+    "predictionsCount": 80,
+    "resultsCount": 80,
+    "metricAnalysis": {
+      "metrics": 43,
+      "top10Finishers": 13,
+      "totalFinishers": 80
+    },
     "modelDeltaTrends": {
       "metrics": 11,
-      "totalSamples": 6391,
-      "tournamentCount": 6,
+      "totalSamples": 5830,
+      "tournamentCount": 5,
       "source": "season_aggregate"
     }
   },
   "inputs": {
-    "rankingsJsonPath": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/genesis-invitational/pre_event/genesis_invitational_pre_event_rankings.json",
-    "rankingsCsvPath": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/genesis-invitational/pre_event/genesis_invitational_pre_event_rankings.csv",
-    "resultsJsonPath": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/genesis-invitational/post_event/genesis-invitational_results.json",
-    "resultsCsvPath": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/genesis-invitational/post_event/genesis-invitational_results.csv",
-    "configCsvPath": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/genesis-invitational/inputs/Genesis Invitational (2026) - Configuration Sheet.csv"
+    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/pebble-beach/pre_event/pebble-beach_pre_event_rankings.json",
+    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/pebble-beach/pre_event/pebble-beach_pre_event_rankings.csv",
+    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/pebble-beach/post_event/pebble-beach_results.json",
+    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/pebble-beach/post_event/pebble-beach_results.csv",
+    "configCsvPath": null
   },
   "sources": {
-    "rankings": "json",
+    "rankings": "results_json",
     "results": "json",
     "resultsGeneratedFrom": "existing_json",
-    "config": "config_csv"
+    "config": "none"
   },
   "outputs": [
     {
       "label": "calibrationReport.json",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/Calibration_Report.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Calibration_Report.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "calibrationReport.csv",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/Calibration_Report.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Calibration_Report.csv",
+      "existedBefore": true,
+      "written": true,
+      "overwritten": true
+    },
+    {
+      "label": "metricAnalysis.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/att_pebble_beach_pro-am_metric_analysis.json",
+      "existedBefore": true,
+      "written": true,
+      "overwritten": true
+    },
+    {
+      "label": "metricAnalysis.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/att_pebble_beach_pro-am_metric_analysis.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "courseTypeClassification.json",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/Course_Type_Classification.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Course_Type_Classification.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "courseTypeClassification.csv",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/Course_Type_Classification.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Course_Type_Classification.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "powerCorrelationSummary.json",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/POWER_Correlation_Summary.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/POWER_Correlation_Summary.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "powerCorrelationSummary.csv",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/POWER_Correlation_Summary.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/POWER_Correlation_Summary.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "technicalCorrelationSummary.json",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/TECHNICAL_Correlation_Summary.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/TECHNICAL_Correlation_Summary.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "technicalCorrelationSummary.csv",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/TECHNICAL_Correlation_Summary.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/TECHNICAL_Correlation_Summary.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "balancedCorrelationSummary.json",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/BALANCED_Correlation_Summary.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/BALANCED_Correlation_Summary.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "balancedCorrelationSummary.csv",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/BALANCED_Correlation_Summary.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/BALANCED_Correlation_Summary.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "weightCalibrationGuide.json",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/Weight_Calibration_Guide.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Weight_Calibration_Guide.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "weightCalibrationGuide.csv",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/Weight_Calibration_Guide.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Weight_Calibration_Guide.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "weightTemplates.json",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/Weight_Templates.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Weight_Templates.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "weightTemplates.csv",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/Weight_Templates.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Weight_Templates.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "modelDeltaTrends.json",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/Model_Delta_Trends.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Model_Delta_Trends.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "modelDeltaTrends.csv",
-      "path": "/workspaces/GoogleAppScripts/apps-scripts/modelOptimizer/data/2026/validation_outputs/Model_Delta_Trends.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Model_Delta_Trends.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true

@@ -31,6 +31,7 @@ const DATAGOLF_LIVE_STATS_TTL_HOURS = (() => {
 const DATAGOLF_LIVE_STATS_TOUR = String(process.env.DATAGOLF_LIVE_STATS_TOUR || 'pga')
   .trim()
   .toLowerCase();
+const SEASON_MANIFEST_NAME = 'manifest.json';
 
 const OUTPUT_NAMES = {
   calibrationReport: 'Calibration_Report',
@@ -42,6 +43,28 @@ const OUTPUT_NAMES = {
   technicalCorrelationSummary: 'TECHNICAL_Correlation_Summary',
   balancedCorrelationSummary: 'BALANCED_Correlation_Summary',
   weightCalibrationGuide: 'Weight_Calibration_Guide'
+};
+
+const loadSeasonManifest = (dataRootDir, season) => {
+  if (!dataRootDir || !season) return new Map();
+  const manifestPath = path.resolve(dataRootDir, String(season), SEASON_MANIFEST_NAME);
+  if (!fs.existsSync(manifestPath)) return new Map();
+  try {
+    const raw = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const entries = Array.isArray(raw) ? raw : (Array.isArray(raw?.entries) ? raw.entries : []);
+    const map = new Map();
+    entries.forEach(entry => {
+      const slug = String(entry?.tournamentSlug || '').trim();
+      const eventId = entry?.eventId !== undefined && entry?.eventId !== null
+        ? String(entry.eventId).trim()
+        : null;
+      if (!slug || !eventId) return;
+      map.set(slug, eventId);
+    });
+    return map;
+  } catch (error) {
+    return new Map();
+  }
 };
 
 const METRIC_ORDER = [
@@ -1713,6 +1736,8 @@ const buildMetricAnalysis = ({
   courseType
 }) => {
   const extracted = extractRankingMetrics(rankingsCsvPath);
+  let metricLabels = Array.isArray(extracted.metricLabels) ? extracted.metricLabels : [];
+  let players = Array.isArray(extracted.players) ? extracted.players : [];
   const finishers = (resultsRows || [])
     .map(row => {
       const dgId = String(row?.['DG ID'] || row?.dgId || row?.dg_id || '').trim();
@@ -1726,13 +1751,34 @@ const buildMetricAnalysis = ({
   const resultsById = new Map(finishers.map(entry => [String(entry.dgId), entry.finishPosition]));
   const resultsMetricMap = buildResultsMetricMap(resultsRows || []);
   const historyMetricMap = buildHistoricalMetricMap(historyCsvPath, eventId, season);
+  if (!metricLabels.length) {
+    metricLabels = METRIC_ORDER.slice();
+  }
+  if (!players.length) {
+    const fallbackRows = (resultsRows || []).length
+      ? resultsRows
+      : (Array.isArray(results) ? results : []);
+    players = fallbackRows
+      .map(row => {
+        const dgId = String(row?.['DG ID'] || row?.dgId || row?.dg_id || '').trim();
+        if (!dgId) return null;
+        const name = row?.['Player Name'] || row?.playerName || row?.player_name || row?.name || '';
+        return {
+          dgId,
+          name: String(name || '').trim() || 'Unknown',
+          rank: null,
+          metrics: {}
+        };
+      })
+      .filter(Boolean);
+  }
   const metrics = [];
 
-  extracted.metricLabels.forEach(label => {
+  metricLabels.forEach(label => {
     const values = [];
     const positions = [];
     const top10Values = [];
-    extracted.players.forEach(player => {
+    players.forEach(player => {
       const finish = resultsById.get(String(player.dgId));
       if (typeof finish !== 'number' || Number.isNaN(finish)) return;
       const dgId = String(player.dgId);
@@ -2069,7 +2115,9 @@ const writeMetricAnalysis = (outputDir, metricAnalysis, options = {}) => {
     : (Array.isArray(resultsPayload) ? resultsPayload : []);
   const predictions = loadTournamentPredictions({
     rankingsJsonPath: options.rankingsJsonPath,
-    rankingsCsvPath: options.rankingsCsvPath
+    rankingsCsvPath: options.rankingsCsvPath,
+    resultsJsonPath: options.resultsJsonPath,
+    resultsCsvPath: options.resultsCsvPath
   }).predictions;
   const predictionMap = new Map(predictions.map(entry => [entry.dgId, entry.rank]));
 
@@ -3017,6 +3065,95 @@ const writeProcessingLog = (outputDir, details) => {
   return { jsonPath };
 };
 
+const sigmoid = value => {
+  if (value > 30) return 1;
+  if (value < -30) return 0;
+  return 1 / (1 + Math.exp(-value));
+};
+
+const buildPlattSamples = (predictionsList, resultsList, threshold) => {
+  const predictionMap = new Map();
+  (predictionsList || []).forEach((pred, idx) => {
+    const dgId = String(pred?.dgId || '').trim();
+    if (!dgId) return;
+    const rankValue = typeof pred.rank === 'number' ? pred.rank : (idx + 1);
+    predictionMap.set(dgId, rankValue);
+  });
+
+  const resultsById = new Map();
+  (resultsList || []).forEach(entry => {
+    const dgId = String(entry?.dgId || '').trim();
+    const finishPos = entry?.finishPosition;
+    if (!dgId || typeof finishPos !== 'number' || Number.isNaN(finishPos)) return;
+    resultsById.set(dgId, finishPos);
+  });
+
+  const denom = Math.max(1, predictionMap.size - 1);
+  const samples = [];
+  predictionMap.forEach((rankValue, dgId) => {
+    const finishPos = resultsById.get(dgId);
+    if (typeof finishPos !== 'number' || Number.isNaN(finishPos)) return;
+    const percentile = Math.min(1, Math.max(0, (rankValue - 1) / denom));
+    samples.push({
+      x: percentile,
+      y: finishPos <= threshold ? 1 : 0
+    });
+  });
+  return samples;
+};
+
+const fitPlattScaling = (samples, options = {}) => {
+  if (!Array.isArray(samples) || samples.length === 0) {
+    return { available: false, reason: 'no_samples' };
+  }
+  const maxIterations = Math.max(50, Math.floor(options.maxIterations || 800));
+  const learningRate = Math.max(0.001, Number(options.learningRate || 0.1));
+  const lambda = Math.max(0, Number(options.lambda || 0.01));
+
+  let a = 0;
+  let b = 0;
+  const n = samples.length;
+
+  for (let i = 0; i < maxIterations; i++) {
+    let gradA = 0;
+    let gradB = 0;
+    samples.forEach(sample => {
+      const z = a * sample.x + b;
+      const p = sigmoid(z);
+      const error = p - sample.y;
+      gradA += error * sample.x;
+      gradB += error;
+    });
+
+    gradA = (gradA / n) + (lambda * a);
+    gradB = (gradB / n) + (lambda * b);
+
+    a -= learningRate * gradA;
+    b -= learningRate * gradB;
+
+    if (Math.abs(gradA) < 1e-6 && Math.abs(gradB) < 1e-6) break;
+  }
+
+  let logLoss = 0;
+  let brier = 0;
+  samples.forEach(sample => {
+    const p = sigmoid(a * sample.x + b);
+    const clipped = Math.min(1 - 1e-9, Math.max(1e-9, p));
+    logLoss += -(sample.y * Math.log(clipped) + (1 - sample.y) * Math.log(1 - clipped));
+    brier += Math.pow(p - sample.y, 2);
+  });
+
+  return {
+    available: true,
+    a,
+    b,
+    samples: n,
+    logLoss: logLoss / n,
+    brier: brier / n,
+    baseRate: samples.reduce((sum, s) => sum + s.y, 0) / n
+  };
+};
+
 const buildCalibrationData = ({ tournamentName, predictions = [], results = [] }) => {
   const predictionMap = new Map();
   (predictions || []).forEach((pred, idx) => {
@@ -3039,9 +3176,63 @@ const buildCalibrationData = ({ tournamentName, predictions = [], results = [] }
     .filter(entry => entry.finishPos <= 10)
     .sort((a, b) => a.finishPos - b.finishPos);
 
+  const buildCalibrationBuckets = (predictionsList, resultsList, bucketCount = 10) => {
+    const predictionRanks = new Map();
+    (predictionsList || []).forEach((pred, idx) => {
+      const dgId = String(pred?.dgId || '').trim();
+      if (!dgId) return;
+      const rankValue = typeof pred.rank === 'number' ? pred.rank : (idx + 1);
+      predictionRanks.set(dgId, rankValue);
+    });
+
+    const resultsById = new Map();
+    (resultsList || []).forEach(entry => {
+      const dgId = String(entry?.dgId || '').trim();
+      const finishPos = entry?.finishPosition;
+      if (!dgId || typeof finishPos !== 'number' || Number.isNaN(finishPos)) return;
+      resultsById.set(dgId, finishPos);
+    });
+
+    const totalPredictions = predictionRanks.size;
+    const denom = Math.max(1, totalPredictions - 1);
+    const buckets = Array.from({ length: bucketCount }, (_, idx) => ({
+      bucket: idx,
+      minPct: idx / bucketCount,
+      maxPct: (idx + 1) / bucketCount,
+      count: 0,
+      top5: 0,
+      top10: 0,
+      top20: 0
+    }));
+
+    predictionRanks.forEach((rankValue, dgId) => {
+      const finishPos = resultsById.get(dgId);
+      if (typeof finishPos !== 'number' || Number.isNaN(finishPos)) return;
+      const percentile = Math.min(1, Math.max(0, (rankValue - 1) / denom));
+      const bucketIndex = Math.min(bucketCount - 1, Math.max(0, Math.floor(percentile * bucketCount)));
+      const bucket = buckets[bucketIndex];
+      bucket.count += 1;
+      if (finishPos <= 5) bucket.top5 += 1;
+      if (finishPos <= 10) bucket.top10 += 1;
+      if (finishPos <= 20) bucket.top20 += 1;
+    });
+
+    return {
+      bucketCount,
+      totalPredictions,
+      matchedCount: buckets.reduce((sum, entry) => sum + entry.count, 0),
+      buckets
+    };
+  };
+
   const tournamentAnalysis = {
     name: tournamentName || 'Tournament',
     topFinishers: [],
+    calibrationBuckets: buildCalibrationBuckets(predictions, results),
+    plattCalibration: {
+      top10: fitPlattScaling(buildPlattSamples(predictions, results, 10)),
+      top20: fitPlattScaling(buildPlattSamples(predictions, results, 20))
+    },
     accuracyMetrics: {
       top5Predicted: 0,
       top10Predicted: 0,
@@ -3105,6 +3296,8 @@ const buildCalibrationData = ({ tournamentName, predictions = [], results = [] }
 
   return {
     tournaments: [tournamentAnalysis],
+    calibrationBuckets: tournamentAnalysis.calibrationBuckets,
+    plattCalibration: tournamentAnalysis.plattCalibration,
     totalTop5,
     predictedTop5InTop20,
     totalTop10,
@@ -3115,11 +3308,48 @@ const buildCalibrationData = ({ tournamentName, predictions = [], results = [] }
 
 const mergeCalibrationData = (target, source) => {
   if (!source) return target;
+  const mergeBuckets = (targetBuckets, sourceBuckets) => {
+    if (!sourceBuckets || !Array.isArray(sourceBuckets.buckets)) return targetBuckets;
+    if (!targetBuckets || !Array.isArray(targetBuckets.buckets)) return { ...sourceBuckets };
+
+    const bucketCount = Math.max(targetBuckets.bucketCount || 0, sourceBuckets.bucketCount || 0, targetBuckets.buckets.length, sourceBuckets.buckets.length);
+    const merged = Array.from({ length: bucketCount }, (_, idx) => ({
+      bucket: idx,
+      minPct: idx / bucketCount,
+      maxPct: (idx + 1) / bucketCount,
+      count: 0,
+      top5: 0,
+      top10: 0,
+      top20: 0
+    }));
+
+    const addBucket = entry => {
+      if (!entry) return;
+      const index = typeof entry.bucket === 'number' ? entry.bucket : null;
+      if (index === null || index < 0 || index >= merged.length) return;
+      merged[index].count += entry.count || 0;
+      merged[index].top5 += entry.top5 || 0;
+      merged[index].top10 += entry.top10 || 0;
+      merged[index].top20 += entry.top20 || 0;
+    };
+
+    (targetBuckets.buckets || []).forEach(addBucket);
+    (sourceBuckets.buckets || []).forEach(addBucket);
+
+    return {
+      bucketCount,
+      totalPredictions: (targetBuckets.totalPredictions || 0) + (sourceBuckets.totalPredictions || 0),
+      matchedCount: merged.reduce((sum, entry) => sum + entry.count, 0),
+      buckets: merged
+    };
+  };
+
   target.tournaments.push(...(source.tournaments || []));
   target.totalTop5 += source.totalTop5 || 0;
   target.predictedTop5InTop20 += source.predictedTop5InTop20 || 0;
   target.totalTop10 += source.totalTop10 || 0;
   target.predictedTop10InTop30 += source.predictedTop10InTop30 || 0;
+  target.calibrationBuckets = mergeBuckets(target.calibrationBuckets, source.calibrationBuckets);
   return target;
 };
 
@@ -3127,6 +3357,9 @@ const buildSeasonCalibrationData = ({ season, dataRootDir, logger = console }) =
   const tournamentDirs = listSeasonTournamentDirs(dataRootDir, season);
   const aggregate = {
     tournaments: [],
+    calibrationBuckets: null,
+    plattCalibration: null,
+    plattSamples: { top10: [], top20: [] },
     totalTop5: 0,
     predictedTop5InTop20: 0,
     totalTop10: 0,
@@ -3170,7 +3403,9 @@ const buildSeasonCalibrationData = ({ season, dataRootDir, logger = console }) =
 
     const predictionsResult = loadTournamentPredictions({
       rankingsJsonPath,
-      rankingsCsvPath
+      rankingsCsvPath,
+      resultsJsonPath,
+      resultsCsvPath
     });
 
     const resultsResult = (() => {
@@ -3190,6 +3425,13 @@ const buildSeasonCalibrationData = ({ season, dataRootDir, logger = console }) =
       return;
     }
 
+    aggregate.plattSamples.top10.push(
+      ...buildPlattSamples(predictionsResult.predictions, resultsResult.results, 10)
+    );
+    aggregate.plattSamples.top20.push(
+      ...buildPlattSamples(predictionsResult.predictions, resultsResult.results, 20)
+    );
+
     let displayName = tournamentName;
     if (resultsJsonPath && fs.existsSync(resultsJsonPath)) {
       const payload = readJsonFile(resultsJsonPath);
@@ -3205,6 +3447,14 @@ const buildSeasonCalibrationData = ({ season, dataRootDir, logger = console }) =
     mergeCalibrationData(aggregate, calibration);
   });
 
+  aggregate.plattCalibration = {
+    top10: fitPlattScaling(aggregate.plattSamples.top10),
+    top20: fitPlattScaling(aggregate.plattSamples.top20)
+  };
+  aggregate.plattSamples = {
+    top10Count: aggregate.plattSamples.top10.length,
+    top20Count: aggregate.plattSamples.top20.length
+  };
   return aggregate;
 };
 
@@ -3270,6 +3520,65 @@ const writeCalibrationReport = (outputDir, calibrationData) => {
   });
 
   lines.push('');
+  if (calibrationData?.calibrationBuckets?.buckets?.length) {
+    lines.push(toCsvRow(['RANK CALIBRATION (DECILES)']));
+    lines.push(toCsvRow(['Predicted Rank Percentile', 'Count', 'Top 5 Rate', 'Top 10 Rate', 'Top 20 Rate']));
+
+    calibrationData.calibrationBuckets.buckets.forEach(bucket => {
+      const count = bucket.count || 0;
+      const top5Rate = count > 0 ? (bucket.top5 / count) * 100 : 0;
+      const top10Rate = count > 0 ? (bucket.top10 / count) * 100 : 0;
+      const top20Rate = count > 0 ? (bucket.top20 / count) * 100 : 0;
+      const label = `${Math.round(bucket.minPct * 100)}-${Math.round(bucket.maxPct * 100)}%`;
+      lines.push(toCsvRow([
+        label,
+        count,
+        `${top5Rate.toFixed(1)}%`,
+        `${top10Rate.toFixed(1)}%`,
+        `${top20Rate.toFixed(1)}%`
+      ]));
+    });
+
+    lines.push('');
+  }
+
+  if (calibrationData?.plattCalibration) {
+    const top10 = calibrationData.plattCalibration.top10 || {};
+    const top20 = calibrationData.plattCalibration.top20 || {};
+    lines.push(toCsvRow(['PLATT CALIBRATION (rank percentile → probability)']));
+    lines.push(toCsvRow(['Target', 'Samples', 'a', 'b', 'LogLoss', 'Brier', 'BaseRate']));
+
+    if (top10.available) {
+      lines.push(toCsvRow([
+        'Top 10',
+        top10.samples,
+        top10.a.toFixed(4),
+        top10.b.toFixed(4),
+        top10.logLoss.toFixed(4),
+        top10.brier.toFixed(4),
+        top10.baseRate.toFixed(4)
+      ]));
+    } else {
+      lines.push(toCsvRow(['Top 10', top10.reason || 'unavailable']));
+    }
+
+    if (top20.available) {
+      lines.push(toCsvRow([
+        'Top 20',
+        top20.samples,
+        top20.a.toFixed(4),
+        top20.b.toFixed(4),
+        top20.logLoss.toFixed(4),
+        top20.brier.toFixed(4),
+        top20.baseRate.toFixed(4)
+      ]));
+    } else {
+      lines.push(toCsvRow(['Top 20', top20.reason || 'unavailable']));
+    }
+
+    lines.push('');
+  }
+
   lines.push(toCsvRow(['NEXT STEPS']));
   lines.push(toCsvRow(['1. Review individual 02_Tournament_* sheets for detailed analysis']));
   lines.push(toCsvRow(['2. Compare Config vs Template vs Recommended weights']));
@@ -3308,7 +3617,66 @@ const resolveTournamentDir = (dataRootDir, season, tournamentName, tournamentSlu
   return normalized ? path.resolve(seasonDir, normalized) : seasonDir;
 };
 
-const loadTournamentPredictions = ({ rankingsJsonPath, rankingsCsvPath, maxRows = 150 }) => {
+const parseModelRankValue = value => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  const parsed = parseInt(String(value || '').trim(), 10);
+  return Number.isNaN(parsed) ? null : parsed;
+};
+
+const loadPredictionsFromResultsJson = (resultsJsonPath, maxRows = 150) => {
+  if (!resultsJsonPath || !fs.existsSync(resultsJsonPath)) return { source: 'missing', predictions: [] };
+  const payload = readJsonFile(resultsJsonPath);
+  const rows = Array.isArray(payload) ? payload : (Array.isArray(payload?.results) ? payload.results : payload?.resultsCurrent);
+  if (!Array.isArray(rows)) return { source: 'results_json', predictions: [] };
+  const predictions = rows
+    .map(row => {
+      const dgId = String(row?.dgId || row?.dg_id || row?.['DG ID'] || '').trim();
+      if (!dgId) return null;
+      const name = String(row?.playerName || row?.player_name || row?.name || row?.['Player Name'] || '').trim();
+      const rank = parseModelRankValue(row?.['Model Rank'] ?? row?.modelRank ?? row?.model_rank);
+      if (!rank) return null;
+      return { dgId, name: name || 'Unknown', rank };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, maxRows);
+  return { source: 'results_json', predictions };
+};
+
+const loadPredictionsFromResultsCsv = (resultsCsvPath, maxRows = 150) => {
+  if (!resultsCsvPath || !fs.existsSync(resultsCsvPath)) return { source: 'missing', predictions: [] };
+  const rows = parseCsvRows(resultsCsvPath);
+  const headerIndex = findHeaderRowIndex(rows, ['dg id', 'player name', 'model rank']);
+  if (headerIndex === -1) return { source: 'results_csv', predictions: [] };
+  const headers = rows[headerIndex];
+  const headerMap = buildHeaderIndexMap(headers);
+  const dgIdIdx = headerMap.get('dg id');
+  const nameIdx = headerMap.get('player name');
+  const rankIdx = headerMap.get('model rank');
+  if (rankIdx === undefined) return { source: 'results_csv', predictions: [] };
+  const predictions = rows.slice(headerIndex + 1)
+    .map(row => {
+      const dgId = dgIdIdx !== undefined ? String(row[dgIdIdx] || '').trim() : '';
+      if (!dgId) return null;
+      const name = nameIdx !== undefined ? String(row[nameIdx] || '').trim() : '';
+      const rank = parseModelRankValue(row[rankIdx]);
+      if (!rank) return null;
+      return { dgId, name: name || 'Unknown', rank };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, maxRows);
+  return { source: 'results_csv', predictions };
+};
+
+const loadTournamentPredictions = ({
+  rankingsJsonPath,
+  rankingsCsvPath,
+  resultsJsonPath,
+  resultsCsvPath,
+  maxRows = 150
+}) => {
   if (rankingsJsonPath && fs.existsSync(rankingsJsonPath)) {
     const payload = readJsonFile(rankingsJsonPath);
     const players = Array.isArray(payload?.players) ? payload.players : [];
@@ -3324,6 +3692,10 @@ const loadTournamentPredictions = ({ rankingsJsonPath, rankingsCsvPath, maxRows 
   }
 
   if (!rankingsCsvPath || !fs.existsSync(rankingsCsvPath)) {
+    const fromResultsJson = loadPredictionsFromResultsJson(resultsJsonPath, maxRows);
+    if (fromResultsJson.predictions.length > 0) return fromResultsJson;
+    const fromResultsCsv = loadPredictionsFromResultsCsv(resultsCsvPath, maxRows);
+    if (fromResultsCsv.predictions.length > 0) return fromResultsCsv;
     return { source: 'missing', predictions: [] };
   }
 
@@ -3351,6 +3723,13 @@ const loadTournamentPredictions = ({ rankingsJsonPath, rankingsCsvPath, maxRows 
     })
     .filter(entry => entry.dgId && entry.name)
     .slice(0, maxRows);
+
+  if (predictions.length === 0) {
+    const fromResultsJson = loadPredictionsFromResultsJson(resultsJsonPath, maxRows);
+    if (fromResultsJson.predictions.length > 0) return fromResultsJson;
+    const fromResultsCsv = loadPredictionsFromResultsCsv(resultsCsvPath, maxRows);
+    if (fromResultsCsv.predictions.length > 0) return fromResultsCsv;
+  }
 
   return { source: 'csv', predictions };
 };
@@ -3907,6 +4286,7 @@ const runSeasonValidation = async ({ season, dataRootDir, logger = console } = {
   }
 
   const tournamentDirs = listSeasonTournamentDirs(dataRootDir, season);
+  const manifestEventMap = loadSeasonManifest(dataRootDir, season);
   const results = [];
 
   for (const tournamentDir of tournamentDirs) {
@@ -3921,7 +4301,7 @@ const runSeasonValidation = async ({ season, dataRootDir, logger = console } = {
         tournamentName,
         tournamentSlug,
         tournamentDir,
-        eventId: null,
+        eventId: manifestEventMap.get(tournamentSlug) || null,
         logger
       });
       results.push({ tournament: tournamentSlug, status: 'ok', outputDir: validationResult.outputDir });
@@ -4053,7 +4433,9 @@ const runValidation = async ({
 
   const predictionsResult = loadTournamentPredictions({
     rankingsJsonPath,
-    rankingsCsvPath
+    rankingsCsvPath,
+    resultsJsonPath,
+    resultsCsvPath
   });
 
   const resultsResult = (() => {

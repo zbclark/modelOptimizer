@@ -1,0 +1,7 @@
+Logging to /workspaces/modelOptimizer/data/2026/farmers/post_event/farmers_insurance_open_post_event_log.txt
+ℹ️  Skipping early-season ramp summary (post-tournament mode).
+ℹ️  Skipping course history regression (post-tournament mode).
+
+🔄 Loading configuration...
+
+❌ Configuration unavailable (missing Configuration Sheet and course_context entry).

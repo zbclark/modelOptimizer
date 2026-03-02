@@ -23,15 +23,15 @@ The schema currently assumes:
 - Notes column: **A**
 - Table starts: **B** (Rank at **B5**)
 - Header row: **5**
-- Median row: **6** (synthetic row inserted by Node export)
-- Player rows start: **7**
+- Median row: **4** (synthetic row inserted by Node export)
+- Player rows start: **6**
 
 These are encoded in `ranking_formatting_schema.json`:
 
 - `headerRow = 5`
-- `medianRow = 6`
-- `dataStartRow = 7`
-- `conditionalFormattingStartRow = 7` (important: median row excluded)
+- `medianRow = 4`
+- `dataStartRow = 6`
+- `conditionalFormattingStartRow = 6` (important: median row excluded)
 
 ---
 
@@ -106,4 +106,3 @@ If you change `rankingFormattingSchema.js` (e.g. add/remove columns or change ro
 1. Re-run the generator:
    - `apps-scripts/modelOptimizer/scripts/generate_ranking_formatting_output.js`
 2. Re-copy the updated JSON into your bound Sheet script.
-

@@ -7,6 +7,39 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
 const OUTPUT_PATH = path.resolve(ROOT_DIR, 'utilities', 'course_context.json');
 
+const readExistingContext = () => {
+  if (!fs.existsSync(OUTPUT_PATH)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf8'));
+  } catch (error) {
+    return null;
+  }
+};
+
+const existingContext = readExistingContext();
+
+const pickLocationFields = (entry = {}) => {
+  if (!entry || typeof entry !== 'object') return null;
+  const location = entry.location || {};
+  const locationCity = entry.locationCity ?? location.city ?? null;
+  const locationState = entry.locationState ?? location.state ?? null;
+  const locationCountry = entry.locationCountry ?? location.country ?? null;
+  const locationLat = entry.locationLat ?? location.lat ?? null;
+  const locationLon = entry.locationLon ?? location.lon ?? null;
+  const locationQuery = entry.locationQuery ?? location.query ?? null;
+  if (!locationCity && !locationState && !locationCountry && !locationLat && !locationLon && !locationQuery) {
+    return null;
+  }
+  return {
+    city: locationCity,
+    state: locationState,
+    country: locationCountry,
+    lat: locationLat,
+    lon: locationLon,
+    query: locationQuery
+  };
+};
+
 const args = process.argv.slice(2);
 const includeSourcePath = args.includes('--includeSourcePath')
   || ['1', 'true', 'yes', 'on'].includes(String(process.env.INCLUDE_COURSE_CONTEXT_SOURCEPATH || '').trim().toLowerCase());
@@ -54,6 +87,9 @@ const buildContextEntry = (config, sourcePath) => {
     over200: safeNumber(courseSetup.over200)
   };
 
+  const existingEntry = existingContext?.byEventId?.[String(config.currentEventId || '').trim()] || null;
+  const location = pickLocationFields(existingEntry);
+
   return {
     // Migration-only metadata. We default to null for portability; enable via --includeSourcePath.
     sourcePath: includeSourcePath ? toRepoRelativePath(sourcePath) : null,
@@ -69,7 +105,8 @@ const buildContextEntry = (config, sourcePath) => {
     puttingCourseCourseNums: {},
     similarCoursesWeight: safeNumber(config.similarCoursesWeight),
     puttingCoursesWeight: safeNumber(config.puttingCoursesWeight),
-    shotDistribution
+    shotDistribution,
+    location
   };
 };
 

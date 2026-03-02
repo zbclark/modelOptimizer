@@ -60,6 +60,51 @@ Use this checklist to track what to fix first as we work through the audit.
 
 ---
 
+## Post‑Tournament Top‑20 Blend Notes (2026-03-02)
+
+**Context:** Post‑event optimizer runs were executed for:
+
+- Genesis Invitational (eventId `7`)
+- AT&T Pebble Beach Pro‑Am (eventId `5`)
+
+Blend outputs were written to:
+
+- `data/2026/validation_outputs/the-genesis-invitational_top20_template_blend.json`
+- `data/2026/validation_outputs/atandt-pebble-beach-pro-am_top20_template_blend.json`
+
+The post‑event optimizer logs confirm both runs completed and produced the blend artifacts. Runs used API/cache fallbacks and **skipped approach snapshots** because `DATAGOLF_API_KEY` was not set.
+
+**Problem observed:**
+
+- In the blend JSONs, `suggestedMetrics` contained **all approach bucket metrics** (e.g., `Approach <100 SG`, `Approach <150 FW Prox`, etc.) with **weights of `0.0`**.
+- These zeros are not meaningful signals; they occur because approach bucket data was **missing** in the post‑event run, so those metrics had no coverage.
+
+**Why it matters:**
+
+- The top‑20 blend output is consumed by the validation runner and also reviewed directly. A long list of zeros is misleading and makes it look like the model “ranked” those metrics when it actually lacked the data.
+
+**Decision (conditional):**
+
+- **Keep approach bucket metrics when weekly approach data is available** (post‑event API snapshot present). This is valuable because weekly approach performance vs pre‑event baselines *should* inform post‑tournament analysis.
+- **Hide/omit approach bucket metrics when approach data is missing** to avoid misleading zero‑weight rows.
+
+**Implementation (current state):**
+
+- `utilities/top20TemplateBlend.js` was updated so `suggestedMetrics` is filtered to the metric label list used for Top‑20 analysis. This prevents excluded labels from showing up with zero weights.
+- This change is **data‑driven**: if Top‑20 labels include approach buckets (because approach data is available), they will appear and contribute; if labels exclude them, they won’t appear.
+
+**Open follow‑ups / next steps:**
+
+- **Decide the final gating rule** for Top‑20 labels.
+  Option A (current): approach buckets excluded unless explicitly included in the Top‑20 label list.
+  Option B (preferred): dynamically include approach buckets **only if** approach data is present in the current run.
+- **Re‑run post‑event optimizer for event 7 and event 5** after deciding the gating rule to regenerate the blend JSONs.
+- **Verify regenerated blend JSONs** confirm:
+  approach buckets are **present with non‑zero weights** *when* approach data exists,
+  and **absent** when data is missing.
+
+---
+
 ## New Files For Review (2026-02-25)
 
 - `utilities/top20TemplateBlend.js` — wired into validation flow (post‑event blend output + template integration).

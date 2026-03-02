@@ -1,9 +1,9 @@
 {
   "sheetName": "Player Ranking Model",
   "headerRow": 5,
-  "medianRow": 6,
-  "dataStartRow": 7,
-  "conditionalFormattingStartRow": 7,
+  "medianRow": 4,
+  "dataStartRow": 6,
+  "conditionalFormattingStartRow": 6,
   "notesColumn": 1,
   "notesColumnHeader": "Expected Peformance Notes",
   "tableStartColumn": 2,

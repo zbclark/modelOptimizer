@@ -5,6 +5,61 @@
     "pga"
   ],
   "byEventId": {
+    "2": {
+      "sourcePath": null,
+      "eventId": "2",
+      "templateKey": "BALANCED_PGA_WEST",
+      "courseNum": "704",
+      "courseNums": [
+        "704",
+        "233",
+        "202"
+      ],
+      "courseNameKey": "PETE_DYE_STADIUM_COURSE",
+      "courseType": "BALANCED",
+      "pastPerformance": true,
+      "similarCourseIds": [
+        "3",
+        "47",
+        "545"
+      ],
+      "puttingCourseIds": [
+        "4",
+        "7",
+        "505"
+      ],
+      "similarCourseCourseNums": {
+        "3": [
+          "510"
+        ],
+        "47": [
+          "538"
+        ],
+        "545": [
+          "538"
+        ]
+      },
+      "puttingCourseCourseNums": {
+        "4": [
+          "4"
+        ],
+        "7": [
+          "500"
+        ],
+        "505": [
+          "4"
+        ]
+      },
+      "similarCoursesWeight": 0.7,
+      "puttingCoursesWeight": 0.75,
+      "shotDistribution": {
+        "under100": 0.154,
+        "from100to150": 0.253,
+        "from150to200": 0.293,
+        "over200": 0.3
+      },
+      "pastPerformanceWeight": 0.3
+    },
     "3": {
       "sourcePath": null,
       "eventId": "3",
@@ -62,6 +117,47 @@
       },
       "pastPerformanceWeight": 0.1
     },
+    "4": {
+      "sourcePath": null,
+      "eventId": "4",
+      "templateKey": "POWER",
+      "courseNum": "104",
+      "courseNums": [
+        "4",
+        "104"
+      ],
+      "courseNameKey": "TORREY_PINES_GOLF_COURSE_NORTH_COURSE",
+      "courseType": "POWER",
+      "pastPerformance": true,
+      "similarCourseIds": [
+        "505",
+        "536",
+        "23",
+        "9",
+        "538",
+        "33"
+      ],
+      "puttingCourseIds": [
+        "505",
+        "7",
+        "5"
+      ],
+      "similarCourseCourseNums": {
+        "505": []
+      },
+      "puttingCourseCourseNums": {
+        "505": []
+      },
+      "similarCoursesWeight": 0.75,
+      "puttingCoursesWeight": 0.67,
+      "shotDistribution": {
+        "under100": 0.087,
+        "from100to150": 0.238,
+        "from150to200": 0.338,
+        "over200": 0.336
+      },
+      "pastPerformanceWeight": 0.3
+    },
     "5": {
       "sourcePath": null,
       "eventId": "5",
@@ -106,6 +202,79 @@
         "over200": 0.271
       },
       "pastPerformanceWeight": 0.1
+    },
+    "6": {
+      "sourcePath": null,
+      "eventId": "6",
+      "templateKey": "WAIALAE_COUNTRY_CLUB",
+      "courseNum": "6",
+      "courseNums": [
+        "6"
+      ],
+      "courseNameKey": "WAIALAE_COUNTRY_CLUB",
+      "courseType": null,
+      "pastPerformance": true,
+      "similarCourseIds": [
+        "12",
+        "21",
+        "493",
+        "549",
+        "13"
+      ],
+      "puttingCourseIds": [
+        "493",
+        "549",
+        "12",
+        "13",
+        "27",
+        "533"
+      ],
+      "similarCourseCourseNums": {
+        "12": [
+          "12"
+        ],
+        "13": [
+          "752"
+        ],
+        "21": [
+          "21"
+        ],
+        "493": [
+          "776"
+        ],
+        "549": [
+          "776"
+        ]
+      },
+      "puttingCourseCourseNums": {
+        "12": [
+          "12"
+        ],
+        "13": [
+          "752"
+        ],
+        "27": [
+          "513"
+        ],
+        "493": [
+          "776"
+        ],
+        "533": [
+          "513"
+        ],
+        "549": [
+          "776"
+        ]
+      },
+      "similarCoursesWeight": 0.3,
+      "puttingCoursesWeight": 0.25,
+      "shotDistribution": {
+        "under100": 0.083,
+        "from100to150": 0.298,
+        "from150to200": 0.448,
+        "over200": 0.056
+      },
+      "pastPerformanceWeight": 0.14
     },
     "7": {
       "sourcePath": null,
@@ -195,11 +364,7 @@
       "similarCourseIds": [],
       "puttingCourseIds": [],
       "similarCourseCourseNums": {},
-      "puttingCourseCourseNums": {
-        "9": [
-          "9"
-        ]
-      },
+      "puttingCourseCourseNums": {},
       "similarCoursesWeight": null,
       "puttingCoursesWeight": null,
       "shotDistribution": null,
@@ -383,9 +548,6 @@
         "11": [
           "11"
         ],
-        "12": [
-          "12"
-        ],
         "20": [
           "897"
         ],
@@ -446,9 +608,7 @@
         "33": [
           "611"
         ],
-        "536": [
-          "14"
-        ]
+        "536": []
       },
       "puttingCourseCourseNums": {
         "4": [
@@ -513,9 +673,6 @@
         "12": [
           "12"
         ],
-        "18": [
-          "714"
-        ],
         "25": [
           "513"
         ],
@@ -578,9 +735,6 @@
         ],
         "3": [
           "510"
-        ],
-        "20": [
-          "897"
         ]
       },
       "similarCoursesWeight": 0.7,
@@ -635,9 +789,6 @@
       "puttingCourseCourseNums": {
         "14": [
           "14"
-        ],
-        "21": [
-          "21"
         ],
         "33": [
           "611"
@@ -703,9 +854,6 @@
         "20": [
           "897"
         ],
-        "41": [
-          "770"
-        ],
         "475": [
           "665"
         ]
@@ -744,12 +892,6 @@
       "puttingCourseCourseNums": {
         "33": [
           "697"
-        ],
-        "100": [
-          "724",
-          "709",
-          "778",
-          "668"
         ]
       },
       "similarCoursesWeight": 0.1,
@@ -802,9 +944,6 @@
         ],
         "11": [
           "11"
-        ],
-        "475": [
-          "665"
         ]
       },
       "similarCoursesWeight": 0.4,
@@ -864,6 +1003,79 @@
       },
       "pastPerformanceWeight": 0.1
     },
+    "6": {
+      "sourcePath": null,
+      "eventId": "6",
+      "templateKey": "WAIALAE_COUNTRY_CLUB",
+      "courseNum": "6",
+      "courseNums": [
+        "6"
+      ],
+      "courseNameKey": "WAIALAE_COUNTRY_CLUB",
+      "courseType": null,
+      "pastPerformance": true,
+      "similarCourseIds": [
+        "12",
+        "21",
+        "493",
+        "549",
+        "13"
+      ],
+      "puttingCourseIds": [
+        "493",
+        "549",
+        "12",
+        "13",
+        "27",
+        "533"
+      ],
+      "similarCourseCourseNums": {
+        "12": [
+          "12"
+        ],
+        "13": [
+          "752"
+        ],
+        "21": [
+          "21"
+        ],
+        "493": [
+          "776"
+        ],
+        "549": [
+          "776"
+        ]
+      },
+      "puttingCourseCourseNums": {
+        "12": [
+          "12"
+        ],
+        "13": [
+          "752"
+        ],
+        "27": [
+          "513"
+        ],
+        "493": [
+          "776"
+        ],
+        "533": [
+          "513"
+        ],
+        "549": [
+          "776"
+        ]
+      },
+      "similarCoursesWeight": 0.3,
+      "puttingCoursesWeight": 0.25,
+      "shotDistribution": {
+        "under100": 0.083,
+        "from100to150": 0.298,
+        "from150to200": 0.448,
+        "over200": 0.056
+      },
+      "pastPerformanceWeight": 0.14
+    },
     "9": {
       "sourcePath": null,
       "eventId": "9",
@@ -878,11 +1090,7 @@
       "similarCourseIds": [],
       "puttingCourseIds": [],
       "similarCourseCourseNums": {},
-      "puttingCourseCourseNums": {
-        "9": [
-          "9"
-        ]
-      },
+      "puttingCourseCourseNums": {},
       "similarCoursesWeight": null,
       "puttingCoursesWeight": null,
       "shotDistribution": null,
@@ -982,9 +1190,6 @@
         "11": [
           "11"
         ],
-        "12": [
-          "12"
-        ],
         "20": [
           "897"
         ],
@@ -1045,9 +1250,7 @@
         "33": [
           "611"
         ],
-        "536": [
-          "14"
-        ]
+        "536": []
       },
       "puttingCourseCourseNums": {
         "4": [
@@ -1113,9 +1316,6 @@
         "14": [
           "14"
         ],
-        "21": [
-          "21"
-        ],
         "33": [
           "611"
         ],
@@ -1132,6 +1332,50 @@
         "over200": 0.425
       },
       "pastPerformanceWeight": 0.1
+    },
+    "104": {
+      "sourcePath": null,
+      "eventId": "4",
+      "templateKey": "POWER",
+      "courseNum": "104",
+      "courseNums": [
+        "104"
+      ],
+      "courseNameKey": "TORREY_PINES_GOLF_COURSE_NORTH_COURSE",
+      "courseType": "POWER",
+      "pastPerformance": true,
+      "similarCourseIds": [
+        "505",
+        "536",
+        "23",
+        "9",
+        "538",
+        "33"
+      ],
+      "puttingCourseIds": [
+        "505",
+        "7",
+        "5"
+      ],
+      "similarCourseCourseNums": {
+        "505": [
+          "4"
+        ]
+      },
+      "puttingCourseCourseNums": {
+        "505": [
+          "4"
+        ]
+      },
+      "similarCoursesWeight": 0.75,
+      "puttingCoursesWeight": 0.67,
+      "shotDistribution": {
+        "under100": 0.087,
+        "from100to150": 0.238,
+        "from150to200": 0.338,
+        "over200": 0.336
+      },
+      "pastPerformanceWeight": 0.3
     },
     "500": {
       "sourcePath": null,
@@ -1305,9 +1549,6 @@
         ],
         "11": [
           "11"
-        ],
-        "475": [
-          "665"
         ]
       },
       "similarCoursesWeight": 0.4,
@@ -1319,6 +1560,59 @@
         "over200": 0.319
       },
       "pastPerformanceWeight": 0.1
+    },
+    "704": {
+      "sourcePath": null,
+      "eventId": "2",
+      "templateKey": "BALANCED_PGA_WEST",
+      "courseNum": "704",
+      "courseNums": [
+        "704"
+      ],
+      "courseNameKey": "PETE_DYE_STADIUM_COURSE",
+      "courseType": "BALANCED",
+      "pastPerformance": true,
+      "similarCourseIds": [
+        "3",
+        "47",
+        "545"
+      ],
+      "puttingCourseIds": [
+        "4",
+        "7",
+        "505"
+      ],
+      "similarCourseCourseNums": {
+        "3": [
+          "510"
+        ],
+        "47": [
+          "538"
+        ],
+        "545": [
+          "538"
+        ]
+      },
+      "puttingCourseCourseNums": {
+        "4": [
+          "4"
+        ],
+        "7": [
+          "500"
+        ],
+        "505": [
+          "4"
+        ]
+      },
+      "similarCoursesWeight": 0.7,
+      "puttingCoursesWeight": 0.75,
+      "shotDistribution": {
+        "under100": 0.154,
+        "from100to150": 0.253,
+        "from150to200": 0.293,
+        "over200": 0.3
+      },
+      "pastPerformanceWeight": 0.3
     },
     "714": {
       "sourcePath": null,
@@ -1362,9 +1656,6 @@
       "puttingCourseCourseNums": {
         "12": [
           "12"
-        ],
-        "18": [
-          "714"
         ],
         "25": [
           "513"
@@ -1438,9 +1729,6 @@
         "20": [
           "897"
         ],
-        "41": [
-          "770"
-        ],
         "475": [
           "665"
         ]
@@ -1479,12 +1767,6 @@
       "puttingCourseCourseNums": {
         "33": [
           "697"
-        ],
-        "100": [
-          "724",
-          "709",
-          "778",
-          "668"
         ]
       },
       "similarCoursesWeight": 0.1,
@@ -1533,9 +1815,6 @@
         ],
         "3": [
           "510"
-        ],
-        "20": [
-          "897"
         ]
       },
       "similarCoursesWeight": 0.7,

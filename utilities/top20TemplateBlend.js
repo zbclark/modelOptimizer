@@ -92,14 +92,21 @@ const buildSuggestedGroupWeights = (metricConfig, signalMap = {}) => {
   return normalizeWeights(totals);
 };
 
-const buildSuggestedMetricWeights = (metricConfig, signalMap = {}) => {
+const buildSuggestedMetricWeights = (metricConfig, signalMap = {}, allowedLabels = null) => {
   if (!metricConfig || !Array.isArray(metricConfig.groups)) return {};
   const metricWeights = {};
+  const allowedSet = Array.isArray(allowedLabels)
+    ? new Set(allowedLabels.map(label => normalizeMetricLabel(label)))
+    : null;
+
   metricConfig.groups.forEach(group => {
-    const groupEntries = group.metrics.map(metric => {
+    const groupEntries = group.metrics.reduce((acc, metric) => {
       const key = normalizeMetricLabel(metric.name);
-      return { name: metric.name, weight: signalMap[key] || 0 };
-    });
+      if (allowedSet && !allowedSet.has(key)) return acc;
+      acc.push({ name: metric.name, weight: signalMap[key] || 0 });
+      return acc;
+    }, []);
+    if (!groupEntries.length) return;
     const total = groupEntries.reduce((sum, entry) => sum + Math.abs(entry.weight), 0);
     groupEntries.forEach(entry => {
       const normalized = total > 0 ? entry.weight / total : 0;
@@ -174,7 +181,7 @@ const blendTemplateWeights = ({
 
   const signalMap = buildSignalMap(top20Correlations, top20Logistic, metricLabels, resolvedOptions);
   const suggestedGroups = buildSuggestedGroupWeights(metricConfig, signalMap);
-  const suggestedMetrics = buildSuggestedMetricWeights(metricConfig, signalMap);
+  const suggestedMetrics = buildSuggestedMetricWeights(metricConfig, signalMap, metricLabels);
 
   const blendGroup = resolvedOptions.templateBlend;
   const blendedGroupsRaw = {};

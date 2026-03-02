@@ -1,5 +1,27 @@
 const { cleanMetricValue } = require('../core/modelCore');
 
+const normalizeWave = (value) => {
+  if (!value) return null;
+  const normalized = String(value).trim().toLowerCase();
+  if (normalized === 'early' || normalized === 'am' || normalized === 'morning') return 'early';
+  if (normalized === 'late' || normalized === 'pm' || normalized === 'afternoon') return 'late';
+  return null;
+};
+
+const buildWaveByRound = (teeTimes = []) => {
+  if (!Array.isArray(teeTimes)) return {};
+  return teeTimes.reduce((acc, entry) => {
+    if (!entry || typeof entry !== 'object') return acc;
+    const roundNumRaw = entry.round_num ?? entry.roundNum ?? entry.round ?? null;
+    const roundNum = Number(roundNumRaw);
+    if (!Number.isFinite(roundNum)) return acc;
+    const wave = normalizeWave(entry.wave);
+    if (!wave) return acc;
+    acc[String(roundNum)] = wave;
+    return acc;
+  }, {});
+};
+
 const parsePosition = (positionValue) => {
   if (!positionValue) return 100;
 
@@ -55,6 +77,10 @@ const buildPlayerData = ({ fieldData, roundsRawData, approachRawData, currentEve
     const dgId = row.dg_id || row['dg_id'];
     const name = row.player_name || row['player_name'];
     if (dgId && name) {
+      const teeTimes = Array.isArray(row.teetimes)
+        ? row.teetimes
+        : (Array.isArray(row.tee_times) ? row.tee_times : (Array.isArray(row['tee_times']) ? row['tee_times'] : []));
+      const waveByRound = buildWaveByRound(teeTimes);
       players[dgId] = {
         name,
         dgId,
@@ -62,7 +88,9 @@ const buildPlayerData = ({ fieldData, roundsRawData, approachRawData, currentEve
         historicalRounds: [],
         similarRounds: [],
         puttingRounds: [],
-        approachMetrics: {}
+        approachMetrics: {},
+        teeTimes,
+        waveByRound
       };
     }
   });

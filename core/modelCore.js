@@ -1272,6 +1272,10 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
   const computeCourseFitMultiplier = (metrics, groupsList, stats) => {
     if (!metrics || !Array.isArray(groupsList) || !stats) return 1.0;
 
+    const fitMethod = String(process.env.MODEL_COURSE_FIT_METHOD || 'topn')
+      .trim()
+      .toLowerCase();
+
     const allMetrics = [];
     groupsList.forEach(group => {
       group.metrics.forEach(metric => {
@@ -1287,6 +1291,41 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     const keyMetrics = allMetrics
       .sort((a, b) => b.weight - a.weight)
       .slice(0, 5);
+
+    const poorFitMultiplier = getEnvNumber('MODEL_COURSE_FIT_POOR_MULT', 0.8);
+    const goodFitMultiplier = getEnvNumber('MODEL_COURSE_FIT_GOOD_MULT', 0.95);
+    const strongFitMultiplier = getEnvNumber('MODEL_COURSE_FIT_STRONG_MULT', 1.0);
+
+    if (fitMethod === 'weighted') {
+      const strongZ = getEnvNumber('MODEL_COURSE_FIT_STRONG_Z', 0.35);
+      const goodZ = getEnvNumber('MODEL_COURSE_FIT_GOOD_Z', 0.15);
+      const poorZ = getEnvNumber('MODEL_COURSE_FIT_POOR_Z', -0.35);
+      let weightedSum = 0;
+      let weightTotal = 0;
+
+      allMetrics.forEach(metric => {
+        if (!metrics[metric.index] || !stats[metric.group] || !stats[metric.group][metric.name]) return;
+        const playerValue = metrics[metric.index];
+        const mean = stats[metric.group][metric.name].mean;
+        const stdDev = stats[metric.group][metric.name].stdDev || 0.001;
+        const zScore = (playerValue - mean) / stdDev;
+        const isNegativeMetric = metric.name.includes('Poor') ||
+          metric.name.includes('Scoring Average') ||
+          metric.name.includes('Prox');
+        const adjustedZScore = isNegativeMetric ? -zScore : zScore;
+        const weight = Math.abs(metric.weight || 0);
+        if (!weight) return;
+        weightedSum += adjustedZScore * weight;
+        weightTotal += weight;
+      });
+
+      if (weightTotal <= 0) return 1.0;
+      const fitScore = weightedSum / weightTotal;
+      if (fitScore >= strongZ) return strongFitMultiplier;
+      if (fitScore >= goodZ) return goodFitMultiplier;
+      if (fitScore <= poorZ) return poorFitMultiplier;
+      return 1.0;
+    }
 
     const strengths = [];
     const weaknesses = [];
@@ -1314,10 +1353,6 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     const playerStrengthWeight = strengths.reduce((sum, s) => sum + s.weight, 0);
     const fitPercentage = totalKeyWeight > 0 ? (playerStrengthWeight / totalKeyWeight) * 100 : 0;
 
-    const poorFitMultiplier = getEnvNumber('MODEL_COURSE_FIT_POOR_MULT', 0.8);
-    const goodFitMultiplier = getEnvNumber('MODEL_COURSE_FIT_GOOD_MULT', 0.95);
-    const strongFitMultiplier = getEnvNumber('MODEL_COURSE_FIT_STRONG_MULT', 1.0);
-
     if (fitPercentage >= 50) {
       return strongFitMultiplier;
     }
@@ -1328,6 +1363,188 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       return poorFitMultiplier;
     }
     return 1.0;
+  };
+
+  const parseTeeTimeValue = value => {
+    if (!value) return null;
+    if (value instanceof Date && !isNaN(value.getTime())) return value;
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return new Date(value);
+    }
+    if (typeof value !== 'string') return null;
+    const raw = value.trim();
+    if (!raw) return null;
+    const parsed = new Date(raw);
+    if (!isNaN(parsed.getTime())) return parsed;
+
+    const timeMatch = raw.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+    if (timeMatch) {
+      const hours = parseInt(timeMatch[1], 10);
+      const minutes = parseInt(timeMatch[2] || '0', 10);
+      const meridiem = (timeMatch[3] || '').toUpperCase();
+      if (!Number.isNaN(hours) && !Number.isNaN(minutes)) {
+        let normalizedHours = hours % 12;
+        if (meridiem === 'PM') normalizedHours += 12;
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), normalizedHours, minutes, 0, 0);
+      }
+    }
+
+    return null;
+  };
+
+  const extractTeeTimeMinutes = teeTimes => {
+    if (!Array.isArray(teeTimes) || teeTimes.length === 0) return null;
+    const minutes = teeTimes
+      .map(entry => {
+        if (entry && typeof entry === 'object') {
+          return parseTeeTimeValue(entry.time || entry.tee_time || entry.teeTime || entry.start || entry.startTime);
+        }
+        return parseTeeTimeValue(entry);
+      })
+      .filter(date => date instanceof Date && !isNaN(date.getTime()))
+      .map(date => date.getHours() * 60 + date.getMinutes())
+      .filter(value => Number.isFinite(value));
+    if (minutes.length === 0) return null;
+    return Math.min(...minutes);
+  };
+
+  const buildTeeTimeMultipliers = playerMap => {
+    const teeTimeBias = getEnvNumber('MODEL_TEE_TIME_BIAS', 0.0);
+    const teeTimeMaxShift = Math.max(0, Math.min(0.2, getEnvNumber('MODEL_TEE_TIME_MAX_SHIFT', 0.03)));
+    const minPlayers = Math.max(5, Math.floor(getEnvNumber('MODEL_TEE_TIME_MIN_PLAYERS', 20)));
+    const earlyAdvantage = getEnvNumber('MODEL_TEE_TIME_EARLY_ADVANTAGE', 1) >= 0 ? 1 : -1;
+
+    if (!teeTimeBias || teeTimeBias === 0) {
+      return { multipliers: new Map(), summary: { enabled: false } };
+    }
+
+    const entries = Object.values(playerMap || {})
+      .map(player => ({
+        dgId: String(player?.dgId || '').trim(),
+        minutes: extractTeeTimeMinutes(player?.teeTimes)
+      }))
+      .filter(entry => entry.dgId && Number.isFinite(entry.minutes));
+
+    if (entries.length < minPlayers) {
+      return {
+        multipliers: new Map(),
+        summary: { enabled: false, reason: 'insufficient_players', count: entries.length }
+      };
+    }
+
+    entries.sort((a, b) => a.minutes - b.minutes);
+    const denom = Math.max(1, entries.length - 1);
+    const multipliers = new Map();
+
+    entries.forEach((entry, idx) => {
+      const percentile = idx / denom;
+      const centered = (0.5 - percentile) * 2 * earlyAdvantage; // range [-1, 1]
+      const rawShift = teeTimeBias * centered;
+      const shift = Math.max(-teeTimeMaxShift, Math.min(teeTimeMaxShift, rawShift));
+      multipliers.set(entry.dgId, {
+        minutes: entry.minutes,
+        percentile,
+        multiplier: 1 + shift
+      });
+    });
+
+    return {
+      multipliers,
+      summary: {
+        enabled: true,
+        count: entries.length,
+        bias: teeTimeBias,
+        maxShift: teeTimeMaxShift,
+        earlyAdvantage: earlyAdvantage === 1
+      }
+    };
+  };
+
+  const teeTimeAdjustment = buildTeeTimeMultipliers(players);
+
+  const normalizeWave = value => {
+    if (!value) return null;
+    const normalized = String(value).trim().toLowerCase();
+    if (normalized === 'early' || normalized === 'am' || normalized === 'morning') return 'early';
+    if (normalized === 'late' || normalized === 'pm' || normalized === 'afternoon') return 'late';
+    return null;
+  };
+
+  const resolveWaveForRound = (player, roundNum) => {
+    if (!player || !roundNum) return null;
+    const waveByRound = player.waveByRound || {};
+    const direct = waveByRound[String(roundNum)];
+    if (direct) return normalizeWave(direct);
+    if (Array.isArray(player.teeTimes)) {
+      const match = player.teeTimes.find(entry => {
+        if (!entry || typeof entry !== 'object') return false;
+        const entryRound = Number(entry.round_num ?? entry.roundNum ?? entry.round ?? NaN);
+        return Number.isFinite(entryRound) && entryRound === Number(roundNum);
+      });
+      if (match && match.wave) return normalizeWave(match.wave);
+    }
+    return null;
+  };
+
+  const applyWeatherWavePenalty = (metrics, player) => {
+    const enabled = getEnvNumber('MODEL_WEATHER_WAVE_ENABLED', 0) > 0;
+    if (!enabled || !Array.isArray(metrics)) {
+      return { metrics, summary: { enabled: false } };
+    }
+
+    const round1Wave = resolveWaveForRound(player, 1);
+    const round2Wave = resolveWaveForRound(player, 2);
+
+    const penaltyR1Early = getEnvNumber('MODEL_WEATHER_WAVE_R1_EARLY_PENALTY', 0);
+    const penaltyR1Late = getEnvNumber('MODEL_WEATHER_WAVE_R1_LATE_PENALTY', 0);
+    const penaltyR2Early = getEnvNumber('MODEL_WEATHER_WAVE_R2_EARLY_PENALTY', 0);
+    const penaltyR2Late = getEnvNumber('MODEL_WEATHER_WAVE_R2_LATE_PENALTY', 0);
+
+    const roundPenalty = (roundWave, earlyPenalty, latePenalty) => {
+      if (roundWave === 'early') return earlyPenalty;
+      if (roundWave === 'late') return latePenalty;
+      return 0;
+    };
+
+    const r1Penalty = roundPenalty(round1Wave, penaltyR1Early, penaltyR1Late);
+    const r2Penalty = roundPenalty(round2Wave, penaltyR2Early, penaltyR2Late);
+    const totalPenalty = r1Penalty + r2Penalty;
+
+    if (!Number.isFinite(totalPenalty) || totalPenalty === 0) {
+      return {
+        metrics,
+        summary: {
+          enabled: true,
+          totalPenalty: 0,
+          round1Wave,
+          round2Wave,
+          r1Penalty,
+          r2Penalty
+        }
+      };
+    }
+
+    const sgIndices = [0, 3, 4, 5, 6, 7];
+    const adjusted = [...metrics];
+    sgIndices.forEach(index => {
+      const value = adjusted[index];
+      if (typeof value === 'number' && !Number.isNaN(value)) {
+        adjusted[index] = value - totalPenalty;
+      }
+    });
+
+    return {
+      metrics: adjusted,
+      summary: {
+        enabled: true,
+        totalPenalty,
+        round1Wave,
+        round2Wave,
+        r1Penalty,
+        r2Penalty
+      }
+    };
   };
 
  
@@ -1441,7 +1658,10 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
 
  
     // Apply trends to metrics using the helper function
-    const adjustedMetrics = applyTrends(updatedMetrics, trends, data.name);
+    let adjustedMetrics = applyTrends(updatedMetrics, trends, data.name);
+
+    const weatherWaveAdjustment = applyWeatherWavePenalty(adjustedMetrics, data);
+    adjustedMetrics = weatherWaveAdjustment.metrics;
 
     if (shouldTracePlayer(data.name)) {
       const formatValue = (value) => (typeof value === 'number' && !isNaN(value) ? value.toFixed(4) : 'n/a');
@@ -1691,6 +1911,12 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       weightedScore *= courseFitMultiplier;
     }
 
+    const teeTimeEntry = teeTimeAdjustment.multipliers.get(String(dgId));
+    const teeTimeMultiplier = teeTimeEntry?.multiplier;
+    if (Number.isFinite(teeTimeMultiplier) && teeTimeMultiplier > 0 && teeTimeMultiplier !== 1) {
+      weightedScore *= teeTimeMultiplier;
+    }
+
     // Refined score: apply confidence multiplier only
     const refinedWeightedScore = weightedScore * confidenceFactor;
     
@@ -1886,7 +2112,14 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       war: war,
       dataCoverage: dataCoverage,
       dataCoverageConfidence: getCoverageConfidence(dataCoverage) || 1.0,
+      teeTimeMultiplier: Number.isFinite(teeTimeMultiplier) ? teeTimeMultiplier : null,
+      teeTimeMinutes: teeTimeEntry?.minutes ?? null,
       trends,
+      waveRound1: weatherWaveAdjustment.summary?.round1Wave ?? null,
+      waveRound2: weatherWaveAdjustment.summary?.round2Wave ?? null,
+      weatherWavePenalty: Number.isFinite(weatherWaveAdjustment.summary?.totalPenalty)
+        ? weatherWaveAdjustment.summary.totalPenalty
+        : null,
       // Debug fields for calculation sheet
       isLowConfidencePlayer: isLowConfidencePlayer,
       baselineScore: baselineScore,

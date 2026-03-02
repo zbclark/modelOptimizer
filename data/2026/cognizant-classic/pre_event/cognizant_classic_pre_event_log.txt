@@ -1,0 +1,87 @@
+Logging to /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/cognizant_classic_pre_event_log.txt
+✓ Loaded player ramp summary (348 players, maxEvents=6)
+🔄 Generating course history regression inputs...
+✓ Course history regression inputs generated.
+ℹ️  Course history regression loaded; no course_context updates needed.
+
+🔄 Loading configuration...
+ℹ️  Configuration sheet missing; using course_context.json defaults.
+✓ Configuration loaded
+✓ Applied course context overrides (eventId)
+ℹ️  Current-event rounds policy: default
+   Defaults: metrics=include, baseline=exclude, optimization=exclude, historical=exclude
+🔄 Building metric config...
+✓ Metric config built
+
+--- LOADING ALL AVAILABLE TEMPLATES ---
+✓ Loaded POWER template
+✓ Loaded PGA_NATIONAL_RESORT_CHAMPION_COURSE template
+✓ Loaded TECHNICAL template
+✓ Loaded BALANCED template
+✓ Loaded TPC_LOUISIANA template
+✓ Loaded PEBBLE_BEACH_GOLF_LINKS template
+✓ Loaded WAIALAE_COUNTRY_CLUB template
+✓ Loaded THE_RIVIERA_COUNTRY_CLUB template
+✓ Loaded event-specific weights (eventId: 10) from template: PGA_NATIONAL_RESORT_CHAMPION_COURSE
+✓ Validation course type selected from summaries: TECHNICAL
+ℹ️  DataGolf rankings skipped (DATAGOLF_API_KEY not set).
+ℹ️  DataGolf approach skill skipped (DATAGOLF_API_KEY not set).
+ℹ️  Skipping L12 approach snapshot (not end-of-season post-tournament run).
+✓ Approach snapshot ytd ready (snapshot, updated 2026-02-23 14:52:29 UTC)
+✓ DataGolf field updates loaded (cache-stale, Cognizant Classic)
+ℹ️  DataGolf player decompositions skipped (DATAGOLF_API_KEY not set).
+ℹ️  DataGolf skill ratings skipped (DATAGOLF_API_KEY not set).
+✅ Wrote 10 course summaries to /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/course_history_regression/course_history_regression_summary.csv
+✅ Wrote 5027 detail rows to /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/course_history_regression/course_history_regression_details.csv
+✅ Wrote 11 similar-course summaries to /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/course_history_regression/course_history_regression_summary_similar.csv
+✅ Wrote 18762 similar-course detail rows to /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/course_history_regression/course_history_regression_details_similar.csv
+✅ Wrote course history regression JSON to /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/course_history_regression/course_history_regression.json
+ℹ️  Tours used: pga
+ℹ️  Event scope: 10 + similar (7) + putting (6)
+ℹ️  Year scope: last6=[2026, 2025, 2024, 2023, 2022, 2021], recentMonths=[2026-3, 2026-2, 2026-1, 2025-12]
+ℹ️  Skipped regression utility output (WRITE_TEMPLATES not enabled).
+ℹ️  DataGolf skill ratings skipped (DATAGOLF_API_KEY not set).
+✓ DataGolf historical rounds loaded (cache, pga 2026)
+ℹ️  Validation outputs loaded for reporting only (no template/constraint influence).
+
+🔄 Loading data...
+✓ Loaded field (API fallback): 123 players
+✓ Loaded history (robust merged-source): 76649 rounds
+ℹ️  History rows for event 10: 1727 (season 2026: 0)
+✓ Loaded approach: 0 rows (source: DataGolf approach skill (missing-key, l24))
+✓ Using YTD approach snapshot for current season (176 rows, file: approach_ytd_latest.json, field overlap 107/123)
+ℹ️  Derived 0 results from historical data.
+ℹ️  Pre-tournament override active: ignoring results for mode selection.
+
+⚠️  No results found for the current season/event.
+   Falling back to historical + similar-course outcomes for supervised metric training.
+✓ Built rolling approach delta baseline (4 files).
+✓ Loaded 2026 field: 123 players
+
+---
+STEP 1: HISTORICAL METRIC CORRELATIONS
+Analyze past-year metrics vs finish position
+---
+
+✓ Years available for evaluation: 2022, 2023, 2024, 2025 (event_history)
+✓ Validation years (last 5 from latest available (2025)): 2022, 2023, 2024, 2025
+✓ Total historical rounds for event 10 (all players): 1727
+✓ Total historical rounds for event 10 (current field only): 641
+
+---
+STEP 1b: CURRENT-SEASON (EVENT + SIMILAR + PUTTING) METRIC CORRELATIONS
+Correlate generatePlayerRankings metrics for current season using event + similar/putting courses
+---
+Training metrics included (15): Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Greens in Regulation, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better, Fairway Proximity, Rough Proximity
+Training metrics excluded: Birdie Chances Created, SG Total
+Derived metrics: Birdies or Better = birdies + eagles (from historical rounds when available)
+✓ Computed 15 historical metric correlations (no current results).
+🗄️  Backed up previous JSON results to: /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/archive/cognizant_classic_pre_event_results.json.2026-03-01T02-28-42-774Z.bak
+🗄️  Backed up previous text results to: /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/archive/cognizant_classic_pre_event_results.txt.2026-03-01T02-28-42-825Z.bak
+✅ Pre-event training output saved (rankings generated).
+✅ JSON results saved to: /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/cognizant_classic_pre_event_results.json
+✅ Text results saved to: /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/cognizant_classic_pre_event_results.txt
+
+🧪 Dry-run enabled: generating preview outputs without writing templates.
+🧪 Dry-run template output saved to: /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/dryrun/dryrun_weightTemplates.js
+🧪 Dry-run delta scores saved to: /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/dryrun/dryrun_deltaPlayerScores.node.js
