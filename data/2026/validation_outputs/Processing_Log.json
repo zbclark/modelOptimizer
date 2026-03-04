@@ -1,32 +1,32 @@
 {
-  "generatedAt": "2026-03-02T22:31:06.876Z",
-  "tournament": "sony_open_seed-e",
-  "eventId": "6",
+  "generatedAt": "2026-03-04T08:28:46.765Z",
+  "tournament": "cognizant-classic",
+  "eventId": "10",
   "season": 2026,
   "skipMetricAnalysis": true,
   "dataProcessed": {
-    "predictionsCount": 120,
-    "resultsCount": 120,
+    "predictionsCount": 123,
+    "resultsCount": 123,
     "metricAnalysis": null,
     "modelDeltaTrends": {
       "metrics": 11,
-      "totalSamples": 4510,
-      "tournamentCount": 5,
+      "totalSamples": 9031,
+      "tournamentCount": 7,
       "source": "season_aggregate"
     }
   },
   "inputs": {
-    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/sony-open/pre_event/sony_open_pre_event_rankings.json",
-    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/sony-open/pre_event/sony_open_pre_event_rankings.csv",
-    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/sony-open/post_event/sony_open_seed-e_post_event_results.json",
-    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/sony-open/post_event/sony-open_results.csv",
-    "configCsvPath": "/workspaces/modelOptimizer/data/2026/sony-open/inputs/Sony Open (2026) - Configuration Sheet (1).csv"
+    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/cognizant-classic_pre_event_rankings.json",
+    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/cognizant-classic_pre_event_rankings.csv",
+    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/cognizant-classic/post_event/cognizant-classic_results.json",
+    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/cognizant-classic/post_event/cognizant-classic_results.csv",
+    "configCsvPath": null
   },
   "sources": {
     "rankings": "json",
     "results": "json",
     "resultsGeneratedFrom": "existing_json",
-    "config": "config_csv"
+    "config": "course_context"
   },
   "outputs": [
     {

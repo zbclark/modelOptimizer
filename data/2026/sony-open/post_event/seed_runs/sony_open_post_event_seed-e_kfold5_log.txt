@@ -1,0 +1,401 @@
+Logging to /workspaces/modelOptimizer/data/2026/sony-open/post_event/seed_runs/sony_open_post_event_seed-e_kfold5_log.txt
+ℹ️  Skipping early-season ramp summary (post-tournament mode).
+ℹ️  Skipping course history regression (post-tournament mode).
+
+🔄 Loading configuration...
+✓ Configuration loaded
+✓ Applied course context overrides (eventId)
+ℹ️  Current-event rounds policy: default
+   Defaults: metrics=include, baseline=include, optimization=include, historical=exclude
+🔄 Building metric config...
+✓ Metric config built
+
+--- LOADING ALL AVAILABLE TEMPLATES ---
+✓ Loaded POWER template
+✓ Loaded PGA_NATIONAL_RESORT_CHAMPION_COURSE template
+✓ Loaded TECHNICAL template
+✓ Loaded BALANCED template
+✓ Loaded TPC_LOUISIANA template
+✓ Loaded PEBBLE_BEACH_GOLF_LINKS template
+✓ Loaded WAIALAE_COUNTRY_CLUB template
+✓ Loaded THE_RIVIERA_COUNTRY_CLUB template
+✓ Loaded event-specific weights (eventId: 6) from template: WAIALAE_COUNTRY_CLUB
+✓ Validation course type selected from summaries: TECHNICAL
+✓ DataGolf rankings loaded (api, updated 2026-03-02 12:35:19 UTC)
+✓ DataGolf approach skill loaded (api, last 24 months, updated 2026-03-02 14:45:09 UTC)
+ℹ️  Loaded L12 approach snapshot from archive (approach_l12_2026-02-23.json).
+✓ Approach snapshot l24 ready (snapshot, updated 2026-02-23 14:52:29 UTC)
+ℹ️  Skipping L12 approach snapshot refresh (not end-of-season post-tournament run; cached snapshot found).
+ℹ️  Skipping YTD approach snapshot refresh (post-tournament run; cached snapshot found).
+ℹ️  DataGolf field updates unavailable (no cache + API failed).
+✓ DataGolf player decompositions loaded (api, updated 2026-03-02 18:01:10 UTC)
+✓ DataGolf skill ratings loaded (api, display value, updated 2026-03-02 17:50:57 UTC)
+✓ DataGolf skill ratings loaded (api, display rank, updated 2026-03-02 17:50:57 UTC)
+✓ DataGolf historical rounds loaded (cache, pga 2026)
+✓ Loaded validation template: VALIDATION_TECHNICAL
+ℹ️  Validation template is included in Step 1d template testing.
+ℹ️  Validation outputs loaded for reporting only (no template/constraint influence).
+   To apply validation templates/constraints, set APPLY_VALIDATION_OUTPUTS=true.
+
+🔄 Loading data...
+✓ Field updates sourced from Tournament Field CSV (120 players).
+✓ Loaded field (CSV): 120 players
+ℹ️  Weather penalties unavailable (missing-date-start).
+✓ Loaded history (robust merged-source): 77028 rounds
+ℹ️  History source: refreshPolicy=force-refresh, api(cache=0, stale=0, api=5, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+ℹ️  History rows for event 6: 2131 (season 2026: 387)
+✓ Loaded approach: 311 rows (source: CSV Sony Open (2026) - Approach Skill (1).csv)
+✓ Using approach CSV as primary for current season (311 rows, field overlap 93/120)
+ℹ️  Approach usage summary:
+   - Current-season rankings (baseline/optimization): csv_primary
+   - Step 1b (event-only correlations): latest_snapshot_fallback
+   - Step 1c (event+similar+putting correlations): latest snapshot (csv_primary)
+ℹ️  Derived 120 results from historical data.
+ℹ️  Manifest approach entries: current=6:sony-open@2026-01-15, next=2:american-express@2026-01-22.
+ℹ️  Manifest approach CSVs: pre=Sony Open (2026) - Approach Skill (1).csv (approach_csv_manifest), post=American Express (2026) - Approach Skill (1).csv (approach_csv_manifest).
+ℹ️  Event-only snapshot selection: pre=Sony Open (2026) - Approach Skill (1).csv (approach_csv_manifest), post=American Express (2026) - Approach Skill (1).csv (approach_csv_manifest).
+✓ Event-only approach metrics enabled (pre=Sony Open (2026) - Approach Skill (1).csv, post=American Express (2026) - Approach Skill (1).csv, overlap 82.5%).
+🧹 Removed 2 .bak file(s) from /workspaces/modelOptimizer/data/2026/sony-open/post_event/seed_runs/archive.
+ℹ️  Approach delta prior unavailable (no delta JSON found).
+✓ Loaded 2026 field: 120 players
+
+---
+STEP 1: HISTORICAL METRIC CORRELATIONS
+Analyze past-year metrics vs finish position
+---
+
+✓ Years available for evaluation: 2022, 2023, 2024, 2025, 2026 (current_field)
+✓ Validation years (last 5 incl current): 2022, 2023, 2024, 2025, 2026
+✓ Total historical rounds for event 6 (all players): 2131
+✓ Total historical rounds for event 6 (current field only): 1094
+
+---
+STEP 1b: CURRENT-SEASON (EVENT ONLY) METRIC CORRELATIONS
+Correlate current-season event-only metrics (event rounds only; event-only approach when available)
+Data usage (Step 1b): event rounds=383, results=120, approach=event_only (rows=315, pre=Sony Open (2026) - Approach Skill (1).csv, post=American Express (2026) - Approach Skill (1).csv, overlap=82.5%), history=refreshPolicy=force-refresh, api(cache=0, stale=0, api=5, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+---
+✓ Computed 35 event-only metric correlations (2026).
+---
+STEP 1c: CURRENT-SEASON (EVENT + SIMILAR + PUTTING) METRIC CORRELATIONS
+Correlate generatePlayerRankings metrics for current season using event + similar/putting courses (latest approach snapshot)
+Data usage (Step 1c): rounds=1839, events=event+similar+putting, approach=csv_primary (rows=311, file=Sony Open (2026) - Approach Skill (1).csv), history=refreshPolicy=force-refresh, api(cache=0, stale=0, api=5, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+---
+ℹ️  Current-season metric scope: season=2026, events=[6, 12, 21, 493, 549, 13, 27, 533] (event + similar + putting).
+   Similar events: 12, 21, 493, 549, 13
+   Putting events: 493, 549, 12, 13, 27, 533
+ℹ️  Using 383 current-season rounds (field-filtered; season=2026, event + similar + putting) for metric correlations.
+   Total current-season rounds (all players): 1839
+✓ Wrote top20 template blend output: /workspaces/modelOptimizer/data/2026/validation_outputs/sony-open_top20_template_blend.json
+✓ Computed 35 metric correlations for 2026 (event + similar + putting)
+ℹ️  Course type alignment recommendation (informational only): POWER (POWER=0.0000, TECHNICAL=0.0000, BALANCED=0.0000)
+---
+STEP 1d: CURRENT-SEASON TEMPLATE BASELINE
+Compare baseline templates for 2026 only
+Data usage (Step 1d): rounds=1839, results=120, approach=csv_primary (rows=311, file=Sony Open (2026) - Approach Skill (1).csv), validationTemplates=reporting_only, history=refreshPolicy=force-refresh, api(cache=0, stale=0, api=5, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+---
+
+🔄 Testing 6 for 2026...
+   Correlation: 0.6640
+   Top-10: 70.0%
+   Top-20: 70.0%
+   Top-20 Weighted Score: 75.9%
+
+🔄 Testing POWER for 2026...
+   Correlation: 0.4941
+   Top-10: 50.0%
+   Top-20: 60.0%
+   Top-20 Weighted Score: 60.3%
+
+🔄 Testing PGA_NATIONAL_RESORT_CHAMPION_COURSE for 2026...
+   Correlation: 0.6713
+   Top-10: 60.0%
+   Top-20: 70.0%
+   Top-20 Weighted Score: 79.6%
+
+🔄 Testing TECHNICAL for 2026...
+   Correlation: 0.3039
+   Top-10: 40.0%
+   Top-20: 40.0%
+   Top-20 Weighted Score: 40.1%
+
+🔄 Testing BALANCED for 2026...
+   Correlation: 0.4191
+   Top-10: 50.0%
+   Top-20: 60.0%
+   Top-20 Weighted Score: 51.7%
+
+🔄 Testing TPC_LOUISIANA for 2026...
+   Correlation: 0.6254
+   Top-10: 50.0%
+   Top-20: 55.0%
+   Top-20 Weighted Score: 49.1%
+
+🔄 Testing PEBBLE_BEACH_GOLF_LINKS for 2026...
+   Correlation: 0.6444
+   Top-10: 50.0%
+   Top-20: 55.0%
+   Top-20 Weighted Score: 61.6%
+
+🔄 Testing WAIALAE_COUNTRY_CLUB for 2026...
+   Correlation: 0.6640
+   Top-10: 70.0%
+   Top-20: 70.0%
+   Top-20 Weighted Score: 75.9%
+
+🔄 Testing THE_RIVIERA_COUNTRY_CLUB for 2026...
+   Correlation: 0.6547
+   Top-10: 50.0%
+   Top-20: 55.0%
+   Top-20 Weighted Score: 50.2%
+
+🔄 Testing VALIDATION_TECHNICAL for 2026...
+   Correlation: 0.5814
+   Top-10: 50.0%
+   Top-20: 70.0%
+   Top-20 Weighted Score: 64.2%
+ℹ️  Using course-context template: WAIALAE_COUNTRY_CLUB
+---
+STEP 2: TOP-20 GROUP WEIGHT TUNING
+Tune lower-importance groups for Top-20 outcomes (event 6, all years)
+Data usage (Step 2): roundsByYear=5 years, resultsByYear=5 years, approach=csv_primary (rows=311, file=Sony Open (2026) - Approach Skill (1).csv), history=refreshPolicy=force-refresh, api(cache=0, stale=0, api=5, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+---
+✓ Top-20 tuning best: Top-10=61.8%, Top-20=63.2%, RMSE=24.91, Corr=0.7672
+---
+BEST BASELINE TEMPLATE (CURRENT YEAR)
+---
+
+✅ Baseline Template (rankings): WAIALAE_COUNTRY_CLUB
+   Correlation: 0.6640
+   Top-10: 70.0%
+   Top-20: 70.0%
+   Top-20 Weighted Score: 75.9%
+
+✅ Optimization seed template: PGA_NATIONAL_RESORT_CHAMPION_COURSE
+---
+STEP 3: WEIGHT OPTIMIZATION
+Randomized search starting from best template baseline
+Using current season results for optimization (current-year field only)
+Data usage (Step 3): rounds=383, results=120, approach=csv_primary (rows=311, file=Sony Open (2026) - Approach Skill (1).csv), history=refreshPolicy=force-refresh, api(cache=0, stale=0, api=5, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+---
+🔄 Grid search optimization from PGA_NATIONAL_RESORT_CHAMPION_COURSE baseline...
+   Starting correlation: 0.6640
+   Tested 100/1500...
+   Tested 200/1500...
+   Tested 300/1500...
+   Tested 400/1500...
+   Tested 500/1500...
+   Tested 600/1500...
+   Tested 700/1500...
+   Tested 800/1500...
+   Tested 900/1500...
+   Tested 1000/1500...
+   Tested 1100/1500...
+   Tested 1200/1500...
+   Tested 1300/1500...
+   Tested 1400/1500...
+   Tested 1500/1500...
+
+✅ Best Optimized: 0.6928
+   Metric Alignment Score (Top-20 KPI blend): 0.2491
+   Top-20 Composite Score: 79.3%
+   Combined Objective Score: 0.7755
+   Improvement: 4.35%
+   Top-10: 80.0%
+   Top-20: 75.0%
+   Top-20 Weighted Score: 83.7%
+
+---
+STEP 4a/4b: MULTI-YEAR VALIDATION
+Test baseline vs optimized weights across all available years
+Data usage (Step 4): years=5, approachPolicy=current_only, snapshots=current:csv_primary/last:l12/older:l24, history=refreshPolicy=force-refresh, api(cache=0, stale=0, api=5, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+---
+✓ Skill ratings (value) validation: avg |ρ|=0.501 across 7 metrics (matched players: 94)
+✓ Skill ratings (rank) validation: avg |ρ|=0.501 across 7 metrics (matched players: 94)
+✓ Player decompositions validation: ρ=0.456 (matched players: 38)
+
+🔄 STEP 4a BASELINE: building multi-year validation data...
+   Approach mode: current_only
+
+📊 Historical rounds by year (STEP 4a BASELINE):
+
+  2022: 128 rounds
+     Correlation: 0.7515 | Top-10: 40.0% | Top-20: 45.0% | Top-20 Weighted: 93.6% | Subset RMSE: 6.38 | Subset Top-10: 80.0% | Subset Top-20: 75.0% | Pct RMSE: 0.16 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 4/10 | Top-20 Overlap: 9/20
+
+  2023: 160 rounds
+     Correlation: 0.6403 | Top-10: 30.0% | Top-20: 45.0% | Top-20 Weighted: 56.5% | Subset RMSE: 10.31 | Subset Top-10: 70.0% | Subset Top-20: 90.0% | Pct RMSE: 0.21 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 3/10 | Top-20 Overlap: 9/20
+
+  2024: 198 rounds
+     Correlation: 0.7048 | Top-10: 40.0% | Top-20: 40.0% | Top-20 Weighted: 79.6% | Subset RMSE: 11.95 | Subset Top-10: 60.0% | Subset Top-20: 85.0% | Pct RMSE: 0.21 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 4/10 | Top-20 Overlap: 8/20
+
+  2025: 225 rounds
+     Correlation: 0.6424 | Top-10: 50.0% | Top-20: 55.0% | Top-20 Weighted: 63.2% | Subset RMSE: 14.70 | Subset Top-10: 50.0% | Subset Top-20: 55.0% | Pct RMSE: 0.21 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 5/10 | Top-20 Overlap: 11/20
+
+  2026: 383 rounds
+     Correlation: 0.6640 | Top-10: 70.0% | Top-20: 70.0% | Top-20 Weighted: 75.9% | Subset RMSE: 23.24 | Subset Top-10: 70.0% | Subset Top-20: 70.0% | Pct RMSE: 0.20 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 7/10 | Top-20 Overlap: 14/20
+
+🔄 STEP 4a NO-APPROACH BASELINE: building multi-year validation data...
+   Approach mode: current_only
+
+📊 Historical rounds by year (STEP 4a NO-APPROACH BASELINE):
+
+  2022: 128 rounds
+     Correlation: 0.7970 | Top-10: 40.0% | Top-20: 50.0% | Top-20 Weighted: 87.8% | Subset RMSE: 5.60 | Subset Top-10: 60.0% | Subset Top-20: 85.0% | Pct RMSE: 0.14 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 4/10 | Top-20 Overlap: 10/20
+
+  2023: 160 rounds
+     Correlation: 0.5803 | Top-10: 20.0% | Top-20: 40.0% | Top-20 Weighted: 47.1% | Subset RMSE: 11.29 | Subset Top-10: 50.0% | Subset Top-20: 80.0% | Pct RMSE: 0.24 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 2/10 | Top-20 Overlap: 8/20
+
+  2024: 198 rounds
+     Correlation: 0.7004 | Top-10: 40.0% | Top-20: 40.0% | Top-20 Weighted: 78.5% | Subset RMSE: 11.24 | Subset Top-10: 60.0% | Subset Top-20: 80.0% | Pct RMSE: 0.19 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 4/10 | Top-20 Overlap: 8/20
+
+  2025: 225 rounds
+     Correlation: 0.6332 | Top-10: 60.0% | Top-20: 50.0% | Top-20 Weighted: 58.7% | Subset RMSE: 14.07 | Subset Top-10: 60.0% | Subset Top-20: 50.0% | Pct RMSE: 0.20 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: FAIL (top20W<60%) | Top-10 Overlap: 6/10 | Top-20 Overlap: 10/20
+
+  2026: 383 rounds
+     Correlation: 0.1274 | Top-10: 9.1% | Top-20: 25.0% | Top-20 Weighted: 23.7% | Subset RMSE: 39.83 | Subset Top-10: 10.0% | Subset Top-20: 25.0% | Pct RMSE: 0.34 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: FAIL (top20W<60%) | Top-10 Overlap: 1/10 | Top-20 Overlap: 5/20
+
+🔄 STEP 4b OPTIMIZED: building multi-year validation data...
+   Approach mode: current_only
+
+📊 Historical rounds by year (STEP 4b OPTIMIZED):
+
+  2022: 128 rounds
+     Correlation: 0.8661 | Top-10: 50.0% | Top-20: 55.0% | Top-20 Weighted: 98.3% | Subset RMSE: 14.36 | Subset Top-10: 90.0% | Subset Top-20: 85.0% | Pct RMSE: 0.36 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 5/10 | Top-20 Overlap: 11/20
+
+  2023: 160 rounds
+     Correlation: 0.8188 | Top-10: 30.0% | Top-20: 45.0% | Top-20 Weighted: 85.3% | Subset RMSE: 16.28 | Subset Top-10: 60.0% | Subset Top-20: 95.0% | Pct RMSE: 0.34 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 3/10 | Top-20 Overlap: 9/20
+
+  2024: 198 rounds
+     Correlation: 0.8114 | Top-10: 50.0% | Top-20: 45.0% | Top-20 Weighted: 88.4% | Subset RMSE: 19.41 | Subset Top-10: 90.0% | Subset Top-20: 85.0% | Pct RMSE: 0.33 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 5/10 | Top-20 Overlap: 9/20
+
+  2025: 225 rounds
+     Correlation: 0.7926 | Top-10: 60.0% | Top-20: 70.0% | Top-20 Weighted: 89.4% | Subset RMSE: 14.16 | Subset Top-10: 60.0% | Subset Top-20: 75.0% | Pct RMSE: 0.20 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 6/10 | Top-20 Overlap: 14/20
+
+  2026: 383 rounds
+     Correlation: 0.6928 | Top-10: 80.0% | Top-20: 75.0% | Top-20 Weighted: 83.7% | Subset RMSE: 22.06 | Subset Top-10: 80.0% | Subset Top-20: 75.0% | Pct RMSE: 0.19 | Pct Top-10: n/a | Pct Top-20: n/a | Stress: PASS | Top-10 Overlap: 8/10 | Top-20 Overlap: 15/20
+
+🔄 STEP 4a BASELINE: event-based K-fold validation...
+
+🔄 STEP 4b OPTIMIZED: event-based K-fold validation...
+---
+FINAL SUMMARY
+---
+
+Baseline Template Analysis (Current Year):
+  Best Template: WAIALAE_COUNTRY_CLUB
+   Correlation: 0.6640
+   Top-10: 70.0%
+   Top-20: 70.0%
+   Top-20 Weighted Score: 75.9%
+
+
+Optimized Results (2026):
+  Correlation: 0.6928
+  Improvement: 4.35%
+  Top-10: 80.0%
+  Top-20: 75.0%
+  Top-20 Weighted Score: 83.7%
+
+Multi-Year Validation (Baseline):
+  2022: Correlation=0.7515 | Top-10=40.0% | Top-20=45.0% | Top-20 Weighted=93.6% | Subset RMSE=6.38 | Subset Top-20=75.0% | Pct RMSE=0.16 | Pct Top-20=n/a | Top-10 Overlap=4/10 | Top-20 Overlap=9/20
+  2023: Correlation=0.6403 | Top-10=30.0% | Top-20=45.0% | Top-20 Weighted=56.5% | Subset RMSE=10.31 | Subset Top-20=90.0% | Pct RMSE=0.21 | Pct Top-20=n/a | Top-10 Overlap=3/10 | Top-20 Overlap=9/20
+  2024: Correlation=0.7048 | Top-10=40.0% | Top-20=40.0% | Top-20 Weighted=79.6% | Subset RMSE=11.95 | Subset Top-20=85.0% | Pct RMSE=0.21 | Pct Top-20=n/a | Top-10 Overlap=4/10 | Top-20 Overlap=8/20
+  2025: Correlation=0.6424 | Top-10=50.0% | Top-20=55.0% | Top-20 Weighted=63.2% | Subset RMSE=14.70 | Subset Top-20=55.0% | Pct RMSE=0.21 | Pct Top-20=n/a | Top-10 Overlap=5/10 | Top-20 Overlap=11/20
+  2026: Correlation=0.6640 | Top-10=70.0% | Top-20=70.0% | Top-20 Weighted=75.9% | Subset RMSE=23.24 | Subset Top-20=70.0% | Pct RMSE=0.20 | Pct Top-20=n/a | Top-10 Overlap=7/10 | Top-20 Overlap=14/20
+
+Multi-Year Validation (No-Approach Baseline):
+  2022: Correlation=0.7970 | Top-10=40.0% | Top-20=50.0% | Top-20 Weighted=87.8% | Subset RMSE=5.60 | Subset Top-20=85.0% | Pct RMSE=0.14 | Pct Top-20=n/a | Top-10 Overlap=4/10 | Top-20 Overlap=10/20
+  2023: Correlation=0.5803 | Top-10=20.0% | Top-20=40.0% | Top-20 Weighted=47.1% | Subset RMSE=11.29 | Subset Top-20=80.0% | Pct RMSE=0.24 | Pct Top-20=n/a | Top-10 Overlap=2/10 | Top-20 Overlap=8/20
+  2024: Correlation=0.7004 | Top-10=40.0% | Top-20=40.0% | Top-20 Weighted=78.5% | Subset RMSE=11.24 | Subset Top-20=80.0% | Pct RMSE=0.19 | Pct Top-20=n/a | Top-10 Overlap=4/10 | Top-20 Overlap=8/20
+  2025: Correlation=0.6332 | Top-10=60.0% | Top-20=50.0% | Top-20 Weighted=58.7% | Subset RMSE=14.07 | Subset Top-20=50.0% | Pct RMSE=0.20 | Pct Top-20=n/a | Top-10 Overlap=6/10 | Top-20 Overlap=10/20
+  2026: Correlation=0.1274 | Top-10=9.1% | Top-20=25.0% | Top-20 Weighted=23.7% | Subset RMSE=39.83 | Subset Top-20=25.0% | Pct RMSE=0.34 | Pct Top-20=n/a | Top-10 Overlap=1/10 | Top-20 Overlap=5/20
+
+Multi-Year Validation (Optimized):
+  2022: Correlation=0.8661 | Top-10=50.0% | Top-20=55.0% | Top-20 Weighted=98.3% | Subset RMSE=14.36 | Subset Top-20=85.0% | Pct RMSE=0.36 | Pct Top-20=n/a | Top-10 Overlap=5/10 | Top-20 Overlap=11/20
+  2023: Correlation=0.8188 | Top-10=30.0% | Top-20=45.0% | Top-20 Weighted=85.3% | Subset RMSE=16.28 | Subset Top-20=95.0% | Pct RMSE=0.34 | Pct Top-20=n/a | Top-10 Overlap=3/10 | Top-20 Overlap=9/20
+  2024: Correlation=0.8114 | Top-10=50.0% | Top-20=45.0% | Top-20 Weighted=88.4% | Subset RMSE=19.41 | Subset Top-20=85.0% | Pct RMSE=0.33 | Pct Top-20=n/a | Top-10 Overlap=5/10 | Top-20 Overlap=9/20
+  2025: Correlation=0.7926 | Top-10=60.0% | Top-20=70.0% | Top-20 Weighted=89.4% | Subset RMSE=14.16 | Subset Top-20=75.0% | Pct RMSE=0.20 | Pct Top-20=n/a | Top-10 Overlap=6/10 | Top-20 Overlap=14/20
+  2026: Correlation=0.6928 | Top-10=80.0% | Top-20=75.0% | Top-20 Weighted=83.7% | Subset RMSE=22.06 | Subset Top-20=75.0% | Pct RMSE=0.19 | Pct Top-20=n/a | Top-10 Overlap=8/10 | Top-20 Overlap=15/20
+
+Event K-Fold Validation (Baseline):
+  2022: mode=k_fold, folds=5/5, Corr=0.5956, Top-10=66.4%, Top-20=74.0%, Top-20 Weighted=60.2%
+  2023: mode=k_fold, folds=5/5, Corr=0.5965, Top-10=65.6%, Top-20=81.3%, Top-20 Weighted=59.9%
+  2024: mode=k_fold, folds=5/5, Corr=0.6574, Top-10=57.4%, Top-20=66.8%, Top-20 Weighted=58.9%
+  2025: mode=k_fold, folds=5/5, Corr=0.6857, Top-10=52.7%, Top-20=74.2%, Top-20 Weighted=56.7%
+  2026: mode=k_fold, folds=5/5, Corr=0.3038, Top-10=25.6%, Top-20=27.0%, Top-20 Weighted=35.7%
+
+Event K-Fold Validation (Optimized):
+  2022: mode=k_fold, folds=5/5, Corr=0.1677, Top-10=66.4%, Top-20=74.8%, Top-20 Weighted=57.4%
+  2023: mode=k_fold, folds=5/5, Corr=0.0234, Top-10=67.9%, Top-20=74.3%, Top-20 Weighted=56.6%
+  2024: mode=k_fold, folds=5/5, Corr=0.1050, Top-10=44.0%, Top-20=64.3%, Top-20 Weighted=50.2%
+  2025: mode=k_fold, folds=5/5, Corr=0.0791, Top-10=49.0%, Top-20=66.2%, Top-20 Weighted=49.8%
+  2026: mode=k_fold, folds=5/5, Corr=0.2981, Top-10=23.4%, Top-20=31.8%, Top-20 Weighted=37.4%
+---
+📊 FINAL SUMMARY
+---
+
+🏆 Step 1: Current-Year Baseline (2026)
+   Best Template: WAIALAE_COUNTRY_CLUB
+   Correlation: 0.6640
+   Top-10 Accuracy: 70.0%
+   Top-20 Accuracy: 70.0%
+   Top-20 Weighted Score: 75.9%
+   Matched Players: 118
+
+🎯 Step 3: Weight Optimization (2026 with approach metrics)
+   Best Correlation: 0.6928
+   Improvement: 4.35%
+   Top-10 Accuracy: 80.0%
+   Top-20 Accuracy: 75.0%
+   Top-20 Weighted Score: 83.7%
+   Matched Players (current year): 118
+
+📈 Optimized Weights:
+   Driving Performance: 12.3%
+   Approach - Short (<100): 3.7%
+   Approach - Mid (100-150): 9.1%
+   Approach - Long (150-200): 9.5%
+   Approach - Very Long (>200): 4.9%
+   Putting: 16.5%
+   Around the Green: 4.6%
+   Scoring: 19.7%
+   Course Management: 19.7%
+
+✓ Step 4a: Multi-Year Validation (Baseline)
+   2022: Correlation=0.7515, Top-10=40.0%, Top-20=45.0%, Top-20 Weighted=93.6%, Subset RMSE=6.38, Subset Top-20=75.0%, Pct RMSE=0.16, Pct Top-20=n/a, Top-10 Overlap=4/10, Top-20 Overlap=9/20, Players=41
+   2023: Correlation=0.6403, Top-10=30.0%, Top-20=45.0%, Top-20 Weighted=56.5%, Subset RMSE=10.31, Subset Top-20=90.0%, Pct RMSE=0.21, Pct Top-20=n/a, Top-10 Overlap=3/10, Top-20 Overlap=9/20, Players=49
+   2024: Correlation=0.7048, Top-10=40.0%, Top-20=40.0%, Top-20 Weighted=79.6%, Subset RMSE=11.95, Subset Top-20=85.0%, Pct RMSE=0.21, Pct Top-20=n/a, Top-10 Overlap=4/10, Top-20 Overlap=8/20, Players=59
+   2025: Correlation=0.6424, Top-10=50.0%, Top-20=55.0%, Top-20 Weighted=63.2%, Subset RMSE=14.70, Subset Top-20=55.0%, Pct RMSE=0.21, Pct Top-20=n/a, Top-10 Overlap=5/10, Top-20 Overlap=11/20, Players=72
+   2026: Correlation=0.6640, Top-10=70.0%, Top-20=70.0%, Top-20 Weighted=75.9%, Subset RMSE=23.24, Subset Top-20=70.0%, Pct RMSE=0.20, Pct Top-20=n/a, Top-10 Overlap=7/10, Top-20 Overlap=14/20, Players=118
+
+✓ Step 4b: Multi-Year Validation (Optimized)
+   2022: Correlation=0.8661, Top-10=50.0%, Top-20=55.0%, Top-20 Weighted=98.3%, Subset RMSE=14.36, Subset Top-20=85.0%, Pct RMSE=0.36, Pct Top-20=n/a, Top-10 Overlap=5/10, Top-20 Overlap=11/20, Players=41
+   2023: Correlation=0.8188, Top-10=30.0%, Top-20=45.0%, Top-20 Weighted=85.3%, Subset RMSE=16.28, Subset Top-20=95.0%, Pct RMSE=0.34, Pct Top-20=n/a, Top-10 Overlap=3/10, Top-20 Overlap=9/20, Players=49
+   2024: Correlation=0.8114, Top-10=50.0%, Top-20=45.0%, Top-20 Weighted=88.4%, Subset RMSE=19.41, Subset Top-20=85.0%, Pct RMSE=0.33, Pct Top-20=n/a, Top-10 Overlap=5/10, Top-20 Overlap=9/20, Players=59
+   2025: Correlation=0.7926, Top-10=60.0%, Top-20=70.0%, Top-20 Weighted=89.4%, Subset RMSE=14.16, Subset Top-20=75.0%, Pct RMSE=0.20, Pct Top-20=n/a, Top-10 Overlap=6/10, Top-20 Overlap=14/20, Players=72
+   2026: Correlation=0.6928, Top-10=80.0%, Top-20=75.0%, Top-20 Weighted=83.7%, Subset RMSE=22.06, Subset Top-20=75.0%, Pct RMSE=0.19, Pct Top-20=n/a, Top-10 Overlap=8/10, Top-20 Overlap=15/20, Players=118
+
+💡 Recommendation:
+   ❌ K-fold regression detected; Use template baseline (WAIALAE_COUNTRY_CLUB)
+   ⚠️  K-fold gate applied (confidence 70% ≥ 65%)
+
+====================================================================================================
+
+ℹ️  Standard template selection: TECHNICAL (source=validation_course_type, raw=TECHNICAL)
+🗄️  Backed up previous JSON results to: /workspaces/modelOptimizer/data/2026/sony-open/post_event/seed_runs/archive/sony_open_seed-e_kfold5_post_event_results.json.2026-03-03T06-03-35-162Z.bak
+🗄️  Backed up previous text results to: /workspaces/modelOptimizer/data/2026/sony-open/post_event/seed_runs/archive/sony_open_seed-e_kfold5_post_event_results.txt.2026-03-03T06-03-35-214Z.bak
+ℹ️  Event template not written (recommendation gate).
+✅ Validation template written to: /workspaces/modelOptimizer/utilities/weightTemplates.js (TECHNICAL)
+
+🧾 Template write summary:
+   Event template (WAIALAE_COUNTRY_CLUB): not written
+   Standard template (TECHNICAL): write
+     - /workspaces/modelOptimizer/utilities/weightTemplates.js
+✅ JSON results also saved to: /workspaces/modelOptimizer/data/2026/sony-open/post_event/seed_runs/sony_open_seed-e_kfold5_post_event_results.json
+✅ Text results saved to: /workspaces/modelOptimizer/data/2026/sony-open/post_event/seed_runs/sony_open_seed-e_kfold5_post_event_results.txt
+
+🔄 Running validation runner (post-tournament, slug=sony-open)...
+ℹ️  Validation runner initialized (season=2026, outputDir=/workspaces/modelOptimizer/data/2026/validation_outputs)
+ℹ️  Skipping metric analysis for sony-open (already exists).
+ℹ️  Course context courseType already aligned; no updates needed.
+ℹ️  Baseline templates update skipped (writeTemplates=false, dryRun=false).
+✅ Validation outputs written to: /workspaces/modelOptimizer/data/2026/validation_outputs

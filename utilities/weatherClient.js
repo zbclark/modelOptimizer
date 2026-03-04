@@ -87,7 +87,8 @@ const getMeteoblueLocation = async (options = {}) => {
     query,
     cacheDir,
     ttlMs = DEFAULT_TTL_MS,
-    allowStale = true
+    allowStale = true,
+    forceRefresh = false
   } = options;
 
   const safeQuery = String(query || '').trim();
@@ -96,7 +97,7 @@ const getMeteoblueLocation = async (options = {}) => {
     ? path.resolve(cacheDir, `weather_meteoblue_location_${cacheSuffix}.json`)
     : null;
 
-  if (cachePath && isFresh(cachePath, ttlMs)) {
+  if (!forceRefresh && cachePath && isFresh(cachePath, ttlMs)) {
     return { source: 'cache', path: cachePath, payload: readJson(cachePath) };
   }
 

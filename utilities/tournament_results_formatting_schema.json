@@ -1,0 +1,477 @@
+{
+  "sheetName": "Tournament Results",
+  "headerRow": 5,
+  "dataStartRow": 6,
+  "notesColumn": 1,
+  "notesColumnHeader": "Performance Notes",
+  "tableStartColumn": 2,
+  "notesColumnWidth": 350,
+  "columnDefaults": {
+    "width": 110,
+    "format": "0.000"
+  },
+  "columns": [
+    {
+      "name": "DG ID",
+      "format": "0",
+      "width": 70
+    },
+    {
+      "name": "Player Name",
+      "format": "text",
+      "width": 140
+    },
+    {
+      "name": "Finish Position",
+      "format": "0",
+      "width": 70
+    },
+    {
+      "name": "Model Rank",
+      "format": "0",
+      "width": 70
+    },
+    {
+      "name": "SG Total (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG Total (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Driving Distance (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Driving Distance (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Driving Accuracy (Actual)",
+      "group": "actual",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Driving Accuracy (Model)",
+      "group": "model",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG T2G (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG T2G (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG Approach (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG Approach (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG Around Green (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG Around Green (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG OTT (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG OTT (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG Putting (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "SG Putting (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Greens in Regulation (Actual)",
+      "group": "actual",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Greens in Regulation (Model)",
+      "group": "model",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Scrambling (Actual)",
+      "group": "actual",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Scrambling (Model)",
+      "group": "model",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Great Shots (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Great Shots (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Poor Shots (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Poor Shots (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Scoring Average (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Scoring Average (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Fairway Proximity (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Fairway Proximity (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Rough Proximity (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Rough Proximity (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach <100 GIR (Actual)",
+      "group": "actual",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <100 GIR (Model)",
+      "group": "model",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <100 SG (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <100 SG (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <100 Prox (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach <100 Prox (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach <150 FW GIR (Actual)",
+      "group": "actual",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <150 FW GIR (Model)",
+      "group": "model",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <150 FW SG (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <150 FW SG (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <150 FW Prox (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach <150 FW Prox (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach <150 Rough GIR (Actual)",
+      "group": "actual",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <150 Rough GIR (Model)",
+      "group": "model",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <150 Rough SG (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <150 Rough SG (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <150 Rough Prox (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach <150 Rough Prox (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach >150 Rough GIR (Actual)",
+      "group": "actual",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach >150 Rough GIR (Model)",
+      "group": "model",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach >150 Rough SG (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach >150 Rough SG (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach >150 Rough Prox (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach >150 Rough Prox (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach <200 FW GIR (Actual)",
+      "group": "actual",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <200 FW GIR (Model)",
+      "group": "model",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <200 FW SG (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <200 FW SG (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach <200 FW Prox (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach <200 FW Prox (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach >200 FW GIR (Actual)",
+      "group": "actual",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach >200 FW GIR (Model)",
+      "group": "model",
+      "format": "0.00%",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach >200 FW SG (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach >200 FW SG (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "higher_better"
+    },
+    {
+      "name": "Approach >200 FW Prox (Actual)",
+      "group": "actual",
+      "format": "0.000",
+      "direction": "lower_better"
+    },
+    {
+      "name": "Approach >200 FW Prox (Model)",
+      "group": "model",
+      "format": "0.000",
+      "direction": "lower_better"
+    }
+  ],
+  "tournamentResultsHighlighting": {
+    "finishPosition": {
+      "label": "Finish Position",
+      "medalRanges": [
+        {
+          "min": 1,
+          "max": 1,
+          "background": "#FFD700",
+          "bold": true
+        },
+        {
+          "min": 2,
+          "max": 5,
+          "background": "#C0C0C0",
+          "bold": true
+        },
+        {
+          "min": 6,
+          "max": 10,
+          "background": "#CD7F32"
+        }
+      ]
+    },
+    "modelRankComparison": {
+      "label": "Model Rank",
+      "finishLabel": "Finish Position",
+      "bigMiss": {
+        "rankThreshold": 100,
+        "finishThreshold": 10,
+        "background": "#FFC7CE",
+        "fontColor": "#9C0006",
+        "bold": true
+      },
+      "strongHit": {
+        "rankThreshold": 20,
+        "finishThreshold": 10,
+        "background": "#C6EFCE",
+        "fontColor": "#006100",
+        "bold": true
+      }
+    },
+    "actualVsModelColors": {
+      "better": "#DFF0D8",
+      "worse": "#F2DEDE"
+    }
+  }
+}

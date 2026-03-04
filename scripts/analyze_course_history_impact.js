@@ -11,6 +11,18 @@ const OUTPUT_DIR = process.env.PRE_TOURNAMENT_OUTPUT_DIR
   ? path.resolve(process.env.PRE_TOURNAMENT_OUTPUT_DIR)
   // Legacy default was `.../output/`; keep everything under `data/` by default.
   : path.resolve(__dirname, '..', 'data', 'course_history_regression');
+
+// PHASE 2 WIRING PLAN (comments only; no behavior change in this draft):
+// - Migrate OUTPUT_DIR resolution to utilities/outputPaths.js:
+//   resolveRegressionRoot({ workspaceRoot, dataRoot, regressionDirOverride })
+// - Keep env override precedence for PRE_TOURNAMENT_OUTPUT_DIR exactly as-is.
+// - Migrate regression artifact filenames to OUTPUT_ARTIFACTS:
+//   COURSE_HISTORY_REGRESSION_JSON
+//   COURSE_HISTORY_REGRESSION_SUMMARY_CSV
+//   COURSE_HISTORY_REGRESSION_DETAILS_CSV
+//   COURSE_HISTORY_REGRESSION_SUMMARY_SIMILAR_CSV
+//   COURSE_HISTORY_REGRESSION_DETAILS_SIMILAR_CSV
+// - Do NOT change writeback behavior for utilities/courseHistoryRegression.js in this migration.
 const SHOULD_WRITE_TEMPLATES = String(process.env.WRITE_TEMPLATES || '').trim().toLowerCase() === 'true';
 const DATAGOLF_API_KEY = String(process.env.DATAGOLF_API_KEY || '').trim();
 const DATAGOLF_CACHE_DIR = path.resolve(__dirname, '..', 'data', 'cache');
@@ -710,6 +722,8 @@ const run = async () => {
   summary.sort((a, b) => a.pValue - b.pValue);
   summarySimilar.sort((a, b) => a.pValue - b.pValue);
 
+  // PHASE 2 TODO: replace manual path.resolve(...) calls below with buildArtifactPath(...)
+  // using the regression artifact keys in utilities/outputArtifacts.js.
   const summaryPath = path.resolve(OUTPUT_DIR, 'course_history_regression_summary.csv');
   const detailPath = path.resolve(OUTPUT_DIR, 'course_history_regression_details.csv');
   const summarySimilarPath = path.resolve(OUTPUT_DIR, 'course_history_regression_summary_similar.csv');

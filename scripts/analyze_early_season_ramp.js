@@ -66,6 +66,16 @@ let DATA_DIR = path.resolve(ROOT_DIR, 'data');
 // Legacy default was `.../output/`; keep everything under `data/` by default.
 let OUTPUT_DIR = path.resolve(ROOT_DIR, 'data', 'analysis');
 
+// PHASE 2 WIRING PLAN (comments only; no behavior change in this draft):
+// - Migrate OUTPUT_DIR resolution to utilities/outputPaths.js:
+//   - resolveAnalysisRoot({ tournamentRoot, mode, analysisDirOverride })
+// - Preserve existing CLI override precedence exactly:
+//   --outputDir > --dataDir/--dir derived path > default data/analysis
+// - Migrate artifact filenames to OUTPUT_ARTIFACTS:
+//   - RAMP_JSON  => early_season_ramp_<metric>.json
+//   - RAMP_CSV   => early_season_ramp_<metric>.csv
+// - Keep this script tournament/field-scoped in final path contract.
+
 if (OVERRIDE_DIR) {
   const normalized = OVERRIDE_DIR.replace(/^[\/]+|[\/]+$/g, '');
   DATA_DIR = path.resolve(ROOT_DIR, 'data', normalized);
@@ -619,6 +629,8 @@ const output = {
   }
 };
 
+// PHASE 2 TODO: replace manual path.resolve(...) with
+// buildArtifactPath({ artifactType: OUTPUT_ARTIFACTS.RAMP_JSON, metricKey: metric, analysisRoot: OUTPUT_DIR })
 const jsonPath = path.resolve(OUTPUT_DIR, `early_season_ramp_${metric}.json`);
 fs.writeFileSync(jsonPath, JSON.stringify(output, null, 2));
 
@@ -650,6 +662,8 @@ players.sort((a, b) => b.seasons - a.seasons).forEach(entry => {
   ].join(','));
 });
 
+// PHASE 2 TODO: replace manual path.resolve(...) with
+// buildArtifactPath({ artifactType: OUTPUT_ARTIFACTS.RAMP_CSV, metricKey: metric, analysisRoot: OUTPUT_DIR })
 const csvPath = path.resolve(OUTPUT_DIR, `early_season_ramp_${metric}.csv`);
 fs.writeFileSync(csvPath, csvLines.join('\n'));
 

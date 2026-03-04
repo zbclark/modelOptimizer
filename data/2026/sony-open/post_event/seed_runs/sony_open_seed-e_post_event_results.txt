@@ -1,0 +1,1293 @@
+====================================================================================================
+ADAPTIVE WEIGHT OPTIMIZER - FINAL RESULTS
+====================================================================================================
+DRY RUN: ON (template files not modified)
+RUN FINGERPRINT: see JSON output (runFingerprint)
+OPT_SEED: e
+
+STEP 1: HISTORICAL METRIC CORRELATIONS
+Functions: buildHistoricalMetricSamples, computeHistoricalMetricCorrelations (optimizer.js)
+HISTORICAL METRIC CORRELATIONS (avg across years):
+  Scoring Average: Corr=0.5616, Samples=2131
+  Eagles or Better: Corr=0.0788, Samples=247
+  Birdies: Corr=0.4010, Samples=2105
+  Birdies or Better: Corr=0.4296, Samples=2131
+  SG Total: Corr=0.5292, Samples=2131
+  Driving Distance: Corr=0.0779, Samples=2131
+  Driving Accuracy: Corr=0.1606, Samples=2131
+  SG T2G: Corr=0.4178, Samples=2131
+  SG Approach: Corr=0.3142, Samples=2130
+  SG Around Green: Corr=0.1691, Samples=2127
+  SG OTT: Corr=0.1993, Samples=2131
+  SG Putting: Corr=0.3143, Samples=2131
+  GIR: Corr=0.2762, Samples=2131
+  Scrambling: Corr=0.2621, Samples=2107
+  Great Shots: Corr=0.2034, Samples=2131
+  Poor Shots: Corr=0.3541, Samples=2131
+  Fairway Proximity: Corr=0.2385, Samples=2131
+  Rough Proximity: Corr=0.1012, Samples=2112
+
+HISTORICAL METRIC CORRELATIONS (per year):
+  2022:
+    Scoring Average: Corr=0.5566, Samples=417
+    Eagles or Better: Corr=0.2380, Samples=52
+    Birdies: Corr=0.3998, Samples=415
+    Birdies or Better: Corr=0.4198, Samples=417
+    SG Total: Corr=0.5217, Samples=417
+    Driving Distance: Corr=-0.0102, Samples=417
+    Driving Accuracy: Corr=0.2176, Samples=417
+    SG T2G: Corr=0.4827, Samples=417
+    SG Approach: Corr=0.4031, Samples=417
+    SG Around Green: Corr=0.1208, Samples=414
+    SG OTT: Corr=0.2223, Samples=417
+    SG Putting: Corr=0.2221, Samples=417
+    GIR: Corr=0.3118, Samples=417
+    Scrambling: Corr=0.1470, Samples=407
+    Great Shots: Corr=0.1971, Samples=417
+    Poor Shots: Corr=0.4191, Samples=417
+    Fairway Proximity: Corr=0.2866, Samples=417
+    Rough Proximity: Corr=0.1319, Samples=410
+  2023:
+    Scoring Average: Corr=0.6189, Samples=440
+    Eagles or Better: Corr=0.2644, Samples=39
+    Birdies: Corr=0.4298, Samples=436
+    Birdies or Better: Corr=0.4511, Samples=440
+    SG Total: Corr=0.5422, Samples=440
+    Driving Distance: Corr=0.0894, Samples=440
+    Driving Accuracy: Corr=0.1876, Samples=440
+    SG T2G: Corr=0.3821, Samples=440
+    SG Approach: Corr=0.2838, Samples=440
+    SG Around Green: Corr=0.1396, Samples=439
+    SG OTT: Corr=0.2021, Samples=440
+    SG Putting: Corr=0.3269, Samples=440
+    GIR: Corr=0.2890, Samples=440
+    Scrambling: Corr=0.3173, Samples=434
+    Great Shots: Corr=0.2176, Samples=440
+    Poor Shots: Corr=0.3863, Samples=440
+    Fairway Proximity: Corr=0.2269, Samples=440
+    Rough Proximity: Corr=0.0421, Samples=440
+  2024:
+    Scoring Average: Corr=0.5697, Samples=451
+    Eagles or Better: Corr=0.0099, Samples=65
+    Birdies: Corr=0.3948, Samples=444
+    Birdies or Better: Corr=0.4399, Samples=451
+    SG Total: Corr=0.5320, Samples=451
+    Driving Distance: Corr=0.1707, Samples=451
+    Driving Accuracy: Corr=0.1417, Samples=451
+    SG T2G: Corr=0.4274, Samples=451
+    SG Approach: Corr=0.2904, Samples=451
+    SG Around Green: Corr=0.1939, Samples=451
+    SG OTT: Corr=0.2149, Samples=451
+    SG Putting: Corr=0.3230, Samples=451
+    GIR: Corr=0.2671, Samples=451
+    Scrambling: Corr=0.3095, Samples=449
+    Great Shots: Corr=0.1813, Samples=451
+    Poor Shots: Corr=0.3740, Samples=451
+    Fairway Proximity: Corr=0.2552, Samples=451
+    Rough Proximity: Corr=0.1759, Samples=448
+  2025:
+    Scoring Average: Corr=0.5565, Samples=436
+    Eagles or Better: Corr=0.0995, Samples=49
+    Birdies: Corr=0.3985, Samples=430
+    Birdies or Better: Corr=0.4322, Samples=436
+    SG Total: Corr=0.5353, Samples=436
+    Driving Distance: Corr=-0.0637, Samples=436
+    Driving Accuracy: Corr=0.1743, Samples=436
+    SG T2G: Corr=0.3744, Samples=436
+    SG Approach: Corr=0.3283, Samples=436
+    SG Around Green: Corr=0.1437, Samples=436
+    SG OTT: Corr=0.1485, Samples=436
+    SG Putting: Corr=0.3546, Samples=436
+    GIR: Corr=0.2223, Samples=436
+    Scrambling: Corr=0.2692, Samples=433
+    Great Shots: Corr=0.2060, Samples=436
+    Poor Shots: Corr=0.3086, Samples=436
+    Fairway Proximity: Corr=0.1769, Samples=436
+    Rough Proximity: Corr=0.0877, Samples=432
+  2026:
+    Scoring Average: Corr=0.4984, Samples=387
+    Eagles or Better: Corr=-0.2083, Samples=42
+    Birdies: Corr=0.3791, Samples=380
+    Birdies or Better: Corr=0.4006, Samples=387
+    SG Total: Corr=0.5125, Samples=387
+    Driving Distance: Corr=0.2111, Samples=387
+    Driving Accuracy: Corr=0.0750, Samples=387
+    SG T2G: Corr=0.4263, Samples=387
+    SG Approach: Corr=0.2647, Samples=386
+    SG Around Green: Corr=0.2539, Samples=387
+    SG OTT: Corr=0.2103, Samples=387
+    SG Putting: Corr=0.3441, Samples=387
+    GIR: Corr=0.2948, Samples=387
+    Scrambling: Corr=0.2580, Samples=384
+    Great Shots: Corr=0.2170, Samples=387
+    Poor Shots: Corr=0.2759, Samples=387
+    Fairway Proximity: Corr=0.2496, Samples=387
+    Rough Proximity: Corr=0.0642, Samples=382
+
+STEP 1b: CURRENT-SEASON EVENT-ONLY METRICS (2026, event only)
+Functions: runRanking (optimizer.js) -> buildPlayerData (utilities/dataPrep.js) -> generatePlayerRankings (modelCore.js)
+Additional: computeGeneratedMetricCorrelations, computeGeneratedMetricTopNCorrelations, trainTopNLogisticModel, crossValidateTopNLogisticByEvent, buildSuggestedMetricWeights, buildSuggestedGroupWeights (optimizer.js)
+APPROACH DELTA PRIOR (approachDeltaPrior):
+  No approach delta correlations computed (missing results or delta file).
+
+EVENT-ONLY means season 2026 only (current event rounds only).
+EVENT-ONLY GENERATED METRIC CORRELATIONS (2026, event only):
+  0. SG Total: Corr=0.9285, Samples=118
+  1. Driving Distance: Corr=0.2647, Samples=118
+  2. Driving Accuracy: Corr=0.0941, Samples=118
+  3. SG T2G: Corr=0.6858, Samples=118
+  4. SG Approach: Corr=0.4308, Samples=118
+  5. SG Around Green: Corr=0.4331, Samples=118
+  6. SG OTT: Corr=0.3194, Samples=118
+  7. SG Putting: Corr=0.6238, Samples=118
+  8. Greens in Regulation: Corr=0.5550, Samples=118
+  9. Scrambling: Corr=0.4579, Samples=118
+  10. Great Shots: Corr=0.3938, Samples=118
+  11. Poor Shots: Corr=0.4977, Samples=118
+  12. Scoring Average: Corr=0.9163, Samples=118
+  13. Birdies or Better: Corr=0.7069, Samples=118
+  14. Birdie Chances Created: Corr=0.5119, Samples=118
+  15. Fairway Proximity: Corr=0.3944, Samples=118
+  16. Rough Proximity: Corr=0.0032, Samples=118
+  17. Approach <100 GIR: Corr=0.2818, Samples=118
+  18. Approach <100 SG: Corr=0.0826, Samples=118
+  19. Approach <100 Prox: Corr=-0.1401, Samples=118
+  20. Approach <150 FW GIR: Corr=0.2428, Samples=118
+  21. Approach <150 FW SG: Corr=0.1573, Samples=118
+  22. Approach <150 FW Prox: Corr=-0.0804, Samples=118
+  23. Approach <150 Rough GIR: Corr=0.2333, Samples=118
+  24. Approach <150 Rough SG: Corr=0.1798, Samples=118
+  25. Approach <150 Rough Prox: Corr=-0.1806, Samples=118
+  26. Approach >150 Rough GIR: Corr=0.3279, Samples=118
+  27. Approach >150 Rough SG: Corr=0.2578, Samples=118
+  28. Approach >150 Rough Prox: Corr=-0.2626, Samples=118
+  29. Approach <200 FW GIR: Corr=0.2574, Samples=118
+  30. Approach <200 FW SG: Corr=0.2014, Samples=118
+  31. Approach <200 FW Prox: Corr=-0.0583, Samples=118
+  32. Approach >200 FW GIR: Corr=0.1902, Samples=118
+  33. Approach >200 FW SG: Corr=0.1920, Samples=118
+  34. Approach >200 FW Prox: Corr=-0.1223, Samples=118
+
+EVENT-ONLY GENERATED METRIC TOP-20 SIGNAL (2026, event only):
+  0. SG Total: Corr=0.6604, Samples=118
+  1. Driving Distance: Corr=0.2497, Samples=118
+  2. Driving Accuracy: Corr=0.0157, Samples=118
+  3. SG T2G: Corr=0.4626, Samples=118
+  4. SG Approach: Corr=0.2270, Samples=118
+  5. SG Around Green: Corr=0.3282, Samples=118
+  6. SG OTT: Corr=0.2917, Samples=118
+  7. SG Putting: Corr=0.4770, Samples=118
+  8. Greens in Regulation: Corr=0.3715, Samples=118
+  9. Scrambling: Corr=0.3307, Samples=118
+  10. Great Shots: Corr=0.3568, Samples=118
+  11. Poor Shots: Corr=0.3869, Samples=118
+  12. Scoring Average: Corr=0.6460, Samples=118
+  13. Birdies or Better: Corr=0.5119, Samples=118
+  14. Birdie Chances Created: Corr=0.3125, Samples=118
+  15. Fairway Proximity: Corr=0.2252, Samples=118
+  16. Rough Proximity: Corr=0.0725, Samples=118
+  17. Approach <100 GIR: Corr=0.1478, Samples=118
+  18. Approach <100 SG: Corr=0.0152, Samples=118
+  19. Approach <100 Prox: Corr=-0.1020, Samples=118
+  20. Approach <150 FW GIR: Corr=0.1569, Samples=118
+  21. Approach <150 FW SG: Corr=0.0987, Samples=118
+  22. Approach <150 FW Prox: Corr=-0.0598, Samples=118
+  23. Approach <150 Rough GIR: Corr=0.1712, Samples=118
+  24. Approach <150 Rough SG: Corr=0.0894, Samples=118
+  25. Approach <150 Rough Prox: Corr=-0.1709, Samples=118
+  26. Approach >150 Rough GIR: Corr=0.2128, Samples=118
+  27. Approach >150 Rough SG: Corr=0.1434, Samples=118
+  28. Approach >150 Rough Prox: Corr=-0.1154, Samples=118
+  29. Approach <200 FW GIR: Corr=0.1173, Samples=118
+  30. Approach <200 FW SG: Corr=0.2054, Samples=118
+  31. Approach <200 FW Prox: Corr=0.0848, Samples=118
+  32. Approach >200 FW GIR: Corr=0.0958, Samples=118
+  33. Approach >200 FW SG: Corr=0.1518, Samples=118
+  34. Approach >200 FW Prox: Corr=-0.0645, Samples=118
+
+
+STEP 1c: CURRENT-SEASON GENERATED METRICS (2026, event + similar + putting)
+CURRENT-SEASON means season 2026 only (event + similar + putting events).
+Metric events (current season): [6, 12, 21, 493, 549, 13, 27, 533]
+Blend settings: similarCourseEvents=5, similarBlend=0.30, puttingCourseEvents=6, puttingBlend=0.25 (SG Putting only)
+CURRENT-SEASON GENERATED METRIC CORRELATIONS (2026, event + similar + putting):
+  0. SG Total: Corr=0.7847, Samples=118
+  1. Driving Distance: Corr=0.1662, Samples=118
+  2. Driving Accuracy: Corr=0.1234, Samples=118
+  3. SG T2G: Corr=0.5887, Samples=118
+  4. SG Approach: Corr=0.3981, Samples=118
+  5. SG Around Green: Corr=0.3218, Samples=118
+  6. SG OTT: Corr=0.2715, Samples=118
+  7. SG Putting: Corr=0.4109, Samples=118
+  8. Greens in Regulation: Corr=0.4643, Samples=118
+  9. Scrambling: Corr=0.3657, Samples=118
+  10. Great Shots: Corr=0.3294, Samples=118
+  11. Poor Shots: Corr=0.4256, Samples=118
+  12. Scoring Average: Corr=0.7579, Samples=118
+  13. Birdies or Better: Corr=0.5963, Samples=118
+  14. Birdie Chances Created: Corr=0.4676, Samples=118
+  15. Fairway Proximity: Corr=0.3222, Samples=118
+  16. Rough Proximity: Corr=0.0123, Samples=118
+  17. Approach <100 GIR: Corr=0.2607, Samples=118
+  18. Approach <100 SG: Corr=0.1795, Samples=118
+  19. Approach <100 Prox: Corr=-0.0639, Samples=118
+  20. Approach <150 FW GIR: Corr=0.2952, Samples=118
+  21. Approach <150 FW SG: Corr=0.1976, Samples=118
+  22. Approach <150 FW Prox: Corr=-0.0494, Samples=118
+  23. Approach <150 Rough GIR: Corr=0.1859, Samples=118
+  24. Approach <150 Rough SG: Corr=0.0339, Samples=118
+  25. Approach <150 Rough Prox: Corr=-0.2090, Samples=118
+  26. Approach >150 Rough GIR: Corr=0.3145, Samples=118
+  27. Approach >150 Rough SG: Corr=0.2163, Samples=118
+  28. Approach >150 Rough Prox: Corr=-0.1779, Samples=118
+  29. Approach <200 FW GIR: Corr=0.2843, Samples=118
+  30. Approach <200 FW SG: Corr=0.0680, Samples=118
+  31. Approach <200 FW Prox: Corr=-0.1413, Samples=118
+  32. Approach >200 FW GIR: Corr=0.3025, Samples=118
+  33. Approach >200 FW SG: Corr=0.2222, Samples=118
+  34. Approach >200 FW Prox: Corr=-0.1322, Samples=118
+
+CURRENT-SEASON GENERATED METRIC TOP-20 SIGNAL (2026, event + similar + putting):
+  0. SG Total: Corr=0.5300, Samples=118
+  1. Driving Distance: Corr=0.1277, Samples=118
+  2. Driving Accuracy: Corr=0.1177, Samples=118
+  3. SG T2G: Corr=0.4246, Samples=118
+  4. SG Approach: Corr=0.3089, Samples=118
+  5. SG Around Green: Corr=0.2087, Samples=118
+  6. SG OTT: Corr=0.2180, Samples=118
+  7. SG Putting: Corr=0.2562, Samples=118
+  8. Greens in Regulation: Corr=0.3482, Samples=118
+  9. Scrambling: Corr=0.2810, Samples=118
+  10. Great Shots: Corr=0.2995, Samples=118
+  11. Poor Shots: Corr=0.2819, Samples=118
+  12. Scoring Average: Corr=0.4284, Samples=118
+  13. Birdies or Better: Corr=0.4013, Samples=118
+  14. Birdie Chances Created: Corr=0.3364, Samples=118
+  15. Fairway Proximity: Corr=0.2095, Samples=118
+  16. Rough Proximity: Corr=0.1071, Samples=118
+  17. Approach <100 GIR: Corr=0.1617, Samples=118
+  18. Approach <100 SG: Corr=0.0970, Samples=118
+  19. Approach <100 Prox: Corr=-0.0326, Samples=118
+  20. Approach <150 FW GIR: Corr=0.2139, Samples=118
+  21. Approach <150 FW SG: Corr=0.1417, Samples=118
+  22. Approach <150 FW Prox: Corr=-0.0598, Samples=118
+  23. Approach <150 Rough GIR: Corr=0.0961, Samples=118
+  24. Approach <150 Rough SG: Corr=0.0319, Samples=118
+  25. Approach <150 Rough Prox: Corr=-0.1070, Samples=118
+  26. Approach >150 Rough GIR: Corr=0.1656, Samples=118
+  27. Approach >150 Rough SG: Corr=0.1415, Samples=118
+  28. Approach >150 Rough Prox: Corr=-0.1096, Samples=118
+  29. Approach <200 FW GIR: Corr=0.2334, Samples=118
+  30. Approach <200 FW SG: Corr=0.1434, Samples=118
+  31. Approach <200 FW Prox: Corr=-0.0333, Samples=118
+  32. Approach >200 FW GIR: Corr=0.2567, Samples=118
+  33. Approach >200 FW SG: Corr=0.2188, Samples=118
+  34. Approach >200 FW Prox: Corr=-0.0367, Samples=118
+
+HISTORICAL CORE METRIC TOP-20 SIGNAL (all years, event only):
+Blend weight into top-20 signal: 65%
+  0. SG Total: Corr=0.4956, Samples=332
+  12. Scoring Average: Corr=0.3500, Samples=332
+  13. Birdies or Better: Corr=0.3701, Samples=332
+  1. Driving Distance: Corr=0.0967, Samples=332
+  2. Driving Accuracy: Corr=0.1347, Samples=332
+  3. SG T2G: Corr=0.4171, Samples=332
+  4. SG Approach: Corr=0.3384, Samples=332
+  5. SG Around Green: Corr=0.1910, Samples=332
+  6. SG OTT: Corr=0.1878, Samples=332
+  7. SG Putting: Corr=0.2192, Samples=332
+  11. Poor Shots: Corr=0.2453, Samples=332
+
+CURRENT-SEASON TOP-20 LOGISTIC MODEL (2026, event + similar + putting):
+  Samples: 556
+  Accuracy: 95.1%
+  LogLoss: 0.1637
+  Top 10 Weighted Metrics:
+    1. SG Total: weight=0.8750
+    2. SG Putting: weight=0.8546
+    3. SG T2G: weight=0.5672
+    4. SG Around Green: weight=0.3856
+    5. SG OTT: weight=0.3508
+    6. SG Approach: weight=0.3355
+    7. Approach >150 Rough SG: weight=-0.3076
+    8. Birdies or Better: weight=0.3065
+    9. Great Shots: weight=0.2832
+    10. Poor Shots: weight=0.2605
+
+EVENT-BASED TOP-20 CV SUMMARY (2026):
+  Events: 7
+  Samples: 556
+  Best L2: 0
+  Avg LogLoss: 0.1874
+  Avg Accuracy: 93.7%
+  Folds Used: 7
+
+SUGGESTED METRIC WEIGHTS (TOP-20) - SOURCE: top20-logistic
+  1. SG Total: weight=0.1306, top20Corr=0.5300, logisticWeight=0.8750
+  2. SG Putting: weight=0.1275, top20Corr=0.2562, logisticWeight=0.8546
+  3. SG T2G: weight=0.0847, top20Corr=0.4246, logisticWeight=0.5672
+  4. SG Around Green: weight=0.0576, top20Corr=0.2087, logisticWeight=0.3856
+  5. SG OTT: weight=0.0524, top20Corr=0.2180, logisticWeight=0.3508
+  6. SG Approach: weight=0.0501, top20Corr=0.3089, logisticWeight=0.3355
+  7. Approach >150 Rough SG: weight=-0.0459, top20Corr=0.1415, logisticWeight=-0.3076
+  8. Birdies or Better: weight=0.0457, top20Corr=0.4013, logisticWeight=0.3065
+  9. Great Shots: weight=0.0423, top20Corr=0.2995, logisticWeight=0.2832
+  10. Poor Shots: weight=0.0389, top20Corr=0.2819, logisticWeight=0.2605
+  11. Approach <150 FW Prox: weight=0.0335, top20Corr=-0.0598, logisticWeight=0.2241
+  12. Approach <150 FW SG: weight=0.0322, top20Corr=0.1417, logisticWeight=0.2155
+  13. Approach <150 Rough GIR: weight=0.0254, top20Corr=0.0961, logisticWeight=0.1700
+  14. Greens in Regulation: weight=0.0230, top20Corr=0.3482, logisticWeight=0.1542
+  15. Scrambling: weight=0.0216, top20Corr=0.2810, logisticWeight=0.1449
+
+SUGGESTED GROUP WEIGHTS (TOP-20) - SOURCE: top20-logistic
+  1. Scoring: weight=0.3134
+  2. Course Management: weight=0.2355
+  3. Putting: weight=0.1702
+  4. Driving Performance: weight=0.0993
+  5. Around the Green: weight=0.0768
+  6. Approach - Mid (100-150): weight=0.0374
+  7. Approach - Long (150-200): weight=0.0355
+  8. Approach - Short (<100): weight=0.0177
+  9. Approach - Very Long (>200): weight=0.0141
+
+CV RELIABILITY (event-based): 83.3%
+CONSERVATIVE GROUP WEIGHTS (CV-adjusted, model share 29.2%):
+  1. Scoring: weight=0.1679
+  2. Putting: weight=0.1489
+  3. Driving Performance: weight=0.1297
+  4. Approach - Mid (100-150): weight=0.1232
+  5. Approach - Long (150-200): weight=0.1146
+  6. Course Management: weight=0.1069
+  7. Approach - Short (<100): weight=0.1059
+  8. Around the Green: weight=0.0780
+  9. Approach - Very Long (>200): weight=0.0250
+
+STEP 1d: CURRENT-YEAR TEMPLATE BASELINE (2026)
+Functions: runRanking, evaluateRankings, computeTemplateCorrelationAlignment (optimizer.js)
+PAST PERFORMANCE WEIGHTING (course history regression):
+  Enabled: yes
+  Course Num: 6
+  Regression: n/a
+  Computed Weight: n/a
+  Used Weight (config): 0.14
+  Regression Source: n/a
+  Course Context Updates: no (0 entries)
+  Update Note: regression_unavailable
+
+VALIDATION / DELTA TREND INTEGRATION SUMMARY:
+  Validation Course Type: n/a
+  Validation Template: n/a
+  Validation Prior Weight: 0.25
+  Delta Trend Prior Weight: 0.15
+  Delta Trends Source: /workspaces/modelOptimizer/data/2026/validation_outputs/Model_Delta_Trends.csv
+  Guardrail Totals: n/a
+
+CONFIGURATION_SHEET BASELINE (event-specific config weights):
+Template: CONFIGURATION_SHEET
+Correlation: 0.6640
+R²: 0.4409
+RMSE: 27.67
+MAE: 21.91
+Mean Error: 9.55
+Std Dev Error: 25.97
+Top-10 Accuracy: 70.0%
+Top-20 Accuracy: 70.0%
+Top-20 Weighted Score: 75.9%
+Matched Players: 118
+Top-20 Overlap: 14/20
+  Predicted Top-20 source: generatePlayerRankings (config weights)
+  Predicted Top-20: 17780, 23323, 27774, 24968, 17606, 29767, 27194, 14502, 17536, 25157, 14578, 23504, 29433, 18424, 18634, 16283, 28309, 13562, 8825, 24550
+  Actual Top-20: 27774, 29767, 16283, 29433, 23323, 25157, 19872, 17606, 27194, 17780, 19396, 14609, 28309, 21688, 13562, 13126, 18424, 29925, 24968, 20766, 13764, 27164, 14578
+  Overlap: 17780, 23323, 27774, 24968, 17606, 29767, 27194, 25157, 14578, 29433, 18424, 16283, 28309, 13562
+
+TEMPLATES TESTED (Step 1d):
+  - 6
+  - BALANCED
+  - PEBBLE_BEACH_GOLF_LINKS
+  - PGA_NATIONAL_RESORT_CHAMPION_COURSE
+  - POWER
+  - TECHNICAL
+  - THE_RIVIERA_COUNTRY_CLUB
+  - TPC_LOUISIANA
+  - WAIALAE_COUNTRY_CLUB
+
+RAW TEMPLATE RESULTS (2026, per template):
+  CONFIGURATION_SHEET: Corr=0.6640, R²=0.4409, RMSE=27.67, MAE=21.91, Mean Err=9.55, Std Err=25.97, Top-10=70.0%, Top-20=70.0%, Top-20 Weighted=75.9%, Players=118
+  POWER: Corr=0.4941, R²=0.2442, RMSE=32.70, MAE=26.64, Mean Err=10.06, Std Err=31.11, Top-10=50.0%, Top-20=60.0%, Top-20 Weighted=60.3%, Players=118
+  PGA_NATIONAL_RESORT_CHAMPION_COURSE: Corr=0.6713, R²=0.4507, RMSE=27.15, MAE=21.35, Mean Err=9.97, Std Err=25.25, Top-10=60.0%, Top-20=70.0%, Top-20 Weighted=79.6%, Players=118
+  TECHNICAL: Corr=0.3039, R²=0.0923, RMSE=37.34, MAE=30.74, Mean Err=11.28, Std Err=35.60, Top-10=40.0%, Top-20=40.0%, Top-20 Weighted=40.1%, Players=118
+  BALANCED: Corr=0.4191, R²=0.1757, RMSE=34.87, MAE=29.11, Mean Err=10.97, Std Err=33.10, Top-10=50.0%, Top-20=60.0%, Top-20 Weighted=51.7%, Players=118
+  TPC_LOUISIANA: Corr=0.6254, R²=0.3911, RMSE=29.12, MAE=23.45, Mean Err=9.82, Std Err=27.42, Top-10=50.0%, Top-20=55.0%, Top-20 Weighted=49.1%, Players=118
+  PEBBLE_BEACH_GOLF_LINKS: Corr=0.6444, R²=0.4153, RMSE=28.77, MAE=22.55, Mean Err=10.50, Std Err=26.78, Top-10=50.0%, Top-20=55.0%, Top-20 Weighted=61.6%, Players=118
+  WAIALAE_COUNTRY_CLUB: Corr=0.6640, R²=0.4409, RMSE=27.67, MAE=21.91, Mean Err=9.55, Std Err=25.97, Top-10=70.0%, Top-20=70.0%, Top-20 Weighted=75.9%, Players=118
+  THE_RIVIERA_COUNTRY_CLUB: Corr=0.6547, R²=0.4287, RMSE=28.02, MAE=22.96, Mean Err=9.65, Std Err=26.31, Top-10=50.0%, Top-20=55.0%, Top-20 Weighted=50.2%, Players=118
+
+BEST TEMPLATE (for comparison):
+Template: WAIALAE_COUNTRY_CLUB
+Correlation: 0.6640
+R²: 0.4409
+RMSE: 27.67
+MAE: 21.91
+Mean Error: 9.55
+Std Dev Error: 25.97
+Top-10 Accuracy: 70.0%
+Top-20 Accuracy: 70.0%
+Top-20 Weighted Score: 75.9%
+Matched Players: 118
+Top-20 Overlap: 14/20
+  Predicted Top-20 source: generatePlayerRankings (best template weights)
+  Predicted Top-20: 17780, 23323, 27774, 24968, 17606, 29767, 27194, 14502, 17536, 25157, 14578, 23504, 29433, 18424, 18634, 16283, 28309, 13562, 8825, 24550
+  Actual Top-20: 27774, 29767, 16283, 29433, 23323, 25157, 19872, 17606, 27194, 17780, 19396, 14609, 28309, 21688, 13562, 13126, 18424, 29925, 24968, 20766, 13764, 27164, 14578
+  Overlap: 17780, 23323, 27774, 24968, 17606, 29767, 27194, 25157, 14578, 29433, 18424, 16283, 28309, 13562
+
+RESULTS CURRENT (derived/loaded):
+  Source: Historical Data fin_text (event + season)
+  27774: 1 - Gotterup, Chris
+  29767: 2 - Gerard, Ryan
+  16283: 3 - Rodgers, Patrick
+  23323: 4 - MacIntyre, Robert
+  29433: 4 - Bridgeman, Jacob
+  17606: 6 - Berger, Daniel
+  17780: 6 - Pendrith, Taylor
+  19872: 6 - Riley, Davis
+  25157: 6 - Hodges, Lee
+  27194: 6 - Hall, Harry
+  14609: 11 - Kim, Si Woo
+  19396: 11 - Knapp, Jake
+  13126: 13 - Taylor, Nick
+  13562: 13 - Matsuyama, Hideki
+  18424: 13 - Roy, Kevin
+  21688: 13 - Kim, S.H.
+  28309: 13 - Coody, Pierceson
+  29925: 13 - Yellamaraju, Sudarshan
+  13764: 19 - Parry, John
+  14578: 19 - Henley, Russell
+  20766: 19 - Brown, Dan
+  24968: 19 - Griffin, Ben
+  27164: 19 - Phillips, Chandler
+  13470: 24 - Kizzire, Patton
+  14502: 24 - Cauley, Bud
+  14636: 24 - Spieth, Jordan
+  17576: 24 - Conners, Corey
+  18634: 24 - McNealy, Maverick
+  20954: 24 - Hirata, Kensei
+  22002: 24 - Dumont de Chassart, Adrien
+  10104: 31 - Power, Seamus
+  11451: 31 - Garnett, Brice
+  17543: 31 - Kim, Michael
+  19729: 31 - Kanaya, Takumi
+  23014: 31 - Theegala, Sahith
+  25002: 31 - Wu, Dylan
+  25569: 31 - Stevens, Sam
+  25739: 31 - Yonezawa, Ren
+  27819: 31 - Castillo, Ricky
+  13997: 40 - Svensson, Adam
+  15575: 40 - Hoge, Tom
+  17536: 40 - Spaun, J.J.
+  18474: 40 - Smalley, Alex
+  19870: 40 - McCarthy, Denny
+  21891: 40 - Kitayama, Kurt
+  25908: 40 - Whaley, Vince
+  28159: 40 - Meissner, Mac
+  6430: 40 - Scott, Adam
+  653: 40 - Singh, Vijay
+  17639: 50 - Blair, Zac
+  18554: 50 - Rai, Aaron
+  23504: 50 - Hoey, Rico
+  28016: 50 - Gonzalez, Emilio
+  31343: 50 - Ford, David
+  11049: 55 - Simpson, Webb
+  15310: 55 - Li, Haotong
+  16757: 55 - Dou, Zecheng
+  19960: 55 - Pavon, Matthieu
+  24550: 55 - Ghim, Doug
+  28635: 55 - McCarty, Matt
+  24766: 61 - Kim, Tom
+  28270: 61 - Dunlap, Nick
+  32457: 61 - Keefer, Johnny
+  6986: 61 - Johnson, Zach
+  8825: 61 - Harman, Brian
+  16333: 66 - Hubbard, Mark
+  17365: 66 - Mitchell, Keith
+  18586: 66 - Smith, Jordan
+  28469: 66 - Highsmith, Joe
+  19846: 70 - Bauchou, Zach
+  19840: 71 - Ramey, Chad
+  29770: 71 - Mouw, William
+  28268: 73 - Kaneko, Kota
+  11276: 74 - Horschel, Billy
+  11676: 75 - Finau, Tony
+  12423: 75 - Kirk, Chris
+  12577: 75 - Woodland, Gary
+  12808: 75 - Grillo, Emiliano
+  12909: 75 - Campos, Rafael
+  13872: 75 - Bradley, Keegan
+  14792: 75 - Saddier, Adrien
+  14926: 75 - Malnati, Peter
+  15470: 75 - Hossler, Beau
+  15756: 75 - Higa, Kazuki
+  16162: 75 - Lee, S.T.
+  16591: 75 - Rozo, Marcelo
+  17032: 75 - Tosti, Alejandro
+  17550: 75 - van Rooyen, Erik
+  17786: 75 - Davis, Cam
+  18628: 75 - Campbell, Brian
+  19477: 75 - Schenk, Adam
+  20722: 75 - Schmid, Matti
+  21074: 75 - Nakajima, Keita
+  21407: 75 - Reitan, Kristoffer
+  21756: 75 - Cole, Eric
+  21883: 75 - Ewart, A.J.
+  21889: 75 - Kang, Jeffrey
+  21943: 75 - Lebioda, Hank
+  22085: 75 - Morikawa, Collin
+  22760: 75 - Hisatsune, Ryo
+  22833: 75 - Echavarria, Nico
+  22985: 75 - Smotherman, Austin
+  23505: 75 - McGreevy, Max
+  24223: 75 - Sugiura, Yuta
+  24343: 75 - Lamprecht, Christo
+  24956: 75 - Blanchet, Chandler
+  25003: 75 - Walker, Danny
+  25319: 75 - VanDerLaan, John
+  25475: 75 - Nyholm, Pontus
+  26653: 75 - Eckroat, Austin
+  26657: 75 - Fisk, Steven
+  27183: 75 - Salinda, Isaiah
+  29197: 75 - Brennan, Michael
+  30620: 75 - Chatfield, Davis
+  30814: 75 - Sargent, Gordon
+  32055: 75 - Shipley, Neal
+  32081: 75 - Nagasaki, Taisei
+  32330: 75 - Clanton, Luke
+  34839: 75 - Kozuma, Corey
+  34840: 75 - Cabello, Anson
+
+STEP 2: TOP-20 GROUP WEIGHT TUNING
+Functions: selectOptimizableGroups, runRanking, evaluateRankings (optimizer.js)
+Scope: event 6 across all years (current-field only)
+TUNED TOP-20 GROUP WEIGHTS (BEST CANDIDATE):
+  Top-10: 61.8%
+  Top-20: 63.2%
+  RMSE: 24.91 | Corr: 0.7672 | Players: 339
+  Scoring: 0.1787
+  Putting: 0.1585
+  Driving Performance: 0.1381
+  Approach - Mid (100-150): 0.0994
+  Approach - Long (150-200): 0.0944
+  Course Management: 0.0943
+  Approach - Short (<100): 0.1176
+  Around the Green: 0.0904
+  Approach - Very Long (>200): 0.0285
+  Metric Weights (used unchanged from PGA_NATIONAL_RESORT_CHAMPION_COURSE):
+  Driving Performance::Driving Distance: 0.2524
+  Driving Performance::Driving Accuracy: 0.3040
+  Driving Performance::SG OTT: 0.4436
+  Approach - Short (<100)::Approach <100 GIR: 0.1289
+  Approach - Short (<100)::Approach <100 SG: 0.0935
+  Approach - Short (<100)::Approach <100 Prox: 0.7776
+  Approach - Mid (100-150)::Approach <150 FW GIR: 0.1173
+  Approach - Mid (100-150)::Approach <150 FW SG: 0.1934
+  Approach - Mid (100-150)::Approach <150 FW Prox: 0.6893
+  Approach - Mid (100-150)::Approach <150 Rough GIR: 0.0000
+  Approach - Mid (100-150)::Approach <150 Rough SG: 0.0000
+  Approach - Mid (100-150)::Approach <150 Rough Prox: 0.0000
+  Approach - Long (150-200)::Approach <200 FW GIR: 0.1044
+  Approach - Long (150-200)::Approach <200 FW SG: 0.3277
+  Approach - Long (150-200)::Approach <200 FW Prox: 0.5679
+  Approach - Long (150-200)::Approach >150 Rough GIR: 0.0000
+  Approach - Long (150-200)::Approach >150 Rough SG: 0.0000
+  Approach - Long (150-200)::Approach >150 Rough Prox: 0.0000
+  Approach - Very Long (>200)::Approach >200 FW GIR: 0.0939
+  Approach - Very Long (>200)::Approach >200 FW SG: 0.1509
+  Approach - Very Long (>200)::Approach >200 FW Prox: 0.7552
+  Putting::SG Putting: 1.0000
+  Around the Green::SG Around Green: 1.0000
+  Scoring::SG T2G: 0.7450
+  Scoring::Scoring Average: 0.0079
+  Scoring::Birdie Chances Created: 0.1102
+  Scoring::Scoring: Approach <100 SG: 0.0090
+  Scoring::Scoring: Approach <150 FW SG: 0.0196
+  Scoring::Scoring: Approach <150 Rough SG: 0.0196
+  Scoring::Scoring: Approach <200 FW SG: 0.0560
+  Scoring::Scoring: Approach >200 FW SG: 0.0163
+  Scoring::Scoring: Approach >150 Rough SG: 0.0163
+  Course Management::Scrambling: 0.3290
+  Course Management::Great Shots: 0.0734
+  Course Management::Poor Shot Avoidance: 0.1356
+  Course Management::Course Management: Approach <100 Prox: 0.0305
+  Course Management::Course Management: Approach <150 FW Prox: 0.0661
+  Course Management::Course Management: Approach <150 Rough Prox: 0.0661
+  Course Management::Course Management: Approach >150 Rough Prox: 0.0552
+  Course Management::Course Management: Approach <200 FW Prox: 0.1890
+  Course Management::Course Management: Approach >200 FW Prox: 0.0552
+  Course Management::Poor Shots: -0.0743
+
+STEP 3: WEIGHT OPTIMIZATION (2026 with approach metrics)
+Functions: adjustMetricWeights, computeMetricAlignmentScore, runRanking, evaluateRankings (optimizer.js)
+Objective: current-year results only (current-year field)
+Baseline Template: WAIALAE_COUNTRY_CLUB
+Best Correlation: 0.6928
+Metric Alignment Score (Top-20 KPI blend): 0.2491
+Top-20 Composite Score: 79.3%
+Combined Objective Score: 0.7755 (corr 0.3, top20 0.5, alignment 0.2)
+Best R²: 0.4800
+Best RMSE: 26.42
+Best MAE: 20.89
+Best Mean Error: 10.04
+Best Std Dev Error: 24.43
+Improvement: 4.35%
+Top-10 Accuracy: 80.0%
+Top-20 Accuracy: 75.0%
+Top-20 Weighted Score: 83.7%
+Matched Players (current year): 118
+
+Optimized Group Weights:
+  Driving Performance: 12.3%
+  Approach - Short (<100): 3.7%
+  Approach - Mid (100-150): 9.1%
+  Approach - Long (150-200): 9.5%
+  Approach - Very Long (>200): 4.9%
+  Putting: 16.5%
+  Around the Green: 4.6%
+  Scoring: 19.7%
+  Course Management: 19.7%
+
+Optimized Metric Weights:
+  Driving Performance::Driving Distance: 0.2181
+  Driving Performance::Driving Accuracy: 0.3147
+  Driving Performance::SG OTT: 0.4673
+  Approach - Short (<100)::Approach <100 GIR: 0.1301
+  Approach - Short (<100)::Approach <100 SG: 0.0962
+  Approach - Short (<100)::Approach <100 Prox: 0.7737
+  Approach - Mid (100-150)::Approach <150 FW GIR: 0.1250
+  Approach - Mid (100-150)::Approach <150 FW SG: 0.1711
+  Approach - Mid (100-150)::Approach <150 FW Prox: 0.7036
+  Approach - Mid (100-150)::Approach <150 Rough GIR: 0.0001
+  Approach - Mid (100-150)::Approach <150 Rough SG: 0.0001
+  Approach - Mid (100-150)::Approach <150 Rough Prox: 0.0001
+  Approach - Long (150-200)::Approach <200 FW GIR: 0.0971
+  Approach - Long (150-200)::Approach <200 FW SG: 0.3685
+  Approach - Long (150-200)::Approach <200 FW Prox: 0.5341
+  Approach - Long (150-200)::Approach >150 Rough GIR: 0.0001
+  Approach - Long (150-200)::Approach >150 Rough SG: 0.0001
+  Approach - Long (150-200)::Approach >150 Rough Prox: 0.0001
+  Approach - Very Long (>200)::Approach >200 FW GIR: 0.1071
+  Approach - Very Long (>200)::Approach >200 FW SG: 0.1440
+  Approach - Very Long (>200)::Approach >200 FW Prox: 0.7489
+  Putting::SG Putting: 1.0000
+  Around the Green::SG Around Green: 1.0000
+  Scoring::SG T2G: 0.7400
+  Scoring::Scoring Average: 0.0080
+  Scoring::Birdie Chances Created: 0.1098
+  Scoring::Scoring: Approach <100 SG: 0.0088
+  Scoring::Scoring: Approach <150 FW SG: 0.0185
+  Scoring::Scoring: Approach <150 Rough SG: 0.0189
+  Scoring::Scoring: Approach <200 FW SG: 0.0629
+  Scoring::Scoring: Approach >200 FW SG: 0.0160
+  Scoring::Scoring: Approach >150 Rough SG: 0.0171
+  Course Management::Scrambling: 0.3907
+  Course Management::Great Shots: 0.0874
+  Course Management::Poor Shot Avoidance: 0.1356
+  Course Management::Course Management: Approach <100 Prox: 0.0318
+  Course Management::Course Management: Approach <150 FW Prox: 0.0643
+  Course Management::Course Management: Approach <150 Rough Prox: 0.0781
+  Course Management::Course Management: Approach >150 Rough Prox: 0.0626
+  Course Management::Course Management: Approach <200 FW Prox: 0.2203
+  Course Management::Course Management: Approach >200 FW Prox: 0.0647
+  Course Management::Poor Shots: 0.0001
+
+Metric Stats Diagnostics (current-year ranking):
+  Thresholds: stdDev<=0.05, count<10
+  No metrics flagged under the thresholds.
+
+Optimized Rankings (Current Year 2026):
+  1: 23323 - MacIntyre, Robert | refined=0.6395, weighted=0.6395
+  2: 29767 - Gerard, Ryan | refined=0.6303, weighted=0.6303
+  3: 17780 - Pendrith, Taylor | refined=0.5788, weighted=0.5788
+  4: 27774 - Gotterup, Chris | refined=0.5559, weighted=0.5559
+  5: 13562 - Matsuyama, Hideki | refined=0.5166, weighted=0.5166
+  6: 25157 - Hodges, Lee | refined=0.4317, weighted=0.4317
+  7: 16283 - Rodgers, Patrick | refined=0.4507, weighted=0.4507
+  8: 14578 - Henley, Russell | refined=0.4306, weighted=0.4306
+  9: 17606 - Berger, Daniel | refined=0.4158, weighted=0.4158
+  10: 29433 - Bridgeman, Jacob | refined=0.4022, weighted=0.4022
+  11: 27194 - Hall, Harry | refined=0.3746, weighted=0.3746
+  12: 14609 - Kim, Si Woo | refined=0.3425, weighted=0.3425
+  13: 14502 - Cauley, Bud | refined=0.3299, weighted=0.3299
+  14: 24968 - Griffin, Ben | refined=0.3186, weighted=0.3186
+  15: 17536 - Spaun, J.J. | refined=0.2862, weighted=0.2862
+  16: 23504 - Hoey, Rico | refined=0.2718, weighted=0.2718
+  17: 28309 - Coody, Pierceson | refined=0.2024, weighted=0.2024
+  18: 19396 - Knapp, Jake | refined=0.1976, weighted=0.1976
+  19: 15575 - Hoge, Tom | refined=0.2088, weighted=0.2088
+  20: 18634 - McNealy, Maverick | refined=0.1724, weighted=0.1724
+  21: 23014 - Theegala, Sahith | refined=0.1856, weighted=0.1856
+  22: 18424 - Roy, Kevin | refined=0.2031, weighted=0.2031
+  23: 17576 - Conners, Corey | refined=0.1447, weighted=0.1447
+  24: 13126 - Taylor, Nick | refined=0.1383, weighted=0.1383
+  25: 22085 - Morikawa, Collin | refined=0.1273, weighted=0.1273
+  26: 24766 - Kim, Tom | refined=0.1399, weighted=0.1399
+  27: 29925 - Yellamaraju, Sudarshan | refined=0.0857, weighted=0.4284
+  28: 28016 - Gonzalez, Emilio | refined=0.0750, weighted=0.3747
+  29: 20954 - Hirata, Kensei | refined=0.0683, weighted=0.3415
+  30: 14636 - Spieth, Jordan | refined=0.1160, weighted=0.1160
+  31: 17543 - Kim, Michael | refined=0.1103, weighted=0.1103
+  32: 13470 - Kizzire, Patton | refined=0.1364, weighted=0.1364
+  33: 20766 - Brown, Daniel | refined=0.0616, weighted=0.2968
+  34: 16757 - Dou, Zecheng | refined=0.0592, weighted=0.2956
+  35: 17365 - Mitchell, Keith | refined=0.0998, weighted=0.0998
+  36: 13872 - Bradley, Keegan | refined=0.0919, weighted=0.0919
+  37: 25739 - Yonezawa, Ren | refined=0.0418, weighted=0.2090
+  38: 22002 - Dumont De Chassart, Adrien | refined=0.0360, weighted=0.1736
+  39: 653 - Singh, Vijay | refined=0.0369, weighted=0.1842
+  40: 15310 - Li, Haotong | refined=0.0421, weighted=0.2029
+  41: 32081 - Nagasaki, Taisei | refined=0.0339, weighted=0.1692
+  42: 21688 - Kim, S.H. | refined=0.0220, weighted=0.1060
+  43: 14792 - Saddier, Adrien | refined=0.0361, weighted=0.1805
+  44: 30620 - Chatfield, Davis | refined=0.0227, weighted=0.1134
+  45: 25319 - VanDerLaan, John | refined=0.0225, weighted=0.1124
+  46: 21891 - Kitayama, Kurt | refined=0.0680, weighted=0.0680
+  47: 19870 - McCarthy, Denny | refined=0.0718, weighted=0.0718
+  48: 6430 - Scott, Adam | refined=0.0647, weighted=0.0647
+  49: 11049 - Simpson, Webb | refined=0.0836, weighted=0.0836
+  50: 25569 - Stevens, Sam | refined=0.0759, weighted=0.0759
+  51: 29197 - Brennan, Michael | refined=0.0252, weighted=0.1257
+  52: 18474 - Smalley, Alex | refined=0.0732, weighted=0.0732
+  53: 15756 - Higa, Kazuki | refined=0.0221, weighted=0.1105
+  54: 22985 - Smotherman, Austin | refined=0.0163, weighted=0.0813
+  55: 13764 - Parry, John | refined=0.0048, weighted=0.0200
+  56: 16162 - Lee, Seung-taek | refined=0.0094, weighted=0.0469
+  57: 28268 - Kaneko, Kota | refined=0.0046, weighted=0.0230
+  58: 28159 - Meissner, Mac | refined=0.0416, weighted=0.0416
+  59: 21883 - Ewart, A.J. | refined=-0.0044, weighted=-0.0222
+  60: 25475 - Nyholm, Pontus | refined=0.0057, weighted=0.0285
+  61: 8825 - Harman, Brian | refined=0.0339, weighted=0.0339
+  62: 24550 - Ghim, Doug | refined=-0.0089, weighted=-0.0089
+  63: 19846 - Bauchou, Zach | refined=-0.0058, weighted=-0.0289
+  64: 19872 - Riley, Davis | refined=-0.0048, weighted=-0.0048
+  65: 10104 - Power, Seamus | refined=0.0007, weighted=0.0007
+  66: 32457 - Keefer, Johnny | refined=-0.0117, weighted=-0.0369
+  67: 13997 - Svensson, Adam | refined=-0.0036, weighted=-0.0036
+  68: 18554 - Rai, Aaron | refined=-0.0438, weighted=-0.0438
+  69: 18628 - Campbell, Brian | refined=-0.0134, weighted=-0.0134
+  70: 22760 - Hisatsune, Ryo | refined=-0.0460, weighted=-0.0460
+  71: 21074 - Nakajima, Keita | refined=-0.0045, weighted=-0.0225
+  72: 11451 - Garnett, Brice | refined=-0.0508, weighted=-0.0508
+  73: 21943 - Lebioda, Hank | refined=-0.0149, weighted=-0.0745
+  74: 18586 - Smith, Jordan | refined=-0.0722, weighted=-0.0722
+  75: 16591 - Rozo, Marcelo | refined=-0.0260, weighted=-0.1299
+  76: 32330 - Clanton, Luke | refined=-0.0808, weighted=-0.0808
+  77: 24956 - Blanchet, Chandler | refined=-0.0331, weighted=-0.1656
+  78: 32055 - Shipley, Neal | refined=-0.0412, weighted=-0.1986
+  79: 21889 - Kang, Jeffrey | refined=-0.0445, weighted=-0.2225
+  80: 24343 - Lamprecht, Christo | refined=-0.0463, weighted=-0.2315
+  81: 27164 - Phillips, Chandler | refined=-0.1112, weighted=-0.1112
+  82: 27819 - Castillo, Ricky | refined=-0.1370, weighted=-0.1370
+  83: 28635 - McCarty, Matt | refined=-0.1292, weighted=-0.1292
+  84: 25002 - Wu, Dylan | refined=-0.1344, weighted=-0.1344
+  85: 6986 - Johnson, Zach | refined=-0.1503, weighted=-0.1503
+  86: 31343 - Ford, David | refined=-0.1117, weighted=-0.1117
+  87: 15470 - Hossler, Beau | refined=-0.1159, weighted=-0.1159
+  88: 19729 - Kanaya, Takumi | refined=-0.1471, weighted=-0.1471
+  89: 24223 - Sugiura, Yuta | refined=-0.0986, weighted=-0.4926
+  90: 10047735 - Kozuma, Corey | refined=-0.0985, weighted=-0.4926
+  90: 30041790 - Cabello, Anson | refined=-0.0985, weighted=-0.4926
+  92: 21407 - Reitan, Kristoffer | refined=-0.0919, weighted=-0.4426
+  93: 25908 - Whaley, Vince | refined=-0.2126, weighted=-0.2126
+  94: 17639 - Blair, Zac | refined=-0.2053, weighted=-0.2053
+  95: 12909 - Campos, Rafael | refined=-0.1910, weighted=-0.1910
+  96: 26657 - Fisk, Steven | refined=-0.2283, weighted=-0.2283
+  97: 21756 - Cole, Eric | refined=-0.2561, weighted=-0.2561
+  98: 28270 - Dunlap, Nick | refined=-0.2189, weighted=-0.2189
+  99: 19840 - Ramey, Chad | refined=-0.2709, weighted=-0.2709
+  100: 27183 - Salinda, Isaiah | refined=-0.2460, weighted=-0.2460
+  101: 19960 - Pavon, Matthieu | refined=-0.2807, weighted=-0.2807
+  102: 26653 - Eckroat, Austin | refined=-0.2483, weighted=-0.2483
+  103: 12577 - Woodland, Gary | refined=-0.2695, weighted=-0.2695
+  104: 11276 - Horschel, Billy | refined=-0.2493, weighted=-0.2493
+  105: 17786 - Davis, Cam | refined=-0.2312, weighted=-0.2312
+  106: 12808 - Grillo, Emiliano | refined=-0.2747, weighted=-0.2747
+  107: 17550 - Van Rooyen, Erik | refined=-0.3061, weighted=-0.3061
+  108: 25003 - Walker, Danny | refined=-0.2823, weighted=-0.2823
+  109: 20722 - Schmid, Matti | refined=-0.3378, weighted=-0.3378
+  110: 12423 - Kirk, Chris | refined=-0.3208, weighted=-0.3208
+  111: 28469 - Highsmith, Joe | refined=-0.3329, weighted=-0.3329
+  112: 16333 - Hubbard, Mark | refined=-0.4198, weighted=-0.4198
+  113: 11676 - Finau, Tony | refined=-0.4115, weighted=-0.4115
+  114: 29770 - Mouw, William | refined=-0.4236, weighted=-0.4236
+  115: 17032 - Tosti, Alejandro | refined=-0.5201, weighted=-0.5201
+  116: 23505 - McGreevy, Max | refined=-0.5588, weighted=-0.5588
+  117: 22833 - Echavarria, Nico | refined=-0.5943, weighted=-0.5943
+  118: 14926 - Malnati, Peter | refined=-0.7316, weighted=-0.7316
+  119: 30814 - Sargent, Gordon | refined=-0.7171, weighted=-0.7171
+  120: 19477 - Schenk, Adam | refined=-0.7611, weighted=-0.7611
+
+STEP 4a: MULTI-YEAR VALIDATION (Baseline)
+Approach mode: current_only
+Functions: runRanking, aggregateYearlyEvaluations (optimizer.js)
+  2022: Corr=0.7515, R²=0.5648, RMSE=26.06, MAE=21.88, Mean Err=-20.66, Std Err=15.89, Top-10=40.0%, Top-20=45.0%, Top-20 Weighted=93.6%, Subset RMSE=6.38, Subset Top-20=75.0%, Pct RMSE=0.16, Stress=PASS, Top-10 Overlap=4/10, Top-20 Overlap=9/20, Players=41, Approach=l24/snapshot_l24, Leakage=approximation
+  2023: Corr=0.6403, R²=0.4099, RMSE=32.96, MAE=28.22, Mean Err=-26.27, Std Err=19.91, Top-10=30.0%, Top-20=45.0%, Top-20 Weighted=56.5%, Subset RMSE=10.31, Subset Top-20=90.0%, Pct RMSE=0.21, Stress=PASS, Top-10 Overlap=3/10, Top-20 Overlap=9/20, Players=49, Approach=l24/snapshot_l24, Leakage=approximation
+  2024: Corr=0.7048, R²=0.4967, RMSE=24.91, MAE=20.51, Mean Err=-16.71, Std Err=18.47, Top-10=40.0%, Top-20=40.0%, Top-20 Weighted=79.6%, Subset RMSE=11.95, Subset Top-20=85.0%, Pct RMSE=0.21, Stress=PASS, Top-10 Overlap=4/10, Top-20 Overlap=8/20, Players=59, Approach=l24/snapshot_l24, Leakage=approximation
+  2025: Corr=0.6424, R²=0.4127, RMSE=24.15, MAE=18.79, Mean Err=-11.40, Std Err=21.28, Top-10=50.0%, Top-20=55.0%, Top-20 Weighted=63.2%, Subset RMSE=14.70, Subset Top-20=55.0%, Pct RMSE=0.21, Stress=PASS, Top-10 Overlap=5/10, Top-20 Overlap=11/20, Players=72, Approach=l12/snapshot_l12, Leakage=approximation
+  2026: Corr=0.6640, R²=0.4409, RMSE=27.67, MAE=21.91, Mean Err=9.55, Std Err=25.97, Top-10=70.0%, Top-20=70.0%, Top-20 Weighted=75.9%, Subset RMSE=23.24, Subset Top-20=70.0%, Pct RMSE=0.20, Stress=PASS, Top-10 Overlap=7/10, Top-20 Overlap=14/20, Players=118, Approach=ytd/csv_primary, Leakage=approximation
+
+STEP 4a: MULTI-YEAR VALIDATION (No-Approach Baseline)
+Approach mode: none (forced)
+Functions: runRanking, aggregateYearlyEvaluations (optimizer.js)
+  2022: Corr=0.7970, R²=0.6352, RMSE=25.83, MAE=21.63, Mean Err=-20.66, Std Err=15.51, Top-10=40.0%, Top-20=50.0%, Top-20 Weighted=87.8%, Subset RMSE=5.60, Subset Top-20=85.0%, Pct RMSE=0.14, Stress=PASS, Top-10 Overlap=4/10, Top-20 Overlap=10/20, Players=41, Approach=none/none, Leakage=none
+  2023: Corr=0.5803, R²=0.3367, RMSE=33.48, MAE=28.47, Mean Err=-26.27, Std Err=20.77, Top-10=20.0%, Top-20=40.0%, Top-20 Weighted=47.1%, Subset RMSE=11.29, Subset Top-20=80.0%, Pct RMSE=0.24, Stress=PASS, Top-10 Overlap=2/10, Top-20 Overlap=8/20, Players=49, Approach=none/none, Leakage=none
+  2024: Corr=0.7004, R²=0.4906, RMSE=25.24, MAE=21.07, Mean Err=-17.85, Std Err=17.84, Top-10=40.0%, Top-20=40.0%, Top-20 Weighted=78.5%, Subset RMSE=11.24, Subset Top-20=80.0%, Pct RMSE=0.19, Stress=PASS, Top-10 Overlap=4/10, Top-20 Overlap=8/20, Players=59, Approach=none/none, Leakage=none
+  2025: Corr=0.6332, R²=0.4010, RMSE=23.61, MAE=18.47, Mean Err=-12.06, Std Err=20.30, Top-10=60.0%, Top-20=50.0%, Top-20 Weighted=58.7%, Subset RMSE=14.07, Subset Top-20=50.0%, Pct RMSE=0.20, Stress=FAIL (top20W<60%), Top-10 Overlap=6/10, Top-20 Overlap=10/20, Players=72, Approach=none/none, Leakage=none
+  2026: Corr=0.1274, R²=0.0162, RMSE=39.19, MAE=32.20, Mean Err=6.71, Std Err=38.61, Top-10=9.1%, Top-20=25.0%, Top-20 Weighted=23.7%, Subset RMSE=39.83, Subset Top-20=25.0%, Pct RMSE=0.34, Stress=FAIL (top20W<60%), Top-10 Overlap=1/10, Top-20 Overlap=5/20, Players=118, Approach=none/none, Leakage=none
+
+STEP 4b: MULTI-YEAR VALIDATION (Optimized)
+Approach mode: current_only
+Functions: runRanking, aggregateYearlyEvaluations (optimizer.js)
+  2022: Corr=0.8661, R²=0.7502, RMSE=19.03, MAE=13.20, Mean Err=-12.61, Std Err=14.26, Top-10=50.0%, Top-20=55.0%, Top-20 Weighted=98.3%, Subset RMSE=14.36, Subset Top-20=85.0%, Pct RMSE=0.36, Stress=PASS, Top-10 Overlap=5/10, Top-20 Overlap=11/20, Players=41, Approach=l24/snapshot_l24, Leakage=approximation
+  2023: Corr=0.8188, R²=0.6704, RMSE=24.91, MAE=19.20, Mean Err=-18.18, Std Err=17.03, Top-10=30.0%, Top-20=45.0%, Top-20 Weighted=85.3%, Subset RMSE=16.28, Subset Top-20=95.0%, Pct RMSE=0.34, Stress=PASS, Top-10 Overlap=3/10, Top-20 Overlap=9/20, Players=49, Approach=l24/snapshot_l24, Leakage=approximation
+  2024: Corr=0.8114, R²=0.6584, RMSE=22.21, MAE=17.08, Mean Err=-9.76, Std Err=19.95, Top-10=50.0%, Top-20=45.0%, Top-20 Weighted=88.4%, Subset RMSE=19.41, Subset Top-20=85.0%, Pct RMSE=0.33, Stress=PASS, Top-10 Overlap=5/10, Top-20 Overlap=9/20, Players=59, Approach=l24/snapshot_l24, Leakage=approximation
+  2025: Corr=0.7926, R²=0.6283, RMSE=19.38, MAE=14.35, Mean Err=-7.38, Std Err=17.92, Top-10=60.0%, Top-20=70.0%, Top-20 Weighted=89.4%, Subset RMSE=14.16, Subset Top-20=75.0%, Pct RMSE=0.20, Stress=PASS, Top-10 Overlap=6/10, Top-20 Overlap=14/20, Players=72, Approach=l12/snapshot_l12, Leakage=approximation
+  2026: Corr=0.6928, R²=0.4800, RMSE=26.42, MAE=20.89, Mean Err=10.04, Std Err=24.43, Top-10=80.0%, Top-20=75.0%, Top-20 Weighted=83.7%, Subset RMSE=22.06, Subset Top-20=75.0%, Pct RMSE=0.19, Stress=PASS, Top-10 Overlap=8/10, Top-20 Overlap=15/20, Players=118, Approach=ytd/csv_primary, Leakage=approximation
+
+APPROACH USAGE SUMMARY (Multi-Year Validation)
+| Year | Period | Source | Leakage |
+| --- | --- | --- | --- |
+| 2022 | l24 | snapshot_l24 | approximation |
+| 2023 | l24 | snapshot_l24 | approximation |
+| 2024 | l24 | snapshot_l24 | approximation |
+| 2025 | l12 | snapshot_l12 | approximation |
+| 2026 | ytd | csv_primary | approximation |
+
+EVENT K-FOLD SETTINGS
+  EVENT_KFOLD_K: LOEO (default)
+  EVENT_KFOLD_SEED: e
+  OPT_SEED: e
+
+STEP 4a: EVENT K-FOLD VALIDATION (Baseline)
+  2022: mode=leave_one_event_out, folds=46/46, Corr=0.3131, RMSE=280.60, Top-10=12.2%, Top-20=17.3%, Top-20 Weighted=35.3%, Players=5995, Approach=l24/snapshot_l24, Leakage=approximation
+    Fold 1: events=1, trainRows=17948, testRows=538, players=156, Corr=0.4402, RMSE=241.18, Top-10=10.0%, Top-20=15.0%, Top-20W=34.7%
+    Fold 2: events=1, trainRows=18088, testRows=398, players=132, Corr=0.3108, RMSE=235.22, Top-10=30.0%, Top-20=30.0%, Top-20W=59.1%
+    Fold 3: events=1, trainRows=18016, testRows=470, players=156, Corr=0.2323, RMSE=229.08, Top-10=10.0%, Top-20=20.0%, Top-20W=20.0%
+    Fold 4: events=1, trainRows=17959, testRows=527, players=143, Corr=0.3892, RMSE=310.75, Top-10=10.0%, Top-20=10.0%, Top-20W=45.9%
+    Fold 5: events=1, trainRows=18069, testRows=417, players=144, Corr=0.2543, RMSE=283.92, Top-10=0.0%, Top-20=15.0%, Top-20W=45.1%
+    Fold 6: events=1, trainRows=18097, testRows=389, players=120, Corr=0.3052, RMSE=222.26, Top-10=30.0%, Top-20=30.0%, Top-20W=48.0%
+    Fold 7: events=1, trainRows=18092, testRows=394, players=120, Corr=0.3000, RMSE=214.77, Top-10=20.0%, Top-20=40.0%, Top-20W=46.5%
+    Fold 8: events=1, trainRows=18052, testRows=434, players=144, Corr=0.3106, RMSE=275.90, Top-10=20.0%, Top-20=10.0%, Top-20W=42.0%
+    Fold 9: events=1, trainRows=18063, testRows=423, players=143, Corr=0.1136, RMSE=214.52, Top-10=10.0%, Top-20=20.0%, Top-20W=21.2%
+    Fold 10: events=1, trainRows=18083, testRows=403, players=131, Corr=0.2841, RMSE=234.93, Top-10=20.0%, Top-20=20.0%, Top-20W=41.0%
+    Fold 11: events=1, trainRows=18010, testRows=476, players=156, Corr=0.1817, RMSE=276.19, Top-10=0.0%, Top-20=10.0%, Top-20W=23.9%
+    Fold 12: events=1, trainRows=18203, testRows=283, players=90, Corr=0.3358, RMSE=279.03, Top-10=30.0%, Top-20=30.0%, Top-20W=46.7%
+    Fold 13: events=1, trainRows=18334, testRows=152, players=38, Corr=0.1974, RMSE=176.11, Top-10=20.0%, Top-20=30.0%, Top-20W=50.4%
+    Fold 14: events=1, trainRows=18007, testRows=479, players=156, Corr=0.3027, RMSE=278.22, Top-10=0.0%, Top-20=25.0%, Top-20W=29.9%
+    Fold 15: events=1, trainRows=18091, testRows=395, players=132, Corr=0.3619, RMSE=245.75, Top-10=10.0%, Top-20=5.0%, Top-20W=29.7%
+    Fold 16: events=1, trainRows=18109, testRows=377, players=120, Corr=0.0112, RMSE=231.14, Top-10=10.0%, Top-20=10.0%, Top-20W=29.0%
+    Fold 17: events=1, trainRows=18109, testRows=377, players=119, Corr=0.3435, RMSE=200.55, Top-10=20.0%, Top-20=25.0%, Top-20W=29.3%
+    Fold 18: events=1, trainRows=18046, testRows=440, players=156, Corr=0.3894, RMSE=332.01, Top-10=30.0%, Top-20=35.0%, Top-20W=42.3%
+    Fold 19: events=1, trainRows=18111, testRows=375, players=120, Corr=0.2949, RMSE=176.61, Top-10=10.0%, Top-20=30.0%, Top-20W=24.9%
+    Fold 20: events=1, trainRows=18216, testRows=270, players=68, Corr=0.1999, RMSE=141.63, Top-10=40.0%, Top-20=40.0%, Top-20W=54.5%
+    Fold 21: events=1, trainRows=18040, testRows=446, players=156, Corr=0.4001, RMSE=327.98, Top-10=0.0%, Top-20=5.0%, Top-20W=38.3%
+    Fold 22: events=1, trainRows=18039, testRows=447, players=155, Corr=0.4641, RMSE=348.81, Top-10=20.0%, Top-20=25.0%, Top-20W=60.0%
+    Fold 23: events=1, trainRows=18017, testRows=469, players=156, Corr=0.4970, RMSE=345.00, Top-10=20.0%, Top-20=20.0%, Top-20W=23.1%
+    Fold 24: events=1, trainRows=18035, testRows=451, players=155, Corr=0.2065, RMSE=233.23, Top-10=0.0%, Top-20=30.0%, Top-20W=31.1%
+    Fold 25: events=1, trainRows=18060, testRows=426, players=143, Corr=0.1538, RMSE=260.51, Top-10=0.0%, Top-20=10.0%, Top-20W=14.2%
+    Fold 26: events=1, trainRows=18045, testRows=441, players=144, Corr=0.3713, RMSE=258.80, Top-10=0.0%, Top-20=10.0%, Top-20W=27.2%
+    Fold 27: events=1, trainRows=18042, testRows=444, players=144, Corr=0.3078, RMSE=256.88, Top-10=0.0%, Top-20=10.0%, Top-20W=35.3%
+    Fold 28: events=1, trainRows=18370, testRows=116, players=29, Corr=0.3740, RMSE=102.21, Top-10=30.0%, Top-20=50.0%, Top-20W=74.8%
+    Fold 29: events=1, trainRows=18008, testRows=478, players=156, Corr=0.3976, RMSE=365.89, Top-10=40.0%, Top-20=25.0%, Top-20W=31.9%
+    Fold 30: events=1, trainRows=18088, testRows=398, players=132, Corr=0.3491, RMSE=260.08, Top-10=20.0%, Top-20=20.0%, Top-20W=39.3%
+    Fold 31: events=1, trainRows=18030, testRows=456, players=155, Corr=0.2430, RMSE=240.32, Top-10=0.0%, Top-20=0.0%, Top-20W=9.5%
+    Fold 32: events=1, trainRows=18037, testRows=449, players=155, Corr=0.4614, RMSE=373.11, Top-10=0.0%, Top-20=0.0%, Top-20W=26.0%
+    Fold 33: events=1, trainRows=18054, testRows=432, players=144, Corr=0.1869, RMSE=266.57, Top-10=0.0%, Top-20=20.0%, Top-20W=36.8%
+    Fold 34: events=1, trainRows=18406, testRows=80, players=20, Corr=0.3199, RMSE=60.64, Top-10=40.0%, Top-20=45.0%, Top-20W=91.9%
+    Fold 35: events=1, trainRows=18048, testRows=438, players=155, Corr=0.2941, RMSE=276.14, Top-10=10.0%, Top-20=15.0%, Top-20W=40.5%
+    Fold 36: events=1, trainRows=18106, testRows=380, players=120, Corr=0.4379, RMSE=421.84, Top-10=0.0%, Top-20=0.0%, Top-20W=21.7%
+    Fold 37: events=1, trainRows=18041, testRows=445, players=155, Corr=0.2797, RMSE=250.03, Top-10=10.0%, Top-20=10.0%, Top-20W=34.0%
+    Fold 38: events=1, trainRows=18016, testRows=470, players=155, Corr=0.3417, RMSE=389.61, Top-10=0.0%, Top-20=0.0%, Top-20W=25.7%
+    Fold 39: events=1, trainRows=18174, testRows=312, players=78, Corr=0.3918, RMSE=233.41, Top-10=20.0%, Top-20=30.0%, Top-20W=38.5%
+    Fold 40: events=1, trainRows=18118, testRows=368, players=120, Corr=0.2835, RMSE=359.17, Top-10=0.0%, Top-20=0.0%, Top-20W=13.3%
+    Fold 41: events=1, trainRows=18028, testRows=458, players=155, Corr=0.3438, RMSE=262.99, Top-10=20.0%, Top-20=30.0%, Top-20W=51.5%
+    Fold 42: events=1, trainRows=18028, testRows=458, players=155, Corr=0.3466, RMSE=338.07, Top-10=0.0%, Top-20=10.0%, Top-20W=35.5%
+    Fold 43: events=1, trainRows=18174, testRows=312, players=78, Corr=0.4166, RMSE=283.84, Top-10=10.0%, Top-20=15.0%, Top-20W=40.4%
+    Fold 44: events=1, trainRows=18089, testRows=397, players=132, Corr=0.2798, RMSE=338.44, Top-10=0.0%, Top-20=5.0%, Top-20W=33.4%
+    Fold 45: events=1, trainRows=18051, testRows=435, players=144, Corr=0.3683, RMSE=330.24, Top-10=20.0%, Top-20=15.0%, Top-20W=48.9%
+    Fold 46: events=1, trainRows=18023, testRows=463, players=160, Corr=0.2590, RMSE=354.53, Top-10=40.0%, Top-20=30.0%, Top-20W=44.1%
+  2023: mode=leave_one_event_out, folds=46/46, Corr=0.3039, RMSE=253.52, Top-10=12.2%, Top-20=18.3%, Top-20 Weighted=31.4%, Players=6060, Approach=l24/snapshot_l24, Leakage=approximation
+    Fold 1: events=1, trainRows=18180, testRows=537, players=156, Corr=0.3171, RMSE=225.40, Top-10=20.0%, Top-20=20.0%, Top-20W=25.7%
+    Fold 2: events=1, trainRows=18319, testRows=398, players=134, Corr=0.2726, RMSE=193.75, Top-10=40.0%, Top-20=20.0%, Top-20W=29.2%
+    Fold 3: events=1, trainRows=18259, testRows=458, players=156, Corr=0.3400, RMSE=257.50, Top-10=10.0%, Top-20=15.0%, Top-20W=28.9%
+    Fold 4: events=1, trainRows=18192, testRows=525, players=155, Corr=0.2048, RMSE=250.50, Top-10=0.0%, Top-20=5.0%, Top-20W=26.2%
+    Fold 5: events=1, trainRows=18277, testRows=440, players=144, Corr=0.3515, RMSE=253.36, Top-10=10.0%, Top-20=15.0%, Top-20W=26.3%
+    Fold 6: events=1, trainRows=18324, testRows=393, players=129, Corr=0.2580, RMSE=156.46, Top-10=20.0%, Top-20=45.0%, Top-20W=37.5%
+    Fold 7: events=1, trainRows=18334, testRows=383, players=120, Corr=0.0947, RMSE=138.12, Top-10=20.0%, Top-20=30.0%, Top-20W=28.4%
+    Fold 8: events=1, trainRows=18271, testRows=446, players=144, Corr=0.1490, RMSE=248.44, Top-10=0.0%, Top-20=10.0%, Top-20W=23.9%
+    Fold 9: events=1, trainRows=18280, testRows=437, players=144, Corr=0.3104, RMSE=136.41, Top-10=20.0%, Top-20=40.0%, Top-20W=30.8%
+    Fold 10: events=1, trainRows=18289, testRows=428, players=142, Corr=0.2488, RMSE=180.23, Top-10=10.0%, Top-20=35.0%, Top-20W=28.7%
+    Fold 11: events=1, trainRows=18259, testRows=458, players=156, Corr=0.3591, RMSE=211.10, Top-10=10.0%, Top-20=20.0%, Top-20W=41.5%
+    Fold 12: events=1, trainRows=18440, testRows=277, players=86, Corr=0.4779, RMSE=288.14, Top-10=50.0%, Top-20=45.0%, Top-20W=48.0%
+    Fold 13: events=1, trainRows=18564, testRows=153, players=39, Corr=0.0640, RMSE=111.77, Top-10=30.0%, Top-20=30.0%, Top-20W=42.4%
+    Fold 14: events=1, trainRows=18257, testRows=460, players=160, Corr=0.3970, RMSE=275.17, Top-10=30.0%, Top-20=20.0%, Top-20W=45.4%
+    Fold 15: events=1, trainRows=18237, testRows=480, players=156, Corr=0.3118, RMSE=261.37, Top-10=10.0%, Top-20=10.0%, Top-20W=21.9%
+    Fold 16: events=1, trainRows=18333, testRows=384, players=120, Corr=0.2907, RMSE=159.17, Top-10=10.0%, Top-20=15.0%, Top-20W=32.5%
+    Fold 17: events=1, trainRows=18349, testRows=368, players=119, Corr=0.3325, RMSE=143.07, Top-10=20.0%, Top-20=35.0%, Top-20W=30.7%
+    Fold 18: events=1, trainRows=18275, testRows=442, players=156, Corr=0.4363, RMSE=331.07, Top-10=30.0%, Top-20=50.0%, Top-20W=40.5%
+    Fold 19: events=1, trainRows=18437, testRows=280, players=70, Corr=0.3452, RMSE=68.36, Top-10=10.0%, Top-20=50.0%, Top-20W=44.4%
+    Fold 20: events=1, trainRows=18520, testRows=197, players=50, Corr=0.3498, RMSE=123.10, Top-10=50.0%, Top-20=40.0%, Top-20W=62.1%
+    Fold 21: events=1, trainRows=18268, testRows=449, players=156, Corr=0.2919, RMSE=254.23, Top-10=10.0%, Top-20=10.0%, Top-20W=33.7%
+    Fold 22: events=1, trainRows=18257, testRows=460, players=156, Corr=0.4730, RMSE=288.39, Top-10=0.0%, Top-20=20.0%, Top-20W=35.3%
+    Fold 23: events=1, trainRows=18253, testRows=464, players=156, Corr=0.4048, RMSE=300.05, Top-10=20.0%, Top-20=40.0%, Top-20W=38.1%
+    Fold 24: events=1, trainRows=18275, testRows=442, players=155, Corr=0.3098, RMSE=158.20, Top-10=20.0%, Top-20=40.0%, Top-20W=26.3%
+    Fold 25: events=1, trainRows=18292, testRows=425, players=143, Corr=0.3699, RMSE=229.15, Top-10=10.0%, Top-20=5.0%, Top-20W=23.2%
+    Fold 26: events=1, trainRows=18597, testRows=120, players=30, Corr=0.4351, RMSE=67.69, Top-10=50.0%, Top-20=50.0%, Top-20W=75.7%
+    Fold 27: events=1, trainRows=18099, testRows=618, players=164, Corr=-0.0210, RMSE=514.06, Top-10=0.0%, Top-20=0.0%, Top-20W=8.4%
+    Fold 28: events=1, trainRows=18253, testRows=464, players=156, Corr=0.3034, RMSE=363.25, Top-10=0.0%, Top-20=25.0%, Top-20W=25.3%
+    Fold 29: events=1, trainRows=18273, testRows=444, players=156, Corr=0.2416, RMSE=294.43, Top-10=0.0%, Top-20=5.0%, Top-20W=28.6%
+    Fold 30: events=1, trainRows=18285, testRows=432, players=144, Corr=0.1903, RMSE=236.09, Top-10=10.0%, Top-20=10.0%, Top-20W=28.2%
+    Fold 31: events=1, trainRows=18273, testRows=444, players=154, Corr=0.2732, RMSE=206.81, Top-10=10.0%, Top-20=20.0%, Top-20W=20.1%
+    Fold 32: events=1, trainRows=18339, testRows=378, players=120, Corr=0.5595, RMSE=406.00, Top-10=0.0%, Top-20=0.0%, Top-20W=58.4%
+    Fold 33: events=1, trainRows=18273, testRows=444, players=155, Corr=0.2902, RMSE=371.60, Top-10=0.0%, Top-20=0.0%, Top-20W=40.4%
+    Fold 34: events=1, trainRows=18334, testRows=383, players=120, Corr=0.4507, RMSE=324.06, Top-10=0.0%, Top-20=0.0%, Top-20W=33.6%
+    Fold 35: events=1, trainRows=18238, testRows=479, players=156, Corr=0.2754, RMSE=212.72, Top-10=10.0%, Top-20=10.0%, Top-20W=24.2%
+    Fold 36: events=1, trainRows=18262, testRows=455, players=156, Corr=0.2633, RMSE=241.04, Top-10=0.0%, Top-20=10.0%, Top-20W=7.3%
+    Fold 37: events=1, trainRows=18283, testRows=434, players=144, Corr=0.4611, RMSE=291.38, Top-10=0.0%, Top-20=0.0%, Top-20W=17.6%
+    Fold 38: events=1, trainRows=18255, testRows=462, players=155, Corr=0.2656, RMSE=309.62, Top-10=20.0%, Top-20=30.0%, Top-20W=40.5%
+    Fold 39: events=1, trainRows=18270, testRows=447, players=156, Corr=0.2682, RMSE=284.06, Top-10=10.0%, Top-20=10.0%, Top-20W=39.9%
+    Fold 40: events=1, trainRows=18273, testRows=444, players=144, Corr=0.1421, RMSE=251.55, Top-10=20.0%, Top-20=10.0%, Top-20W=35.4%
+    Fold 41: events=1, trainRows=18321, testRows=396, players=131, Corr=0.3903, RMSE=230.48, Top-10=0.0%, Top-20=10.0%, Top-20W=24.9%
+    Fold 42: events=1, trainRows=18408, testRows=309, players=78, Corr=0.1633, RMSE=238.35, Top-10=10.0%, Top-20=20.0%, Top-20W=31.3%
+    Fold 43: events=1, trainRows=18307, testRows=410, players=132, Corr=0.3143, RMSE=256.42, Top-10=10.0%, Top-20=5.0%, Top-20W=22.3%
+    Fold 44: events=1, trainRows=18291, testRows=426, players=132, Corr=0.3985, RMSE=327.39, Top-10=0.0%, Top-20=5.0%, Top-20W=33.1%
+    Fold 45: events=1, trainRows=18253, testRows=464, players=155, Corr=0.3127, RMSE=248.40, Top-10=20.0%, Top-20=15.0%, Top-20W=42.6%
+    Fold 46: events=1, trainRows=18637, testRows=80, players=20, Corr=0.2032, RMSE=101.41, Top-10=30.0%, Top-20=25.0%, Top-20W=85.1%
+  2024: mode=leave_one_event_out, folds=49/49, Corr=0.3076, RMSE=228.33, Top-10=7.3%, Top-20=12.7%, Top-20 Weighted=31.1%, Players=5918, Approach=l24/snapshot_l24, Leakage=approximation
+    Fold 1: events=1, trainRows=18051, testRows=533, players=156, Corr=0.3245, RMSE=166.58, Top-10=0.0%, Top-20=15.0%, Top-20W=23.6%
+    Fold 2: events=1, trainRows=18175, testRows=409, players=132, Corr=0.3094, RMSE=143.00, Top-10=10.0%, Top-20=25.0%, Top-20W=38.7%
+    Fold 3: events=1, trainRows=18115, testRows=469, players=156, Corr=0.2117, RMSE=176.28, Top-10=0.0%, Top-20=10.0%, Top-20W=23.3%
+    Fold 4: events=1, trainRows=18344, testRows=240, players=80, Corr=0.1944, RMSE=80.07, Top-10=10.0%, Top-20=25.0%, Top-20W=30.5%
+    Fold 5: events=1, trainRows=18133, testRows=451, players=144, Corr=0.3374, RMSE=190.14, Top-10=10.0%, Top-20=15.0%, Top-20W=35.9%
+    Fold 6: events=1, trainRows=18343, testRows=241, players=70, Corr=0.2027, RMSE=103.43, Top-10=20.0%, Top-20=30.0%, Top-20W=37.7%
+    Fold 7: events=1, trainRows=18330, testRows=254, players=69, Corr=0.1222, RMSE=115.09, Top-10=30.0%, Top-20=20.0%, Top-20W=43.6%
+    Fold 8: events=1, trainRows=18161, testRows=423, players=144, Corr=0.3247, RMSE=157.75, Top-10=20.0%, Top-20=10.0%, Top-20W=24.3%
+    Fold 9: events=1, trainRows=18153, testRows=431, players=143, Corr=0.2487, RMSE=110.07, Top-10=10.0%, Top-20=25.0%, Top-20W=35.4%
+    Fold 10: events=1, trainRows=18308, testRows=276, players=69, Corr=0.2916, RMSE=79.01, Top-10=20.0%, Top-20=35.0%, Top-20W=56.0%
+    Fold 11: events=1, trainRows=18142, testRows=442, players=156, Corr=0.2716, RMSE=176.29, Top-10=0.0%, Top-20=0.0%, Top-20W=15.8%
+    Fold 12: events=1, trainRows=18286, testRows=298, players=89, Corr=0.3427, RMSE=228.53, Top-10=10.0%, Top-20=25.0%, Top-20W=38.6%
+    Fold 13: events=1, trainRows=18348, testRows=236, players=59, Corr=-0.0199, RMSE=80.84, Top-10=10.0%, Top-20=20.0%, Top-20W=32.2%
+    Fold 14: events=1, trainRows=18143, testRows=441, players=156, Corr=0.2231, RMSE=208.22, Top-10=10.0%, Top-20=10.0%, Top-20W=31.0%
+    Fold 15: events=1, trainRows=18131, testRows=453, players=144, Corr=0.4347, RMSE=205.59, Top-10=10.0%, Top-20=10.0%, Top-20W=44.7%
+    Fold 16: events=1, trainRows=18181, testRows=403, players=132, Corr=0.1667, RMSE=140.12, Top-10=10.0%, Top-20=20.0%, Top-20W=41.8%
+    Fold 17: events=1, trainRows=18334, testRows=250, players=73, Corr=0.1494, RMSE=73.92, Top-10=10.0%, Top-20=20.0%, Top-20W=36.3%
+    Fold 18: events=1, trainRows=18124, testRows=460, players=156, Corr=0.4485, RMSE=328.68, Top-10=20.0%, Top-20=35.0%, Top-20W=39.3%
+    Fold 19: events=1, trainRows=18304, testRows=280, players=70, Corr=0.2431, RMSE=63.52, Top-10=20.0%, Top-20=20.0%, Top-20W=40.9%
+    Fold 20: events=1, trainRows=18389, testRows=195, players=50, Corr=0.1148, RMSE=124.07, Top-10=10.0%, Top-20=25.0%, Top-20W=38.9%
+    Fold 21: events=1, trainRows=18119, testRows=465, players=156, Corr=0.3500, RMSE=198.84, Top-10=0.0%, Top-20=0.0%, Top-20W=25.5%
+    Fold 22: events=1, trainRows=18136, testRows=448, players=156, Corr=0.4361, RMSE=264.27, Top-10=10.0%, Top-20=5.0%, Top-20W=31.1%
+    Fold 23: events=1, trainRows=18119, testRows=465, players=156, Corr=0.4524, RMSE=301.36, Top-10=40.0%, Top-20=40.0%, Top-20W=52.6%
+    Fold 24: events=1, trainRows=18304, testRows=280, players=70, Corr=0.2304, RMSE=83.41, Top-10=30.0%, Top-20=35.0%, Top-20W=48.8%
+    Fold 25: events=1, trainRows=18111, testRows=473, players=156, Corr=0.3094, RMSE=175.29, Top-10=10.0%, Top-20=20.0%, Top-20W=27.0%
+    Fold 26: events=1, trainRows=18190, testRows=394, players=132, Corr=0.1630, RMSE=216.39, Top-10=0.0%, Top-20=0.0%, Top-20W=19.0%
+    Fold 27: events=1, trainRows=18189, testRows=395, players=131, Corr=0.4714, RMSE=235.33, Top-10=0.0%, Top-20=0.0%, Top-20W=33.9%
+    Fold 28: events=1, trainRows=18464, testRows=120, players=30, Corr=0.3693, RMSE=57.89, Top-10=20.0%, Top-20=45.0%, Top-20W=75.4%
+    Fold 29: events=1, trainRows=17931, testRows=653, players=170, Corr=0.0709, RMSE=496.79, Top-10=0.0%, Top-20=0.0%, Top-20W=25.1%
+    Fold 30: events=1, trainRows=18114, testRows=470, players=156, Corr=0.2952, RMSE=367.05, Top-10=20.0%, Top-20=35.0%, Top-20W=37.0%
+    Fold 31: events=1, trainRows=18209, testRows=375, players=120, Corr=0.5657, RMSE=252.53, Top-10=0.0%, Top-20=5.0%, Top-20W=31.6%
+    Fold 32: events=1, trainRows=18168, testRows=416, players=144, Corr=0.3022, RMSE=217.11, Top-10=0.0%, Top-20=0.0%, Top-20W=19.4%
+    Fold 33: events=1, trainRows=18144, testRows=440, players=156, Corr=0.3053, RMSE=298.55, Top-10=0.0%, Top-20=5.0%, Top-20W=46.4%
+    Fold 34: events=1, trainRows=18131, testRows=453, players=152, Corr=0.2057, RMSE=195.59, Top-10=0.0%, Top-20=10.0%, Top-20W=18.1%
+    Fold 35: events=1, trainRows=18504, testRows=80, players=20, Corr=0.1227, RMSE=68.41, Top-10=10.0%, Top-20=20.0%, Top-20W=88.6%
+    Fold 36: events=1, trainRows=18312, testRows=272, players=68, Corr=0.3584, RMSE=72.85, Top-10=10.0%, Top-20=25.0%, Top-20W=22.6%
+    Fold 37: events=1, trainRows=18176, testRows=408, players=132, Corr=0.3412, RMSE=366.32, Top-10=0.0%, Top-20=0.0%, Top-20W=10.8%
+    Fold 38: events=1, trainRows=18137, testRows=447, players=156, Corr=0.3323, RMSE=234.26, Top-10=0.0%, Top-20=0.0%, Top-20W=17.3%
+    Fold 39: events=1, trainRows=18140, testRows=444, players=156, Corr=0.2193, RMSE=423.25, Top-10=0.0%, Top-20=0.0%, Top-20W=40.5%
+    Fold 40: events=1, trainRows=18346, testRows=238, players=60, Corr=0.5079, RMSE=287.67, Top-10=20.0%, Top-20=20.0%, Top-20W=53.6%
+    Fold 41: events=1, trainRows=18180, testRows=404, players=132, Corr=0.4065, RMSE=310.43, Top-10=0.0%, Top-20=5.0%, Top-20W=20.7%
+    Fold 42: events=1, trainRows=18126, testRows=458, players=156, Corr=0.3696, RMSE=189.87, Top-10=0.0%, Top-20=0.0%, Top-20W=19.3%
+    Fold 43: events=1, trainRows=18124, testRows=460, players=156, Corr=0.3413, RMSE=216.27, Top-10=0.0%, Top-20=10.0%, Top-20W=32.3%
+    Fold 44: events=1, trainRows=18275, testRows=309, players=78, Corr=0.2566, RMSE=289.00, Top-10=20.0%, Top-20=10.0%, Top-20W=42.0%
+    Fold 45: events=1, trainRows=18199, testRows=385, players=120, Corr=0.3236, RMSE=281.62, Top-10=0.0%, Top-20=5.0%, Top-20W=24.7%
+    Fold 46: events=1, trainRows=18194, testRows=390, players=132, Corr=0.2298, RMSE=251.86, Top-10=0.0%, Top-20=0.0%, Top-20W=11.7%
+    Fold 47: events=1, trainRows=18127, testRows=457, players=156, Corr=0.2758, RMSE=373.14, Top-10=0.0%, Top-20=25.0%, Top-20W=31.6%
+    Fold 48: events=1, trainRows=18180, testRows=404, players=132, Corr=0.4791, RMSE=260.68, Top-10=0.0%, Top-20=0.0%, Top-20W=20.7%
+    Fold 49: events=1, trainRows=18188, testRows=396, players=131, Corr=0.4816, RMSE=239.14, Top-10=0.0%, Top-20=10.0%, Top-20W=31.8%
+  2025: mode=leave_one_event_out, folds=48/48, Corr=0.3063, RMSE=218.55, Top-10=9.7%, Top-20=16.4%, Top-20 Weighted=30.4%, Players=5902, Approach=l12/snapshot_l12, Leakage=approximation
+    Fold 1: events=1, trainRows=18006, testRows=536, players=156, Corr=0.3080, RMSE=168.38, Top-10=0.0%, Top-20=15.0%, Top-20W=21.6%
+    Fold 2: events=1, trainRows=18126, testRows=416, players=132, Corr=0.1128, RMSE=142.13, Top-10=0.0%, Top-20=15.0%, Top-20W=14.6%
+    Fold 3: events=1, trainRows=18103, testRows=439, players=154, Corr=0.1188, RMSE=195.85, Top-10=0.0%, Top-20=10.0%, Top-20W=9.8%
+    Fold 4: events=1, trainRows=18226, testRows=316, players=80, Corr=0.1835, RMSE=94.40, Top-10=30.0%, Top-20=25.0%, Top-20W=37.8%
+    Fold 5: events=1, trainRows=18106, testRows=436, players=143, Corr=0.2737, RMSE=207.59, Top-10=20.0%, Top-20=15.0%, Top-20W=38.8%
+    Fold 6: events=1, trainRows=18290, testRows=252, players=72, Corr=0.1101, RMSE=112.41, Top-10=20.0%, Top-20=20.0%, Top-20W=42.5%
+    Fold 7: events=1, trainRows=18296, testRows=246, players=72, Corr=0.3103, RMSE=81.87, Top-10=20.0%, Top-20=25.0%, Top-20W=43.5%
+    Fold 8: events=1, trainRows=18118, testRows=424, players=144, Corr=0.3025, RMSE=158.51, Top-10=20.0%, Top-20=20.0%, Top-20W=31.0%
+    Fold 9: events=1, trainRows=18111, testRows=431, players=144, Corr=0.2505, RMSE=88.43, Top-10=10.0%, Top-20=30.0%, Top-20W=21.7%
+    Fold 10: events=1, trainRows=18254, testRows=288, players=72, Corr=0.2211, RMSE=77.57, Top-10=30.0%, Top-20=40.0%, Top-20W=43.9%
+    Fold 11: events=1, trainRows=18087, testRows=455, players=156, Corr=0.3697, RMSE=146.58, Top-10=10.0%, Top-20=20.0%, Top-20W=38.5%
+    Fold 12: events=1, trainRows=18246, testRows=296, players=95, Corr=0.3590, RMSE=230.06, Top-10=20.0%, Top-20=20.0%, Top-20W=35.7%
+    Fold 13: events=1, trainRows=18307, testRows=235, players=59, Corr=0.1929, RMSE=84.48, Top-10=0.0%, Top-20=30.0%, Top-20W=41.1%
+    Fold 14: events=1, trainRows=18078, testRows=464, players=160, Corr=0.1515, RMSE=210.58, Top-10=0.0%, Top-20=10.0%, Top-20W=18.5%
+    Fold 15: events=1, trainRows=18091, testRows=451, players=156, Corr=0.3790, RMSE=217.28, Top-10=10.0%, Top-20=15.0%, Top-20W=37.8%
+    Fold 16: events=1, trainRows=18099, testRows=443, players=153, Corr=0.3911, RMSE=177.51, Top-10=10.0%, Top-20=20.0%, Top-20W=33.8%
+    Fold 17: events=1, trainRows=18118, testRows=424, players=134, Corr=0.3414, RMSE=154.50, Top-10=30.0%, Top-20=30.0%, Top-20W=44.8%
+    Fold 18: events=1, trainRows=18285, testRows=257, players=72, Corr=0.3749, RMSE=77.38, Top-10=20.0%, Top-20=40.0%, Top-20W=54.5%
+    Fold 19: events=1, trainRows=18098, testRows=444, players=156, Corr=0.4679, RMSE=326.49, Top-10=40.0%, Top-20=40.0%, Top-20W=49.6%
+    Fold 20: events=1, trainRows=18266, testRows=276, players=69, Corr=0.3703, RMSE=71.42, Top-10=40.0%, Top-20=55.0%, Top-20W=59.9%
+    Fold 21: events=1, trainRows=18347, testRows=195, players=49, Corr=0.2792, RMSE=122.23, Top-10=30.0%, Top-20=35.0%, Top-20W=51.8%
+    Fold 22: events=1, trainRows=18104, testRows=438, players=156, Corr=0.3579, RMSE=180.23, Top-10=0.0%, Top-20=10.0%, Top-20W=34.6%
+    Fold 23: events=1, trainRows=18098, testRows=444, players=155, Corr=0.3436, RMSE=277.03, Top-10=10.0%, Top-20=10.0%, Top-20W=27.9%
+    Fold 24: events=1, trainRows=18083, testRows=459, players=156, Corr=0.3676, RMSE=272.79, Top-10=10.0%, Top-20=20.0%, Top-20W=29.3%
+    Fold 25: events=1, trainRows=18264, testRows=278, players=71, Corr=0.4103, RMSE=69.48, Top-10=20.0%, Top-20=40.0%, Top-20W=45.8%
+    Fold 26: events=1, trainRows=18122, testRows=420, players=144, Corr=0.2875, RMSE=187.61, Top-10=0.0%, Top-20=15.0%, Top-20W=22.1%
+    Fold 27: events=1, trainRows=18144, testRows=398, players=132, Corr=0.1156, RMSE=180.26, Top-10=0.0%, Top-20=0.0%, Top-20W=8.7%
+    Fold 28: events=1, trainRows=18422, testRows=120, players=30, Corr=0.0718, RMSE=54.34, Top-10=20.0%, Top-20=35.0%, Top-20W=60.7%
+    Fold 29: events=1, trainRows=17863, testRows=679, players=174, Corr=0.1262, RMSE=478.36, Top-10=0.0%, Top-20=0.0%, Top-20W=2.3%
+    Fold 30: events=1, trainRows=18090, testRows=452, players=156, Corr=0.4336, RMSE=351.25, Top-10=30.0%, Top-20=35.0%, Top-20W=40.3%
+    Fold 31: events=1, trainRows=18153, testRows=389, players=120, Corr=0.2932, RMSE=209.44, Top-10=0.0%, Top-20=10.0%, Top-20W=32.6%
+    Fold 32: events=1, trainRows=18110, testRows=432, players=144, Corr=0.4553, RMSE=192.53, Top-10=20.0%, Top-20=25.0%, Top-20W=62.0%
+    Fold 33: events=1, trainRows=18100, testRows=442, players=156, Corr=0.2846, RMSE=316.13, Top-10=0.0%, Top-20=5.0%, Top-20W=33.1%
+    Fold 34: events=1, trainRows=18082, testRows=460, players=152, Corr=0.3559, RMSE=159.02, Top-10=10.0%, Top-20=20.0%, Top-20W=28.5%
+    Fold 35: events=1, trainRows=18462, testRows=80, players=20, Corr=0.2898, RMSE=58.27, Top-10=20.0%, Top-20=20.0%, Top-20W=90.9%
+    Fold 36: events=1, trainRows=18259, testRows=283, players=72, Corr=0.2923, RMSE=72.97, Top-10=10.0%, Top-20=30.0%, Top-20W=42.3%
+    Fold 37: events=1, trainRows=18123, testRows=419, players=132, Corr=0.4458, RMSE=340.20, Top-10=0.0%, Top-20=0.0%, Top-20W=30.2%
+    Fold 38: events=1, trainRows=18084, testRows=458, players=156, Corr=0.3430, RMSE=211.53, Top-10=0.0%, Top-20=0.0%, Top-20W=5.1%
+    Fold 39: events=1, trainRows=18095, testRows=447, players=156, Corr=0.4042, RMSE=437.69, Top-10=0.0%, Top-20=0.0%, Top-20W=25.1%
+    Fold 40: events=1, trainRows=18139, testRows=403, players=132, Corr=0.5530, RMSE=331.08, Top-10=0.0%, Top-20=5.0%, Top-20W=39.4%
+    Fold 41: events=1, trainRows=18058, testRows=484, players=156, Corr=0.2470, RMSE=189.56, Top-10=0.0%, Top-20=10.0%, Top-20W=16.0%
+    Fold 42: events=1, trainRows=18079, testRows=463, players=156, Corr=0.2199, RMSE=174.65, Top-10=0.0%, Top-20=10.0%, Top-20W=17.5%
+    Fold 43: events=1, trainRows=18230, testRows=312, players=78, Corr=0.3564, RMSE=282.94, Top-10=0.0%, Top-20=5.0%, Top-20W=37.0%
+    Fold 44: events=1, trainRows=18163, testRows=379, players=120, Corr=0.2663, RMSE=246.03, Top-10=0.0%, Top-20=0.0%, Top-20W=14.1%
+    Fold 45: events=1, trainRows=18124, testRows=418, players=132, Corr=0.2549, RMSE=246.08, Top-10=0.0%, Top-20=5.0%, Top-20W=17.4%
+    Fold 46: events=1, trainRows=18074, testRows=468, players=155, Corr=0.4477, RMSE=362.34, Top-10=30.0%, Top-20=35.0%, Top-20W=45.1%
+    Fold 47: events=1, trainRows=18140, testRows=402, players=132, Corr=0.2986, RMSE=247.95, Top-10=0.0%, Top-20=10.0%, Top-20W=29.7%
+    Fold 48: events=1, trainRows=18151, testRows=391, players=131, Corr=0.1694, RMSE=215.76, Top-10=0.0%, Top-20=5.0%, Top-20W=19.3%
+  2026: mode=leave_one_event_out, folds=7/7, Corr=0.2550, RMSE=70.51, Top-10=17.1%, Top-20=18.5%, Top-20 Weighted=34.1%, Players=821, Approach=ytd/csv_primary, Leakage=approximation
+    Fold 1: events=1, trainRows=2164, testRows=535, players=156, Corr=0.2061, RMSE=69.81, Top-10=10.0%, Top-20=10.0%, Top-20W=26.0%
+    Fold 2: events=1, trainRows=2308, testRows=391, players=123, Corr=0.2129, RMSE=70.83, Top-10=20.0%, Top-20=15.0%, Top-20W=35.7%
+    Fold 3: events=1, trainRows=2258, testRows=441, players=147, Corr=0.2610, RMSE=71.88, Top-10=10.0%, Top-20=15.0%, Top-20W=31.4%
+    Fold 4: events=1, trainRows=2379, testRows=320, players=80, Corr=0.3846, RMSE=50.70, Top-10=40.0%, Top-20=50.0%, Top-20W=45.8%
+    Fold 5: events=1, trainRows=2312, testRows=387, players=120, Corr=0.3352, RMSE=77.49, Top-10=10.0%, Top-20=15.0%, Top-20W=38.2%
+    Fold 6: events=1, trainRows=2453, testRows=246, players=72, Corr=0.2296, RMSE=55.50, Top-10=40.0%, Top-20=35.0%, Top-20W=41.0%
+    Fold 7: events=1, trainRows=2320, testRows=379, players=123, Corr=0.2042, RMSE=84.27, Top-10=10.0%, Top-20=10.0%, Top-20W=30.1%
+
+STEP 4b: EVENT K-FOLD VALIDATION (Optimized)
+  2022: mode=leave_one_event_out, folds=46/46, Corr=0.1456, RMSE=423.93, Top-10=11.5%, Top-20=15.1%, Top-20 Weighted=31.6%, Players=5995, Approach=l24/snapshot_l24, Leakage=approximation
+    Fold 1: events=1, trainRows=17948, testRows=538, players=156, Corr=0.1786, RMSE=435.24, Top-10=10.0%, Top-20=15.0%, Top-20W=23.0%
+    Fold 2: events=1, trainRows=18088, testRows=398, players=132, Corr=0.2356, RMSE=407.49, Top-10=20.0%, Top-20=30.0%, Top-20W=50.3%
+    Fold 3: events=1, trainRows=18016, testRows=470, players=156, Corr=0.2068, RMSE=419.06, Top-10=10.0%, Top-20=15.0%, Top-20W=36.9%
+    Fold 4: events=1, trainRows=17959, testRows=527, players=143, Corr=0.0969, RMSE=440.16, Top-10=10.0%, Top-20=5.0%, Top-20W=33.7%
+    Fold 5: events=1, trainRows=18069, testRows=417, players=144, Corr=0.1012, RMSE=429.72, Top-10=10.0%, Top-20=10.0%, Top-20W=31.3%
+    Fold 6: events=1, trainRows=18097, testRows=389, players=120, Corr=0.2691, RMSE=371.48, Top-10=30.0%, Top-20=20.0%, Top-20W=38.3%
+    Fold 7: events=1, trainRows=18092, testRows=394, players=120, Corr=0.3583, RMSE=397.83, Top-10=20.0%, Top-20=35.0%, Top-20W=43.2%
+    Fold 8: events=1, trainRows=18052, testRows=434, players=144, Corr=0.0492, RMSE=425.51, Top-10=10.0%, Top-20=15.0%, Top-20W=34.8%
+    Fold 9: events=1, trainRows=18063, testRows=423, players=143, Corr=0.3150, RMSE=373.69, Top-10=10.0%, Top-20=15.0%, Top-20W=17.3%
+    Fold 10: events=1, trainRows=18083, testRows=403, players=131, Corr=0.2357, RMSE=412.26, Top-10=20.0%, Top-20=20.0%, Top-20W=33.7%
+    Fold 11: events=1, trainRows=18010, testRows=476, players=156, Corr=0.1700, RMSE=442.21, Top-10=0.0%, Top-20=15.0%, Top-20W=27.9%
+    Fold 12: events=1, trainRows=18203, testRows=283, players=90, Corr=0.3787, RMSE=375.86, Top-10=20.0%, Top-20=25.0%, Top-20W=48.2%
+    Fold 13: events=1, trainRows=18334, testRows=152, players=38, Corr=0.1821, RMSE=338.37, Top-10=10.0%, Top-20=20.0%, Top-20W=49.2%
+    Fold 14: events=1, trainRows=18007, testRows=479, players=156, Corr=0.0753, RMSE=414.28, Top-10=0.0%, Top-20=15.0%, Top-20W=21.5%
+    Fold 15: events=1, trainRows=18091, testRows=395, players=132, Corr=0.0182, RMSE=466.34, Top-10=10.0%, Top-20=15.0%, Top-20W=29.8%
+    Fold 16: events=1, trainRows=18109, testRows=377, players=120, Corr=0.1274, RMSE=438.48, Top-10=20.0%, Top-20=10.0%, Top-20W=20.6%
+    Fold 17: events=1, trainRows=18109, testRows=377, players=119, Corr=0.3070, RMSE=397.21, Top-10=10.0%, Top-20=25.0%, Top-20W=36.3%
+    Fold 18: events=1, trainRows=18046, testRows=440, players=156, Corr=0.2781, RMSE=400.61, Top-10=20.0%, Top-20=25.0%, Top-20W=40.6%
+    Fold 19: events=1, trainRows=18111, testRows=375, players=120, Corr=0.2207, RMSE=406.83, Top-10=10.0%, Top-20=35.0%, Top-20W=27.0%
+    Fold 20: events=1, trainRows=18216, testRows=270, players=68, Corr=0.2352, RMSE=297.08, Top-10=30.0%, Top-20=25.0%, Top-20W=46.4%
+    Fold 21: events=1, trainRows=18040, testRows=446, players=156, Corr=0.1607, RMSE=448.29, Top-10=0.0%, Top-20=10.0%, Top-20W=28.2%
+    Fold 22: events=1, trainRows=18039, testRows=447, players=155, Corr=0.2157, RMSE=415.59, Top-10=20.0%, Top-20=20.0%, Top-20W=45.6%
+    Fold 23: events=1, trainRows=18017, testRows=469, players=156, Corr=0.3340, RMSE=376.50, Top-10=20.0%, Top-20=15.0%, Top-20W=26.0%
+    Fold 24: events=1, trainRows=18035, testRows=451, players=155, Corr=0.0879, RMSE=436.22, Top-10=0.0%, Top-20=35.0%, Top-20W=30.0%
+    Fold 25: events=1, trainRows=18060, testRows=426, players=143, Corr=0.0986, RMSE=463.32, Top-10=0.0%, Top-20=0.0%, Top-20W=16.5%
+    Fold 26: events=1, trainRows=18045, testRows=441, players=144, Corr=0.1119, RMSE=466.84, Top-10=0.0%, Top-20=5.0%, Top-20W=32.3%
+    Fold 27: events=1, trainRows=18042, testRows=444, players=144, Corr=0.0787, RMSE=493.99, Top-10=0.0%, Top-20=0.0%, Top-20W=18.1%
+    Fold 28: events=1, trainRows=18370, testRows=116, players=29, Corr=0.1864, RMSE=173.62, Top-10=40.0%, Top-20=45.0%, Top-20W=69.5%
+    Fold 29: events=1, trainRows=18008, testRows=478, players=156, Corr=0.3349, RMSE=381.75, Top-10=40.0%, Top-20=30.0%, Top-20W=49.3%
+    Fold 30: events=1, trainRows=18088, testRows=398, players=132, Corr=0.1864, RMSE=448.68, Top-10=20.0%, Top-20=10.0%, Top-20W=32.2%
+    Fold 31: events=1, trainRows=18030, testRows=456, players=155, Corr=0.0608, RMSE=487.86, Top-10=0.0%, Top-20=5.0%, Top-20W=19.3%
+    Fold 32: events=1, trainRows=18037, testRows=449, players=155, Corr=-0.0183, RMSE=392.55, Top-10=0.0%, Top-20=0.0%, Top-20W=24.9%
+    Fold 33: events=1, trainRows=18054, testRows=432, players=144, Corr=0.0987, RMSE=437.18, Top-10=0.0%, Top-20=20.0%, Top-20W=20.5%
+    Fold 34: events=1, trainRows=18406, testRows=80, players=20, Corr=0.1912, RMSE=259.36, Top-10=30.0%, Top-20=35.0%, Top-20W=80.3%
+    Fold 35: events=1, trainRows=18048, testRows=438, players=155, Corr=0.1078, RMSE=436.87, Top-10=10.0%, Top-20=15.0%, Top-20W=27.0%
+    Fold 36: events=1, trainRows=18106, testRows=380, players=120, Corr=0.1152, RMSE=443.46, Top-10=0.0%, Top-20=0.0%, Top-20W=10.1%
+    Fold 37: events=1, trainRows=18041, testRows=445, players=155, Corr=0.1505, RMSE=483.37, Top-10=10.0%, Top-20=5.0%, Top-20W=27.2%
+    Fold 38: events=1, trainRows=18016, testRows=470, players=155, Corr=-0.0357, RMSE=405.29, Top-10=10.0%, Top-20=5.0%, Top-20W=19.2%
+    Fold 39: events=1, trainRows=18174, testRows=312, players=78, Corr=0.3297, RMSE=399.28, Top-10=10.0%, Top-20=15.0%, Top-20W=37.7%
+    Fold 40: events=1, trainRows=18118, testRows=368, players=120, Corr=-0.0285, RMSE=443.27, Top-10=0.0%, Top-20=5.0%, Top-20W=16.9%
+    Fold 41: events=1, trainRows=18028, testRows=458, players=155, Corr=0.1884, RMSE=451.23, Top-10=30.0%, Top-20=25.0%, Top-20W=57.3%
+    Fold 42: events=1, trainRows=18028, testRows=458, players=155, Corr=-0.1027, RMSE=446.21, Top-10=10.0%, Top-20=5.0%, Top-20W=37.6%
+    Fold 43: events=1, trainRows=18174, testRows=312, players=78, Corr=0.2576, RMSE=426.73, Top-10=10.0%, Top-20=10.0%, Top-20W=35.3%
+    Fold 44: events=1, trainRows=18089, testRows=397, players=132, Corr=-0.1303, RMSE=476.99, Top-10=0.0%, Top-20=0.0%, Top-20W=13.5%
+    Fold 45: events=1, trainRows=18051, testRows=435, players=144, Corr=0.0641, RMSE=427.47, Top-10=10.0%, Top-20=20.0%, Top-20W=33.6%
+    Fold 46: events=1, trainRows=18023, testRows=463, players=160, Corr=0.0434, RMSE=385.40, Top-10=30.0%, Top-20=25.0%, Top-20W=50.6%
+  2023: mode=leave_one_event_out, folds=46/46, Corr=0.0660, RMSE=448.41, Top-10=12.3%, Top-20=16.4%, Top-20 Weighted=27.7%, Players=6060, Approach=l24/snapshot_l24, Leakage=approximation
+    Fold 1: events=1, trainRows=18180, testRows=537, players=156, Corr=0.1183, RMSE=486.44, Top-10=20.0%, Top-20=20.0%, Top-20W=25.7%
+    Fold 2: events=1, trainRows=18319, testRows=398, players=134, Corr=0.0677, RMSE=432.94, Top-10=40.0%, Top-20=25.0%, Top-20W=30.1%
+    Fold 3: events=1, trainRows=18259, testRows=458, players=156, Corr=0.0375, RMSE=477.93, Top-10=10.0%, Top-20=15.0%, Top-20W=22.9%
+    Fold 4: events=1, trainRows=18192, testRows=525, players=155, Corr=0.0853, RMSE=471.62, Top-10=0.0%, Top-20=15.0%, Top-20W=27.9%
+    Fold 5: events=1, trainRows=18277, testRows=440, players=144, Corr=-0.0322, RMSE=464.60, Top-10=10.0%, Top-20=10.0%, Top-20W=19.4%
+    Fold 6: events=1, trainRows=18324, testRows=393, players=129, Corr=0.2121, RMSE=434.89, Top-10=20.0%, Top-20=35.0%, Top-20W=33.8%
+    Fold 7: events=1, trainRows=18334, testRows=383, players=120, Corr=-0.0127, RMSE=463.41, Top-10=20.0%, Top-20=20.0%, Top-20W=25.8%
+    Fold 8: events=1, trainRows=18271, testRows=446, players=144, Corr=-0.1069, RMSE=460.54, Top-10=0.0%, Top-20=5.0%, Top-20W=17.8%
+    Fold 9: events=1, trainRows=18280, testRows=437, players=144, Corr=0.2778, RMSE=452.01, Top-10=20.0%, Top-20=35.0%, Top-20W=30.5%
+    Fold 10: events=1, trainRows=18289, testRows=428, players=142, Corr=0.1399, RMSE=438.46, Top-10=10.0%, Top-20=35.0%, Top-20W=29.5%
+    Fold 11: events=1, trainRows=18259, testRows=458, players=156, Corr=0.1303, RMSE=455.74, Top-10=20.0%, Top-20=20.0%, Top-20W=34.2%
+    Fold 12: events=1, trainRows=18440, testRows=277, players=86, Corr=0.2220, RMSE=401.56, Top-10=50.0%, Top-20=35.0%, Top-20W=47.7%
+    Fold 13: events=1, trainRows=18564, testRows=153, players=39, Corr=-0.0261, RMSE=379.96, Top-10=20.0%, Top-20=25.0%, Top-20W=45.0%
+    Fold 14: events=1, trainRows=18257, testRows=460, players=160, Corr=0.0899, RMSE=463.65, Top-10=30.0%, Top-20=25.0%, Top-20W=43.7%
+    Fold 15: events=1, trainRows=18237, testRows=480, players=156, Corr=-0.0481, RMSE=449.92, Top-10=10.0%, Top-20=5.0%, Top-20W=21.5%
+    Fold 16: events=1, trainRows=18333, testRows=384, players=120, Corr=0.0867, RMSE=474.97, Top-10=10.0%, Top-20=20.0%, Top-20W=37.4%
+    Fold 17: events=1, trainRows=18349, testRows=368, players=119, Corr=0.1361, RMSE=449.13, Top-10=20.0%, Top-20=25.0%, Top-20W=27.9%
+    Fold 18: events=1, trainRows=18275, testRows=442, players=156, Corr=0.1988, RMSE=417.25, Top-10=30.0%, Top-20=45.0%, Top-20W=43.7%
+    Fold 19: events=1, trainRows=18437, testRows=280, players=70, Corr=0.2986, RMSE=402.95, Top-10=20.0%, Top-20=45.0%, Top-20W=39.7%
+    Fold 20: events=1, trainRows=18520, testRows=197, players=50, Corr=0.3785, RMSE=401.15, Top-10=50.0%, Top-20=40.0%, Top-20W=62.8%
+    Fold 21: events=1, trainRows=18268, testRows=449, players=156, Corr=0.1137, RMSE=472.56, Top-10=20.0%, Top-20=10.0%, Top-20W=25.6%
+    Fold 22: events=1, trainRows=18257, testRows=460, players=156, Corr=0.0468, RMSE=445.47, Top-10=0.0%, Top-20=20.0%, Top-20W=32.4%
+    Fold 23: events=1, trainRows=18253, testRows=464, players=156, Corr=0.2152, RMSE=415.09, Top-10=20.0%, Top-20=30.0%, Top-20W=35.5%
+    Fold 24: events=1, trainRows=18275, testRows=442, players=155, Corr=0.2719, RMSE=448.98, Top-10=20.0%, Top-20=25.0%, Top-20W=22.8%
+    Fold 25: events=1, trainRows=18292, testRows=425, players=143, Corr=-0.0024, RMSE=465.12, Top-10=10.0%, Top-20=5.0%, Top-20W=20.0%
+    Fold 26: events=1, trainRows=18597, testRows=120, players=30, Corr=0.4108, RMSE=351.50, Top-10=30.0%, Top-20=45.0%, Top-20W=72.1%
+    Fold 27: events=1, trainRows=18099, testRows=618, players=164, Corr=-0.0693, RMSE=451.14, Top-10=0.0%, Top-20=0.0%, Top-20W=17.4%
+    Fold 28: events=1, trainRows=18253, testRows=464, players=156, Corr=0.0628, RMSE=412.32, Top-10=10.0%, Top-20=20.0%, Top-20W=22.0%
+    Fold 29: events=1, trainRows=18273, testRows=444, players=156, Corr=-0.0840, RMSE=404.95, Top-10=0.0%, Top-20=5.0%, Top-20W=10.5%
+    Fold 30: events=1, trainRows=18285, testRows=432, players=144, Corr=0.0522, RMSE=475.67, Top-10=10.0%, Top-20=10.0%, Top-20W=14.7%
+    Fold 31: events=1, trainRows=18273, testRows=444, players=154, Corr=0.1272, RMSE=452.24, Top-10=10.0%, Top-20=20.0%, Top-20W=24.3%
+    Fold 32: events=1, trainRows=18339, testRows=378, players=120, Corr=-0.0416, RMSE=434.46, Top-10=0.0%, Top-20=5.0%, Top-20W=33.8%
+    Fold 33: events=1, trainRows=18273, testRows=444, players=155, Corr=0.0035, RMSE=393.06, Top-10=0.0%, Top-20=5.0%, Top-20W=26.8%
+    Fold 34: events=1, trainRows=18334, testRows=383, players=120, Corr=-0.1144, RMSE=428.88, Top-10=0.0%, Top-20=0.0%, Top-20W=15.8%
+    Fold 35: events=1, trainRows=18238, testRows=479, players=156, Corr=0.0771, RMSE=460.90, Top-10=0.0%, Top-20=10.0%, Top-20W=15.3%
+    Fold 36: events=1, trainRows=18262, testRows=455, players=156, Corr=-0.0460, RMSE=458.49, Top-10=0.0%, Top-20=5.0%, Top-20W=9.7%
+    Fold 37: events=1, trainRows=18283, testRows=434, players=144, Corr=-0.1455, RMSE=471.09, Top-10=0.0%, Top-20=0.0%, Top-20W=12.6%
+    Fold 38: events=1, trainRows=18255, testRows=462, players=155, Corr=0.1261, RMSE=404.86, Top-10=20.0%, Top-20=20.0%, Top-20W=29.9%
+    Fold 39: events=1, trainRows=18270, testRows=447, players=156, Corr=-0.0459, RMSE=465.23, Top-10=10.0%, Top-20=10.0%, Top-20W=41.3%
+    Fold 40: events=1, trainRows=18273, testRows=444, players=144, Corr=0.0252, RMSE=472.41, Top-10=10.0%, Top-20=5.0%, Top-20W=35.6%
+    Fold 41: events=1, trainRows=18321, testRows=396, players=131, Corr=0.0579, RMSE=480.15, Top-10=0.0%, Top-20=10.0%, Top-20W=18.5%
+    Fold 42: events=1, trainRows=18408, testRows=309, players=78, Corr=0.1575, RMSE=486.25, Top-10=0.0%, Top-20=20.0%, Top-20W=29.6%
+    Fold 43: events=1, trainRows=18307, testRows=410, players=132, Corr=0.0695, RMSE=473.38, Top-10=10.0%, Top-20=5.0%, Top-20W=17.0%
+    Fold 44: events=1, trainRows=18291, testRows=426, players=132, Corr=-0.1702, RMSE=436.60, Top-10=0.0%, Top-20=5.0%, Top-20W=30.3%
+    Fold 45: events=1, trainRows=18253, testRows=464, players=155, Corr=0.1808, RMSE=476.53, Top-10=20.0%, Top-20=15.0%, Top-20W=43.9%
+    Fold 46: events=1, trainRows=18637, testRows=80, players=20, Corr=0.1581, RMSE=336.02, Top-10=30.0%, Top-20=20.0%, Top-20W=86.8%
+  2024: mode=leave_one_event_out, folds=49/49, Corr=0.1705, RMSE=497.77, Top-10=6.6%, Top-20=11.3%, Top-20 Weighted=25.5%, Players=5918, Approach=l24/snapshot_l24, Leakage=approximation
+    Fold 1: events=1, trainRows=18051, testRows=533, players=156, Corr=0.2709, RMSE=531.54, Top-10=10.0%, Top-20=15.0%, Top-20W=21.6%
+    Fold 2: events=1, trainRows=18175, testRows=409, players=132, Corr=0.1828, RMSE=498.03, Top-10=10.0%, Top-20=30.0%, Top-20W=38.6%
+    Fold 3: events=1, trainRows=18115, testRows=469, players=156, Corr=0.1162, RMSE=520.77, Top-10=0.0%, Top-20=0.0%, Top-20W=8.2%
+    Fold 4: events=1, trainRows=18344, testRows=240, players=80, Corr=0.1272, RMSE=444.14, Top-10=20.0%, Top-20=20.0%, Top-20W=34.5%
+    Fold 5: events=1, trainRows=18133, testRows=451, players=144, Corr=0.2308, RMSE=507.74, Top-10=10.0%, Top-20=5.0%, Top-20W=27.9%
+    Fold 6: events=1, trainRows=18343, testRows=241, players=70, Corr=0.1565, RMSE=405.66, Top-10=20.0%, Top-20=15.0%, Top-20W=35.5%
+    Fold 7: events=1, trainRows=18330, testRows=254, players=69, Corr=0.0834, RMSE=422.00, Top-10=10.0%, Top-20=10.0%, Top-20W=35.3%
+    Fold 8: events=1, trainRows=18161, testRows=423, players=144, Corr=0.1119, RMSE=511.23, Top-10=10.0%, Top-20=5.0%, Top-20W=20.5%
+    Fold 9: events=1, trainRows=18153, testRows=431, players=143, Corr=0.2184, RMSE=481.97, Top-10=10.0%, Top-20=25.0%, Top-20W=34.0%
+    Fold 10: events=1, trainRows=18308, testRows=276, players=69, Corr=0.3242, RMSE=445.45, Top-10=20.0%, Top-20=30.0%, Top-20W=55.8%
+    Fold 11: events=1, trainRows=18142, testRows=442, players=156, Corr=0.1664, RMSE=513.68, Top-10=10.0%, Top-20=5.0%, Top-20W=22.6%
+    Fold 12: events=1, trainRows=18286, testRows=298, players=89, Corr=0.1362, RMSE=418.54, Top-10=10.0%, Top-20=10.0%, Top-20W=25.4%
+    Fold 13: events=1, trainRows=18348, testRows=236, players=59, Corr=0.0543, RMSE=431.09, Top-10=10.0%, Top-20=10.0%, Top-20W=34.7%
+    Fold 14: events=1, trainRows=18143, testRows=441, players=156, Corr=0.1601, RMSE=548.98, Top-10=10.0%, Top-20=15.0%, Top-20W=30.4%
+    Fold 15: events=1, trainRows=18131, testRows=453, players=144, Corr=0.2505, RMSE=538.19, Top-10=20.0%, Top-20=20.0%, Top-20W=39.7%
+    Fold 16: events=1, trainRows=18181, testRows=403, players=132, Corr=0.1267, RMSE=509.53, Top-10=10.0%, Top-20=20.0%, Top-20W=36.7%
+    Fold 17: events=1, trainRows=18334, testRows=250, players=73, Corr=0.1822, RMSE=416.04, Top-10=10.0%, Top-20=15.0%, Top-20W=33.5%
+    Fold 18: events=1, trainRows=18124, testRows=460, players=156, Corr=0.1405, RMSE=425.38, Top-10=10.0%, Top-20=5.0%, Top-20W=21.4%
+    Fold 19: events=1, trainRows=18304, testRows=280, players=70, Corr=0.2189, RMSE=389.74, Top-10=20.0%, Top-20=15.0%, Top-20W=33.9%
+    Fold 20: events=1, trainRows=18389, testRows=195, players=50, Corr=-0.0159, RMSE=352.04, Top-10=0.0%, Top-20=0.0%, Top-20W=29.0%
+    Fold 21: events=1, trainRows=18119, testRows=465, players=156, Corr=0.2535, RMSE=539.56, Top-10=0.0%, Top-20=5.0%, Top-20W=22.3%
+    Fold 22: events=1, trainRows=18136, testRows=448, players=156, Corr=0.2466, RMSE=516.45, Top-10=0.0%, Top-20=15.0%, Top-20W=26.9%
+    Fold 23: events=1, trainRows=18119, testRows=465, players=156, Corr=0.2360, RMSE=441.85, Top-10=30.0%, Top-20=20.0%, Top-20W=34.8%
+    Fold 24: events=1, trainRows=18304, testRows=280, players=70, Corr=0.2371, RMSE=407.20, Top-10=30.0%, Top-20=20.0%, Top-20W=42.0%
+    Fold 25: events=1, trainRows=18111, testRows=473, players=156, Corr=0.2222, RMSE=517.56, Top-10=0.0%, Top-20=15.0%, Top-20W=17.1%
+    Fold 26: events=1, trainRows=18190, testRows=394, players=132, Corr=0.1571, RMSE=535.79, Top-10=0.0%, Top-20=10.0%, Top-20W=19.5%
+    Fold 27: events=1, trainRows=18189, testRows=395, players=131, Corr=0.3548, RMSE=544.31, Top-10=10.0%, Top-20=10.0%, Top-20W=35.4%
+    Fold 28: events=1, trainRows=18464, testRows=120, players=30, Corr=0.1276, RMSE=271.68, Top-10=10.0%, Top-20=20.0%, Top-20W=67.1%
+    Fold 29: events=1, trainRows=17931, testRows=653, players=170, Corr=-0.0665, RMSE=463.74, Top-10=0.0%, Top-20=0.0%, Top-20W=5.7%
+    Fold 30: events=1, trainRows=18114, testRows=470, players=156, Corr=0.1100, RMSE=406.19, Top-10=10.0%, Top-20=5.0%, Top-20W=15.6%
+    Fold 31: events=1, trainRows=18209, testRows=375, players=120, Corr=0.3955, RMSE=559.26, Top-10=0.0%, Top-20=20.0%, Top-20W=37.2%
+    Fold 32: events=1, trainRows=18168, testRows=416, players=144, Corr=0.2463, RMSE=557.23, Top-10=0.0%, Top-20=0.0%, Top-20W=10.0%
+    Fold 33: events=1, trainRows=18144, testRows=440, players=156, Corr=0.0276, RMSE=493.27, Top-10=0.0%, Top-20=10.0%, Top-20W=27.1%
+    Fold 34: events=1, trainRows=18131, testRows=453, players=152, Corr=0.1200, RMSE=540.38, Top-10=0.0%, Top-20=5.0%, Top-20W=17.0%
+    Fold 35: events=1, trainRows=18504, testRows=80, players=20, Corr=0.2327, RMSE=346.08, Top-10=10.0%, Top-20=15.0%, Top-20W=89.1%
+    Fold 36: events=1, trainRows=18312, testRows=272, players=68, Corr=0.2735, RMSE=426.49, Top-10=0.0%, Top-20=10.0%, Top-20W=13.7%
+    Fold 37: events=1, trainRows=18176, testRows=408, players=132, Corr=-0.0217, RMSE=530.95, Top-10=0.0%, Top-20=10.0%, Top-20W=11.1%
+    Fold 38: events=1, trainRows=18137, testRows=447, players=156, Corr=0.2843, RMSE=521.79, Top-10=0.0%, Top-20=10.0%, Top-20W=31.8%
+    Fold 39: events=1, trainRows=18140, testRows=444, players=156, Corr=0.0367, RMSE=550.51, Top-10=0.0%, Top-20=5.0%, Top-20W=26.7%
+    Fold 40: events=1, trainRows=18346, testRows=238, players=60, Corr=0.2945, RMSE=433.75, Top-10=20.0%, Top-20=20.0%, Top-20W=47.5%
+    Fold 41: events=1, trainRows=18180, testRows=404, players=132, Corr=0.0356, RMSE=521.41, Top-10=0.0%, Top-20=10.0%, Top-20W=11.6%
+    Fold 42: events=1, trainRows=18126, testRows=458, players=156, Corr=0.2081, RMSE=533.39, Top-10=0.0%, Top-20=5.0%, Top-20W=16.0%
+    Fold 43: events=1, trainRows=18124, testRows=460, players=156, Corr=0.2263, RMSE=529.94, Top-10=10.0%, Top-20=15.0%, Top-20W=39.7%
+    Fold 44: events=1, trainRows=18275, testRows=309, players=78, Corr=0.2537, RMSE=446.25, Top-10=0.0%, Top-20=10.0%, Top-20W=35.5%
+    Fold 45: events=1, trainRows=18199, testRows=385, players=120, Corr=0.0534, RMSE=543.08, Top-10=0.0%, Top-20=15.0%, Top-20W=12.3%
+    Fold 46: events=1, trainRows=18194, testRows=390, players=132, Corr=0.0494, RMSE=548.72, Top-10=0.0%, Top-20=5.0%, Top-20W=14.7%
+    Fold 47: events=1, trainRows=18127, testRows=457, players=156, Corr=0.0947, RMSE=438.11, Top-10=0.0%, Top-20=10.0%, Top-20W=18.5%
+    Fold 48: events=1, trainRows=18180, testRows=404, players=132, Corr=0.2365, RMSE=551.12, Top-10=0.0%, Top-20=10.0%, Top-20W=19.1%
+    Fold 49: events=1, trainRows=18188, testRows=396, players=131, Corr=0.2902, RMSE=552.48, Top-10=10.0%, Top-20=15.0%, Top-20W=24.1%
+  2025: mode=leave_one_event_out, folds=48/48, Corr=0.1579, RMSE=494.40, Top-10=8.5%, Top-20=15.4%, Top-20 Weighted=27.8%, Players=5902, Approach=l12/snapshot_l12, Leakage=approximation
+    Fold 1: events=1, trainRows=18006, testRows=536, players=156, Corr=0.2370, RMSE=521.12, Top-10=0.0%, Top-20=10.0%, Top-20W=15.9%
+    Fold 2: events=1, trainRows=18126, testRows=416, players=132, Corr=0.0669, RMSE=476.78, Top-10=0.0%, Top-20=5.0%, Top-20W=6.3%
+    Fold 3: events=1, trainRows=18103, testRows=439, players=154, Corr=0.0941, RMSE=534.44, Top-10=0.0%, Top-20=10.0%, Top-20W=11.4%
+    Fold 4: events=1, trainRows=18226, testRows=316, players=80, Corr=0.1619, RMSE=391.68, Top-10=10.0%, Top-20=20.0%, Top-20W=32.2%
+    Fold 5: events=1, trainRows=18106, testRows=436, players=143, Corr=0.2023, RMSE=502.74, Top-10=10.0%, Top-20=15.0%, Top-20W=29.7%
+    Fold 6: events=1, trainRows=18290, testRows=252, players=72, Corr=0.0343, RMSE=378.33, Top-10=20.0%, Top-20=15.0%, Top-20W=41.5%
+    Fold 7: events=1, trainRows=18296, testRows=246, players=72, Corr=0.3031, RMSE=396.28, Top-10=10.0%, Top-20=30.0%, Top-20W=41.1%
+    Fold 8: events=1, trainRows=18118, testRows=424, players=144, Corr=0.2054, RMSE=524.82, Top-10=10.0%, Top-20=15.0%, Top-20W=26.4%
+    Fold 9: events=1, trainRows=18111, testRows=431, players=144, Corr=0.1670, RMSE=462.29, Top-10=10.0%, Top-20=25.0%, Top-20W=17.8%
+    Fold 10: events=1, trainRows=18254, testRows=288, players=72, Corr=0.1771, RMSE=414.14, Top-10=20.0%, Top-20=25.0%, Top-20W=39.2%
+    Fold 11: events=1, trainRows=18087, testRows=455, players=156, Corr=0.2813, RMSE=500.57, Top-10=10.0%, Top-20=35.0%, Top-20W=36.7%
+    Fold 12: events=1, trainRows=18246, testRows=296, players=95, Corr=0.3082, RMSE=405.17, Top-10=10.0%, Top-20=15.0%, Top-20W=37.7%
+    Fold 13: events=1, trainRows=18307, testRows=235, players=59, Corr=0.1713, RMSE=408.46, Top-10=0.0%, Top-20=10.0%, Top-20W=33.9%
+    Fold 14: events=1, trainRows=18078, testRows=464, players=160, Corr=0.0110, RMSE=555.40, Top-10=0.0%, Top-20=15.0%, Top-20W=22.0%
+    Fold 15: events=1, trainRows=18091, testRows=451, players=156, Corr=0.2601, RMSE=545.08, Top-10=10.0%, Top-20=20.0%, Top-20W=29.2%
+    Fold 16: events=1, trainRows=18099, testRows=443, players=153, Corr=0.2848, RMSE=525.44, Top-10=20.0%, Top-20=15.0%, Top-20W=41.5%
+    Fold 17: events=1, trainRows=18118, testRows=424, players=134, Corr=0.2536, RMSE=494.31, Top-10=30.0%, Top-20=25.0%, Top-20W=44.0%
+    Fold 18: events=1, trainRows=18285, testRows=257, players=72, Corr=0.3210, RMSE=415.49, Top-10=10.0%, Top-20=20.0%, Top-20W=45.2%
+    Fold 19: events=1, trainRows=18098, testRows=444, players=156, Corr=0.1864, RMSE=435.20, Top-10=30.0%, Top-20=25.0%, Top-20W=37.7%
+    Fold 20: events=1, trainRows=18266, testRows=276, players=69, Corr=0.3617, RMSE=402.99, Top-10=30.0%, Top-20=35.0%, Top-20W=57.1%
+    Fold 21: events=1, trainRows=18347, testRows=195, players=49, Corr=0.2639, RMSE=328.42, Top-10=30.0%, Top-20=20.0%, Top-20W=41.8%
+    Fold 22: events=1, trainRows=18104, testRows=438, players=156, Corr=0.2009, RMSE=532.21, Top-10=10.0%, Top-20=20.0%, Top-20W=31.1%
+    Fold 23: events=1, trainRows=18098, testRows=444, players=155, Corr=0.1748, RMSE=531.59, Top-10=10.0%, Top-20=10.0%, Top-20W=30.4%
+    Fold 24: events=1, trainRows=18083, testRows=459, players=156, Corr=0.1962, RMSE=416.99, Top-10=20.0%, Top-20=30.0%, Top-20W=38.5%
+    Fold 25: events=1, trainRows=18264, testRows=278, players=71, Corr=0.3249, RMSE=386.21, Top-10=20.0%, Top-20=30.0%, Top-20W=44.2%
+    Fold 26: events=1, trainRows=18122, testRows=420, players=144, Corr=0.1897, RMSE=517.09, Top-10=10.0%, Top-20=10.0%, Top-20W=19.4%
+    Fold 27: events=1, trainRows=18144, testRows=398, players=132, Corr=0.0831, RMSE=557.85, Top-10=0.0%, Top-20=5.0%, Top-20W=18.6%
+    Fold 28: events=1, trainRows=18422, testRows=120, players=30, Corr=0.0402, RMSE=315.30, Top-10=20.0%, Top-20=20.0%, Top-20W=66.0%
+    Fold 29: events=1, trainRows=17863, testRows=679, players=174, Corr=0.0015, RMSE=450.03, Top-10=0.0%, Top-20=0.0%, Top-20W=8.0%
+    Fold 30: events=1, trainRows=18090, testRows=452, players=156, Corr=0.2492, RMSE=420.35, Top-10=10.0%, Top-20=25.0%, Top-20W=40.2%
+    Fold 31: events=1, trainRows=18153, testRows=389, players=120, Corr=0.2263, RMSE=542.10, Top-10=0.0%, Top-20=10.0%, Top-20W=41.6%
+    Fold 32: events=1, trainRows=18110, testRows=432, players=144, Corr=0.2924, RMSE=526.62, Top-10=20.0%, Top-20=20.0%, Top-20W=57.9%
+    Fold 33: events=1, trainRows=18100, testRows=442, players=156, Corr=0.0205, RMSE=494.45, Top-10=0.0%, Top-20=5.0%, Top-20W=14.2%
+    Fold 34: events=1, trainRows=18082, testRows=460, players=152, Corr=0.2719, RMSE=517.92, Top-10=10.0%, Top-20=25.0%, Top-20W=29.3%
+    Fold 35: events=1, trainRows=18462, testRows=80, players=20, Corr=0.2168, RMSE=336.42, Top-10=10.0%, Top-20=25.0%, Top-20W=89.6%
+    Fold 36: events=1, trainRows=18259, testRows=283, players=72, Corr=0.2677, RMSE=377.44, Top-10=10.0%, Top-20=25.0%, Top-20W=46.0%
+    Fold 37: events=1, trainRows=18123, testRows=419, players=132, Corr=-0.1454, RMSE=537.50, Top-10=0.0%, Top-20=0.0%, Top-20W=19.2%
+    Fold 38: events=1, trainRows=18084, testRows=458, players=156, Corr=0.1491, RMSE=547.41, Top-10=0.0%, Top-20=5.0%, Top-20W=9.9%
+    Fold 39: events=1, trainRows=18095, testRows=447, players=156, Corr=-0.2135, RMSE=536.05, Top-10=10.0%, Top-20=5.0%, Top-20W=20.2%
+    Fold 40: events=1, trainRows=18139, testRows=403, players=132, Corr=0.0437, RMSE=544.25, Top-10=0.0%, Top-20=5.0%, Top-20W=27.9%
+    Fold 41: events=1, trainRows=18058, testRows=484, players=156, Corr=0.1330, RMSE=511.88, Top-10=0.0%, Top-20=20.0%, Top-20W=13.6%
+    Fold 42: events=1, trainRows=18079, testRows=463, players=156, Corr=0.0771, RMSE=520.15, Top-10=0.0%, Top-20=20.0%, Top-20W=18.4%
+    Fold 43: events=1, trainRows=18230, testRows=312, players=78, Corr=0.1896, RMSE=475.74, Top-10=0.0%, Top-20=25.0%, Top-20W=29.0%
+    Fold 44: events=1, trainRows=18163, testRows=379, players=120, Corr=-0.0084, RMSE=559.52, Top-10=0.0%, Top-20=5.0%, Top-20W=11.2%
+    Fold 45: events=1, trainRows=18124, testRows=418, players=132, Corr=0.1158, RMSE=554.65, Top-10=0.0%, Top-20=10.0%, Top-20W=16.0%
+    Fold 46: events=1, trainRows=18074, testRows=468, players=155, Corr=0.2581, RMSE=451.78, Top-10=20.0%, Top-20=20.0%, Top-20W=42.4%
+    Fold 47: events=1, trainRows=18140, testRows=402, players=132, Corr=0.2078, RMSE=564.17, Top-10=0.0%, Top-20=5.0%, Top-20W=19.1%
+    Fold 48: events=1, trainRows=18151, testRows=391, players=131, Corr=0.0893, RMSE=555.57, Top-10=0.0%, Top-20=0.0%, Top-20W=7.3%
+  2026: mode=leave_one_event_out, folds=7/7, Corr=0.2390, RMSE=75.29, Top-10=14.7%, Top-20=23.0%, Top-20 Weighted=35.3%, Players=821, Approach=ytd/csv_primary, Leakage=approximation
+    Fold 1: events=1, trainRows=2164, testRows=535, players=156, Corr=0.2586, RMSE=73.55, Top-10=10.0%, Top-20=10.0%, Top-20W=30.5%
+    Fold 2: events=1, trainRows=2308, testRows=391, players=123, Corr=0.2029, RMSE=70.31, Top-10=10.0%, Top-20=25.0%, Top-20W=43.7%
+    Fold 3: events=1, trainRows=2258, testRows=441, players=147, Corr=0.2271, RMSE=74.76, Top-10=10.0%, Top-20=15.0%, Top-20W=30.6%
+    Fold 4: events=1, trainRows=2379, testRows=320, players=80, Corr=0.3623, RMSE=75.14, Top-10=40.0%, Top-20=60.0%, Top-20W=49.1%
+    Fold 5: events=1, trainRows=2312, testRows=387, players=120, Corr=0.1641, RMSE=75.63, Top-10=10.0%, Top-20=20.0%, Top-20W=28.9%
+    Fold 6: events=1, trainRows=2453, testRows=246, players=72, Corr=0.2416, RMSE=70.00, Top-10=30.0%, Top-20=50.0%, Top-20W=44.7%
+    Fold 7: events=1, trainRows=2320, testRows=379, players=123, Corr=0.2556, RMSE=85.96, Top-10=10.0%, Top-20=10.0%, Top-20W=30.4%
+
+EVENT K-FOLD INTERPRETATION
+  Regression: optimized weights underperform baseline across folds.
+  Δ Corr: -0.1679 | Δ RMSE: 213.27 | Δ Top-20W: -3.7%
+  Baseline: Corr=0.3060, RMSE=239.62, Top-20W=32.1%
+  Optimized: Corr=0.1381, RMSE=452.88, Top-20W=28.4%
+  Baseline fold dist (Corr): median=0.3066, IQR=0.1377 (p25=0.2319, p75=0.3696)
+  Optimized fold dist (Corr): median=0.1604, IQR=0.1705 (p25=0.0662, p75=0.2367)
+  Baseline fold dist (RMSE): median=229.60, IQR=127.20 (p25=155.97, p75=283.17)
+  Optimized fold dist (RMSE): median=448.49, IQR=96.88 (p25=407.11, p75=503.99)
+  Baseline confidence: 71% - Moderate confidence: some fold variability or limited fold count.
+  Optimized confidence: 67% - Moderate confidence: some fold variability or limited fold count.
+  Interpretation: Higher confidence means fold results are more stable and reliable.
+
+RECOMMENDATION:
+Use optimized weights (improvement: 0.0289)
+
+TEMPLATE WRITE SUMMARY:
+Event template (WAIALAE_COUNTRY_CLUB): not written
+Standard templates: no updates
+
+---

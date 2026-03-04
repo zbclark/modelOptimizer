@@ -1,0 +1,14 @@
+{
+  "query": "PGA National Resort (The Champion Course)",
+  "iso2": null,
+  "currentPage": 1,
+  "itemsPerPage": 10,
+  "pages": 0,
+  "count": 0,
+  "orderBy": "ranker DESC",
+  "lat": null,
+  "lon": null,
+  "radius": 20,
+  "type": "name",
+  "results": []
+}

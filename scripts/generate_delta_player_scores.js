@@ -5,6 +5,12 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 // NOTE: We intentionally do NOT default to ROOT_DIR/output anymore.
 // If you don't pass --input, we try to use PRE_TOURNAMENT_OUTPUT_DIR set by core/optimizer.js.
 
+// PHASE 2 WIRING PLAN (comments only; no behavior change in this draft):
+// - Keep this script's Node-only target output behavior unchanged.
+// - For input auto-discovery, consider using shared legacy read candidates from
+//   utilities/outputPaths.js (POST_EVENT_RESULTS_JSON) to reduce drift with core readers.
+// - Preserve current suffix preference order unless explicitly changed in migration notes.
+
 function resolveDefaultInputPath() {
   const envDirRaw = String(process.env.PRE_TOURNAMENT_OUTPUT_DIR || '').trim();
   if (!envDirRaw) return null;
@@ -24,6 +30,8 @@ function resolveDefaultInputPath() {
   //   <tournamentSlug>_post_event_results.json
   // so we support suffix matching as a fallback.
   const candidateSuffixes = [
+    // PHASE 2 TODO: this suffix list should eventually be sourced from a shared
+    // compatibility helper (getLegacyReadCandidates) to keep naming support consistent.
     // Prefer optimizer's post-event payload if available.
     '_post_event_results.json',
     // Back-compat: older runs used this suffix.

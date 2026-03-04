@@ -31,6 +31,19 @@ function setupLogging(outputDir, eventName, context, options = {}) {
   }
   const safeEvent = String(eventName || 'event').toLowerCase().replace(/[^a-z0-9]+/g, '_');
   const logFile = path.join(outputDir, `${safeEvent}_${context}_log.txt`);
+  if (fs.existsSync(logFile)) {
+    try {
+      const archiveDir = path.resolve(outputDir, 'archive');
+      if (!fs.existsSync(archiveDir)) {
+        fs.mkdirSync(archiveDir, { recursive: true });
+      }
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const archivePath = path.join(archiveDir, `${path.basename(logFile)}.${timestamp}.bak`);
+      fs.renameSync(logFile, archivePath);
+    } catch (error) {
+      // Ignore archive failures and continue.
+    }
+  }
   try {
     fs.writeFileSync(logFile, '');
   } catch (error) {

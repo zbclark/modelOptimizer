@@ -427,6 +427,61 @@ Enable with `CONFIG_PARSER_WARN_BLANKS=true`.
 
 ---
 
+## Draft Implementation Notes (2026-03-03) — Output Dir Utility (Scaffold Only)
+
+### Scope in this draft
+
+- Added **draft-only** output path scaffolding; **no wiring** into `core/` or `scripts/` execution flows.
+- Goal is to lock path/naming contracts before integration.
+
+### New draft files
+
+- `utilities/outputArtifacts.js`
+  - Central artifact key catalog (`OUTPUT_ARTIFACTS`)
+  - Validation subfolder constants (`VALIDATION_SUBDIRS`)
+- `utilities/outputPaths.js`
+  - Pure resolver helpers for tournament/mode/seed/dry-run/validation/analysis/regression roots
+  - Base-name and slug normalization helpers
+  - Artifact filename + full-path builders
+  - Legacy read-candidate helper (includes read-only `output/` fallback)
+- `utilities/outputPaths.draft.test.js`
+  - Draft assertions for root resolution and naming behavior
+  - Confirms distinct handling of:
+    - full optimizer post-event outputs (`*_post_event_results.*`)
+    - normalized tournament snapshots (`*_results.*`)
+  - Confirms validation season root + subfolders and legacy read candidates
+
+### Contract encoded in draft utility
+
+- Keep both post artifact families:
+  - `*_post_event_results.json/.txt`
+  - `*_results.json/.csv`
+- Validation remains season-scoped:
+  - `data/<season>/validation_outputs/`
+  - `metric_analysis/`, `template_correlation_summaries/`
+- Ramp path support is tournament-scoped via analysis root resolver.
+- Course history regression defaults to long-lived shared root:
+  - `data/course_history_regression/`
+- Legacy `output/` support is read-candidate only.
+
+### Explicitly NOT done in this draft
+
+- No imports of `outputPaths.js` were added to:
+  - `core/optimizer.js`
+  - `core/validationRunner.js`
+  - any `scripts/*` or existing utilities
+- No runtime output behavior changed.
+- No migration/deprecation warnings wired yet.
+
+### Next implementation phase (after draft approval)
+
+1. Wire `core/optimizer.js` to shared resolvers.
+2. Wire `core/validationRunner.js` root/subfolder resolution.
+3. Migrate script-level writers/readers (`ramp`, `course history`, `seed summary`, `delta scores`).
+4. Add compatibility warnings when legacy fallback reads are used.
+
+---
+
 ## Cleanup before next run (recommended deletes)
 
 If you want a clean run with fresh artifacts, remove these paths before re-running:
@@ -444,3 +499,123 @@ Optional (only if you want fresh API/cache pulls):
 
 - `data/cache/*`
 - `data/approach_snapshot/approach_ytd_latest.json`
+
+---
+
+## New Audit Entry (Farmers pre-event) -  Data Aggregation Behavior
+
+This does not seem to be the right behavior for a tournament in the past.  the optimizer should look at the manifest to determine the evnt date and then count backwards for months to include for recentMonths
+
+ℹ️  Tours used: pga
+ℹ️  Event scope: 4 + similar (6) + putting (3)
+ℹ️  Year scope: last6=[2026, 2025, 2024, 2023, 2022, 2021], recentMonths=[2026-3, 2026-2, 2026-1, 2025-12]
+ℹ️  Skipped regression utility output (WRITE_TEMPLATES not enabled).
+
+## New Audit Entry (2026-03-03) — Validation/Template Drift + Aggregation Consistency
+
+### Reported issue (Farmers pre-event)
+
+During post-event runs, values shown as **Recommended Weight** in validation artifacts (notably `Weight_Templates.csv/.json`) did not match corresponding weights in `utilities/weightTemplates.js` for some metrics.
+
+Additionally, `Calibration_Report` was observed to be non-aggregated in single-tournament validation runs.
+
+### Reproduction context (Farmers run)
+
+- Command used:
+  - `LOGGING_ENABLED=1 OPT_SEED=b EVENT_KFOLD_K=5 node core/optimizer.js --event 2 --season 2026 --tournament "American Express" --post --writeTemplates`
+- Artifacts compared:
+  - `data/2026/validation_outputs/Weight_Templates.csv`
+  - `data/2026/validation_outputs/Weight_Templates.json`
+  - `utilities/weightTemplates.js`
+  - `data/2026/validation_outputs/Calibration_Report.json/.csv`
+
+### Why drift can occur (current architecture)
+
+1. **Different producer stages / timing**
+   - `Weight_Templates.*` is emitted by `core/validationRunner.js` (`writeWeightTemplatesOutput`).
+   - `utilities/weightTemplates.js` can be updated by optimizer template upserts in `core/optimizer.js` (event-specific and optional standard template updates) and also by validation-runner baseline updates depending on flags.
+
+2. **Recommended weight transformation path differs by artifact**
+   - Baseline recommended values originate from correlation-derived normalization (`buildRecommendedWeights`).
+   - Validation output may then apply Top-20 blend overlays and re-normalization (`aggregateTop20BlendByType` + `blendTemplateMaps` + group/metric normalization).
+   - Stored baseline templates represent the final upserted payload, not necessarily the same intermediate recommended vector displayed elsewhere.
+
+3. **Write-gating / flags can produce mixed-state outputs**
+   - Optimizer `--writeTemplates` can update event template and/or selected standard template based on gate checks.
+   - Validation-runner baseline writeback requires its own write path/flags; if disabled, reports can reflect newly computed recommendations while file writes remain from prior state.
+
+### Calibration aggregation status
+
+- **Identified gap:** single-tournament `runValidation` previously wrote tournament-only calibration unless season scope was explicitly enabled.
+- **Patch applied (2026-03-03):** calibration now attempts season aggregation in single-tournament runs and falls back to tournament-only if no season data is available.
+- **Verification pending:** confirm `Calibration_Report.meta/tournament counts` reflect season aggregate in post-event single-tournament workflows.
+
+### Impact
+
+- Analysts may compare two artifacts that are valid for different stages and interpret this as a computation bug.
+- Baseline template governance becomes harder when writeback and reporting are not clearly synchronized.
+
+### Follow-up evaluation tasks (regression freshness)
+
+- [ ] Add explicit `sourceStage` / `transformChain` metadata to `Weight_Templates.json` and `weightTemplates.js` write logs.
+- [ ] Add a deterministic “final write payload” export in validation outputs (exact object written to baseline templates).
+- [ ] Add an integrity check step after run completion:
+  - compare validation-recommended (post-blend, post-normalization) vs baseline template weights for updated template type(s),
+  - fail/warn when mismatch exceeds tolerance.
+- [ ] Confirm `Calibration_Report` in single-tournament runs contains season-aggregated tournament counts when season data exists.
+- [ ] Document required flag combinations for synchronized writeback (event template + baseline template + validation reports).
+
+---
+
+## New Audit Entry (2026-03-03) — Pre-Event Regression Freshness Not Applied in Same Run (Farmers)
+
+### Reported issue
+
+In a Farmers pre-event run, course-history regression inputs were generated successfully, but `pastPerformanceWeighting` still showed:
+
+- `computedWeight: null`
+- `regression: null`
+- `source: "utility"`
+
+This indicates the run did **not** consume the freshly generated regression map for weighting in that same execution.
+
+### Reproduction context (observed)
+
+- Command:
+  - `LOGGING_ENABLED=1 node core/optimizer.js --event 4 --season 2026 --tournament "Farmers" --pre --apiYears 2021-2025`
+- Log signals:
+  - `🔄 Generating course history regression inputs...`
+  - `✓ Course history regression inputs generated.`
+  - later: `ℹ️  Course history regression loaded; no course_context updates needed.`
+- Output signals:
+  - `data/2026/farmers/pre_event/course_history_regression/course_history_regression.json` exists and includes course `"104"` with valid `slope/pValue`.
+  - `data/2026/farmers/pre_event/farmers_pre_event_results.json` still reports `pastPerformanceWeighting.source = "utility"` and null computed regression fields.
+
+### Likely root cause
+
+The regression-generation step and regression-snapshot load are in the same run path, but snapshot resolution can still fall back to utility map (`utilities/courseHistoryRegression.js`) when the just-generated JSON is not selected/visible at load time.
+
+In effect: **fresh regression artifact produced, but stale/utility source used for weighting in that pass**.
+
+### Why this matters
+
+- Past-performance weighting can silently use fallback config weight (e.g., `0.3`) even when event-specific regression was computed.
+- This is difficult to spot unless one compares log lines, generated regression JSON, and final `pastPerformanceWeighting` block together.
+
+### Clarification
+
+The log line:
+
+- `ℹ️  Skipped regression utility output (WRITE_TEMPLATES not enabled).`
+
+refers to writing utility-style regression outputs, **not** to generation of `pre_event/course_history_regression/course_history_regression.json`.
+
+### Follow-up evaluation tasks (recommended)
+
+- [ ] After regression generation, force a deterministic reload from `PRE_TOURNAMENT_OUTPUT_DIR/course_history_regression.json` before computing `pastPerformanceComputedWeight`.
+- [ ] Add an explicit run-time assertion/warning:
+  - if generated regression file exists for current `courseNum` but `pastPerformanceWeighting.source !== "json"`, emit warning.
+- [ ] Add `pastPerformanceWeighting.sourcePathUsed` and `courseNumResolved` to output for easier auditability.
+- [ ] Add a small integration check for pre-event mode:
+  - generate regression,
+  - verify same run applies non-null computed weight when course regression entry exists.

@@ -1,0 +1,81 @@
+key,value
+sheetName,"Tournament Results"
+headerRow,5
+dataStartRow,6
+notesColumn,1
+notesColumnHeader,"Performance Notes"
+tableStartColumn,2
+notesColumnWidth,350
+defaultWidth,110
+
+columnIndex,name,group,format,width,trend,direction,zScoreColoring,zeroAsNoData
+2,"DG ID","base","0",70,false,higher_better,false,false
+3,"Player Name","base","text",140,false,higher_better,false,false
+4,"Finish Position","base","0",70,false,higher_better,false,false
+5,"Model Rank","base","0",70,false,higher_better,false,false
+6,"SG Total (Actual)","actual","0.000",110,false,higher_better,false,false
+7,"SG Total (Model)","model","0.000",110,false,higher_better,false,false
+8,"Driving Distance (Actual)","actual","0.000",110,false,higher_better,false,false
+9,"Driving Distance (Model)","model","0.000",110,false,higher_better,false,false
+10,"Driving Accuracy (Actual)","actual","0.00%",110,false,higher_better,false,false
+11,"Driving Accuracy (Model)","model","0.00%",110,false,higher_better,false,false
+12,"SG T2G (Actual)","actual","0.000",110,false,higher_better,false,false
+13,"SG T2G (Model)","model","0.000",110,false,higher_better,false,false
+14,"SG Approach (Actual)","actual","0.000",110,false,higher_better,false,false
+15,"SG Approach (Model)","model","0.000",110,false,higher_better,false,false
+16,"SG Around Green (Actual)","actual","0.000",110,false,higher_better,false,false
+17,"SG Around Green (Model)","model","0.000",110,false,higher_better,false,false
+18,"SG OTT (Actual)","actual","0.000",110,false,higher_better,false,false
+19,"SG OTT (Model)","model","0.000",110,false,higher_better,false,false
+20,"SG Putting (Actual)","actual","0.000",110,false,higher_better,false,false
+21,"SG Putting (Model)","model","0.000",110,false,higher_better,false,false
+22,"Greens in Regulation (Actual)","actual","0.00%",110,false,higher_better,false,false
+23,"Greens in Regulation (Model)","model","0.00%",110,false,higher_better,false,false
+24,"Scrambling (Actual)","actual","0.00%",110,false,higher_better,false,false
+25,"Scrambling (Model)","model","0.00%",110,false,higher_better,false,false
+26,"Great Shots (Actual)","actual","0.000",110,false,higher_better,false,false
+27,"Great Shots (Model)","model","0.000",110,false,higher_better,false,false
+28,"Poor Shots (Actual)","actual","0.000",110,false,lower_better,false,false
+29,"Poor Shots (Model)","model","0.000",110,false,lower_better,false,false
+30,"Scoring Average (Actual)","actual","0.000",110,false,lower_better,false,false
+31,"Scoring Average (Model)","model","0.000",110,false,lower_better,false,false
+32,"Fairway Proximity (Actual)","actual","0.000",110,false,lower_better,false,false
+33,"Fairway Proximity (Model)","model","0.000",110,false,lower_better,false,false
+34,"Rough Proximity (Actual)","actual","0.000",110,false,lower_better,false,false
+35,"Rough Proximity (Model)","model","0.000",110,false,lower_better,false,false
+36,"Approach <100 GIR (Actual)","actual","0.00%",110,false,higher_better,false,false
+37,"Approach <100 GIR (Model)","model","0.00%",110,false,higher_better,false,false
+38,"Approach <100 SG (Actual)","actual","0.000",110,false,higher_better,false,false
+39,"Approach <100 SG (Model)","model","0.000",110,false,higher_better,false,false
+40,"Approach <100 Prox (Actual)","actual","0.000",110,false,lower_better,false,false
+41,"Approach <100 Prox (Model)","model","0.000",110,false,lower_better,false,false
+42,"Approach <150 FW GIR (Actual)","actual","0.00%",110,false,higher_better,false,false
+43,"Approach <150 FW GIR (Model)","model","0.00%",110,false,higher_better,false,false
+44,"Approach <150 FW SG (Actual)","actual","0.000",110,false,higher_better,false,false
+45,"Approach <150 FW SG (Model)","model","0.000",110,false,higher_better,false,false
+46,"Approach <150 FW Prox (Actual)","actual","0.000",110,false,lower_better,false,false
+47,"Approach <150 FW Prox (Model)","model","0.000",110,false,lower_better,false,false
+48,"Approach <150 Rough GIR (Actual)","actual","0.00%",110,false,higher_better,false,false
+49,"Approach <150 Rough GIR (Model)","model","0.00%",110,false,higher_better,false,false
+50,"Approach <150 Rough SG (Actual)","actual","0.000",110,false,higher_better,false,false
+51,"Approach <150 Rough SG (Model)","model","0.000",110,false,higher_better,false,false
+52,"Approach <150 Rough Prox (Actual)","actual","0.000",110,false,lower_better,false,false
+53,"Approach <150 Rough Prox (Model)","model","0.000",110,false,lower_better,false,false
+54,"Approach >150 Rough GIR (Actual)","actual","0.00%",110,false,higher_better,false,false
+55,"Approach >150 Rough GIR (Model)","model","0.00%",110,false,higher_better,false,false
+56,"Approach >150 Rough SG (Actual)","actual","0.000",110,false,higher_better,false,false
+57,"Approach >150 Rough SG (Model)","model","0.000",110,false,higher_better,false,false
+58,"Approach >150 Rough Prox (Actual)","actual","0.000",110,false,lower_better,false,false
+59,"Approach >150 Rough Prox (Model)","model","0.000",110,false,lower_better,false,false
+60,"Approach <200 FW GIR (Actual)","actual","0.00%",110,false,higher_better,false,false
+61,"Approach <200 FW GIR (Model)","model","0.00%",110,false,higher_better,false,false
+62,"Approach <200 FW SG (Actual)","actual","0.000",110,false,higher_better,false,false
+63,"Approach <200 FW SG (Model)","model","0.000",110,false,higher_better,false,false
+64,"Approach <200 FW Prox (Actual)","actual","0.000",110,false,lower_better,false,false
+65,"Approach <200 FW Prox (Model)","model","0.000",110,false,lower_better,false,false
+66,"Approach >200 FW GIR (Actual)","actual","0.00%",110,false,higher_better,false,false
+67,"Approach >200 FW GIR (Model)","model","0.00%",110,false,higher_better,false,false
+68,"Approach >200 FW SG (Actual)","actual","0.000",110,false,higher_better,false,false
+69,"Approach >200 FW SG (Model)","model","0.000",110,false,higher_better,false,false
+70,"Approach >200 FW Prox (Actual)","actual","0.000",110,false,lower_better,false,false
+71,"Approach >200 FW Prox (Model)","model","0.000",110,false,lower_better,false,false

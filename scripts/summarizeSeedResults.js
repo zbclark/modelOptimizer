@@ -7,6 +7,13 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_ROOT = path.resolve(ROOT_DIR, 'data');
 const LEGACY_OUTPUT_ROOT = path.resolve(ROOT_DIR, 'output');
 
+// PHASE 2 WIRING PLAN (comments only; no behavior change in this draft):
+// - Migrate summary output path to utilities/outputPaths.js:
+//   buildArtifactPath({ artifactType: OUTPUT_ARTIFACTS.SEED_SUMMARY_TXT, ... })
+// - Keep seed file discovery + cleanup regex behavior unchanged initially.
+// - Replace manual legacy fallback probing with getLegacyReadCandidates(...) where safe.
+// - Preserve read-only compatibility for legacy `output/` and `_post_tournament_` names.
+
 const args = process.argv.slice(2);
 let TOURNAMENT_NAME = null;
 let EVENT_ID = null;
@@ -131,6 +138,8 @@ let files = fs.readdirSync(resolvedOutputDir)
 
 if (files.length === 0) {
   // Back-compat: allow legacy `output/` usage for historical runs, but prefer `data/`.
+  // PHASE 2 TODO: replace this block with getLegacyReadCandidates(...)
+  // while preserving current precedence and warning messages.
   const legacyDir = LEGACY_OUTPUT_ROOT;
   if (resolvedOutputDir !== legacyDir && fs.existsSync(legacyDir)) {
     const legacyFiles = fs.readdirSync(legacyDir)
@@ -273,6 +282,8 @@ if (recommendationGroups.size === 0) {
   });
 }
 
+// PHASE 2 TODO: replace manual summary path with buildArtifactPath(...SEED_SUMMARY_TXT...)
+// and keep this exact filename pattern for compatibility.
 const summaryPath = path.resolve(effectiveOutputDir, `${baseName}_seed_summary.txt`);
 fs.writeFileSync(summaryPath, lines.join('\n'), 'utf8');
 
@@ -321,20 +332,25 @@ if (bestSeed) {
   });
 }
 
-const toDelete = fs.readdirSync(effectiveOutputDir)
-  .filter(name => seedResultRegex.test(name) || seedLogRegex.test(name))
-  .map(name => path.resolve(effectiveOutputDir, name))
-  .filter(filePath => !keptFiles.has(filePath));
-
-if (toDelete.length > 0) {
-  toDelete.forEach(filePath => {
-    try {
-      fs.unlinkSync(filePath);
-    } catch (error) {
-      console.warn(`⚠️ Unable to delete ${filePath}: ${error.message}`);
-    }
-  });
-  console.log(`🧹 Removed ${toDelete.length} seed files/logs (kept best seed outputs).`);
+const skipCleanup = ['1', 'true', 'yes'].includes(String(process.env.SKIP_SEED_CLEANUP || '').trim().toLowerCase());
+if (skipCleanup) {
+  console.log('🧹 Seed cleanup skipped (SKIP_SEED_CLEANUP enabled).');
 } else {
-  console.log('🧹 No extra seed files/logs found to remove.');
+  const toDelete = fs.readdirSync(effectiveOutputDir)
+    .filter(name => seedResultRegex.test(name) || seedLogRegex.test(name))
+    .map(name => path.resolve(effectiveOutputDir, name))
+    .filter(filePath => !keptFiles.has(filePath));
+
+  if (toDelete.length > 0) {
+    toDelete.forEach(filePath => {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (error) {
+        console.warn(`⚠️ Unable to delete ${filePath}: ${error.message}`);
+      }
+    });
+    console.log(`🧹 Removed ${toDelete.length} seed files/logs (kept best seed outputs).`);
+  } else {
+    console.log('🧹 No extra seed files/logs found to remove.');
+  }
 }

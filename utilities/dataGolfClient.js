@@ -39,11 +39,17 @@ const isFieldUpdateMatch = (payload, expectedEventId, expectedEventName) => {
   if (!payload) return false;
   const expectedId = expectedEventId ? String(expectedEventId).trim() : null;
   const actualId = payload?.event_id ? String(payload.event_id).trim() : null;
-  if (expectedId && actualId && expectedId !== actualId) return false;
+  if (expectedId && actualId) {
+    return expectedId === actualId;
+  }
 
   const expectedName = expectedEventName ? normalizeNameForMatch(expectedEventName) : null;
   const actualName = payload?.event_name ? normalizeNameForMatch(payload.event_name) : null;
-  if (expectedName && actualName && expectedName !== actualName) return false;
+  if (expectedName && actualName) {
+    return expectedName === actualName
+      || expectedName.includes(actualName)
+      || actualName.includes(expectedName);
+  }
 
   return true;
 };

@@ -53,7 +53,10 @@ function extractHistoricalRowsFromSnapshotPayload(payload) {
       if (scores.length === 0) return;
       const eventId = eventEntry.event_id || eventEntry.eventId || eventKey;
       const eventCompleted = eventEntry.event_completed || eventEntry.eventCompleted || null;
-      const year = eventCompleted ? String(eventCompleted).slice(0, 4) : null;
+      const explicitYear = eventEntry.year || eventEntry.season || null;
+      const year = explicitYear
+        ? String(explicitYear).slice(0, 4)
+        : (eventCompleted ? String(eventCompleted).slice(0, 4) : null);
 
       scores.forEach(playerEntry => {
         if (!playerEntry) return;

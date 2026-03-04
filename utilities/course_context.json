@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-02T19:36:11.201Z",
+  "updatedAt": "2026-03-04T18:57:13.641Z",
   "sourceDir": "apps-scripts/modelOptimizer/data",
   "defaultTours": [
     "pga"
@@ -16,7 +16,7 @@
         "202"
       ],
       "courseNameKey": "PETE_DYE_STADIUM_COURSE",
-      "courseType": "BALANCED",
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
       "similarCourseIds": [
         "3",
@@ -58,18 +58,18 @@
         "from150to200": 0.293,
         "over200": 0.3
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.3
     },
     "3": {
       "sourcePath": null,
       "eventId": "3",
-      "templateKey": "POWER",
+      "templateKey": "WM_PHOENIX_OPEN_STADIUM_COURSE",
       "courseNum": "510",
       "courseNums": [
         "510"
       ],
-      "courseNameKey": "TPC_SCOTTSDALE",
-      "courseType": "POWER",
+      "courseNameKey": "WM_PHOENIX_OPEN_STADIUM_COURSE",
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
       "similarCourseIds": [
         "536",
@@ -115,19 +115,19 @@
         "from150to200": 0.405,
         "over200": 0.244
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.25
     },
     "4": {
       "sourcePath": null,
       "eventId": "4",
-      "templateKey": "POWER",
+      "templateKey": "TORREY_PINES_GOLF_COURSE",
       "courseNum": "104",
       "courseNums": [
         "4",
         "104"
       ],
       "courseNameKey": "TORREY_PINES_GOLF_COURSE_NORTH_COURSE",
-      "courseType": "POWER",
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
       "similarCourseIds": [
         "505",
@@ -156,12 +156,12 @@
         "from150to200": 0.338,
         "over200": 0.336
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.25
     },
     "5": {
       "sourcePath": null,
       "eventId": "5",
-      "templateKey": "TECHNICAL",
+      "templateKey": "PEBBLE_BEACH_GOLF_LINKS",
       "courseNum": "5",
       "courseNums": [
         "5"
@@ -201,7 +201,7 @@
         "from150to200": 0.288,
         "over200": 0.271
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.4
     },
     "6": {
       "sourcePath": null,
@@ -212,7 +212,7 @@
         "6"
       ],
       "courseNameKey": "WAIALAE_COUNTRY_CLUB",
-      "courseType": null,
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
       "similarCourseIds": [
         "12",
@@ -286,7 +286,7 @@
         "939"
       ],
       "courseNameKey": "THE_RIVIERA_COUNTRY_CLUB",
-      "courseType": "BALANCED",
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
       "similarCourseIds": [
         "14",
@@ -348,27 +348,79 @@
         "from150to200": 0.388,
         "over200": 0.331
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.4
     },
     "9": {
       "sourcePath": null,
       "eventId": "9",
-      "templateKey": "BALANCED",
+      "templateKey": "BAY_HILL_CLUB_AND_LODGE",
       "courseNum": "9",
       "courseNums": [
         "9"
       ],
+      "locationQuery": "Orlando FL",
       "courseNameKey": "BAY_HILL_CLUB_AND_LODGE",
-      "courseType": "BALANCED",
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
-      "similarCourseIds": [],
-      "puttingCourseIds": [],
-      "similarCourseCourseNums": {},
-      "puttingCourseCourseNums": {},
-      "similarCoursesWeight": null,
-      "puttingCoursesWeight": null,
-      "shotDistribution": null,
-      "pastPerformanceWeight": 0.4
+      "similarCourseIds": [
+        "10",
+        "33",
+        "480"
+      ],
+      "puttingCourseIds": [
+        "10",
+        "16",
+        "60",
+        "493",
+        "528",
+        "548"
+      ],
+      "similarCourseCourseNums": {
+        "10": [
+          "928"
+        ],
+        "33": [
+          "241"
+        ],
+        "480": [
+          "872"
+        ]
+      },
+      "puttingCourseCourseNums": {
+        "10": [
+          "928"
+        ],
+        "16": [
+          "656"
+        ],
+        "60": [
+          "688",
+          "933"
+        ],
+        "493": [
+          "776"
+        ],
+        "528": [
+          "765"
+        ],
+        "548": [
+          "765"
+        ]
+      },
+      "similarCoursesWeight": 0.65,
+      "puttingCoursesWeight": 0.45,
+      "shotDistribution": {
+        "under100": 0.092,
+        "from100to150": 0.239,
+        "from150to200": 0.375,
+        "over200": 0.295
+      },
+      "pastPerformanceWeight": 0.4,
+      "locationLat": 28.5383,
+      "locationLon": -81.3792,
+      "locationCity": "Orlando",
+      "locationState": "Florida",
+      "locationCountry": "United States"
     },
     "10": {
       "sourcePath": null,
@@ -379,7 +431,7 @@
         "928"
       ],
       "courseNameKey": "PGA_NATIONAL_RESORT_CHAMPION_COURSE",
-      "courseType": "BALANCED",
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
       "pastPerformanceWeight": 0.1,
       "similarCourseIds": [
@@ -430,19 +482,16 @@
           "752"
         ],
         "33": [
-          "241",
-          "872"
+          "241"
         ],
         "475": [
           "665"
         ],
         "480": [
-          "241",
           "872"
         ],
         "538": [
-          "241",
-          "872"
+          "241"
         ]
       },
       "similarCoursesWeight": 0.45,
@@ -628,7 +677,8 @@
         "from100to150": 0.238,
         "from150to200": 0.37,
         "over200": 0.319
-      }
+      },
+      "pastPerformanceWeight": 0.3
     },
     "18": {
       "sourcePath": null,
@@ -1001,7 +1051,7 @@
         "from150to200": 0.288,
         "over200": 0.271
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.4
     },
     "6": {
       "sourcePath": null,
@@ -1012,7 +1062,7 @@
         "6"
       ],
       "courseNameKey": "WAIALAE_COUNTRY_CLUB",
-      "courseType": null,
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
       "similarCourseIds": [
         "12",
@@ -1079,21 +1129,62 @@
     "9": {
       "sourcePath": null,
       "eventId": "9",
-      "templateKey": "BALANCED",
+      "templateKey": "BAY_HILL_CLUB_AND_LODGE",
       "courseNum": "9",
       "courseNums": [
         "9"
       ],
       "courseNameKey": "BAY_HILL_CLUB_AND_LODGE",
-      "courseType": "BALANCED",
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
-      "similarCourseIds": [],
-      "puttingCourseIds": [],
-      "similarCourseCourseNums": {},
-      "puttingCourseCourseNums": {},
-      "similarCoursesWeight": null,
-      "puttingCoursesWeight": null,
-      "shotDistribution": null,
+      "similarCourseIds": [
+        "10",
+        "33",
+        "480"
+      ],
+      "puttingCourseIds": [
+        "10",
+        "16",
+        "60",
+        "493",
+        "528"
+      ],
+      "similarCourseCourseNums": {
+        "10": [
+          "928"
+        ],
+        "33": [
+          "241"
+        ],
+        "480": [
+          "872"
+        ]
+      },
+      "puttingCourseCourseNums": {
+        "10": [
+          "928"
+        ],
+        "16": [
+          "656"
+        ],
+        "60": [
+          "668"
+        ],
+        "493": [
+          "776"
+        ],
+        "528": [
+          "765"
+        ]
+      },
+      "similarCoursesWeight": 0.65,
+      "puttingCoursesWeight": 0.45,
+      "shotDistribution": {
+        "under100": 0.092,
+        "from100to150": 0.239,
+        "from150to200": 0.375,
+        "over200": 0.295
+      },
       "pastPerformanceWeight": 0.4
     },
     "11": {
@@ -1270,7 +1361,8 @@
         "from100to150": 0.238,
         "from150to200": 0.37,
         "over200": 0.319
-      }
+      },
+      "pastPerformanceWeight": 0.3
     },
     "21": {
       "sourcePath": null,
@@ -1375,7 +1467,7 @@
         "from150to200": 0.338,
         "over200": 0.336
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.25
     },
     "500": {
       "sourcePath": null,
@@ -1449,18 +1541,18 @@
         "from150to200": 0.388,
         "over200": 0.331
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.4
     },
     "510": {
       "sourcePath": null,
       "eventId": "3",
-      "templateKey": "POWER",
+      "templateKey": "WM_PHOENIX_OPEN_STADIUM_COURSE",
       "courseNum": "510",
       "courseNums": [
         "510"
       ],
-      "courseNameKey": "TPC_SCOTTSDALE",
-      "courseType": "POWER",
+      "courseNameKey": "WM_PHOENIX_OPEN_STADIUM_COURSE",
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
       "similarCourseIds": [
         "536",
@@ -1506,7 +1598,7 @@
         "from150to200": 0.405,
         "over200": 0.244
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.25
     },
     "665": {
       "sourcePath": null,
@@ -1612,7 +1704,7 @@
         "from150to200": 0.293,
         "over200": 0.3
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.3
     },
     "714": {
       "sourcePath": null,
