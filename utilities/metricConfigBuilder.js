@@ -1,3 +1,8 @@
+/**
+ * Module: metricConfigBuilder
+ * Purpose: Build metric/group weight configs from config sheet cells.
+ */
+
 const { getMetricGroups, cleanMetricValue } = require('../core/modelCore');
 
 const buildMetricGroupsFromConfig = ({ getCell, pastPerformanceEnabled, pastPerformanceWeight, currentEventId }) => {

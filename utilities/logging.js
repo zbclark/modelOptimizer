@@ -1,5 +1,7 @@
-// utilities/logging.js
-// Shared logging utility for context-aware log file creation
+/**
+ * Module: logging
+ * Purpose: Context-aware log file setup with teardown helpers.
+ */
 const fs = require('fs');
 const path = require('path');
 

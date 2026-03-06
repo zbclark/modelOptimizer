@@ -38,7 +38,7 @@ Use this checklist when **no CSV inputs are available** (no config sheet, histor
 
 ## 4) Output Folders
 
-- [ ] Create event folder under `apps-scripts/modelOptimizer/data/<season>/<tournament>/`.
+- [ ] Create event folder under `data/<season>/<tournament>/`.
 - [ ] Create `inputs/` subfolder (even if empty, for structure consistency).
 - [ ] Confirm output directory for run results is:
   - `data/<season>/<tournament>/pre_event/` (pre-event), or

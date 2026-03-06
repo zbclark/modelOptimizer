@@ -1,3 +1,8 @@
+/**
+ * Module: dataPrep
+ * Purpose: Normalize rounds payloads and build player-level inputs.
+ */
+
 const { cleanMetricValue } = require('../core/modelCore');
 
 const normalizeWave = (value) => {

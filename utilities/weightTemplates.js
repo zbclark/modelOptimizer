@@ -1,8 +1,5 @@
 /**
  * Weight Templates for Tournament Analysis
- * Extracted from Golf_Algorithm_Library/utilities/templateLoader.js
- *
- * These represent POWER, BALANCED, and TECHNICAL course weight profiles
  */
 
 const WEIGHT_TEMPLATES = {

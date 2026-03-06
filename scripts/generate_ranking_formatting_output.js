@@ -5,7 +5,7 @@ const path = require('path');
 const { getRankingFormattingSchema } = require('../utilities/rankingFormattingSchema');
 
 
-const OUTPUT_DIR = path.resolve(__dirname, '../utilities');
+const OUTPUT_DIR = path.resolve(__dirname, '../utilities/sheets');
 const WRITE_JSON = true;
 const WRITE_CSV = true;
 

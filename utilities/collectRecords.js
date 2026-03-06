@@ -1,5 +1,10 @@
 // Utility to collect historical records (shared)
 const fs = require('fs');
+/**
+ * Module: collectRecords
+ * Purpose: Load CSV inputs and collect normalized records for runs.
+ */
+
 const path = require('path');
 const { loadCsv } = require('./csvLoader');
 const { extractHistoricalRowsFromSnapshotPayload } = require('./extractHistoricalRows');

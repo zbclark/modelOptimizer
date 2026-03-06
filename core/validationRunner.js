@@ -1,3 +1,9 @@
+/**
+ * Module: validationRunner
+ * Purpose: Generate validation reports, tournament results, and template outputs.
+ * Notes: Reads optimizer outputs + DataGolf snapshots and writes season-scoped artifacts.
+ */
+
 const fs = require('fs');
 const path = require('path');
 const { parse } = require('csv-parse/sync');

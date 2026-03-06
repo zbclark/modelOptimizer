@@ -1,7 +1,7 @@
 /**
- * Model Core - Ported from results.js
- * This file contains the exact calculation logic from the production Google Apps Script model
- * The ONLY difference is data loading (CSV vs Google Sheets API)
+ * Module: modelCore
+ * Purpose: Core ranking + metric calculations (ported from results.js).
+ * Notes: Preserves Google Apps Script logic; only data loading differs (CSV/Node).
  */
 
 // Toggle verbose logging for model calculations

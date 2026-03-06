@@ -1,3 +1,8 @@
+/**
+ * Module: configParser
+ * Purpose: Parse configuration sheet values into model settings.
+ */
+
 const fs = require('fs');
 const { parse } = require('csv-parse/sync');
 

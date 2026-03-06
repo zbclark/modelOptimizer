@@ -1,3 +1,8 @@
+/**
+ * Module: dataGolfClient
+ * Purpose: DataGolf API client with caching and retry logic.
+ */
+
 const fs = require('fs');
 const path = require('path');
 

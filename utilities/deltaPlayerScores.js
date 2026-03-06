@@ -1,3 +1,8 @@
+/**
+ * Module: deltaPlayerScores
+ * Purpose: Generated delta player score lookup table and access helpers.
+ */
+
 const DELTA_PLAYER_SCORES = {
   "7": {
     "season": 2026,

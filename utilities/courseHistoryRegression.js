@@ -1,3 +1,8 @@
+/**
+ * Module: courseHistoryRegression
+ * Purpose: Embedded course-history regression map (JSON override supported elsewhere).
+ */
+
 const COURSE_HISTORY_REGRESSION = {
   "4": {
     "slope": -3.728545546250211,

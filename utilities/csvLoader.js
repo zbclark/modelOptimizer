@@ -1,4 +1,7 @@
-// Utility to load and parse CSV files for local model testing
+/**
+ * Module: csvLoader
+ * Purpose: Load and parse CSV files with header detection helpers.
+ */
 const fs = require('fs');
 const path = require('path');
 const { parse } = require('csv-parse/sync');

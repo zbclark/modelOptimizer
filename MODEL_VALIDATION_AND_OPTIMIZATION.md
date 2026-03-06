@@ -1,14 +1,14 @@
 # Model Validation and Optimization (modelOptimizer)
 
-This document provides a **detailed, review-friendly** guide to how `apps-scripts/modelOptimizer/core/optimizer.js` behaves in **pre‑tournament** and **post‑tournament** modes, including inputs, outputs, decisions, and validation logic. The goal is to make configuration intent explicit and auditable.
+This document provides a **detailed, review-friendly** guide to how `core/optimizer.js` behaves in **pre‑tournament** and **post‑tournament** modes, including inputs, outputs, decisions, and validation logic. The goal is to make configuration intent explicit and auditable.
 
-> Scope: **Node-based optimizer** only. This is the source of truth for validation/optimization moving forward. Legacy sheet-based validation remains out of scope and is slated for migration to Node.
+> Scope: **Node-based optimizer** only. This is the source of truth for validation/optimization moving forward. Legacy sheet references are kept here only for parity/audit context.
 
 ---
 
 ## Data Directory Convention (Quick Reference)
 
-**Root:** `apps-scripts/modelOptimizer/data/`
+**Root:** `data/`
 
 ### Naming conventions
 
@@ -37,18 +37,21 @@ data/
         Genesis Invitational (2026) - Historical Data.csv (optional input)
         Genesis Invitational (2026) - Approach Skill.csv (optional input)
       pre_event/
+        {output-base}_pre_event_log.txt
+        {output-base}_run_log.txt
         {output-base}_pre_event_results.json
         {output-base}_pre_event_results.txt
         {output-base}_pre_event_rankings.json
         {output-base}_pre_event_rankings.csv
+        {output-base}_signal_contributions.json
         analysis/
-          early_season_ramp_sg_total.json (optional)
+          early_season_ramp_sg_total.json (optional; generated during pre-event optimizer.js runs)
         course_history_regression/
           summary.csv
           details.csv
           summary_similar.csv
           details_similar.csv
-          course_history_regression.json (required input; generated during optimizer.js runs)
+          course_history_regression.json (required input; generated during pre-event optimizer.js runs)
         dryrun/
           dryrun_weightTemplates.js
           dryrun_deltaPlayerScores.node.js
@@ -88,9 +91,9 @@ It uses both **historical rounds** and **current‑season data**, and can option
 
 ### **Pre‑Tournament Mode**
 
-Triggered when **current‑year results are not available**. This is the default before a tournament concludes.
+Triggered when **current‑year results are not available or specifically excluded**. This is the default before a tournament commences.
 
-**Primary goal:** produce a blended, pre‑event template based on historical + similar course data, with optional approach delta priors.
+**Primary goal:** produce a blended, pre‑event rankings file based on historical + similar course data, with approach delta priors.
 
 **Manual override:** pass `--pre` to force pre‑tournament mode (results are ignored for mode selection).
 
@@ -104,11 +107,81 @@ Triggered when **current‑year results exist** for the event.
 
 ---
 
+## Operator Runbook (What / How / Why)
+
+Use this section as the quick execution guide before diving into detailed sections.
+
+### Pre‑Tournament Sequence (in order)
+
+#### Step 1 — Confirm mode + inputs
+
+**What:** Ensure this is a pre-event run (no current-event results yet).  
+**How:** Auto-detection or force with `--pre`; verify field/history/approach sources are available.  
+**Why:** Prevents accidental post-event logic and keeps priors unbiased.
+
+#### Step 2 — Build training signal from historical + similar events
+
+**What:** Compute metric/top‑N correlations and logistic signal.  
+**How:** Use recent-form + 5-year event/similar/putting history.  
+**Why:** Produces statistically grounded suggested weights.
+
+#### Step 3 — Apply priors and reliability controls
+
+**What:** Blend suggested weights with template priors and CV reliability.  
+**How:** Fill missing weights, normalize, conservative blend.  
+**Why:** Reduces overreaction to noisy short-window signals.
+
+#### Step 4 — Apply course/setup and approach-delta adjustments
+
+**What:** Adjust blended metric weights for event context.  
+**How:** Course context + shot distribution + approach delta alignment.  
+**Why:** Makes weights event-specific without retraining the whole model.
+
+#### Step 5 — Write pre-event artifacts
+
+**What:** Rankings + run summary + optional template writebacks.  
+**How:** Emit `pre_event` JSON/CSV/TXT (and dry-run artifacts when enabled).  
+**Why:** Produces the pre-event prediction package used later in validation.
+
+### Post‑Tournament Sequence (in order)
+
+#### Step 1 — Hydrate canonical results snapshot
+
+**What:** Build/refresh `post_event/<tournament-slug>_results.json`.  
+**How:** Use JSON if valid, else rebuild from cache, then CSVs, then Historical Rounds API, then Live Stats API fallbacks.  
+**Why:** Establishes one authoritative results source for evaluation.
+
+#### Step 2 — Auto-run validation artifacts when needed
+
+**What:** Ensure season `validation_outputs` are present/current, if not produce them.  
+**How:** `optimizer.js` calls `validationRunner.js` in post mode when outputs are missing/stale.  
+**Why:** Required priors and summaries feed downstream optimization/selection.
+
+#### Step 3 — Baseline template evaluation
+
+**What:** Compare candidate templates on current context.  
+**How:** Evaluate correlation/error/top‑N metrics and pick `step1_bestTemplate`.  
+**Why:** Establishes the benchmark that optimization must beat.
+
+#### Step 4 — Optimization + multi-year + event K‑fold checks
+
+**What:** Tune weights, then test robustness across years/folds.  
+**How:** Run objective-based search and record `step3_optimized`, `step4a*`, `step4b*`.  
+**Why:** Separates one-off gains from stable signal.
+
+#### Step 5 — Emit recommendation + writebacks
+
+**What:** Write post-event JSON/TXT with recommendation and writeback status.  
+**How:** Persist in `post_event/` and optionally update templates when gates pass.  
+**Why:** Produces a clear decision trail and reproducible artifact set.
+
+---
+
 ## Quick Pre/Post Checklist
 
 ### Pre‑Tournament
 
-- [ ] Inputs present (historical rounds, field, approach snapshots)
+- [ ] Inputs present (historical rounds, field, approach snapshots, **what other inputs are needed?**)
 - [ ] Suggested weights computed
 - [ ] CV reliability computed
 - [ ] Pre‑event outputs written
@@ -116,7 +189,7 @@ Triggered when **current‑year results exist** for the event.
 
 ### Post‑Tournament
 
-- [ ] Current results available
+- [ ] Current results available **what other inputs are needed?**
 - [ ] Baseline template comparison complete
 - [ ] Optimization search completed
 - [ ] Multi‑year validation complete
@@ -175,6 +248,7 @@ When API snapshots are present, they are recorded in `apiSnapshots` within the J
 - **Approach snapshots (L24/L12/YTD)** → API approach snapshots (CSV fallback: approach skill CSV)
 - **Similar/putting event IDs** → `utilities/courseContext.js` or configuration sheet
 - **Template weights** → `utilities/weightTemplates.js`
+- **Event Approach Metrics** → derived from two approach delta files (pre-event and post event)
 
 ### Outputs Created
 
@@ -225,7 +299,7 @@ When API snapshots are present, they are recorded in `apiSnapshots` within the J
 - **Pre‑tournament baseline template configuration** (required)
   - Source: `utilities/weightTemplates.js`
   - Fallback: template specified by `templateKey` in `utilities/course_context.json` for the eventId
-- **Past‑performance weight** (required for historical/long‑term signal)
+- **Past‑performance weight** (required for historical/long‑term signal; **calcuate if needed**)
   - Source: `utilities/course_context.js`
 
 ### 3.2 Core Steps (Pre‑Tournament)
@@ -282,7 +356,7 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
   - `data/<season>/<tournament>/pre_event/course_history_regression/summary_similar.csv`
   - `data/<season>/<tournament>/pre_event/course_history_regression/details_similar.csv`
   - `data/<season>/<tournament>/pre_event/course_history_regression/course_history_regression.json` (when templates enabled)
-  - `apps-scripts/modelOptimizer/utilities/courseHistoryRegression.js` (when templates enabled)
+  - `utilities/courseHistoryRegression.js` (when templates enabled)
   - `apps-scripts/Golf_Algorithm_Library/utilities/courseHistoryRegression.js` (when templates enabled)
 
 #### Step 1 — Historical Metric Correlations
@@ -523,9 +597,9 @@ JSON includes:
 If `--writeTemplates` is used:
 
 - Writes the blended pre‑event template into:
-  - `apps-scripts/modelOptimizer/utilities/weightTemplates.js`
+  - `utilities/weightTemplates.js`
 - Writes **delta player scores** into:
-  - `apps-scripts/modelOptimizer/utilities/deltaPlayerScores.js`
+  - `utilities/deltaPlayerScores.js`
 
 Dry‑run mode writes to:
 
@@ -595,11 +669,17 @@ If dry‑run, outputs are written under `data/<season>/<tournament>/<mode>/dryru
 
 Post‑tournament mode includes everything in pre‑tournament mode **plus** the following steps. Use `--pre` or `--post` only when you need to override auto‑mode selection.
 
-Open items: begin **migration plan** from legacy sheet validation to Node.
+Execution order in this section reflects current runtime behavior in `core/optimizer.js` + `core/validationRunner.js`.
+
+### 4.0 Runtime Sequence (Short Form)
+
+For the concise operator sequence, use **Operator Runbook → Post‑Tournament Sequence (in order)** above.
+
+This section (4.x) is the deep-dive reference for implementation details, data contracts, and artifact schemas.
 
 ### 4.1 Algorithm Validation (Post‑Tournament)
 
-Post‑tournament validation is being **ported to Node** so the optimizer can run the full evaluation pipeline without relying on legacy sheet workflows. Outputs for this step will be **renamed and pared down** once the migration stabilizes.
+Post‑tournament validation runs in Node today via `runValidation()` from `core/validationRunner.js` and writes season-scoped artifacts under `data/<season>/validation_outputs/`.
 
 **Current JSON storage (post‑tournament output):**
 
@@ -633,19 +713,19 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
 
 ### 4.1a Fetch Tournament Results
 
-**Node‑based results ingestion (target behavior):**
+**Node‑based results ingestion (current behavior):**
 
-1. **Locate results in Historical Data CSV.** If `* - Historical Data.csv` exists, derive the event’s results directly from that file.
+1. **Use existing results JSON if present.** Prefer `post_event/<tournament-slug>_results.json` (or legacy `tournament_results.json`). If the JSON exists but is missing model‑side fields or required metric columns, the runner **rebuilds/enriches** it.
 
-1. **Cache lookup (reruns).** If a cached results JSON exists in `data/cache/`, use it before calling the API.
+1. **Historical Data CSV (preferred rebuild source).** If `* - Historical Data.csv` exists and contains current‑season rows for the event, rebuild results (including metric rollups).
 
-1. **API fallback #1 — Historical Rounds API.** If no Historical Data CSV exists, pull finalized results for the event/season and normalize player identifiers to DG ID.
+1. **DataGolf historical rounds (API/cache).** If CSV results are missing or incomplete, load historical rounds from cache or API and rebuild results.
 
-1. **API fallback #2 — Live Tournament Results API.** Used when historical endpoint is incomplete or not yet finalized; normalize to the same results schema.
+1. **Live stats fallback.** If historical rounds have no results for the event, pull live tournament stats and normalize to the results schema.
 
 1. **Normalize finish positions.** Accept `T#` and `#T` tie formats; map `CUT`, `WD`, `DQ` to **worst finish + 1**; drop rows with missing DG IDs.
 
-1. **Persist results snapshot.** The canonical results JSON becomes the **single source of truth** for validation runs.
+1. **Persist results snapshot.** Results are written to `post_event/<tournament-slug>_results.json` and used as the canonical source for validation runs.
 
 **Current JSON storage (post‑tournament output):**
 
@@ -657,9 +737,9 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
 
 **Results CSV formats (current reality):**
 
-- **Input results data (for validation):** derived from **Historical Data CSV** or **Historical Rounds API** payloads (same schema as other rounds snapshots). No standalone Tournament Results CSV is provided.
+- **Authoritative results JSON (Node):** `post_event/<tournament-slug>_results.json` contains normalized results + model comparison columns (when rankings are available).
 
-- **Legacy results export (human‑readable output):** when results are exported from the legacy sheets pipeline (`apps-scripts/Golf_Algorithm_Library/modelGeneration/results.js`), the CSV includes **metadata rows** followed by a header row and the per‑player results. The **first data column is a notes/analysis column** (emojis + text). Example structure:
+- **Human‑readable results CSV (Node):** the runner emits a CSV with **metadata rows** followed by headers and per‑player results. The **first data column is a notes/analysis column**. Example structure:
 
   - **Row 1:** (blank spacer)
   - **Row 2:** `Tournament: <Name>`, `Last updated: <timestamp>`
@@ -684,6 +764,11 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
     - `Fairway Proximity`, `Fairway Proximity - Model`
     - `Rough Proximity`, `Rough Proximity - Model`
     - `SG BS`
+    - `Scoring Average`
+    - `Birdies or Better`
+    - `Scrambling`
+    - `Great Shots`
+    - `Poor Shot Avoidance`
   - **Row 6+ (data):** notes in column 1 + per‑player metrics.
 
 **Parsing note:** the Node parser must **skip metadata rows** until the header row is found, then treat column 1 as the notes/analysis field (non‑numeric) and parse the rest by header label. Validation runs will also fall back to `post_event/<tournament-slug>_results.csv` if the JSON snapshot is missing.
@@ -691,7 +776,10 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
 **Output location (Node):**
 
 - **Authoritative results JSON:** `data/<season>/<tournament>/post_event/<tournament-slug>_results.json`
-- **Optional human‑readable CSV:** `data/<season>/<tournament>/post_event/<tournament-slug>_results.csv`
+- **Human‑readable CSV:** `data/<season>/<tournament>/post_event/<tournament-slug>_results.csv`
+- **Optional extras (when `WRITE_RESULTS_EXTRAS=1`):**
+  - `data/<season>/<tournament>/post_event/<tournament-slug>_results_zscores.csv`
+  - `data/<season>/<tournament>/post_event/<tournament-slug>_results_formatting.csv`
 
 **CSV parsing rules (legacy results export → Node ingestion, if needed for QA/export parity):**
 
@@ -713,12 +801,13 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
 6. **DG ID required:** drop rows without a valid DG ID.
 7. **Stable column mapping:** rely on header labels (not column index) because optional columns and metadata rows can shift indices.
 
-### 4.1c Legacy/Node Notes (Post‑Tournament Results Output)
+### 4.1c Implementation Notes (Post‑Tournament Results Output)
 
 **Implementation notes (post‑event results):**
 
 - **Tournament Results sheet calculations:** the legacy `tournamentResults_historical.js` pipeline computes **additional outputs before writing the Tournament Results sheet** (performance analysis notes, model‑vs‑actual deltas, trend notes, and the z‑score inputs used for conditional formatting). These calculations must be **ported to Node** for parity when producing the results JSON/CSV outputs.
-  - **Dependency note:** Tournament Results analysis notes in the legacy sheets pipeline are built from **post‑tournament results + pre‑event rankings** (Player Ranking Model). WAR and trend signals are **read from the pre‑event sheet**, and trend significance uses cached `groupStats` from pre‑event ranking runs. There is **no confidence factor used directly** in the Tournament Results sheet today.
+- **Current Node status:** these outputs are produced in `core/validationRunner.js` (notes, model-vs-actual deltas, z-score/formatted CSV extras when enabled).
+- **Dependency note:** Tournament Results analysis notes in the legacy sheets pipeline are built from **post‑tournament results + pre‑event rankings** (Player Ranking Model). WAR and trend signals are **read from the pre‑event sheet**, and trend significance uses cached `groupStats` from pre‑event ranking runs. There is **no confidence factor used directly** in the Tournament Results sheet today.
 
 **Locked CSV header contract (post‑tournament results):**
 
@@ -753,11 +842,9 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
 
 > Porting guidance: mirror the **data contracts** (inputs/outputs) of each function, not the Sheets‑specific formatting calls. Node should emit JSON/CSV payloads with the same columns + z‑score stats instead of relying on in‑sheet conditional formatting.
 
-### 4.2 Tournament / Config Validation (Node Port from legacy sheets)
+### 4.2 Tournament / Config Validation (Current Node Workflow)
 
-Post‑tournament validation is being **ported to Node** so the optimizer can run the full evaluation pipeline without relying on legacy sheet workflows. Outputs for this step will be **renamed and pared down** once the migration stabilizes.
-
-**Node‑based workflow (target behavior):**
+**Node workflow (current behavior):**
 
 1. **Enumerate tournaments to validate**
   Input: tournament identifiers and seasons (from CLI or a config file).
@@ -810,7 +897,7 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
 
 **Data directory convention (resolved):**
 
-- **Root:** `apps-scripts/modelOptimizer/data/`
+- **Root:** `data/`
 - **Per‑tournament artifacts:** `data/<season>/<tournament>/...`
 - **Per‑tournament inputs (CSV fallback):** `data/<season>/<tournament>/inputs/`
 - **Pre‑tournament outputs:** `data/<season>/<tournament>/pre_event/` (rankings + run summary)
@@ -829,7 +916,7 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
 
 - None (data directory and manifest conventions are defined above).
 
-**Functions to port from legacy sheets to Node:**
+**Legacy function mapping reference (for audit only):**
 
 - `utilities_DataLoading.js`
   - `listAvailableTournamentWorkbooks()` → replace with file enumeration under `data/`.
@@ -847,11 +934,11 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
 - `templateGeneration.js`
   - `generateWeightTemplates()` → weight templates from per‑tournament summaries.
 
-> The Node port should **mirror the legacy outputs conceptually** (Calibration Report, 02_/03_/04_ summaries, Weight Templates), but emit JSON/CSV artifacts instead of sheets.
+> Node already emits JSON/CSV artifacts for these outputs; keep this mapping as a parity checklist/reference.
 
 ### 4.3 Current‑Season, Current‑Tournament Baseline
 
-**Node‑based baseline evaluation (target behavior):**
+**Node‑based baseline evaluation (current behavior):**
 
 1. **Assemble candidate templates.** Event‑specific template from `utilities/weightTemplates.js` when present; fallback template from `utilities/course_context.json` → `templateKey`; optional neutral baseline for comparison.
 
@@ -872,7 +959,7 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
 
 ### 4.4 Group Weight Tuning
 
-**Node‑based group tuning (target behavior):**
+**Node‑based group tuning (current behavior):**
 
 #### Step 1 — Top‑20 Group Weight Tuning
 
@@ -898,7 +985,7 @@ Post‑tournament validation is being **ported to Node** so the optimizer can ru
 
 ### 4.5 Weight Optimization
 
-**Node‑based optimization (target behavior):**
+**Node‑based optimization (current behavior):**
 
 1. **Seed search from best baseline.** Start with Step 4.3 baseline + Step 4.4 group tuning, using baseline metric weights as the search center.
 
@@ -977,7 +1064,7 @@ Includes:
 - K‑fold summaries and interpretations
 - Template writeback decisions
 
-**Node output depth (target behavior):**
+**Node output depth (current behavior):**
 
 - **`data/<season>/<tournament>/post_event/{output-base}_post_event_results.json`**
   - **meta:** eventId, season, tournament name, run timestamp, CLI flags used
@@ -1028,7 +1115,7 @@ If dry‑run, outputs are written under `data/<season>/<tournament>/<mode>/dryru
   - `data/<season>/<tournament>/post_event/<tournament-slug>_results.json`
   - `data/<season>/<tournament>/post_event/<tournament-slug>_results.csv` (optional human‑readable export)
 
-#### Step 4.2 — Algorithm Validation (Node Port)
+#### Step 4.2 — Algorithm Validation (Node)
 
 - **Data used (Node):**
   - Pre‑event rankings outputs from Node (`data/<season>/<tournament>/pre_event/<output-base>_pre_event_rankings.csv/json`).
@@ -1038,7 +1125,7 @@ If dry‑run, outputs are written under `data/<season>/<tournament>/<mode>/dryru
   - Current season only (completed tournaments for the target season).
 - **Sources:**
   - Node optimizer outputs (`data/<season>/<tournament>/pre_event/` and `data/<season>/<tournament>/post_event/`).
-  - Data cache/API (`apps-scripts/modelOptimizer/data/cache/`).
+  - Data cache/API (`data/cache/`).
 - **Outputs (Node):**
   - `data/<season>/validation_outputs/Processing_Log.json`
   - `data/<season>/validation_outputs/Calibration_Report.json`
@@ -1103,12 +1190,12 @@ If dry‑run, outputs are written under `data/<season>/<tournament>/<mode>/dryru
 
 ## 5. Approach Data Policy (Leakage Handling)
 
-**Status:** deferred. Leakage flagging is not currently enforced in Node outputs.
+Node enforces timing-aware approach snapshot usage (L24/L12/YTD by season timing) to reduce leakage risk during validation and post-event analyses.
 
 ---
 
 ## 6. Data Sources & Ingestion Roadmap
 
-**Status:** deferred. API ingestion notes are retained for reference but not an active requirement.
+API/cache-first ingestion is active, with CSV inputs used as fallback where applicable. This section is retained as operational guidance rather than a pending roadmap.
 
 ---

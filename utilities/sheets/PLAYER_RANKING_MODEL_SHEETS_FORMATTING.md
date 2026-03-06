@@ -2,16 +2,12 @@
 
 This repo generates a **formatting schema** for the *Player Ranking Model* rankings output.
 
-- Schema source of truth (Node): `apps-scripts/modelOptimizer/utilities/rankingFormattingSchema.js`
+- Schema source of truth (Node): `utilities/rankingFormattingSchema.js`
 - Generated artifacts:
-  - `apps-scripts/modelOptimizer/utilities/ranking_formatting_schema.json`
-  - `apps-scripts/modelOptimizer/utilities/ranking_formatting_schema.csv`
+  - `utilities/sheets/ranking_formatting_schema.json`
+  - `utilities/sheets/ranking_formatting_schema.csv`
 
-The formatter is intended for the Node export at:
-
-- `data/<season>/<tournament>/pre_event/<output-base>_pre_event_rankings.csv`
-
-> This guide assumes you want the formatter **inside the spreadsheet** (bound script), not as a standalone library.
+> This formatter acts as a **standalone library** by storing schema JSON files in Google Drive and referencing them by file ID. The bound script dynamically fetches schemas at runtime.
 
 ---
 
@@ -35,26 +31,26 @@ These are encoded in `ranking_formatting_schema.json`:
 
 ---
 
-## 2) Add the bound formatter (no library required)
+## 2) Add the bound formatter
 
 1. In the Google Sheet: **Extensions → Script editor**
 2. Create a new script file (e.g. `PlayerRankingModelFormatter.bound.gs`)
 3. Copy/paste the contents of:
 
-   `apps-scripts/modelOptimizer/utilities/sheets/PlayerRankingModelFormatter.bound.gs`
+   `utilities/sheets/PlayerRankingModelFormatter.bound.gs`
 
-4. Paste the **entire JSON** from:
+4. **Important:** The script references schema JSON files stored in Google Drive:
+   - Ranking schema: `RANKING_FORMATTING_SCHEMA_FILE_ID = '1cph5kQftNPZp-Cd2J7pwR0Kl_b5jEiZY'`
+   - Tournament Results schema: `TOURNAMENT_RESULTS_FORMATTING_SCHEMA_FILE_ID = '1B0-F7qx1ipQLY7ELFBgV1KgIHWV7cf_E'`
 
-   `apps-scripts/modelOptimizer/utilities/ranking_formatting_schema.json`
-
-   into the `RANKING_FORMATTING_SCHEMA_JSON` constant in the script.
+   These file IDs must match the schema JSON files uploaded to Drive.
 
 5. Reload the spreadsheet.
 
-You should see a menu: **Rankings**
+You should see a menu: **🏌️ Golf Model Menu**
 
-- **Rename active tab to Player Ranking Model**
-- **Format Player Ranking Model**
+- **🎨 Format Player Ranking Model**
+- **🎯 Format Tournament Results**
 
 ---
 
@@ -62,7 +58,7 @@ You should see a menu: **Rankings**
 
 - Sets column widths from schema (including Notes = 350px)
 - Styles header row (row 5)
-- Styles the **MEDIAN** row (row 6) light blue
+- Styles the **MEDIAN** row (row 4) light blue
 - Coerces imported numeric strings (including percent strings like `"12.3%"`) to actual numbers
 - Applies number formats per column
 - Replaces conditional formatting rules for the sheet with:
@@ -86,8 +82,8 @@ If you want interactive filtering (e.g., show only players above the median for 
 
 ### Tip: filtering vs median row
 
-- Because MEDIAN is on row 6, most slicers will include it if you include the full table.
-- Best practice: set your slicer range to start at **row 5** but consider excluding row 6 if you don’t want MEDIAN appearing in filtered results.
+- Because MEDIAN is on row 4, most slicers will include it if you include the full table.
+- Best practice: set your slicer range to start at **row 5** (the header) but consider excluding row 4 if you don't want MEDIAN appearing in filtered results.
 
 ---
 
@@ -95,7 +91,7 @@ If you want interactive filtering (e.g., show only players above the median for 
 
 - **If everything is a string:** Conditional formatting won’t behave until values are numeric. The formatter includes a coercion pass.
 - **If blanks turn grey:** Grey is only applied where `zeroAsNoData` is true, and the rule uses `ISNUMBER(...)` so blanks should stay blank.
-- **If the sheet is named differently:** Run **Rankings → Rename active tab** (or rename manually).
+- **If the sheet is named differently:** Rename the sheet manually to match `schema.sheetName` or the formatter will rename it automatically.
 
 ---
 
@@ -104,5 +100,6 @@ If you want interactive filtering (e.g., show only players above the median for 
 If you change `rankingFormattingSchema.js` (e.g. add/remove columns or change row positions):
 
 1. Re-run the generator:
-   - `apps-scripts/modelOptimizer/scripts/generate_ranking_formatting_output.js`
-2. Re-copy the updated JSON into your bound Sheet script.
+   - `scripts/generate_ranking_formatting_output.js`
+2. Re-upload the updated JSON files to Google Drive (replacing the existing files at the same file IDs).
+3. The bound script will automatically fetch the latest schema on next run.

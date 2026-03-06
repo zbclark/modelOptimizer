@@ -1,3 +1,8 @@
+/**
+ * Module: approachDelta
+ * Purpose: Compute approach-skill deltas and load approach snapshots.
+ */
+
 const fs = require('fs');
 const path = require('path');
 const { loadCsv } = require('./csvLoader');

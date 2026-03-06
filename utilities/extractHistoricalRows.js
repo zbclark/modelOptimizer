@@ -1,4 +1,7 @@
-// Utility to extract historical rows from DataGolf JSON or similar payloads
+/**
+ * Module: extractHistoricalRows
+ * Purpose: Normalize DataGolf historical rounds payloads into flat row arrays.
+ */
 function extractHistoricalRowsFromSnapshotPayload(payload) {
   if (!payload) return [];
   // Single-event payload shape: { event_id, ..., scores: [ { dg_id, ..., round_1: {...}, ... } ] }

@@ -1,8 +1,9 @@
 
 
 /**
- * Adaptive Weight Optimizer v2
- * 
+ * Module: optimizer
+ * Purpose: Adaptive Weight Optimizer v2 (end-to-end pre/post tournament workflow).
+ *
  * Correct 4-Step Workflow:
  * Step 1: Historical Correlation Analysis (past years' metrics only)
  * Step 2: Baseline Rankings (2026 field with template weights)
@@ -2484,9 +2485,9 @@ function generateSheetLikePlayerNotes(player, groups, groupStats) {
     const bucketArrow = bucketSigMatch[1];
     const bucketZ = parseFloat(bucketSigMatch[2]);
     if (hasPoorFitNote && (bucketArrow === '↑' || bucketZ >= 0.75)) {
-      notes.push('ℹ️ Recent bucket trend strong (short-term) despite baseline fit');
+      notes.push('ℹ️ Recent bucket trend strong (short-term) despite poor baseline fit');
     } else if (hasStrongFitNote && (bucketArrow === '↓' || bucketZ <= -0.75)) {
-      notes.push('ℹ️ Recent bucket trend weak (short-term) despite baseline fit');
+      notes.push('ℹ️ Recent bucket trend weak (short-term) despite strong baseline fit');
     }
   }
 
