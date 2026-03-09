@@ -4,6 +4,11 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
+const {
+  buildArtifactPath,
+  buildOutputBaseName,
+  OUTPUT_ARTIFACTS
+} = require(path.resolve(ROOT_DIR, 'utilities', 'outputPaths'));
 const DATA_ROOT = path.resolve(ROOT_DIR, 'data');
 const LEGACY_OUTPUT_ROOT = path.resolve(ROOT_DIR, 'output');
 
@@ -284,7 +289,12 @@ if (recommendationGroups.size === 0) {
 
 // PHASE 2 TODO: replace manual summary path with buildArtifactPath(...SEED_SUMMARY_TXT...)
 // and keep this exact filename pattern for compatibility.
-const summaryPath = path.resolve(effectiveOutputDir, `${baseName}_seed_summary.txt`);
+const summaryPath = buildArtifactPath({
+  artifactType: OUTPUT_ARTIFACTS.SEED_SUMMARY_TXT,
+  outputBaseName: buildOutputBaseName({ tournamentSlug: baseName }),
+  seedRunRoot: effectiveOutputDir,
+  modeRoot: effectiveOutputDir
+});
 fs.writeFileSync(summaryPath, lines.join('\n'), 'utf8');
 
 console.log(`✅ Seed summary written to: ${summaryPath}`);

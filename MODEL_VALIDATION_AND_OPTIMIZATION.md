@@ -15,12 +15,13 @@ This document provides a **detailed, review-friendly** guide to how `core/optimi
 - **Season folder:** 4‑digit year (e.g., `2025`).
 - **Tournament slug:** lowercase, hyphen‑separated, no year, no punctuation (e.g., `genesis-invitational`, `wm-phoenix-open`).
 - **Manifest:** `data/<season>/manifest.json` contains `{ eventId, season, tournamentSlug, tournamentName }` entries.
-- **Mode folders:** `pre_event` and `post_event` only (no other variations).
+- **Mode folders:** `validation`, `pre_event` and `post_event` only (no other variations).
 - **Artifacts:** use stable **suffixes** and keep dates in file content (not filenames).
   - **Optimizer outputs:** `<output-base>_pre_event_results.json`, `<output-base>_pre_event_rankings.csv`, `<output-base>_post_event_results.json`.
+  - **Add valiation outputs.**
   - **Results snapshot:** `<tournament-slug>_results.json` (post‑event evaluation input).
   - **Exception:** approach delta JSONs are date‑stamped: `approach_deltas_<tournament-slug>_YYYY_MM_DD.json`.
-- **Output base naming:** `outputBaseName` is derived from `--tournament` (or `event_<eventId>` fallback), lowercased, spaces → underscores, non‑alphanumeric stripped, and leading `optimizer_` removed. Optional suffixes: `_seed-<seed>` and `_<outputTag>`.
+- **Output base naming:** `outputBaseName` is derived from `manifest.json`, or `--tournament` (fallback), lowercased, spaces → dashed, non‑alphanumeric stripped, and leading `optimizer_` removed. Optional suffixes: `_seed-<seed>` and `_<outputTag>`.
 - **Legacy outputs:** older runs may still include `optimizer_<tournament>_post_tournament_results.json`; treat as legacy but keep for audit.
 
 ### Example directory tree
@@ -103,7 +104,7 @@ Triggered when **current‑year results exist** for the event.
 
 **Primary goal:** run full optimization + validation (baseline vs optimized), including multi‑year validation and event K‑fold, then write a recommended template if warranted.
 
-**Manual override:** pass `--post` to force post‑tournament mode (requires results; run will error if none found).
+**Manual override:** pass `--post` to force post‑tournament mode (requires results; run will error if none found **need to fix this**).
 
 ---
 
@@ -316,7 +317,7 @@ When API snapshots are present, they are recorded in `apiSnapshots` within the J
 1. **Approach delta prior**
     - Rolling or explicit delta priors are loaded and used for alignment scoring.
 
-1. **Top‑20 signal (historical outcomes)**
+1. **Top‑20 signal (historical outcomes + tournament approach metrics)**
     - Builds Top‑20 correlations and/or logistic model signal.
 
 1. **Suggested weights**
@@ -327,7 +328,7 @@ When API snapshots are present, they are recorded in `apiSnapshots` within the J
     - CV reliability score is computed and used to conservative‑blend group weights.
 
 1. **Blend weights with prior template**
-    - Prior vs model share (default 60% / 40%)
+    - Prior vs model share (default 60% / 40%).
     - Group weights and metric weights are filled/normalized and blended.
 
 1. **Apply course setup adjustments**
@@ -337,12 +338,12 @@ When API snapshots are present, they are recorded in `apiSnapshots` within the J
 
 Below is a step‑by‑step view of **exact data used**, **time windows**, and **utilities/scripts** involved.
 
-#### Step 0 — Course History Regression (Past Performance)
+### Step 0 — Course History Regression (Past Performance)
 
 - **What it does:** Builds the course‑history regression map used to weight past‑performance signals.
 - **When to run:** **Before** the optimizer if you want course‑history weighting applied.
 - **Integration:** wired into the optimizer wrapper and executed at the **start** of `runAdaptiveOptimizer()`.
-- **Data used (currently CSV‑based):**
+- **Data used (currently CSV‑based, but needs to be cache based):**
   - Historical rounds/results (`* - Historical Data.csv`)
   - Configuration sheet (`* - Configuration Sheet.csv`) for course/event mapping
 - **Sources:**
@@ -359,7 +360,7 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
   - `utilities/courseHistoryRegression.js` (when templates enabled)
   - `apps-scripts/Golf_Algorithm_Library/utilities/courseHistoryRegression.js` (when templates enabled)
 
-#### Step 1 — Historical Metric Correlations
+### Step 1 — Historical Metric Correlations
 
 - **Data used:**
   - Recent‑form rounds (last **3 / 6 / 12 months**)
@@ -375,7 +376,7 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
   - `core/optimizer.js` (correlation logic)
   - `utilities/dataPrep.js` (round parsing + normalization)
 
-#### Step 2 — Training Correlations (Historical Outcomes)
+### Step 2 — Training Correlations (Historical Outcomes)
 
 - **Data used:**
   - **Current Event/Recent History:**
@@ -386,34 +387,36 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
     - Baseline group/metric weights from `utilities/weightTemplates.js`
     - **Fallback for event‑specific weights:** `utilities/course_context.json` (templateKey when explicit event weights are missing in `utilites/weightTemplates.js`)
   - **Similar‑iron performance:**
-    - Event history (last **5 years**) for eventIds listed in `utilities/course_context.json` → `similarIronEventIds`
+    - Event history (last **5 years**) for eventIds listed in `utilities/course_context.json` → `similarIronEventIds` + `similarCourseCourseNums`
   - **Similar‑putting performance:**
-    - Event history (last **5 years**) for eventIds listed in `utilities/course_context.json` → `similarPuttingEventIds`
-  - **Field filter (when available):** current field snapshot to align historical samples to the present‑day field
+    - Event history (last **5 years**) for eventIds listed in `utilities/course_context.json` → `similarPuttingEventIds` + `puttingCourseCourseNums`
+  - **Field filter:** current field snapshot to align historical samples to the present‑day field
 - **Time window:**
   - Recent‑form: 3/6/12 months
   - Event history: 5 years
 - **Similar/Putting scope:**
   - Defined in course context for the current eventId (`utilities/course_context.json`)
 - **Sources:**
-  - API (primary): recent‑form + event history snapshots
+  - cache (primary): recent-form + event history snapshots
+  - API (secondary): recent‑form + event history snapshots
   - CSV fallback: `* - Historical Data.csv`
 - **Utilities/Scripts:**
   - `core/optimizer.js` (generated metric correlation computation)
   - `utilities/dataPrep.js`
+  - `dataGolfClient.js` - for API falbback
 
 **How model‑generated metrics are built (Step 3.2.2):**
 
 - **Step 1 — Gather inputs**
   - Load recent‑form rounds (3/6/12 months) + 5‑year event history (current eventId + similar iron/putting lists).
   - Apply event filters using `utilities/course_context.json` (similarIronEventIds / similarPuttingEventIds).
-  - Apply field filter when a current field snapshot exists.
+  - Apply course number & field filter.  If field snapshot does not exist, fetch.
   - Load group/metric weight configuration:
     - Event‑specific weights from `utilities/weightTemplates.js` when available.
     - Fallback to `templateKey` in `utilities/course_context.json` if no event‑specific weights exist.
   - Load past‑performance blending config from `utilities/course_context.json` → `pastPerformance`.
   - Load approach snapshots (L24/L12/YTD) when available; otherwise exclude approach groups.
-  - Load approach delta priors (if enabled) from `data/approach_deltas` for alignment/score adjustments.
+  - Load approach delta priors (**needs to be ALWAYS enabled**) from `data/approach_deltas` for alignment/score adjustments.
 - **Step 2 — Build per‑player feature rows**
   - `runRanking()` calls `buildPlayerData()` to aggregate round‑level stats into player‑level features.
   - Utilities involved: `utilities/dataPrep.js` (round parsing/normalization).
@@ -458,7 +461,7 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
 
 **Approach snapshot retention (Node):**
 
-- **Latest files (always kept):**
+- **Latest files (always kept):** **THESE NO LONGER EXIST!!**
   - `data/approach_snapshot/approach_l24.json`
   - `data/approach_snapshot/approach_l12.json`
   - `data/approach_snapshot/approach_ytd_latest.json`
@@ -473,7 +476,7 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
 - **Env overrides:**
   - `APPROACH_SNAPSHOT_RETENTION_YTD` (min 2)
 
-#### Step 3 — Approach Delta Prior
+### Step 3 — Approach Delta Prior
 
 - **What it does:** Loads or builds **approach delta priors** (rolling or explicit) and converts them into an **alignment map** that can be blended into Top‑20 alignment/scoring.
   - Computed **before** Step 3.2.2/Step 4 so the priors are available during model‑metric generation and Top‑20 alignment.
@@ -489,7 +492,7 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
 
 **How deltas are created:**
 
-- **Generated inside the optimizer (Node-only):** `core/optimizer.js` will auto-generate a delta JSON in **pre-tournament mode** when no existing delta is found.
+- **Generated inside the optimizer (Node-only):** `core/optimizer.js` will auto-generate a delta JSON in **pre-tournament mode** when no existing delta is found. (NOTE: I THINK WE NEED TO MOVE THIS TO POST TOURNAMENT MODE)
 - **Inputs (API-first):**
   - **Current:** approach snapshot (usually the latest YTD snapshot)
   - **Previous:** prior YTD archive snapshot
@@ -507,14 +510,14 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
   - Included in JSON under `approachDeltaPrior` (alignment map + correlations)
   - Player summaries in `approachDeltaPrior.playerSummary` (top/bottom movers)
 
-#### Step 4 — Top‑20 Signal (Historical Outcomes)
+### Step 4 — Top‑20 Signal (Historical Outcomes)
 
 - **Data used:** Same as Step 2.
 - **Time window:** 3/6/12 months + 5‑year event history.
 - **Utilities/Scripts:**
   - `core/optimizer.js` (Top‑N correlations + logistic modeling)
 
-#### Step 5 — Suggested Weights (Metric + Group)
+### Step 5 — Suggested Weights (Metric + Group)
 
 - **What it does:** Generates **suggested metric weights** and **suggested group weights** from the Top‑20 signal (and logistic model if available).
   - Metric weights prefer **Top‑20 logistic weights** when the model succeeds; otherwise they fall back to **Top‑20 correlation weights**.
@@ -523,7 +526,7 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
 - **Utilities/Scripts:**
   - `core/optimizer.js` → `buildSuggestedMetricWeights()` and `buildSuggestedGroupWeights()`
 
-#### Step 6 — CV Reliability (Event‑based)
+### Step 6 — CV Reliability (Event‑based)
 
 - **What it does:** Computes a **reliability score** from event‑level CV of the Top‑20 logistic model, then uses that score to **conservatively blend** suggested group weights.
   - **This is not K‑fold over rounds**; it’s **event‑level CV** for the Top‑20 logistic model (see `crossValidateTopNLogisticByEvent()`), summarized by `computeCvReliability()`.
@@ -536,7 +539,7 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
 - **Utilities/Scripts:**
   - `core/optimizer.js` → `crossValidateTopNLogisticByEvent()` + `computeCvReliability()`
 
-#### Step 7 — Blend Weights with Prior Template
+### Step 7 — Blend Weights with Prior Template
 
 - **Blending strategy (pre‑tournament):**
   1) **Fill missing weights** using fallback template:
@@ -554,7 +557,7 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
   - `core/optimizer.js` (`buildFilledGroupWeights`, `buildMetricWeightsFromSuggested`, `blendGroupWeights`, `blendMetricWeights`)
   - `utilities/weightTemplates.js`
 
-#### Step 8 — Apply Course Setup Adjustments to Blended Metric Weights
+### Step 8 — Apply Course Setup Adjustments to Blended Metric Weights
 
 - **What it does:** Applies **course setup / shot distribution adjustments** to the **already blended metric weights** (Step 7) so the final metric mix reflects the event’s setup bias.
   - This is **not** the same as Step 3.2.2 (which builds player‑level model metrics). Step 8 only **adjusts weight vectors**.
@@ -742,10 +745,10 @@ Post‑tournament validation runs in Node today via `runValidation()` from `core
 - **Human‑readable results CSV (Node):** the runner emits a CSV with **metadata rows** followed by headers and per‑player results. The **first data column is a notes/analysis column**. Example structure:
 
   - **Row 1:** (blank spacer)
-  - **Row 2:** `Tournament: <Name>`, `Last updated: <timestamp>`
-  - **Row 3:** `Course: <Course>`, `Found <N> players from API`
-  - **Row 4:** `Data Date: <ISO timestamp>`
-  - **Row 5 (headers):**
+  - **Row 2:** (blank spacer)
+  - **Row 3:** (blank spacer)
+  - **Row 4:** (blank spacer)
+  - **Row 5 (headers - NEED TO UPDATE WITH APPROACH MODEL/ACTUAL COLUMNS):**
     - `Performance Analysis`
     - `DG ID`
     - `Player Name`
@@ -765,7 +768,6 @@ Post‑tournament validation runs in Node today via `runValidation()` from `core
     - `Rough Proximity`, `Rough Proximity - Model`
     - `SG BS`
     - `Scoring Average`
-    - `Birdies or Better`
     - `Scrambling`
     - `Great Shots`
     - `Poor Shot Avoidance`
@@ -809,7 +811,7 @@ Post‑tournament validation runs in Node today via `runValidation()` from `core
 - **Current Node status:** these outputs are produced in `core/validationRunner.js` (notes, model-vs-actual deltas, z-score/formatted CSV extras when enabled).
 - **Dependency note:** Tournament Results analysis notes in the legacy sheets pipeline are built from **post‑tournament results + pre‑event rankings** (Player Ranking Model). WAR and trend signals are **read from the pre‑event sheet**, and trend significance uses cached `groupStats` from pre‑event ranking runs. There is **no confidence factor used directly** in the Tournament Results sheet today.
 
-**Locked CSV header contract (post‑tournament results):**
+**Locked CSV header contract (post‑tournament results - NEED TO MODIFY TO INCLUDE APPROACH METRICS):**
 
 - `Performance Analysis`, `DG ID`, `Player Name`, `Model Rank`, `Finish Position`, `Score`,
   `SG Total`, `SG Total - Model`, `Driving Distance`, `Driving Distance - Model`,

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-04T18:57:13.641Z",
+  "updatedAt": "2026-03-09T21:24:03.698Z",
   "sourceDir": "apps-scripts/modelOptimizer/data",
   "defaultTours": [
     "pga"
@@ -415,7 +415,7 @@
         "from150to200": 0.375,
         "over200": 0.295
       },
-      "pastPerformanceWeight": 0.4,
+      "pastPerformanceWeight": 0.1,
       "locationLat": 28.5383,
       "locationLon": -81.3792,
       "locationCity": "Orlando",
@@ -1185,7 +1185,7 @@
         "from150to200": 0.375,
         "over200": 0.295
       },
-      "pastPerformanceWeight": 0.4
+      "pastPerformanceWeight": 0.1
     },
     "11": {
       "sourcePath": null,

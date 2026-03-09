@@ -60,8 +60,11 @@ function resolveAnalysisRoot({ tournamentRoot, mode, analysisDirOverride }) {
   return path.resolve(tournamentRoot, normalizeMode(mode), 'analysis');
 }
 
-function resolveRegressionRoot({ workspaceRoot, dataRoot, regressionDirOverride }) {
+function resolveRegressionRoot({ tournamentRoot, mode = 'pre_event', workspaceRoot, dataRoot, regressionDirOverride }) {
   if (regressionDirOverride) return path.resolve(regressionDirOverride);
+  if (tournamentRoot) {
+    return path.resolve(tournamentRoot, normalizeMode(mode), 'course_history_regression');
+  }
   const rootData = dataRoot ? path.resolve(dataRoot) : path.resolve(workspaceRoot || process.cwd(), 'data');
   return path.resolve(rootData, 'course_history_regression');
 }
@@ -77,6 +80,7 @@ function resolveValidationSubdir({ validationRoot, kind }) {
   const key = String(kind || '').trim().toUpperCase();
   if (key === 'METRIC_ANALYSIS') return path.resolve(validationRoot, VALIDATION_SUBDIRS.METRIC_ANALYSIS);
   if (key === 'TEMPLATE_CORRELATION_SUMMARIES') return path.resolve(validationRoot, VALIDATION_SUBDIRS.TEMPLATE_CORRELATION_SUMMARIES);
+  if (key === 'TOP20_BLEND') return path.resolve(validationRoot, VALIDATION_SUBDIRS.TOP20_BLEND);
   return null;
 }
 
@@ -128,6 +132,9 @@ function buildArtifactFilename({ artifactType, outputBaseName, tournamentSlug, t
       return `${outputBaseName}_seed_summary.txt`;
     case OUTPUT_ARTIFACTS.SEED_LOG_TXT:
       return `${outputBaseName}_log.txt`;
+
+    case OUTPUT_ARTIFACTS.PRE_EVENT_LOG_TXT:
+      return `${outputBaseName}_pre_event_log.txt`;
 
     case OUTPUT_ARTIFACTS.TOP20_TEMPLATE_BLEND_JSON:
       return `${tBase}_top20_template_blend.json`;
@@ -208,10 +215,11 @@ function resolveArtifactDir({
 
     case OUTPUT_ARTIFACTS.SEED_SUMMARY_TXT:
     case OUTPUT_ARTIFACTS.SEED_LOG_TXT:
+    case OUTPUT_ARTIFACTS.PRE_EVENT_LOG_TXT:
       return seedRunRoot || modeRoot;
 
     case OUTPUT_ARTIFACTS.TOP20_TEMPLATE_BLEND_JSON:
-      return validationRoot || analysisRoot || modeRoot;
+      return validationSubdirs.top20Blend || validationRoot || analysisRoot || modeRoot;
 
     case OUTPUT_ARTIFACTS.RAMP_JSON:
     case OUTPUT_ARTIFACTS.RAMP_CSV:

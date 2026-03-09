@@ -226,6 +226,215 @@
       }
     },
     {
+      "name": "Arnold Palmer Invitational",
+      "topFinishers": [
+        {
+          "name": "Bhatia, Akshay",
+          "dgId": "26096",
+          "actualFinish": 1,
+          "predictedRank": 51,
+          "missScore": 50,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "Berger, Daniel",
+          "dgId": "17606",
+          "actualFinish": 2,
+          "predictedRank": 31,
+          "missScore": 29,
+          "inTopXPredicted": "Top 50"
+        },
+        {
+          "name": "Young, Cameron",
+          "dgId": "26651",
+          "actualFinish": 3,
+          "predictedRank": 28,
+          "missScore": 25,
+          "inTopXPredicted": "Top 50"
+        },
+        {
+          "name": "Aberg, Ludvig",
+          "dgId": "23950",
+          "actualFinish": 3,
+          "predictedRank": 39,
+          "missScore": 36,
+          "inTopXPredicted": "Top 50"
+        },
+        {
+          "name": "Morikawa, Collin",
+          "dgId": "22085",
+          "actualFinish": 5,
+          "predictedRank": 24,
+          "missScore": 19,
+          "inTopXPredicted": "Top 50"
+        },
+        {
+          "name": "Henley, Russell",
+          "dgId": "14578",
+          "actualFinish": 6,
+          "predictedRank": 50,
+          "missScore": 44,
+          "inTopXPredicted": "Top 50"
+        },
+        {
+          "name": "Theegala, Sahith",
+          "dgId": "23014",
+          "actualFinish": 6,
+          "predictedRank": 65,
+          "missScore": 59,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "Lee, Min Woo",
+          "dgId": "16841",
+          "actualFinish": 6,
+          "predictedRank": 20,
+          "missScore": 14,
+          "inTopXPredicted": "Top 20"
+        },
+        {
+          "name": "Fowler, Rickie",
+          "dgId": "12965",
+          "actualFinish": 9,
+          "predictedRank": 27,
+          "missScore": 18,
+          "inTopXPredicted": "Top 50"
+        },
+        {
+          "name": "Hall, Harry",
+          "dgId": "27194",
+          "actualFinish": 9,
+          "predictedRank": 52,
+          "missScore": 43,
+          "inTopXPredicted": "Outside Top 50"
+        }
+      ],
+      "calibrationBuckets": {
+        "bucketCount": 10,
+        "totalPredictions": 72,
+        "matchedCount": 71,
+        "buckets": [
+          {
+            "bucket": 0,
+            "minPct": 0,
+            "maxPct": 0.1,
+            "count": 8,
+            "top5": 0,
+            "top10": 0,
+            "top20": 0
+          },
+          {
+            "bucket": 1,
+            "minPct": 0.1,
+            "maxPct": 0.2,
+            "count": 7,
+            "top5": 0,
+            "top10": 0,
+            "top20": 3
+          },
+          {
+            "bucket": 2,
+            "minPct": 0.2,
+            "maxPct": 0.3,
+            "count": 6,
+            "top5": 0,
+            "top10": 1,
+            "top20": 3
+          },
+          {
+            "bucket": 3,
+            "minPct": 0.3,
+            "maxPct": 0.4,
+            "count": 7,
+            "top5": 2,
+            "top10": 3,
+            "top20": 4
+          },
+          {
+            "bucket": 4,
+            "minPct": 0.4,
+            "maxPct": 0.5,
+            "count": 7,
+            "top5": 1,
+            "top10": 1,
+            "top20": 2
+          },
+          {
+            "bucket": 5,
+            "minPct": 0.5,
+            "maxPct": 0.6,
+            "count": 7,
+            "top5": 1,
+            "top10": 1,
+            "top20": 2
+          },
+          {
+            "bucket": 6,
+            "minPct": 0.6,
+            "maxPct": 0.7,
+            "count": 7,
+            "top5": 0,
+            "top10": 1,
+            "top20": 2
+          },
+          {
+            "bucket": 7,
+            "minPct": 0.7,
+            "maxPct": 0.8,
+            "count": 7,
+            "top5": 1,
+            "top10": 2,
+            "top20": 3
+          },
+          {
+            "bucket": 8,
+            "minPct": 0.8,
+            "maxPct": 0.9,
+            "count": 7,
+            "top5": 0,
+            "top10": 0,
+            "top20": 0
+          },
+          {
+            "bucket": 9,
+            "minPct": 0.9,
+            "maxPct": 1,
+            "count": 8,
+            "top5": 0,
+            "top10": 1,
+            "top20": 4
+          }
+        ]
+      },
+      "plattCalibration": {
+        "top10": {
+          "available": true,
+          "a": -0.30204069566879393,
+          "b": -1.5297032778455963,
+          "samples": 71,
+          "logLoss": 0.4091624427591291,
+          "brier": 0.12177030282132606,
+          "baseRate": 0.14084507042253522
+        },
+        "top20": {
+          "available": true,
+          "a": -0.06527539503002179,
+          "b": -0.6702711399615325,
+          "samples": 71,
+          "logLoss": 0.6301340417484752,
+          "brier": 0.21915082347763554,
+          "baseRate": 0.323943661971831
+        }
+      },
+      "accuracyMetrics": {
+        "top5Predicted": 1,
+        "top10Predicted": 4,
+        "top20Predicted": 7,
+        "avgMissTop5": 31.8,
+        "avgMissTop10": 33.7
+      }
+    },
+    {
       "name": "Cognizant Classic",
       "topFinishers": [
         {
@@ -1546,14 +1755,14 @@
   ],
   "calibrationBuckets": {
     "bucketCount": 10,
-    "totalPredictions": 815,
-    "matchedCount": 810,
+    "totalPredictions": 887,
+    "matchedCount": 881,
     "buckets": [
       {
         "bucket": 0,
         "minPct": 0,
         "maxPct": 0.1,
-        "count": 84,
+        "count": 92,
         "top5": 7,
         "top10": 16,
         "top20": 27
@@ -1562,70 +1771,70 @@
         "bucket": 1,
         "minPct": 0.1,
         "maxPct": 0.2,
-        "count": 81,
+        "count": 88,
         "top5": 10,
         "top10": 17,
-        "top20": 26
+        "top20": 29
       },
       {
         "bucket": 2,
         "minPct": 0.2,
         "maxPct": 0.3,
-        "count": 80,
+        "count": 86,
         "top5": 2,
-        "top10": 9,
-        "top20": 16
+        "top10": 10,
+        "top20": 19
       },
       {
         "bucket": 3,
         "minPct": 0.3,
         "maxPct": 0.4,
-        "count": 80,
-        "top5": 5,
-        "top10": 9,
-        "top20": 16
+        "count": 87,
+        "top5": 7,
+        "top10": 12,
+        "top20": 20
       },
       {
         "bucket": 4,
         "minPct": 0.4,
         "maxPct": 0.5,
-        "count": 78,
-        "top5": 4,
-        "top10": 6,
-        "top20": 14
+        "count": 85,
+        "top5": 5,
+        "top10": 7,
+        "top20": 16
       },
       {
         "bucket": 5,
         "minPct": 0.5,
         "maxPct": 0.6,
-        "count": 83,
-        "top5": 3,
-        "top10": 4,
-        "top20": 10
+        "count": 90,
+        "top5": 4,
+        "top10": 5,
+        "top20": 12
       },
       {
         "bucket": 6,
         "minPct": 0.6,
         "maxPct": 0.7,
-        "count": 81,
+        "count": 88,
         "top5": 1,
-        "top10": 3,
-        "top20": 11
+        "top10": 4,
+        "top20": 13
       },
       {
         "bucket": 7,
         "minPct": 0.7,
         "maxPct": 0.8,
-        "count": 80,
-        "top5": 1,
-        "top10": 5,
-        "top20": 12
+        "count": 87,
+        "top5": 2,
+        "top10": 7,
+        "top20": 15
       },
       {
         "bucket": 8,
         "minPct": 0.8,
         "maxPct": 0.9,
-        "count": 81,
+        "count": 88,
         "top5": 2,
         "top10": 4,
         "top20": 14
@@ -1634,40 +1843,40 @@
         "bucket": 9,
         "minPct": 0.9,
         "maxPct": 1,
-        "count": 82,
+        "count": 90,
         "top5": 3,
-        "top10": 7,
-        "top20": 10
+        "top10": 8,
+        "top20": 14
       }
     ]
   },
   "plattCalibration": {
     "top10": {
       "available": true,
-      "a": -1.057849522589518,
-      "b": -1.561300789171523,
-      "samples": 810,
-      "logLoss": 0.3135983539996074,
-      "brier": 0.08718647774873793,
-      "baseRate": 0.09876543209876543
+      "a": -0.989830709230983,
+      "b": -1.555967063704364,
+      "samples": 881,
+      "logLoss": 0.3229055997358018,
+      "brier": 0.09028919798573293,
+      "baseRate": 0.1021566401816118
     },
     "top20": {
       "available": true,
-      "a": -0.8753792882014444,
-      "b": -0.9595164092772192,
-      "samples": 810,
-      "logLoss": 0.47981373897404955,
-      "brier": 0.15217448638898456,
-      "baseRate": 0.1925925925925926
+      "a": -0.7949023087920197,
+      "b": -0.9317563909286716,
+      "samples": 881,
+      "logLoss": 0.49666104147930673,
+      "brier": 0.15916154990129497,
+      "baseRate": 0.20317820658342792
     }
   },
   "plattSamples": {
-    "top10Count": 810,
-    "top20Count": 810
+    "top10Count": 881,
+    "top20Count": 881
   },
-  "totalTop5": 38,
+  "totalTop5": 43,
   "predictedTop5InTop20": 16,
-  "totalTop10": 80,
-  "predictedTop10InTop30": 43,
-  "generatedAt": "2026-03-04T08:28:46.515Z"
+  "totalTop10": 90,
+  "predictedTop10InTop30": 47,
+  "generatedAt": "2026-03-09T21:07:56.532Z"
 }

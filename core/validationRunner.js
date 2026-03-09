@@ -11,10 +11,24 @@ const { parse } = require('csv-parse/sync');
 const { loadCsv } = require('../utilities/csvLoader');
 const { getSharedConfig, loadConfigCells, getCell } = require('../utilities/configParser');
 const { WEIGHT_TEMPLATES } = require('../utilities/weightTemplates');
-const { METRIC_DEFS, loadApproachCsv } = require('../utilities/approachDelta');
+const { METRIC_DEFS, loadApproachCsv, extractApproachRowsFromJson } = require('../utilities/approachDelta');
+const {
+  resolveValidationRoot,
+  resolveValidationSubdir,
+  buildOutputBaseName,
+  buildArtifactPath,
+  OUTPUT_ARTIFACTS
+} = require('../utilities/outputPaths');
+const {
+  loadSeasonManifestEntries,
+  resolveManifestEntryForEvent,
+  resolveNextManifestEntry,
+  parseDateToUtcMs,
+  slugifyTournament
+} = require('../utilities/manifestUtils');
 const {
   getDataGolfHistoricalRounds,
-  getDataGolfLiveTournamentStats
+  getDataGolfApproachSkill
 } = require('../utilities/dataGolfClient');
 
 const DEFAULT_OUTPUT_DIR_NAME = 'validation_outputs';
@@ -25,6 +39,10 @@ const DATAGOLF_CACHE_DIR = path.resolve(ROOT_DIR, 'data', 'cache');
 const METRIC_ANALYSIS_VERSION = 3;
 const EVENT_ONLY_LOW_DATA_THRESHOLD = 0;
 const DATAGOLF_API_KEY = String(process.env.DATAGOLF_API_KEY || '').trim();
+const DATAGOLF_APPROACH_TTL_HOURS = (() => {
+  const raw = parseFloat(String(process.env.DATAGOLF_APPROACH_TTL_HOURS || '').trim());
+  return Number.isNaN(raw) ? 24 : Math.max(1, raw);
+})();
 const DATAGOLF_HISTORICAL_TTL_HOURS = (() => {
   const raw = parseFloat(String(process.env.DATAGOLF_HISTORICAL_TTL_HOURS || '').trim());
   return Number.isNaN(raw) ? 72 : Math.max(1, raw);
@@ -32,18 +50,13 @@ const DATAGOLF_HISTORICAL_TTL_HOURS = (() => {
 const DATAGOLF_HISTORICAL_TOUR = String(process.env.DATAGOLF_HISTORICAL_TOUR || 'pga')
   .trim()
   .toLowerCase();
-const DATAGOLF_LIVE_STATS_TTL_HOURS = (() => {
-  const raw = parseFloat(String(process.env.DATAGOLF_LIVE_STATS_TTL_HOURS || '').trim());
-  return Number.isNaN(raw) ? 1 : Math.max(0.25, raw);
-})();
-const DATAGOLF_LIVE_STATS_TOUR = String(process.env.DATAGOLF_LIVE_STATS_TOUR || 'pga')
-  .trim()
-  .toLowerCase();
 const WRITE_RESULTS_EXTRAS = ['1', 'true', 'yes'].includes(
   String(process.env.WRITE_RESULTS_EXTRAS || '').trim().toLowerCase()
 );
 const SEASON_MANIFEST_NAME = 'manifest.json';
 const STANDARD_TEMPLATE_TYPES = new Set(['POWER', 'TECHNICAL', 'BALANCED']);
+const APPROACH_SNAPSHOT_DIR = path.resolve(ROOT_DIR, 'data', 'approach_snapshot');
+const APPROACH_SNAPSHOT_YTD_LATEST_PATH = path.resolve(APPROACH_SNAPSHOT_DIR, 'approach_ytd_latest.json');
 
 const readJsonFile = filePath => {
   if (!filePath || !fs.existsSync(filePath)) return null;
@@ -57,6 +70,115 @@ const readJsonFile = filePath => {
 const writeJsonFile = (filePath, payload) => {
   if (!filePath) return;
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
+};
+
+const parseApproachSnapshotDateFromFilename = filePath => {
+  const baseName = path.basename(filePath || '');
+  const match = baseName.match(/(\d{4})[-_](\d{2})[-_](\d{2})/);
+  if (!match) return NaN;
+  const [, year, month, day] = match;
+  const iso = `${year}-${month}-${day}T00:00:00Z`;
+  return Date.parse(iso);
+};
+
+const loadApproachSnapshotFromDisk = snapshotPath => {
+  if (!snapshotPath || !fs.existsSync(snapshotPath)) return { source: 'missing', path: snapshotPath, payload: null };
+  const payload = readJsonFile(snapshotPath);
+  if (!payload) return { source: 'invalid-json', path: snapshotPath, payload: null };
+  return { source: 'snapshot', path: snapshotPath, payload };
+};
+
+const listApproachSnapshotArchives = () => {
+  if (!APPROACH_SNAPSHOT_DIR || !fs.existsSync(APPROACH_SNAPSHOT_DIR)) return [];
+  const entries = [];
+  const files = fs.readdirSync(APPROACH_SNAPSHOT_DIR);
+  files.forEach(name => {
+    if (!name.toLowerCase().endsWith('.json')) return;
+    const lower = name.toLowerCase();
+    if (lower === 'approach_l24.json' || lower === 'approach_l12.json' || lower === 'approach_ytd_latest.json') return;
+    const match = name.match(/^approach_([a-z0-9]+)_(\d{4}-\d{2}-\d{2})\.json$/i);
+    if (!match) return;
+    const period = String(match[1] || '').toLowerCase();
+    const dateStamp = match[2];
+    const time = Date.parse(`${dateStamp}T00:00:00Z`);
+    entries.push({
+      period,
+      name,
+      path: path.resolve(APPROACH_SNAPSHOT_DIR, name),
+      time: Number.isNaN(time) ? 0 : time
+    });
+  });
+  entries.sort((a, b) => (b.time || 0) - (a.time || 0));
+  return entries;
+};
+
+const buildApproachSnapshotCandidates = ({ dataRootDir, season, manifestEntries = null }) => {
+  const entries = Array.isArray(manifestEntries) && manifestEntries.length
+    ? manifestEntries
+    : loadSeasonManifestEntries(dataRootDir, season);
+  const candidates = [];
+  const seen = new Set();
+
+  listApproachSnapshotArchives()
+    .filter(entry => entry.period === 'ytd')
+    .forEach(entry => {
+      if (!entry?.path || seen.has(entry.path)) return;
+      seen.add(entry.path);
+      candidates.push({
+        path: entry.path,
+        time: entry.time || 0,
+        date: entry.name.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null,
+        source: 'snapshot_archive',
+        priority: 3
+      });
+    });
+
+  if (APPROACH_SNAPSHOT_YTD_LATEST_PATH && fs.existsSync(APPROACH_SNAPSHOT_YTD_LATEST_PATH)) {
+    const latestTime = parseApproachSnapshotDateFromFilename(APPROACH_SNAPSHOT_YTD_LATEST_PATH);
+    if (!seen.has(APPROACH_SNAPSHOT_YTD_LATEST_PATH)) {
+      seen.add(APPROACH_SNAPSHOT_YTD_LATEST_PATH);
+      candidates.push({
+        path: APPROACH_SNAPSHOT_YTD_LATEST_PATH,
+        time: Number.isNaN(latestTime) ? 0 : latestTime,
+        date: null,
+        source: 'snapshot_latest',
+        priority: 2
+      });
+    }
+  }
+
+  entries.forEach(entry => {
+    const eventTime = parseDateToUtcMs(entry.date);
+    if (Number.isNaN(eventTime)) return;
+    const tournamentDir = resolveTournamentDir(dataRootDir, season, entry.tournamentName, entry.tournamentSlug);
+    const inputsDir = tournamentDir ? path.resolve(tournamentDir, 'inputs') : null;
+    const approachPath = inputsDir
+      ? resolveInputCsvPath({ inputsDir, season, suffix: 'Approach Skill' })
+      : null;
+    if (!approachPath || !fs.existsSync(approachPath) || seen.has(approachPath)) return;
+    seen.add(approachPath);
+    candidates.push({
+      path: approachPath,
+      time: eventTime,
+      date: entry.date,
+      source: 'approach_csv',
+      priority: 1
+    });
+  });
+
+  return candidates.filter(entry => typeof entry.time === 'number' && entry.time > 0);
+};
+
+const selectApproachSnapshotsForEvent = ({ eventDateMs, candidates }) => {
+  if (!eventDateMs || Number.isNaN(eventDateMs)) return { pre: null, post: null };
+  const valid = (candidates || []).filter(entry => typeof entry?.time === 'number' && entry.time > 0);
+  const pre = valid
+    .filter(entry => entry.time <= eventDateMs)
+    .sort((a, b) => (b.time - a.time) || ((b.priority || 0) - (a.priority || 0)))[0] || null;
+  const post = valid
+    .filter(entry => entry.time > eventDateMs)
+    .sort((a, b) => (a.time - b.time) || ((b.priority || 0) - (a.priority || 0)))[0] || null;
+  return { pre, post };
 };
 
 const updateCourseContextCourseTypes = ({ courseContextPath, classificationPayload, logger = console, dryRun = false } = {}) => {
@@ -128,25 +250,17 @@ const OUTPUT_NAMES = {
 };
 
 const loadSeasonManifest = (dataRootDir, season) => {
-  if (!dataRootDir || !season) return new Map();
-  const manifestPath = path.resolve(dataRootDir, String(season), SEASON_MANIFEST_NAME);
-  if (!fs.existsSync(manifestPath)) return new Map();
-  try {
-    const raw = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    const entries = Array.isArray(raw) ? raw : (Array.isArray(raw?.entries) ? raw.entries : []);
-    const map = new Map();
-    entries.forEach(entry => {
-      const slug = String(entry?.tournamentSlug || '').trim();
-      const eventId = entry?.eventId !== undefined && entry?.eventId !== null
-        ? String(entry.eventId).trim()
-        : null;
-      if (!slug || !eventId) return;
-      map.set(slug, eventId);
-    });
-    return map;
-  } catch (error) {
-    return new Map();
-  }
+  const map = new Map();
+  const entries = loadSeasonManifestEntries(dataRootDir, season);
+  entries.forEach(entry => {
+    const slug = String(entry?.tournamentSlug || '').trim();
+    const eventId = entry?.eventId !== undefined && entry?.eventId !== null
+      ? String(entry.eventId).trim()
+      : null;
+    if (!slug || !eventId) return;
+    map.set(slug, eventId);
+  });
+  return map;
 };
 
 const METRIC_ORDER = [
@@ -327,47 +441,6 @@ const computeEventOnlyApproachRows = ({ beforeRows, afterRows }) => {
   return { rows, playersWithShots };
 };
 
-const loadSeasonManifestEntries = (dataRootDir, season) => {
-  if (!dataRootDir || !season) return [];
-  const manifestPath = path.resolve(dataRootDir, String(season), SEASON_MANIFEST_NAME);
-  if (!fs.existsSync(manifestPath)) return [];
-  try {
-    const raw = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    const entries = Array.isArray(raw) ? raw : (Array.isArray(raw?.entries) ? raw.entries : []);
-    return entries
-      .map(entry => ({
-        eventId: entry?.eventId !== undefined && entry?.eventId !== null ? String(entry.eventId).trim() : null,
-        tournamentSlug: String(entry?.tournamentSlug || '').trim(),
-        tournamentName: String(entry?.tournamentName || '').trim(),
-        date: String(entry?.date || '').trim()
-      }))
-      .filter(entry => entry.date && (entry.eventId || entry.tournamentSlug || entry.tournamentName));
-  } catch (error) {
-    return [];
-  }
-};
-
-const resolveManifestEntryForEvent = (entries, { eventId, tournamentSlug, tournamentName }) => {
-  if (!Array.isArray(entries) || entries.length === 0) return null;
-  const eventIdStr = String(eventId || '').trim();
-  const slug = slugifyTournament(tournamentSlug || tournamentName);
-  return entries.find(entry => (eventIdStr && entry.eventId === eventIdStr)
-    || (slug && slugifyTournament(entry.tournamentSlug || entry.tournamentName) === slug)) || null;
-};
-
-const resolveNextManifestEntry = (entries, currentEntry) => {
-  if (!Array.isArray(entries) || entries.length === 0 || !currentEntry?.date) return null;
-  const sorted = entries
-    .map(entry => ({ ...entry, time: Date.parse(`${entry.date}T00:00:00Z`) }))
-    .filter(entry => typeof entry.time === 'number' && !Number.isNaN(entry.time))
-    .sort((a, b) => a.time - b.time);
-  const currentTime = Date.parse(`${currentEntry.date}T00:00:00Z`);
-  if (Number.isNaN(currentTime)) return null;
-  const currentIndex = sorted.findIndex(entry => entry.time === currentTime && entry.eventId === currentEntry.eventId);
-  if (currentIndex === -1) return sorted.find(entry => entry.time > currentTime) || null;
-  return sorted[currentIndex + 1] || null;
-};
-
 const resolveApproachCsvForEntry = (dataRootDir, season, entry) => {
   if (!entry) return null;
   const tournamentDir = resolveTournamentDir(dataRootDir, season, entry.tournamentName, entry.tournamentSlug);
@@ -532,25 +605,21 @@ const RESULTS_REQUIRED_FIELDS = [
 ];
 
 const getValidationOutputDir = (dataRootDir, season) => {
-  // PHASE 2 (planned, no wiring yet):
-  // Migrate this resolver to `utilities/outputPaths.js` via:
-  // - resolveValidationRoot({ dataRoot, season })
-  // Keep season-scoped validation root behavior unchanged.
-  return path.resolve(dataRootDir, String(season), DEFAULT_OUTPUT_DIR_NAME);
+  return resolveValidationRoot({
+    dataRoot: dataRootDir,
+    season,
+    workspaceRoot: ROOT_DIR
+  });
 };
 
 const getMetricAnalysisDir = outputDir => {
-  // PHASE 2 (planned, no wiring yet):
-  // Replace with resolveValidationSubdir(..., 'METRIC_ANALYSIS').
   if (!outputDir) return null;
-  return path.resolve(outputDir, METRIC_ANALYSIS_DIR_NAME);
+  return resolveValidationSubdir({ validationRoot: outputDir, kind: 'METRIC_ANALYSIS' });
 };
 
 const getTemplateCorrelationDir = outputDir => {
-  // PHASE 2 (planned, no wiring yet):
-  // Replace with resolveValidationSubdir(..., 'TEMPLATE_CORRELATION_SUMMARIES').
   if (!outputDir) return null;
-  return path.resolve(outputDir, TEMPLATE_CORRELATION_DIR_NAME);
+  return resolveValidationSubdir({ validationRoot: outputDir, kind: 'TEMPLATE_CORRELATION_SUMMARIES' });
 };
 
 const isMetricAnalysisPopulated = analysis => {
@@ -626,15 +695,6 @@ const listSeasonTournamentDirs = (dataRootDir, season) => {
     .filter(entry => entry.name !== DEFAULT_OUTPUT_DIR_NAME)
     .filter(entry => entry.name.toLowerCase() !== 'all')
     .map(entry => path.resolve(seasonDir, entry.name));
-};
-
-const slugifyTournament = value => {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/&/g, 'and')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
 };
 
 const formatTournamentDisplayName = value => {
@@ -741,11 +801,36 @@ const resolveRankingPath = (dir, candidates, suffix) => {
   return null;
 };
 
-const resolveTop20BlendPath = (dir, candidates) => {
-  if (!dir) return null;
-  const direct = resolveExistingPath(dir, candidates, '_top20_template_blend.json');
-  if (direct) return direct;
-  const fallback = path.resolve(dir, 'top20_template_blend.json');
+const resolveTop20BlendPath = ({
+  validationRoot,
+  validationSubdirs = {},
+  outputBaseName,
+  tournamentSlug,
+  tournamentName
+}) => {
+  if (!validationRoot) return null;
+
+  const preferred = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.TOP20_TEMPLATE_BLEND_JSON,
+    outputBaseName,
+    tournamentSlug,
+    tournamentName,
+    validationRoot,
+    validationSubdirs
+  });
+  if (preferred && fs.existsSync(preferred)) return preferred;
+
+  const legacy = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.TOP20_TEMPLATE_BLEND_JSON,
+    outputBaseName,
+    tournamentSlug,
+    tournamentName,
+    validationRoot,
+    validationSubdirs: {}
+  });
+  if (legacy && fs.existsSync(legacy)) return legacy;
+
+  const fallback = path.resolve(validationRoot, 'top20_template_blend.json');
   return fs.existsSync(fallback) ? fallback : null;
 };
 
@@ -824,8 +909,6 @@ const parseCsvRows = filePath => {
     skip_empty_lines: false
   });
 };
-
-const RESULTS_LIVE_STATS = 'sg_ott,sg_app,sg_arg,sg_putt,sg_t2g,sg_bs,sg_total,distance,accuracy,gir,prox_fw,prox_rgh,scrambling,great_shots,poor_shots';
 
 const normalizeHeader = value => String(value || '').trim().toLowerCase();
 
@@ -4441,35 +4524,6 @@ const loadTournamentResultsFromHistoricalApi = async (eventId, season) => {
   };
 };
 
-const loadTournamentResultsFromLiveStats = async () => {
-  const snapshot = await getDataGolfLiveTournamentStats({
-    apiKey: DATAGOLF_API_KEY,
-    cacheDir: DATAGOLF_CACHE_DIR,
-    ttlMs: DATAGOLF_LIVE_STATS_TTL_HOURS * 60 * 60 * 1000,
-    allowStale: true,
-    stats: RESULTS_LIVE_STATS,
-    round: 'event_avg',
-    display: 'value',
-    fileFormat: 'json'
-  });
-
-  const liveStats = Array.isArray(snapshot?.payload?.live_stats)
-    ? snapshot.payload.live_stats
-    : [];
-
-  const results = liveStats.map(entry => ({
-    dgId: String(entry?.dg_id || '').trim(),
-    playerName: String(entry?.player_name || '').trim(),
-    finishPosition: normalizeFinishPosition(entry?.position)
-  }));
-
-  return {
-    source: snapshot?.source || 'live_stats',
-    results: applyFinishFallback(results),
-    snapshot
-  };
-};
-
 const writeTournamentResultsSnapshot = (resultsJsonPath, payload) => {
   if (!resultsJsonPath) return null;
   ensureDirectory(path.dirname(resultsJsonPath));
@@ -4813,6 +4867,38 @@ const ensureTournamentResults = async ({
     logger.log('ℹ️  Historical Data CSV found, but no current-season results detected; falling back to API.');
   }
 
+  const cachePath = resolveHistoricalRoundsCachePath({
+    cacheDir: DATAGOLF_CACHE_DIR,
+    tour: DATAGOLF_HISTORICAL_TOUR,
+    eventId: 'all',
+    season,
+    fileFormat: 'json'
+  });
+  if (cachePath && fs.existsSync(cachePath)) {
+    const cachedPayload = readJsonFile(cachePath);
+    const buildFromCache = buildResultsFromHistoricalSnapshotPayload(cachedPayload, eventId, season);
+    if (buildFromCache?.results?.length) {
+      const stats = fs.statSync(cachePath);
+      const lastUpdated = stats?.mtime ? stats.mtime.toISOString() : null;
+      buildPayloadAndWrite({
+        source: 'historical_cache',
+        results: buildFromCache.results,
+        eventName: buildFromCache.eventName,
+        courseName: buildFromCache.courseName,
+        lastUpdated,
+        apiSnapshots: {
+          dataGolfHistoricalRounds: {
+            source: 'cache',
+            path: cachePath,
+            lastUpdated
+          }
+        }
+      });
+      logger.log(`✓ Tournament results sourced from cached historical rounds (${buildFromCache.results.length} players).`);
+      return { source: 'historical_cache', path: resultsJsonPath };
+    }
+  }
+
   const fromApi = await loadTournamentResultsFromHistoricalApi(eventId, season);
   if (fromApi.results.length > 0) {
     const build = buildResultsFromHistoricalSnapshotPayload(fromApi.snapshot?.payload, eventId, season);
@@ -4841,32 +4927,7 @@ const ensureTournamentResults = async ({
     return { source: fromApi.source || 'historical_api', path: resultsJsonPath || null };
   }
 
-  const fromLive = await loadTournamentResultsFromLiveStats();
-  if (fromLive.results.length > 0) {
-    const build = buildResultsFromLiveStatsPayload(fromLive.snapshot?.payload || {});
-    buildPayloadAndWrite({
-      source: fromLive.source,
-      results: build.results,
-      eventName: build.eventName,
-      courseName: build.courseName,
-      lastUpdated: fromLive.snapshot?.payload?.last_updated || null,
-      apiSnapshots: {
-        dataGolfLiveStats: {
-          source: fromLive.snapshot?.source || null,
-          path: fromLive.snapshot?.path || null,
-          lastUpdated: fromLive.snapshot?.payload?.last_updated || null,
-          eventName: fromLive.snapshot?.payload?.event_name || null,
-          courseName: fromLive.snapshot?.payload?.course_name || null,
-          statRound: fromLive.snapshot?.payload?.stat_round || null,
-          statDisplay: fromLive.snapshot?.payload?.stat_display || null
-        }
-      }
-    });
-    logger.log(`✓ Tournament results sourced from DataGolf live stats (${build.results.length} players).`);
-    return { source: fromLive.source, path: resultsJsonPath };
-  }
-
-  logger.warn('⚠️  Tournament results unavailable (CSV + API fallbacks failed).');
+  logger.warn('⚠️  Tournament results unavailable (CSV + historical cache/API fallbacks failed).');
   return { source: 'missing', path: resultsJsonPath || null };
 };
 
@@ -4987,6 +5048,15 @@ const runValidation = async ({
     : null;
   const resolvedSlug = tournamentSlug || manifestSlug || slugifyTournament(tournamentName);
   const outputDir = getValidationOutputDir(dataRootDir, season);
+  const validationSubdirs = {
+    metricAnalysis: resolveValidationSubdir({ validationRoot: outputDir, kind: 'METRIC_ANALYSIS' }),
+    templateCorrelations: resolveValidationSubdir({ validationRoot: outputDir, kind: 'TEMPLATE_CORRELATION_SUMMARIES' }),
+    top20Blend: resolveValidationSubdir({ validationRoot: outputDir, kind: 'TOP20_BLEND' })
+  };
+  if (outputDir) ensureDirectory(outputDir);
+  if (validationSubdirs.metricAnalysis) ensureDirectory(validationSubdirs.metricAnalysis);
+  if (validationSubdirs.templateCorrelations) ensureDirectory(validationSubdirs.templateCorrelations);
+  if (validationSubdirs.top20Blend) ensureDirectory(validationSubdirs.top20Blend);
   const resolvedTournamentDir = tournamentDir || resolveTournamentDir(dataRootDir, season, tournamentName, resolvedSlug);
   const slugCandidates = buildSlugCandidates({
     tournamentSlug: resolvedSlug,
@@ -4994,6 +5064,11 @@ const runValidation = async ({
     tournamentDir: resolvedTournamentDir
   });
   const primarySlug = slugCandidates[0] || resolvedSlug || slugifyTournament(tournamentName) || 'tournament';
+  const outputBaseName = buildOutputBaseName({
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    eventId
+  });
   const inputsDir = resolvedTournamentDir ? path.resolve(resolvedTournamentDir, 'inputs') : null;
   const preEventDir = resolvedTournamentDir ? path.resolve(resolvedTournamentDir, 'pre_event') : null;
   const postEventDir = resolvedTournamentDir ? path.resolve(resolvedTournamentDir, 'post_event') : null;
@@ -5118,8 +5193,22 @@ const runValidation = async ({
   const calibrationReportData = hasSeasonCalibration
     ? seasonCalibration
     : tournamentCalibration;
-  const calibrationJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.calibrationReport}.json`);
-  const calibrationCsvPath = path.resolve(outputDir, `${OUTPUT_NAMES.calibrationReport}.csv`);
+  const calibrationJsonPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_CALIBRATION_REPORT_JSON,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
+  const calibrationCsvPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_CALIBRATION_REPORT_CSV,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
   trackOutput('calibrationReport.json', calibrationJsonPath);
   trackOutput('calibrationReport.csv', calibrationCsvPath);
   const calibrationOutputs = writeCalibrationReport(outputDir, calibrationReportData);
@@ -5138,13 +5227,19 @@ const runValidation = async ({
       tournamentName: tournamentName || resolvedSlug
     });
     const nextEntry = resolveNextManifestEntry(manifestEntries, currentEntry);
-    const preApproachPath = resolveApproachCsvForEntry(dataRootDir, season, currentEntry);
-    const postApproachPath = resolveApproachCsvForEntry(dataRootDir, season, nextEntry);
     let approachEventOnlyMap = null;
+    const approachEventOnlyNotes = [];
+    const eventDateMs = parseDateToUtcMs(currentEntry?.date);
+    const snapshotCandidates = buildApproachSnapshotCandidates({
+      dataRootDir,
+      season,
+      manifestEntries
+    });
+    const snapshotOnlyCandidates = snapshotCandidates.filter(entry => (
+      entry?.source === 'snapshot_archive' || entry?.source === 'snapshot_latest'
+    ));
 
-    if (preApproachPath && postApproachPath) {
-      const beforeRows = loadApproachCsv(preApproachPath);
-      const afterRows = loadApproachCsv(postApproachPath);
+    const applyEventOnlyRows = ({ label, beforeRows, afterRows, sourceNote }) => {
       const eventOnly = computeEventOnlyApproachRows({ beforeRows, afterRows });
       if (eventOnly.rows.length > 0) {
         approachEventOnlyMap = new Map();
@@ -5153,17 +5248,125 @@ const runValidation = async ({
           if (!dgId) return;
           approachEventOnlyMap.set(dgId, row);
         });
-        logger.log(`✓ Event-only approach metrics loaded for ${resolvedSlug} (${eventOnly.rows.length} rows; pre=${path.basename(preApproachPath)}, post=${path.basename(postApproachPath)}).`);
-      } else {
-        logger.log(`ℹ️  Event-only approach metrics unavailable for ${resolvedSlug} (no overlapping rows).`);
+        logger.log(`✓ Event-only approach metrics loaded for ${resolvedSlug} (${eventOnly.rows.length} rows; ${label}).`);
+        if (sourceNote) logger.log(sourceNote);
+        return true;
       }
-    } else {
-      logger.log(`ℹ️  Event-only approach metrics unavailable for ${resolvedSlug} (missing pre/post approach CSVs).`);
+      return false;
+    };
+
+    if (eventDateMs && snapshotOnlyCandidates.length > 0) {
+      const snapshotPair = selectApproachSnapshotsForEvent({
+        eventDateMs,
+        candidates: snapshotOnlyCandidates
+      });
+      const preSnapshot = snapshotPair?.pre?.path && fs.existsSync(snapshotPair.pre.path)
+        ? loadApproachSnapshotFromDisk(snapshotPair.pre.path)
+        : null;
+      const postSnapshot = snapshotPair?.post?.path && fs.existsSync(snapshotPair.post.path)
+        ? loadApproachSnapshotFromDisk(snapshotPair.post.path)
+        : null;
+
+      const preRows = preSnapshot?.payload ? extractApproachRowsFromJson(preSnapshot.payload) : [];
+      const postRows = postSnapshot?.payload ? extractApproachRowsFromJson(postSnapshot.payload) : [];
+
+      if (preRows.length > 0 && postRows.length > 0) {
+        const label = `pre=${path.basename(preSnapshot.path)}, post=${path.basename(postSnapshot.path)}`;
+        if (!applyEventOnlyRows({
+          label,
+          beforeRows: preRows,
+          afterRows: postRows,
+          sourceNote: `NOTE: Event-only approach metrics sourced from snapshot archives (manifest-aligned).`
+        })) {
+          approachEventOnlyNotes.push('NOTE: Snapshot event-only approach metrics unavailable (no overlapping rows).');
+        }
+      } else {
+        approachEventOnlyNotes.push('NOTE: Snapshot event-only approach metrics unavailable (missing pre/post snapshots).');
+      }
+    } else if (!eventDateMs) {
+      approachEventOnlyNotes.push('NOTE: Snapshot event-only approach metrics skipped (manifest date missing).');
     }
 
+    if (!approachEventOnlyMap) {
+      const apiSnapshot = await getDataGolfApproachSkill({
+        apiKey: DATAGOLF_API_KEY,
+        cacheDir: DATAGOLF_CACHE_DIR,
+        ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
+        allowStale: true,
+        period: 'ytd',
+        fileFormat: 'json'
+      });
+
+      const postRows = apiSnapshot?.payload ? extractApproachRowsFromJson(apiSnapshot.payload) : [];
+      const preCandidate = eventDateMs && snapshotOnlyCandidates.length > 0
+        ? selectApproachSnapshotsForEvent({ eventDateMs, candidates: snapshotOnlyCandidates }).pre
+        : null;
+      const preSnapshot = preCandidate?.path && fs.existsSync(preCandidate.path)
+        ? loadApproachSnapshotFromDisk(preCandidate.path)
+        : null;
+      const preRows = preSnapshot?.payload ? extractApproachRowsFromJson(preSnapshot.payload) : [];
+
+      if (preRows.length > 0 && postRows.length > 0) {
+        const label = `pre=${preSnapshot?.path ? path.basename(preSnapshot.path) : 'n/a'}, post=api:${apiSnapshot?.source || 'unknown'}`;
+        if (!applyEventOnlyRows({
+          label,
+          beforeRows: preRows,
+          afterRows: postRows,
+          sourceNote: 'NOTE: Event-only approach metrics sourced from API snapshot (snapshot archive missing/incomplete).'
+        })) {
+          approachEventOnlyNotes.push('NOTE: API event-only approach metrics unavailable (no overlapping rows).');
+        }
+      } else if (apiSnapshot?.source === 'missing-key') {
+        approachEventOnlyNotes.push('NOTE: API event-only approach metrics skipped (DATAGOLF_API_KEY missing).');
+      } else if (postRows.length === 0) {
+        approachEventOnlyNotes.push(`NOTE: API event-only approach metrics skipped (api source=${apiSnapshot?.source || 'unknown'}, rows=0).`);
+      } else {
+        approachEventOnlyNotes.push('NOTE: API event-only approach metrics skipped (missing pre snapshot rows).');
+      }
+    }
+
+    if (!approachEventOnlyMap) {
+      const preApproachPath = resolveApproachCsvForEntry(dataRootDir, season, currentEntry);
+      const postApproachPath = resolveApproachCsvForEntry(dataRootDir, season, nextEntry);
+      if (preApproachPath && postApproachPath) {
+        const beforeRows = loadApproachCsv(preApproachPath);
+        const afterRows = loadApproachCsv(postApproachPath);
+        const label = `pre=${path.basename(preApproachPath)}, post=${path.basename(postApproachPath)}`;
+        if (!applyEventOnlyRows({
+          label,
+          beforeRows,
+          afterRows,
+          sourceNote: 'NOTE: Event-only approach metrics sourced from CSV fallback.'
+        })) {
+          approachEventOnlyNotes.push('NOTE: CSV event-only approach metrics unavailable (no overlapping rows).');
+        }
+      } else {
+        approachEventOnlyNotes.push('NOTE: CSV event-only approach metrics unavailable (missing pre/post approach CSVs).');
+      }
+    }
+
+    if (!approachEventOnlyMap) {
+      logger.log(`ℹ️  Event-only approach metrics unavailable for ${resolvedSlug}.`);
+    }
+    approachEventOnlyNotes.forEach(note => logger.log(note));
+
     const metricAnalysisDir = getMetricAnalysisDir(outputDir) || outputDir;
-    const metricJsonPath = path.resolve(metricAnalysisDir, `${resolvedSlug}_metric_analysis.json`);
-    const metricCsvPath = path.resolve(metricAnalysisDir, `${resolvedSlug}_metric_analysis.csv`);
+    const metricJsonPath = buildArtifactPath({
+      artifactType: OUTPUT_ARTIFACTS.VALIDATION_METRIC_ANALYSIS_JSON,
+      outputBaseName,
+      tournamentSlug: resolvedSlug,
+      tournamentName,
+      validationRoot: outputDir,
+      validationSubdirs
+    });
+    const metricCsvPath = buildArtifactPath({
+      artifactType: OUTPUT_ARTIFACTS.VALIDATION_METRIC_ANALYSIS_CSV,
+      outputBaseName,
+      tournamentSlug: resolvedSlug,
+      tournamentName,
+      validationRoot: outputDir,
+      validationSubdirs
+    });
     trackOutput('metricAnalysis.json', metricJsonPath);
     trackOutput('metricAnalysis.csv', metricCsvPath);
     const resultsPayload = readJsonFile(resultsJsonPath);
@@ -5252,7 +5455,13 @@ const runValidation = async ({
   allMetricAnalyses.forEach(entry => {
     const tournamentSlug = entry?.tournament || null;
     if (!tournamentSlug) return;
-    const blendPath = resolveTop20BlendPath(outputDir, [tournamentSlug]);
+    const blendPath = resolveTop20BlendPath({
+      validationRoot: outputDir,
+      validationSubdirs,
+      outputBaseName,
+      tournamentSlug,
+      tournamentName
+    });
     const blendOutput = loadTop20BlendOutput(blendPath);
     if (!blendOutput) return;
     const alignment = computeTemplateAlignmentFromBlend(blendOutput, templatesByType);
@@ -5275,8 +5484,22 @@ const runValidation = async ({
       top20BlendByTournament
     })
   };
-  const classificationJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.courseTypeClassification}.json`);
-  const classificationCsvPath = path.resolve(outputDir, `${OUTPUT_NAMES.courseTypeClassification}.csv`);
+  const classificationJsonPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_COURSE_TYPE_CLASSIFICATION_JSON,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
+  const classificationCsvPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_COURSE_TYPE_CLASSIFICATION_CSV,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
   trackOutput('courseTypeClassification.json', classificationJsonPath);
   trackOutput('courseTypeClassification.csv', classificationCsvPath);
   const classificationOutputs = writeCourseTypeClassification(outputDir, classificationPayload);
@@ -5323,30 +5546,79 @@ const runValidation = async ({
     BALANCED: allMetricAnalyses.filter(entry => resolveTypeForAnalysis(entry) === 'BALANCED')
   };
 
-  const powerCorrelationJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.powerCorrelationSummary}.json`);
-  const powerCorrelationCsvPath = path.resolve(outputDir, `${OUTPUT_NAMES.powerCorrelationSummary}.csv`);
-  const technicalCorrelationJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.technicalCorrelationSummary}.json`);
-  const technicalCorrelationCsvPath = path.resolve(outputDir, `${OUTPUT_NAMES.technicalCorrelationSummary}.csv`);
-  const balancedCorrelationJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.balancedCorrelationSummary}.json`);
-  const balancedCorrelationCsvPath = path.resolve(outputDir, `${OUTPUT_NAMES.balancedCorrelationSummary}.csv`);
+  const powerCorrelationJsonPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_TEMPLATE_CORRELATION_SUMMARY_JSON,
+    templateName: 'POWER',
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
+  const powerCorrelationCsvPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_TEMPLATE_CORRELATION_SUMMARY_CSV,
+    templateName: 'POWER',
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
+  const technicalCorrelationJsonPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_TEMPLATE_CORRELATION_SUMMARY_JSON,
+    templateName: 'TECHNICAL',
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
+  const technicalCorrelationCsvPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_TEMPLATE_CORRELATION_SUMMARY_CSV,
+    templateName: 'TECHNICAL',
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
+  const balancedCorrelationJsonPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_TEMPLATE_CORRELATION_SUMMARY_JSON,
+    templateName: 'BALANCED',
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
+  const balancedCorrelationCsvPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_TEMPLATE_CORRELATION_SUMMARY_CSV,
+    templateName: 'BALANCED',
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
   trackOutput('powerCorrelationSummary.json', powerCorrelationJsonPath);
   trackOutput('powerCorrelationSummary.csv', powerCorrelationCsvPath);
   trackOutput('technicalCorrelationSummary.json', technicalCorrelationJsonPath);
   trackOutput('technicalCorrelationSummary.csv', technicalCorrelationCsvPath);
   trackOutput('balancedCorrelationSummary.json', balancedCorrelationJsonPath);
   trackOutput('balancedCorrelationSummary.csv', balancedCorrelationCsvPath);
+  const correlationOutputDir = validationSubdirs.templateCorrelations || outputDir;
   const correlationSummaries = {
-    POWER: writeCorrelationSummary(outputDir, OUTPUT_NAMES.powerCorrelationSummary, buildCorrelationSummary(byType.POWER), {
+    POWER: writeCorrelationSummary(correlationOutputDir, OUTPUT_NAMES.powerCorrelationSummary, buildCorrelationSummary(byType.POWER), {
       type: 'POWER',
       season,
       tournaments: byType.POWER.map(entry => entry.tournament).filter(Boolean)
     }),
-    TECHNICAL: writeCorrelationSummary(outputDir, OUTPUT_NAMES.technicalCorrelationSummary, buildCorrelationSummary(byType.TECHNICAL), {
+    TECHNICAL: writeCorrelationSummary(correlationOutputDir, OUTPUT_NAMES.technicalCorrelationSummary, buildCorrelationSummary(byType.TECHNICAL), {
       type: 'TECHNICAL',
       season,
       tournaments: byType.TECHNICAL.map(entry => entry.tournament).filter(Boolean)
     }),
-    BALANCED: writeCorrelationSummary(outputDir, OUTPUT_NAMES.balancedCorrelationSummary, buildCorrelationSummary(byType.BALANCED), {
+    BALANCED: writeCorrelationSummary(correlationOutputDir, OUTPUT_NAMES.balancedCorrelationSummary, buildCorrelationSummary(byType.BALANCED), {
       type: 'BALANCED',
       season,
       tournaments: byType.BALANCED.map(entry => entry.tournament).filter(Boolean)
@@ -5371,8 +5643,22 @@ const runValidation = async ({
   };
   
 
-  const weightCalibrationJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.weightCalibrationGuide}.json`);
-  const weightCalibrationCsvPath = path.resolve(outputDir, `${OUTPUT_NAMES.weightCalibrationGuide}.csv`);
+  const weightCalibrationJsonPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_WEIGHT_CALIBRATION_GUIDE_JSON,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
+  const weightCalibrationCsvPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_WEIGHT_CALIBRATION_GUIDE_CSV,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
   trackOutput('weightCalibrationGuide.json', weightCalibrationJsonPath);
   trackOutput('weightCalibrationGuide.csv', weightCalibrationCsvPath);
   const weightCalibrationOutputs = writeWeightCalibrationGuide(outputDir, summariesByType, templatesByType, typeCounts);
@@ -5384,8 +5670,22 @@ const runValidation = async ({
     TECHNICAL: byType.TECHNICAL.map(entry => entry.tournament).filter(Boolean),
     BALANCED: byType.BALANCED.map(entry => entry.tournament).filter(Boolean)
   };
-  const weightTemplatesJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.weightTemplates}.json`);
-  const weightTemplatesCsvPath = path.resolve(outputDir, `${OUTPUT_NAMES.weightTemplates}.csv`);
+  const weightTemplatesJsonPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_WEIGHT_TEMPLATES_JSON,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
+  const weightTemplatesCsvPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_WEIGHT_TEMPLATES_CSV,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
   trackOutput('weightTemplates.json', weightTemplatesJsonPath);
   trackOutput('weightTemplates.csv', weightTemplatesCsvPath);
   const weightTemplatesOutputs = writeWeightTemplatesOutput(outputDir, summariesByType, templatesByType, {
@@ -5403,12 +5703,13 @@ const runValidation = async ({
   });
   const shouldWriteTemplates = !!writeTemplates;
   const shouldDryRunTemplates = !!dryRun && !shouldWriteTemplates;
+  const dryRunTemplateDir = dryRunDir || (postEventDir ? path.resolve(postEventDir, 'dryrun') : null);
   if (shouldWriteTemplates || shouldDryRunTemplates) {
     const updatedPath = updateBaselineTemplatesFile({
       blendedTemplatesByType: blendedByType,
       logger,
       dryRun: shouldDryRunTemplates,
-      outputDir: dryRunDir || outputDir
+      outputDir: dryRunTemplateDir
     });
     if (updatedPath) {
       const label = shouldWriteTemplates ? '✓ Updated baseline templates' : '🧪 Dry-run template output saved';
@@ -5419,15 +5720,36 @@ const runValidation = async ({
   }
 
   const modelDeltaTrends = buildModelDeltaTrends({ resultsJsonPath, season, dataRootDir });
-  const modelDeltaJsonPath = path.resolve(outputDir, `${OUTPUT_NAMES.modelDeltaTrends}.json`);
-  const modelDeltaCsvPath = path.resolve(outputDir, `${OUTPUT_NAMES.modelDeltaTrends}.csv`);
+  const modelDeltaJsonPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_MODEL_DELTA_TRENDS_JSON,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
+  const modelDeltaCsvPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_MODEL_DELTA_TRENDS_CSV,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
   trackOutput('modelDeltaTrends.json', modelDeltaJsonPath);
   trackOutput('modelDeltaTrends.csv', modelDeltaCsvPath);
   const modelDeltaTrendOutputs = writeModelDeltaTrends(outputDir, modelDeltaTrends);
   recordOutput('modelDeltaTrends.json', modelDeltaTrendOutputs?.jsonPath);
   recordOutput('modelDeltaTrends.csv', modelDeltaTrendOutputs?.csvPath);
 
-  const processingLogPath = path.resolve(outputDir, `${OUTPUT_NAMES.processingLog}.json`);
+  const processingLogPath = buildArtifactPath({
+    artifactType: OUTPUT_ARTIFACTS.VALIDATION_PROCESSING_LOG_JSON,
+    outputBaseName,
+    tournamentSlug: resolvedSlug,
+    tournamentName,
+    validationRoot: outputDir,
+    validationSubdirs
+  });
   trackOutput('processingLog.json', processingLogPath);
   const dataProcessed = {
     predictionsCount: predictionsResult.predictions.length,

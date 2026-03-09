@@ -1,13 +1,17 @@
 {
-  "generatedAt": "2026-03-04T08:28:46.765Z",
-  "tournament": "cognizant-classic",
-  "eventId": "10",
+  "generatedAt": "2026-03-09T21:07:56.946Z",
+  "tournament": "arnold-palmer-invitational",
+  "eventId": "9",
   "season": 2026,
-  "skipMetricAnalysis": true,
+  "skipMetricAnalysis": false,
   "dataProcessed": {
-    "predictionsCount": 123,
-    "resultsCount": 123,
-    "metricAnalysis": null,
+    "predictionsCount": 72,
+    "resultsCount": 72,
+    "metricAnalysis": {
+      "metrics": 43,
+      "top10Finishers": 10,
+      "totalFinishers": 72
+    },
     "modelDeltaTrends": {
       "metrics": 11,
       "totalSamples": 9031,
@@ -16,10 +20,10 @@
     }
   },
   "inputs": {
-    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/cognizant-classic_pre_event_rankings.json",
-    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/cognizant-classic_pre_event_rankings.csv",
-    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/cognizant-classic/post_event/cognizant-classic_results.json",
-    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/cognizant-classic/post_event/cognizant-classic_results.csv",
+    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/arnold-palmer-invitational/pre_event/arnold-palmer-invitational_pre_event_rankings.json",
+    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/arnold-palmer-invitational/pre_event/arnold-palmer-invitational_pre_event_rankings.csv",
+    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/arnold-palmer-invitational/post_event/arnold-palmer-invitational_post_event_results.json",
+    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/arnold-palmer-invitational/post_event/arnold-palmer-invitational_results.csv",
     "configCsvPath": null
   },
   "sources": {
@@ -44,6 +48,20 @@
       "overwritten": true
     },
     {
+      "label": "metricAnalysis.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/arnold-palmer-invitational_metric_analysis.json",
+      "existedBefore": false,
+      "written": true,
+      "overwritten": false
+    },
+    {
+      "label": "metricAnalysis.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/arnold-palmer-invitational_metric_analysis.csv",
+      "existedBefore": false,
+      "written": true,
+      "overwritten": false
+    },
+    {
       "label": "courseTypeClassification.json",
       "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Course_Type_Classification.json",
       "existedBefore": true,
@@ -59,42 +77,42 @@
     },
     {
       "label": "powerCorrelationSummary.json",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/POWER_Correlation_Summary.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/POWER_Correlation_Summary.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "powerCorrelationSummary.csv",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/POWER_Correlation_Summary.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/POWER_Correlation_Summary.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "technicalCorrelationSummary.json",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/TECHNICAL_Correlation_Summary.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/TECHNICAL_Correlation_Summary.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "technicalCorrelationSummary.csv",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/TECHNICAL_Correlation_Summary.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/TECHNICAL_Correlation_Summary.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "balancedCorrelationSummary.json",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/BALANCED_Correlation_Summary.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/BALANCED_Correlation_Summary.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "balancedCorrelationSummary.csv",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/BALANCED_Correlation_Summary.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/BALANCED_Correlation_Summary.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true

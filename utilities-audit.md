@@ -1,6 +1,6 @@
 # Utilities & Scripts Audit — modelOptimizer
 
-- **Reviewed:** 2026-02-25
+- **Reviewed:** 2026-03-09
 - **Scope:** `utilities/` and `scripts/`
 
 ---
@@ -24,20 +24,52 @@
 
 ## Open Review Items (2026-03-06)
 
-- [ ] Review and revise order of operations for pre/post runs; ensure scripts/utilities are categorized correctly.
-- [ ] Review the data lookup precedence (cache → API → CSV fallback or updated rule).
-- [ ] Review naming conventions for `approach_deltas` files to include year (future validation support).
+- [x] Review and revise order of operations for pre/post runs; ensure scripts/utilities are categorized correctly.
+- [x] Review the data lookup precedence (cache → API → CSV fallback or updated rule).
+- [x] Review naming conventions for `approach_deltas` files to include year (future validation support).
 - [ ] Review validation Step 4.1a to consider approach metrics for current year (and future years as data grows).
-- [ ] Review early season ramp to decide when it should be turned off.
-- [ ] Investigate options to validate model metric calculations (not just weights).
-- [ ] Investigate tournament-slug sourcing/generation - look in manifest first to see if one exists for the eventId, if not fall back to creating a manifest entry with the --name provided in the correct formatt {tournament-slug}.
-- [ ] Review post-event folder auto-generation to review what folders need to present.
-- [ ] Review "optional" inputs to pre- and post- runs to determine what is actually optional v what is required.
+- [x] Review early season ramp to decide when it should be turned off.
 
+**2026-03-09 review note (early season ramp):**
+
+- Ramp no longer reduces the **past-performance regression weight**; it now **dampens the refined score** directly
+  based on player ramp readiness, and it **turns off once the player reaches return-to-form** for the season.
+
+**2026-03-09 review note (validation Step 4.1a approach metrics):**
+
+- Validation runner now mirrors optimizer approach sourcing for event-only metrics:
+  manifest-aligned **snapshot archives first**, **DataGolf API** fallback (cache-first), then **Approach CSVs**.
+- Logs explicit **NOTE** lines when fallbacks are used or event-only approach metrics are unavailable so
+  downstream metric analysis clearly reflects missing approach data.
+- [ ] Investigate options to validate model metric calculations (not just weights).
+- [x] Investigate tournament-slug sourcing/generation - look in manifest first to see if one exists for the eventId, if not fall back to creating a manifest entry with the --name provided in the correct formatt {tournament-slug}.
+- [x] Review post-event folder auto-generation to review what folders need to present.
+- [x] Review "optional" inputs to pre- and post- runs to determine what is actually optional v what is required.
+
+**2026-03-09 review notes (items 1, 2, 6):**
+
+- **Approach delta naming** already embeds the year in the date stamp:
+  `approach_deltas_<tournament-slug>_YYYY_MM_DD.json`. Matching logic strips the date suffix and picks the newest timestamp.
+  If explicit **season** is required (vs. calendar year), consider adding `season` to `meta` or extending the filename
+  to include `season_<YYYY>`.
+- **Optional vs. required inputs** (current behavior):
+  - `--event` is required for all runs.
+  - `--name` is required for **pre/post/results/validation** runs to resolve manifest placeholders.
+  - `--name "all"` is reserved for **season validation** runs.
+  - CSV inputs are **optional** (API/cache are primary). Missing CSVs log a warning and trigger API/cache fetches.
+  - `course_context.json` is the **primary** configuration source; `Configuration Sheet` is a **fallback**.
+  - If both are missing, the run fails with an explicit error.
+  - `DATAGOLF_API_KEY` becomes **required** when cache is missing (e.g., pre runs validate prior-event history from API).
+  - Validation outputs (weight templates + delta trends) are required **unless** `SKIP_VALIDATION_OUTPUTS=true` or `--results`.
+  - Optional validation snapshots (decompositions/skill ratings) are gated by `DATAGOLF_FETCH_OPTIONAL` and post-only.
+- **Order of operations** (high level):
+  - Resolve manifest + tournament dirs → scaffold (unless results-only) → resolve inputs → infer mode (pre/post)
+  - Pre: generate regression + ramp → load regression snapshot → config → load data → train & write pre outputs
+  - Post: skip regression/ramp → load data → optimize & write post outputs → optional validation auto-run
 
 ---
 
-## Post‑Tournament Top‑20 Blend Notes (2026-03-02)
+## Post‑Tournament Top‑20 Blend Notes (2026-03-02)ok
 
 **Context:** Post‑event optimizer runs were executed for:
 
@@ -48,6 +80,9 @@ Blend outputs were written to:
 
 - `data/2026/validation_outputs/the-genesis-invitational_top20_template_blend.json`
 - `data/2026/validation_outputs/atandt-pebble-beach-pro-am_top20_template_blend.json`
+
+**2026-03-09 update:** Blend outputs now live under
+`data/<season>/validation_outputs/top20_blend/` (see Output Path Refactor below).
 
 The post‑event optimizer logs confirm both runs completed and produced the blend artifacts. Runs used API/cache fallbacks and **skipped approach snapshots** because `DATAGOLF_API_KEY` was not set.
 
@@ -130,6 +165,7 @@ The post‑event optimizer logs confirm both runs completed and produced the ble
 - [ ] **Dry-run output creation:** confirm dry-run template output is generated only when explicitly enabled (no baseline writes otherwise).
 - [ ] **Template duplication guard:** ensure template upserts handle quoted keys and do not create duplicate course templates (e.g., `WAIALAE_COUNTRY_CLUB`).
 - [ ] **Validation outputs integrity:** confirm POWER/TECHNICAL/BALANCED recommendations are populated (non-zero) when metric summaries exist; skip updates when summaries are empty.
+- [x] **Shared output path utility:** adopt `outputPaths` resolver across optimizer + validation runner to centralize filenames/subdirs.
 
 ### P2 — Verification / audit
 
@@ -140,58 +176,33 @@ The post‑event optimizer logs confirm both runs completed and produced the ble
 
 ---
 
-## Draft Implementation Notes (2026-03-03) — Output Dir Utility (Scaffold Only)
+## Output Path Refactor (2026-03-09) — Implemented
 
-### Scope in this draft
+### Scope
 
-- Added **draft-only** output path scaffolding; **no wiring** into `core/` or `scripts/` execution flows.
-- Goal is to lock path/naming contracts before integration.
+- Implemented shared output path resolution across optimizer + validation runner.
+- Enforced file naming and routing for pre/post/validation outputs.
 
-### New draft files
+### Behavioral updates now enforced
 
-- `utilities/outputArtifacts.js`
-  - Central artifact key catalog (`OUTPUT_ARTIFACTS`)
-  - Validation subfolder constants (`VALIDATION_SUBDIRS`)
-- `utilities/outputPaths.js`
-  - Pure resolver helpers for tournament/mode/seed/dry-run/validation/analysis/regression roots
-  - Base-name and slug normalization helpers
-  - Artifact filename + full-path builders
-  - Legacy read-candidate helper (includes read-only `output/` fallback)
-- `utilities/outputPaths.draft.test.js`
-  - Draft assertions for root resolution and naming behavior
-  - Confirms distinct handling of:
-    - full optimizer post-event outputs (`*_post_event_results.*`)
-    - normalized tournament snapshots (`*_results.*`)
-  - Confirms validation season root + subfolders and legacy read candidates
+- **Results-only runs** skip folder scaffolding.
+- **Dryrun folders** are always created (`pre_event/dryrun` + `post_event/dryrun`).
+- **Seed runs** folder is created only when a seeded post-event run is active.
+- **Tournament results** always live under `post_event/` and use enforced filenames.
+- **Pre-event analysis + regression** stay under `pre_event/analysis/` and
+  `pre_event/course_history_regression/`.
+- **Validation dryrun outputs** route to `post_event/dryrun` (not `validation_outputs`).
+- **Top-20 blend outputs** move to `validation_outputs/top20_blend/`.
+- **Pre-event summary log** now uses standardized `outputPaths` naming.
+- **Seed summary output** now uses standardized `outputPaths` naming.
 
-### Contract encoded in draft utility
+### Files touched (high level)
 
-- Keep both post artifact families:
-  - `*_post_event_results.json/.txt`
-  - `*_results.json/.csv`
-- Validation remains season-scoped:
-  - `data/<season>/validation_outputs/`
-  - `metric_analysis/`, `template_correlation_summaries/`
-- Ramp path support is tournament-scoped via analysis root resolver.
-- Course history regression defaults to long-lived shared root:
-  - `data/course_history_regression/`
-- Legacy `output/` support is read-candidate only.
-
-### Explicitly NOT done in this draft
-
-- No imports of `outputPaths.js` were added to:
-  - `core/optimizer.js`
-  - `core/validationRunner.js`
-  - any `scripts/*` or existing utilities
-- No runtime output behavior changed.
-- No migration/deprecation warnings wired yet.
-
-### Next implementation phase (after draft approval)
-
-1. Wire `core/optimizer.js` to shared resolvers.
-2. Wire `core/validationRunner.js` root/subfolder resolution.
-3. Migrate script-level writers/readers (`ramp`, `course history`, `seed summary`, `delta scores`).
-4. Add compatibility warnings when legacy fallback reads are used.
+- `utilities/outputArtifacts.js` — added pre-event log artifact type
+- `utilities/outputPaths.js` — added top20 blend subdir + regression root selection + pre-event log naming
+- `core/optimizer.js` — wired path resolver + enforced filenames/scaffolding rules + pre-event log output path
+- `core/validationRunner.js` — wired validation subdirs + top20 blend routing + legacy-aware blend reads
+- `scripts/summarizeSeedResults.js` — seed summary output now uses outputPaths helpers
 
 ---
 

@@ -16,6 +16,8 @@ const OUTPUT_ARTIFACTS = Object.freeze({
   SEED_SUMMARY_TXT: 'SEED_SUMMARY_TXT',
   SEED_LOG_TXT: 'SEED_LOG_TXT',
 
+  PRE_EVENT_LOG_TXT: 'PRE_EVENT_LOG_TXT',
+
   TOP20_TEMPLATE_BLEND_JSON: 'TOP20_TEMPLATE_BLEND_JSON',
 
   RAMP_JSON: 'RAMP_JSON',
@@ -46,7 +48,8 @@ const OUTPUT_ARTIFACTS = Object.freeze({
 
 const VALIDATION_SUBDIRS = Object.freeze({
   METRIC_ANALYSIS: 'metric_analysis',
-  TEMPLATE_CORRELATION_SUMMARIES: 'template_correlation_summaries'
+  TEMPLATE_CORRELATION_SUMMARIES: 'template_correlation_summaries',
+  TOP20_BLEND: 'top20_blend'
 });
 
 module.exports = {

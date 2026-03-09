@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-04T08:28:46.666Z",
+  "generatedAt": "2026-03-09T21:07:56.821Z",
   "entries": [
     {
       "tournament": "american-express",
@@ -12,7 +12,7 @@
         "TECHNICAL": 0.02432655144471085,
         "BALANCED": 0.01633554053830869
       },
-      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/american-express_top20_template_blend.json"
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/american-express_top20_template_blend.json"
     },
     {
       "tournament": "pebble-beach",
@@ -25,7 +25,7 @@
         "TECHNICAL": 0.021407073990099865,
         "BALANCED": 0.015662445679202597
       },
-      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/pebble-beach_top20_template_blend.json"
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/pebble-beach_top20_template_blend.json"
     },
     {
       "tournament": "cognizant-classic",
@@ -38,7 +38,7 @@
         "TECHNICAL": 0.026674868659975867,
         "BALANCED": 0.018705160919042136
       },
-      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/cognizant-classic_top20_template_blend.json"
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/cognizant-classic_top20_template_blend.json"
     },
     {
       "tournament": "farmers",
@@ -51,7 +51,7 @@
         "TECHNICAL": 0.027443707288974942,
         "BALANCED": 0.020160732348213268
       },
-      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/farmers_top20_template_blend.json"
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/farmers_top20_template_blend.json"
     },
     {
       "tournament": "genesis-invitational",
@@ -64,7 +64,7 @@
         "TECHNICAL": 0.024031008466633096,
         "BALANCED": 0.017253367641026297
       },
-      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/genesis-invitational_top20_template_blend.json"
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/genesis-invitational_top20_template_blend.json"
     },
     {
       "tournament": "sony-open",
@@ -77,7 +77,7 @@
         "TECHNICAL": 0.02717713853795677,
         "BALANCED": 0.018641001230173898
       },
-      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/sony-open_top20_template_blend.json"
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/sony-open_top20_template_blend.json"
     },
     {
       "tournament": "wm-phoenix-open",
@@ -90,7 +90,16 @@
         "TECHNICAL": 0.02638413477536437,
         "BALANCED": 0.019067155692461504
       },
-      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/wm-phoenix-open_top20_template_blend.json"
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/wm-phoenix-open_top20_template_blend.json"
+    },
+    {
+      "tournament": "arnold-palmer-invitational",
+      "displayName": "Arnold Palmer Invitational (2026)",
+      "eventId": "9",
+      "courseType": "TECHNICAL",
+      "source": "course_context",
+      "alignmentScores": null,
+      "blendSource": null
     }
   ]
 }

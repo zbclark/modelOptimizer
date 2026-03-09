@@ -1917,8 +1917,11 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       weightedScore *= teeTimeMultiplier;
     }
 
-    // Refined score: apply confidence multiplier only
-    const refinedWeightedScore = weightedScore * confidenceFactor;
+    let rampReadiness = null;
+    let rampDampening = 1.0;
+
+    // Refined score: apply confidence + ramp dampening
+    let refinedWeightedScore = weightedScore * confidenceFactor;
     
     // Defaults retained for debug fields
     const isLowConfidencePlayer = false;
@@ -1933,6 +1936,30 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
         const yearB = b[0].split('-').pop();
         return parseInt(yearB) - parseInt(yearA);
       });
+
+    if (rampWeight > 0 && rampById) {
+      const rampEntry = rampById[String(dgId)] || null;
+      rampReadiness = computeRampReadiness(rampEntry);
+      if (typeof rampReadiness === 'number') {
+        const eventsThisSeason = sortedEvents.filter(([eventKey, event]) => {
+          const eventId = event?.eventId ? String(event.eventId) : null;
+          if (CURRENT_EVENT_ID && eventId === CURRENT_EVENT_ID) return false;
+          const eventYear = getEventYear(eventKey, event);
+          return eventYear !== null && eventYear === currentSeason;
+        }).length;
+        const playerSeasonIndex = eventsThisSeason + 1;
+        const returnToFormIndex = Number(rampEntry?.avgReturnToFormIndex);
+        if (Number.isFinite(returnToFormIndex) && playerSeasonIndex >= returnToFormIndex) {
+          rampReadiness = 1;
+          rampDampening = 1.0;
+        } else {
+          const rawDampening = 1 - (rampWeight * (1 - rampReadiness));
+          rampDampening = Math.max(0, Math.min(1, rawDampening));
+        }
+      }
+    }
+
+    refinedWeightedScore *= rampDampening;
     
     if (isNaN(refinedWeightedScore)) {
       console.error(`Got NaN for refinedWeightedScore for ${data.name}, setting to 0`);
@@ -1969,15 +1996,6 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
 
     if (PAST_PERF_ENABLED && courseHistoryWeight !== null) {
       effectivePastPerfWeight = Math.min(effectivePastPerfWeight, courseHistoryWeight);
-    }
-
-    if (PAST_PERF_ENABLED && rampWeight > 0 && rampById) {
-      const rampEntry = rampById[String(dgId)] || null;
-      const rampReadiness = computeRampReadiness(rampEntry);
-      if (typeof rampReadiness === 'number') {
-        const adjusted = effectivePastPerfWeight * (1 - (rampWeight * rampReadiness));
-        effectivePastPerfWeight = Math.max(0, adjusted);
-      }
     }
 
     let pastPerformanceMultiplier = 1.0;
@@ -2125,6 +2143,8 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       baselineScore: baselineScore,
       hasRecentTop10: hasRecentTop10,
       confidenceFactor: confidenceFactor,
+      rampReadiness: rampReadiness,
+      rampDampening: rampDampening,
       groupScoresBeforeDampening: groupScoresBeforeDampening,
       groupScoresAfterDampening: groupScoresAfterDampening,
       deltaBonus: deltaBonus
@@ -2174,7 +2194,8 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       weightedScore += deltaBonus;
 
       const confidenceFactor = typeof player.confidenceFactor === 'number' ? player.confidenceFactor : 1.0;
-      const refinedWeightedScore = weightedScore * confidenceFactor;
+      const rampDampening = typeof player.rampDampening === 'number' ? player.rampDampening : 1.0;
+      const refinedWeightedScore = weightedScore * confidenceFactor * rampDampening;
       const pastPerformanceMultiplier = typeof player.pastPerformanceMultiplier === 'number'
         ? player.pastPerformanceMultiplier
         : 1.0;
