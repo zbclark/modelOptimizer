@@ -506,7 +506,7 @@
     "11": {
       "sourcePath": null,
       "eventId": "11",
-      "templateKey": "BALANCED",
+      "templateKey": "TPC_SAWGRASS",
       "courseNum": "11",
       "courseNums": [
         "11"
@@ -549,12 +549,20 @@
       "similarCoursesWeight": 0.7,
       "puttingCoursesWeight": 0.8,
       "shotDistribution": {
-        "under100": 0.102,
-        "from100to150": 0.323,
-        "from150to200": 0.3,
-        "over200": 0.275
+        "under100": 0.103,
+        "from100to150": 0.306,
+        "from150to200": 0.306,
+        "over200": 0.285
       },
-      "pastPerformanceWeight": 0.3
+      "pastPerformanceWeight": 0.3,
+      "locationLat": null,
+      "locationLon": null,
+      "locationQuery": "Ponte Vedra Beach FL",
+      "locationCity": "Ponte Vedra Beach",
+      "locationState": "Florida",
+      "locationCountry": "United States",
+      "timezone": "America/New_York"
+
     },
     "12": {
       "sourcePath": null,
@@ -1190,7 +1198,7 @@
     "11": {
       "sourcePath": null,
       "eventId": "11",
-      "templateKey": "BALANCED",
+      "templateKey": "TPC_SAWGRASS",
       "courseNum": "11",
       "courseNums": [
         "11"
@@ -1233,12 +1241,19 @@
       "similarCoursesWeight": 0.7,
       "puttingCoursesWeight": 0.8,
       "shotDistribution": {
-        "under100": 0.102,
-        "from100to150": 0.323,
-        "from150to200": 0.3,
-        "over200": 0.275
+        "under100": 0.103,
+        "from100to150": 0.306,
+        "from150to200": 0.306,
+        "over200": 0.285
       },
-      "pastPerformanceWeight": 0.3
+      "pastPerformanceWeight": 0.3,
+      "locationLat": null,
+      "locationLon": null,
+      "locationQuery": "Ponte Vedra Beach FL",
+      "locationCity": "Ponte Vedra Beach",
+      "locationState": "Florida",
+      "locationCountry": "United States",
+      "timezone": "America/New_York"
     },
     "12": {
       "sourcePath": null,

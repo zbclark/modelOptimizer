@@ -135,6 +135,8 @@ function buildArtifactFilename({ artifactType, outputBaseName, tournamentSlug, t
 
     case OUTPUT_ARTIFACTS.PRE_EVENT_LOG_TXT:
       return `${outputBaseName}_pre_event_log.txt`;
+    case OUTPUT_ARTIFACTS.POST_EVENT_LOG_TXT:
+      return `${outputBaseName}_post_event_log.txt`;
 
     case OUTPUT_ARTIFACTS.TOP20_TEMPLATE_BLEND_JSON:
       return `${tBase}_top20_template_blend.json`;
@@ -216,6 +218,7 @@ function resolveArtifactDir({
     case OUTPUT_ARTIFACTS.SEED_SUMMARY_TXT:
     case OUTPUT_ARTIFACTS.SEED_LOG_TXT:
     case OUTPUT_ARTIFACTS.PRE_EVENT_LOG_TXT:
+    case OUTPUT_ARTIFACTS.POST_EVENT_LOG_TXT:
       return seedRunRoot || modeRoot;
 
     case OUTPUT_ARTIFACTS.TOP20_TEMPLATE_BLEND_JSON:

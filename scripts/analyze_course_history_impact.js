@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { loadCsv } = require('../utilities/csvLoader');
+const { formatTimestamp } = require('../utilities/timeUtils');
 const { getDataGolfHistoricalRounds } = require('../utilities/dataGolfClient');
 const buildRecentYears = require('../utilities/buildRecentYears');
 const collectRecords = require('../utilities/collectRecords');
@@ -810,7 +811,7 @@ const run = async () => {
   }, {});
 
   const regressionMeta = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: formatTimestamp(new Date()),
     eventId: eventId || null,
     season: PRE_TOURNAMENT_SEASON || null,
     mode: 'pre_event',

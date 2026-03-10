@@ -4,6 +4,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { formatTimestampForFilename } = require('./timeUtils');
 
 let ACTIVE_HANDLE = null;
 
@@ -39,7 +40,7 @@ function setupLogging(outputDir, eventName, context, options = {}) {
       if (!fs.existsSync(archiveDir)) {
         fs.mkdirSync(archiveDir, { recursive: true });
       }
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const timestamp = formatTimestampForFilename(new Date());
       const archivePath = path.join(archiveDir, `${path.basename(logFile)}.${timestamp}.bak`);
       fs.renameSync(logFile, archivePath);
     } catch (error) {

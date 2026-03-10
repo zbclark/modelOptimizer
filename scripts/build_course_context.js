@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { getSharedConfig } = require('../utilities/configParser');
+const { formatTimestamp } = require('../utilities/timeUtils');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
@@ -130,7 +131,7 @@ configFiles.forEach(filePath => {
 });
 
 const payload = {
-  updatedAt: new Date().toISOString(),
+  updatedAt: formatTimestamp(new Date()),
   // Portability: store repo-relative directory for debugging only.
   sourceDir: toRepoRelativePath(DATA_DIR),
   byEventId,

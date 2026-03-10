@@ -18,6 +18,7 @@ const { parse } = require('csv-parse/sync');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const { setupLogging } = require('../utilities/logging');
+const { formatTimestamp, formatDateKey, formatTimestampForFilename } = require('../utilities/timeUtils');
 const { loadCsv } = require('../utilities/csvLoader');
 const { buildPlayerData } = require('../utilities/dataPrep');
 const { generatePlayerRankings, cleanMetricValue, calculateMetricTrends } = require('./modelCore');
@@ -27,6 +28,9 @@ const { WEIGHT_TEMPLATES } = require('../utilities/weightTemplates');
 const { getDeltaPlayerScoresForEvent } = require('../utilities/deltaPlayerScores');
 const { METRIC_DEFS, loadApproachCsv, computeApproachDeltas, extractApproachRowsFromJson } = require('../utilities/approachDelta');
 const { blendTemplateWeights } = require('../utilities/top20TemplateBlend');
+const { resolveKFoldTag } = require('../utilities/kfoldTag');
+const { writeCleanRunSummaryLog } = require('../utilities/runSummaryLog');
+const resultsCsvUtils = require('../utilities/tournamentResultsCsv');
 const {
   parseDateToUtcMs,
   loadSeasonManifestEntries,
@@ -34,7 +38,8 @@ const {
   resolveNextManifestEntry,
   resolvePreviousManifestEntry,
   resolveEventStartDateFromManifest,
-  ensureManifestEntry
+  ensureManifestEntry,
+  resolveApproachSnapshotPairForEvent
 } = require('../utilities/manifestUtils');
 const {
   getDataGolfRankings,
@@ -63,7 +68,7 @@ const {
 
 function extractApproachRowsFromSnapshotPayload(payload) {
   if (typeof extractApproachRowsFromJson === 'function') {
-    return extractApproachRowsFromJson(payload);
+    return extractApproachRowsFromJson(payload) || [];
   }
   return [];
 }
@@ -117,7 +122,7 @@ const APPROACH_SNAPSHOT_RETENTION_COUNTS = {
 const COURSE_CONTEXT_PATH = path.resolve(ROOT_DIR, 'utilities', 'course_context.json');
 const DATAGOLF_CACHE_DIR = path.resolve(ROOT_DIR, 'data', 'cache');
 const TRACE_PLAYER = String(process.env.TRACE_PLAYER || '').trim();
-let LOGGING_ENABLED = false;
+let LOGGING_ENABLED = true;
 let LOGGING_INITIALIZED = false;
 let LOGGING_HANDLE = null;
 const OPT_SEED_RAW = String(process.env.OPT_SEED || '').trim();
@@ -181,9 +186,75 @@ const WEATHER_FORECAST_DAYS = (() => {
   const raw = parseInt(String(process.env.WEATHER_FORECAST_DAYS || '').trim(), 10);
   return Number.isNaN(raw) ? 4 : Math.max(2, Math.min(7, raw));
 })();
+const WEATHER_PENALTY_CACHE_FILENAME = 'weather_wave_penalties.json';
+
+const getBaselineWavePenaltyAdjustments = () => {
+  const defaultBaseline = getEnvNumberValue('WEATHER_BASE_WEEKLONG_SPLIT', 0.10);
+  const lateEarlyAdv = getEnvNumberValue('WEATHER_BASE_LATE_EARLY_ADV', defaultBaseline);
+  const perRoundAdv = lateEarlyAdv / 2;
+
+  return {
+    R1_AM: 0,
+    R1_PM: perRoundAdv,
+    R2_AM: perRoundAdv,
+    R2_PM: 0
+  };
+};
+
+const getNetWeatherWaveAdjustments = ({ r1Am, r1Pm, r2Am, r2Pm }) => {
+  const adjustments = { R1_AM: 0, R1_PM: 0, R2_AM: 0, R2_PM: 0 };
+  const applyDiff = (amValue, pmValue, amKey, pmKey) => {
+    const diff = Math.abs(amValue - pmValue);
+    if (!Number.isFinite(diff) || diff === 0) return 0;
+    if (amValue < pmValue) {
+      adjustments[amKey] = diff;
+    } else if (pmValue < amValue) {
+      adjustments[pmKey] = diff;
+    }
+    return diff;
+  };
+
+  const diffR1 = applyDiff(r1Am, r1Pm, 'R1_AM', 'R1_PM');
+  const diffR2 = applyDiff(r2Am, r2Pm, 'R2_AM', 'R2_PM');
+
+  return {
+    adjustments,
+    diffR1,
+    diffR2,
+    totalDiff: diffR1 + diffR2
+  };
+};
 const VALIDATION_APPROACH_MODE = String(process.env.VALIDATION_APPROACH_MODE || 'current_only')
   .trim()
   .toLowerCase();
+const APPROACH_BLEND_WEIGHTS_RAW = String(process.env.APPROACH_BLEND_WEIGHTS || '').trim();
+const APPROACH_GROUP_CAP = (() => {
+  const raw = parseFloat(String(process.env.APPROACH_GROUP_CAP || '').trim());
+  if (Number.isNaN(raw)) return null;
+  return Math.max(0, Math.min(1, raw));
+})();
+const OPT_OBJECTIVE_CORR = (() => {
+  const raw = parseFloat(String(process.env.OPT_OBJECTIVE_CORR || '').trim());
+  return Number.isNaN(raw) ? null : raw;
+})();
+const OPT_OBJECTIVE_TOP20 = (() => {
+  const raw = parseFloat(String(process.env.OPT_OBJECTIVE_TOP20 || '').trim());
+  return Number.isNaN(raw) ? null : raw;
+})();
+const OPT_OBJECTIVE_ALIGN = (() => {
+  const raw = parseFloat(String(process.env.OPT_OBJECTIVE_ALIGN || '').trim());
+  return Number.isNaN(raw) ? null : raw;
+})();
+const OPT_LOEO_PENALTY = (() => {
+  const raw = parseFloat(String(process.env.OPT_LOEO_PENALTY || '').trim());
+  if (Number.isNaN(raw)) return 0;
+  return Math.max(0, Math.min(1, raw));
+})();
+const OPT_LOEO_TOP_N = (() => {
+  const raw = parseInt(String(process.env.OPT_LOEO_TOP_N || '').trim(), 10);
+  if (Number.isNaN(raw)) return 0;
+  return Math.max(0, raw);
+})();
 const PAST_PERF_RAMP_WEIGHT = (() => {
   const raw = parseFloat(String(process.env.PAST_PERF_RAMP_WEIGHT || '').trim());
   if (Number.isNaN(raw)) return 0.4;
@@ -485,9 +556,54 @@ function normalizeWeights(weights) {
   return normalized;
 }
 
+function applyApproachGroupCap(weights, cap) {
+  if (!cap || cap <= 0 || cap >= 1) return weights;
+  const entries = Object.entries(weights || {});
+  if (entries.length === 0) return weights;
+  const approachKeys = entries
+    .filter(([key]) => String(key).toLowerCase().startsWith('approach'))
+    .map(([key]) => key);
+  if (!approachKeys.length) return weights;
+  const approachTotal = approachKeys.reduce((sum, key) => sum + (weights[key] || 0), 0);
+  if (approachTotal <= cap) return weights;
+
+  const nonApproachKeys = entries
+    .filter(([key]) => !approachKeys.includes(key))
+    .map(([key]) => key);
+  const nonApproachTotal = nonApproachKeys.reduce((sum, key) => sum + (weights[key] || 0), 0);
+  const adjusted = { ...weights };
+  const approachScale = approachTotal > 0 ? cap / approachTotal : 0;
+  approachKeys.forEach(key => {
+    adjusted[key] = (weights[key] || 0) * approachScale;
+  });
+  if (nonApproachTotal > 0) {
+    const lift = (approachTotal - cap) / nonApproachTotal;
+    nonApproachKeys.forEach(key => {
+      adjusted[key] = (weights[key] || 0) * (1 + lift);
+    });
+  }
+  return normalizeWeights(adjusted);
+}
+
+function resolveObjectiveWeights(defaults, overrides = {}) {
+  const weights = { ...defaults };
+  Object.entries(overrides).forEach(([key, value]) => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      weights[key] = value;
+    }
+  });
+  const total = Object.values(weights).reduce((sum, value) => sum + value, 0);
+  if (!Number.isFinite(total) || total <= 0) return defaults;
+  const normalized = {};
+  Object.entries(weights).forEach(([key, value]) => {
+    normalized[key] = value / total;
+  });
+  return normalized;
+}
+
 function resolveOutputBaseName({ tournamentSlug, tournamentName, eventId }) {
   const raw = tournamentSlug
-    || normalizeTournamentSlug(tournamentName || '')
+    || normalizeTournamentSlug(tournamentName || '') || ''
     || (eventId ? `event_${eventId}` : 'event');
   const normalized = String(raw || '')
     .toLowerCase()
@@ -580,7 +696,7 @@ function logSnapshotFreshness({ label, snapshot, ttlHours }) {
 function resolveFileTimestamp(filePath) {
   if (!filePath || !fs.existsSync(filePath)) return null;
   try {
-    return new Date(fs.statSync(filePath).mtimeMs || Date.now()).toISOString();
+    return formatTimestamp(new Date(fs.statSync(filePath).mtimeMs || Date.now()));
   } catch (error) {
     return null;
   }
@@ -592,7 +708,11 @@ function resolveSnapshotUpdatedAt(snapshot) {
     || snapshot?.payload?.meta?.generatedAt
     || snapshot?.payload?.generatedAt
     || null;
-  if (lastUpdatedRaw) return String(lastUpdatedRaw);
+  if (lastUpdatedRaw) {
+    const parsed = Date.parse(String(lastUpdatedRaw));
+    if (!Number.isNaN(parsed)) return formatTimestamp(new Date(parsed));
+    return String(lastUpdatedRaw);
+  }
   return snapshot?.path ? resolveFileTimestamp(snapshot.path) : null;
 }
 
@@ -706,7 +826,7 @@ function buildEventCourseRoundSummary(rows, eventIdSet) {
 
 function evaluateFieldIntegrity({ fieldData, fieldIdSet, approachRows, minPlayers, minApproachOverlapPct, strict }) {
   const summary = {
-    fieldPlayers: fieldData.length,
+    fieldPlayers: Array.isArray(fieldData) ? fieldData.length : 0,
     approachRows: Array.isArray(approachRows) ? approachRows.length : 0,
     approachOverlap: 0,
     minPlayers,
@@ -808,6 +928,43 @@ const coerceFiniteNumber = value => {
   return Number.isFinite(num) ? num : NaN;
 };
 
+const resolveTimeZone = courseContextEntry => {
+  if (!courseContextEntry || typeof courseContextEntry !== 'object') return null;
+  const raw = String(courseContextEntry.timezone || courseContextEntry.timeZone || '').trim();
+  return raw ? raw : null;
+};
+
+const getLocalDatePartsFromTimeZone = (timestampSec, timeZone) => {
+  if (!timeZone) return null;
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    const parts = formatter.formatToParts(new Date(timestampSec * 1000));
+    const map = {};
+    parts.forEach(part => {
+      if (part.type !== 'literal') {
+        map[part.type] = part.value;
+      }
+    });
+    if (!map.year || !map.month || !map.day || !map.hour) return null;
+    return {
+      dateKey: `${map.year}-${map.month}-${map.day}`,
+      hour: Number(map.hour)
+    };
+  } catch (error) {
+    console.warn(`⚠️  Failed to resolve timezone "${timeZone}": ${error.message}`);
+    return null;
+  }
+};
+
 const shouldUpdateWeatherContext = () => {
   const raw = String(process.env.WEATHER_UPDATE_CONTEXT || '').trim().toLowerCase();
   return ['1', 'true', 'yes', 'on'].includes(raw);
@@ -839,7 +996,7 @@ const updateCourseContextLocation = ({ eventId, locationQuery, lat, lon, city, s
   setIfPresent('locationCountry', country);
 
   if (updated) {
-    courseContext.updatedAt = new Date().toISOString();
+    courseContext.updatedAt = formatTimestamp(new Date());
     writeJsonFile(COURSE_CONTEXT_PATH, courseContext);
   }
 
@@ -906,6 +1063,31 @@ const pickArraySeries = (data, keys = []) => {
     if (Array.isArray(data[key])) return data[key];
   }
   return null;
+};
+
+const loadWeatherPenaltyCache = filePath => {
+  if (!filePath || !fs.existsSync(filePath)) return null;
+  try {
+    const payload = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    if (!payload || typeof payload !== 'object') return null;
+    if (!payload.penalties || typeof payload.penalties !== 'object') return null;
+    return payload;
+  } catch (error) {
+    console.warn(`⚠️  Failed to read weather penalty cache: ${error.message}`);
+    return null;
+  }
+};
+
+const writeWeatherPenaltyCache = (filePath, payload) => {
+  if (!filePath || !payload || typeof payload !== 'object') return false;
+  try {
+    ensureDirectory(path.dirname(filePath));
+    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
+    return true;
+  } catch (error) {
+    console.warn(`⚠️  Unable to write weather penalty cache: ${error.message}`);
+    return false;
+  }
 };
 
 const computeWeatherWavePenalties = async ({
@@ -1019,6 +1201,7 @@ const computeWeatherWavePenalties = async ({
   });
 
   const data1h = forecastSnapshot?.payload?.data_1h || forecastSnapshot?.payload?.data_1hr || null;
+  const dataDay = forecastSnapshot?.payload?.data_day || null;
   if (!data1h) {
     return { enabled: false, reason: 'missing-1h-data', source: forecastSnapshot?.source || null };
   }
@@ -1030,6 +1213,22 @@ const computeWeatherWavePenalties = async ({
     'precipitation_probability_max',
     'precipitation_probability_min',
     'precipitation_prob'
+  ]);
+  const precipAmountSeries = pickArraySeries(data1h, [
+    'precipitation',
+    'precipitation_sum',
+    'precipitation_amount'
+  ]);
+  const convectiveAmountSeries = pickArraySeries(data1h, [
+    'convective_precipitation',
+    'convective_precipitation_sum',
+    'convective_precipitation_amount'
+  ]);
+  const convectiveProbSeries = pickArraySeries(data1h, [
+    'convective_precipitation_probability',
+    'convective_precipitation_probability_mean',
+    'convective_precipitation_probability_max',
+    'convective_precipitation_probability_min'
   ]);
   const windSpeedSeries = pickArraySeries(data1h, [
     'windspeed',
@@ -1051,8 +1250,15 @@ const computeWeatherWavePenalties = async ({
     return { enabled: false, reason: 'missing-time-series' };
   }
 
+  const dayTimeSeries = dataDay ? pickArraySeries(dataDay, ['time', 'times', 'timestamp']) : null;
+  const dayPredictabilityClass = dataDay ? pickArraySeries(dataDay, [
+    'predictability_class',
+    'predictabilityClass'
+  ]) : null;
+
   const tzOffsetSec = Number(fieldUpdatesPayload?.tz_offset ?? 0);
   const tzOffsetMs = Number.isFinite(tzOffsetSec) ? tzOffsetSec * 1000 : 0;
+  const timeZone = resolveTimeZone(courseContextEntry);
 
   const amStart = getEnvNumberValue('WEATHER_WAVE_AM_START', 6);
   const amEnd = getEnvNumberValue('WEATHER_WAVE_AM_END', 12);
@@ -1072,29 +1278,162 @@ const computeWeatherWavePenalties = async ({
   const windowStats = windows.reduce((acc, window) => {
     acc[window.key] = {
       maxProb: null,
+      sumPrecip: 0,
+      maxPrecip: null,
+      sumConvective: 0,
+      maxConvectiveProb: null,
+      predictabilityClass: null,
       maxWind: null,
       maxGust: null,
       samples: 0
     };
     return acc;
   }, {});
+  const hourlyStats = new Map();
+
+  const resolveDateKeyForTimestamp = ts => {
+    let dateKey = null;
+    if (timeZone) {
+      const localParts = getLocalDatePartsFromTimeZone(ts, timeZone);
+      if (localParts) {
+        dateKey = localParts.dateKey;
+      }
+    }
+    if (!dateKey) {
+      const localDate = new Date((ts * 1000) + tzOffsetMs);
+      dateKey = localDate.toISOString().slice(0, 10);
+    }
+    return dateKey;
+  };
+
+  const predictabilityByDate = new Map();
+  if (Array.isArray(dayTimeSeries) && Array.isArray(dayPredictabilityClass)) {
+    dayTimeSeries.forEach((timestamp, idx) => {
+      const ts = Number(timestamp);
+      if (!Number.isFinite(ts)) return;
+      const classValue = Number(dayPredictabilityClass[idx]);
+      if (!Number.isFinite(classValue)) return;
+      const dateKey = resolveDateKeyForTimestamp(ts);
+      if (!dateKey) return;
+      predictabilityByDate.set(dateKey, classValue);
+    });
+  }
+
+  Object.values(windowStats).forEach(stats => {
+    stats.predictabilityClass = null;
+  });
 
   timeSeries.forEach((timestamp, idx) => {
     const ts = Number(timestamp);
     if (!Number.isFinite(ts)) return;
-    const localDate = new Date((ts * 1000) + tzOffsetMs);
-    const dateKey = localDate.toISOString().slice(0, 10);
-    const hour = localDate.getUTCHours();
+
+    let dateKey = null;
+    let hour = null;
+
+    if (timeZone) {
+      const localParts = getLocalDatePartsFromTimeZone(ts, timeZone);
+      if (localParts) {
+        dateKey = localParts.dateKey;
+        hour = localParts.hour;
+      }
+    }
+
+    if (!dateKey || hour === null) {
+      const localDate = new Date((ts * 1000) + tzOffsetMs);
+      dateKey = localDate.toISOString().slice(0, 10);
+      hour = localDate.getUTCHours();
+    }
+
+    const hourlyKey = `${dateKey}|${hour}`;
+    let hourly = hourlyStats.get(hourlyKey);
+    if (!hourly) {
+      hourly = {
+        maxProb: null,
+        sumPrecip: 0,
+        maxPrecip: null,
+        sumConvective: 0,
+        maxConvectiveProb: null,
+        predictabilityClass: null,
+        maxWind: null,
+        maxGust: null,
+        samples: 0
+      };
+      hourlyStats.set(hourlyKey, hourly);
+    }
+
+    if (hourly.predictabilityClass === null) {
+      const classValue = predictabilityByDate.get(dateKey);
+      if (Number.isFinite(classValue)) {
+        hourly.predictabilityClass = classValue;
+      }
+    }
+
+    const probHourly = precipProbSeries ? Number(precipProbSeries[idx]) : null;
+    const precipHourly = precipAmountSeries ? Number(precipAmountSeries[idx]) : null;
+    const convectiveHourly = convectiveAmountSeries ? Number(convectiveAmountSeries[idx]) : null;
+    const convectiveProbRawHourly = convectiveProbSeries ? Number(convectiveProbSeries[idx]) : null;
+    const convectiveProbHourly = Number.isFinite(convectiveProbRawHourly)
+      ? convectiveProbRawHourly
+      : (Number.isFinite(convectiveHourly) && convectiveHourly > 0 && Number.isFinite(probHourly) ? probHourly : null);
+    const windHourly = windSpeedSeries ? Number(windSpeedSeries[idx]) : null;
+    const gustHourly = windGustSeries ? Number(windGustSeries[idx]) : null;
+    if (Number.isFinite(probHourly)) {
+      hourly.maxProb = hourly.maxProb === null ? probHourly : Math.max(hourly.maxProb, probHourly);
+    }
+    if (Number.isFinite(precipHourly)) {
+      hourly.sumPrecip += precipHourly;
+      hourly.maxPrecip = hourly.maxPrecip === null ? precipHourly : Math.max(hourly.maxPrecip, precipHourly);
+    }
+    if (Number.isFinite(convectiveHourly)) {
+      hourly.sumConvective += convectiveHourly;
+    }
+    if (Number.isFinite(convectiveProbHourly)) {
+      hourly.maxConvectiveProb = hourly.maxConvectiveProb === null
+        ? convectiveProbHourly
+        : Math.max(hourly.maxConvectiveProb, convectiveProbHourly);
+    }
+    if (Number.isFinite(windHourly)) {
+      hourly.maxWind = hourly.maxWind === null ? windHourly : Math.max(hourly.maxWind, windHourly);
+    }
+    if (Number.isFinite(gustHourly)) {
+      hourly.maxGust = hourly.maxGust === null ? gustHourly : Math.max(hourly.maxGust, gustHourly);
+    }
+    hourly.samples += 1;
+
     windows.forEach(window => {
       if (window.dateKey !== dateKey) return;
       if (hour < window.start || hour >= window.end) return;
       const stats = windowStats[window.key];
       if (!stats) return;
+      if (stats.predictabilityClass === null) {
+        const classValue = predictabilityByDate.get(dateKey);
+        if (Number.isFinite(classValue)) {
+          stats.predictabilityClass = classValue;
+        }
+      }
       const prob = precipProbSeries ? Number(precipProbSeries[idx]) : null;
+      const precip = precipAmountSeries ? Number(precipAmountSeries[idx]) : null;
+      const convective = convectiveAmountSeries ? Number(convectiveAmountSeries[idx]) : null;
+      const convectiveProbRaw = convectiveProbSeries ? Number(convectiveProbSeries[idx]) : null;
+      const convectiveProb = Number.isFinite(convectiveProbRaw)
+        ? convectiveProbRaw
+        : (Number.isFinite(convective) && convective > 0 && Number.isFinite(prob) ? prob : null);
       const wind = windSpeedSeries ? Number(windSpeedSeries[idx]) : null;
       const gust = windGustSeries ? Number(windGustSeries[idx]) : null;
       if (Number.isFinite(prob)) {
         stats.maxProb = stats.maxProb === null ? prob : Math.max(stats.maxProb, prob);
+      }
+      if (Number.isFinite(precip)) {
+        stats.sumPrecip += precip;
+        stats.maxPrecip = stats.maxPrecip === null ? precip : Math.max(stats.maxPrecip, precip);
+      }
+      if (Number.isFinite(convective)) {
+        stats.sumConvective += convective;
+      }
+      if (Number.isFinite(convectiveProb)) {
+        stats.maxConvectiveProb = stats.maxConvectiveProb === null
+          ? convectiveProb
+          : Math.max(stats.maxConvectiveProb, convectiveProb);
       }
       if (Number.isFinite(wind)) {
         stats.maxWind = stats.maxWind === null ? wind : Math.max(stats.maxWind, wind);
@@ -1106,12 +1445,17 @@ const computeWeatherWavePenalties = async ({
     });
   });
 
-  const rainProbLow = getEnvNumberValue('WEATHER_RAIN_PROB_LOW', 30);
-  const rainProbMed = getEnvNumberValue('WEATHER_RAIN_PROB_MED', 50);
-  const rainProbHigh = getEnvNumberValue('WEATHER_RAIN_PROB_HIGH', 70);
-  const rainPenaltyLow = getEnvNumberValue('WEATHER_RAIN_PENALTY_LOW', 0.04);
-  const rainPenaltyMed = getEnvNumberValue('WEATHER_RAIN_PENALTY_MED', 0.07);
-  const rainPenaltyHigh = getEnvNumberValue('WEATHER_RAIN_PENALTY_HIGH', 0.10);
+  const rainProbMaxPenalty = getEnvNumberValue('WEATHER_RAIN_PROB_MAX_PENALTY', 0.10);
+  const rainProbGamma = getEnvNumberValue('WEATHER_RAIN_PROB_GAMMA', 1.7);
+
+  const rainAmtLow = getEnvNumberValue('WEATHER_RAIN_AMT_LOW', 0.5);
+  const rainAmtMed = getEnvNumberValue('WEATHER_RAIN_AMT_MED', 2.0);
+  const rainAmtHigh = getEnvNumberValue('WEATHER_RAIN_AMT_HIGH', 5.0);
+  const rainAmtPenaltyLow = getEnvNumberValue('WEATHER_RAIN_AMT_PENALTY_LOW', 0.02);
+  const rainAmtPenaltyMed = getEnvNumberValue('WEATHER_RAIN_AMT_PENALTY_MED', 0.04);
+  const rainAmtPenaltyHigh = getEnvNumberValue('WEATHER_RAIN_AMT_PENALTY_HIGH', 0.06);
+  const convectiveProbThreshold = getEnvNumberValue('WEATHER_CONVECTIVE_PROB_THRESHOLD', 40);
+  const convectivePenalty = getEnvNumberValue('WEATHER_CONVECTIVE_PENALTY', 0.08);
 
   const windSustainedThreshold = getEnvNumberValue('WEATHER_WIND_SUSTAINED_THRESHOLD', 15);
   const windGustThreshold = getEnvNumberValue('WEATHER_WIND_GUST_THRESHOLD', 20);
@@ -1123,10 +1467,36 @@ const computeWeatherWavePenalties = async ({
     const prob = Number.isFinite(stats.maxProb) ? stats.maxProb : null;
     let rainPenalty = 0;
     if (prob !== null) {
-      if (prob >= rainProbHigh) rainPenalty = rainPenaltyHigh;
-      else if (prob >= rainProbMed) rainPenalty = rainPenaltyMed;
-      else if (prob >= rainProbLow) rainPenalty = rainPenaltyLow;
+      const normalizedProb = Math.max(0, Math.min(1, prob / 100));
+      const gamma = Number.isFinite(rainProbGamma) && rainProbGamma > 0 ? rainProbGamma : 1;
+      rainPenalty = rainProbMaxPenalty * Math.pow(normalizedProb, gamma);
     }
+
+    const predictabilityClass = Number.isFinite(stats.predictabilityClass)
+      ? stats.predictabilityClass
+      : null;
+    const predictabilityScale = predictabilityClass !== null
+      ? Math.max(0, Math.min(1, (predictabilityClass * 0.2)))
+      : 1;
+    if (rainPenalty > 0) {
+      rainPenalty *= predictabilityScale;
+    }
+
+    const precipTotal = Number.isFinite(stats.sumPrecip) ? stats.sumPrecip : null;
+    const convectiveTotal = Number.isFinite(stats.sumConvective) ? stats.sumConvective : 0;
+    const nonConvectiveTotal = precipTotal !== null
+      ? Math.max(0, precipTotal - convectiveTotal)
+      : null;
+    let rainAmountPenalty = 0;
+    if (nonConvectiveTotal !== null) {
+      if (nonConvectiveTotal >= rainAmtHigh) rainAmountPenalty = rainAmtPenaltyHigh;
+      else if (nonConvectiveTotal >= rainAmtMed) rainAmountPenalty = rainAmtPenaltyMed;
+      else if (nonConvectiveTotal >= rainAmtLow) rainAmountPenalty = rainAmtPenaltyLow;
+    }
+
+    const convectiveProb = Number.isFinite(stats.maxConvectiveProb) ? stats.maxConvectiveProb : null;
+    const convectiveHit = convectiveProb !== null && convectiveProb >= convectiveProbThreshold;
+    const convectivePenaltyApplied = convectiveHit ? convectivePenalty : 0;
 
     const sustainedHit = Number.isFinite(stats.maxWind) && stats.maxWind >= windSustainedThreshold;
     const gustHit = Number.isFinite(stats.maxGust) && stats.maxGust >= windGustThreshold;
@@ -1134,10 +1504,20 @@ const computeWeatherWavePenalties = async ({
     if (sustainedHit && gustHit) windPenalty = windPenaltyBoth;
     else if (sustainedHit || gustHit) windPenalty = windPenaltyOne;
 
-    const total = Math.min(penaltyCap, rainPenalty + windPenalty);
+    const total = Math.min(
+      penaltyCap,
+      rainPenalty + rainAmountPenalty + convectivePenaltyApplied + windPenalty
+    );
     return {
       total,
       rainPenalty,
+      rainAmountPenalty,
+      convectivePenalty: convectivePenaltyApplied,
+      convectiveProb,
+      convectiveHit,
+      nonConvectiveTotal,
+      predictabilityClass,
+      predictabilityScale,
       windPenalty,
       sustainedHit,
       gustHit
@@ -1149,6 +1529,15 @@ const computeWeatherWavePenalties = async ({
     penalties[key] = { ...stats, ...computePenaltyForStats(stats) };
   });
 
+  const hourlyPenalties = {};
+  hourlyStats.forEach((stats, key) => {
+    const [dateKey, hourValue] = key.split('|');
+    const hour = Number(hourValue);
+    const penalty = computePenaltyForStats(stats).total;
+    if (!hourlyPenalties[dateKey]) hourlyPenalties[dateKey] = {};
+    hourlyPenalties[dateKey][hour] = Number.isFinite(penalty) ? -penalty : 0;
+  });
+
   return {
     enabled: true,
     dateStart,
@@ -1156,6 +1545,7 @@ const computeWeatherWavePenalties = async ({
     lat,
     lon,
     penalties,
+    hourlyPenalties,
     source: forecastSnapshot?.source || null
   };
 };
@@ -2599,19 +2989,32 @@ function generateSheetLikePlayerNotes(player, groups, groupStats) {
     return normalized.toUpperCase();
   };
 
+  const formatWaveWord = wave => {
+    if (!wave) return null;
+    const normalized = String(wave).trim().toLowerCase();
+    if (normalized === 'early') return 'Early';
+    if (normalized === 'late') return 'Late';
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  };
+
   const waveParts = [];
   const round1Label = formatWaveLabel(player.waveRound1);
   const round2Label = formatWaveLabel(player.waveRound2);
   if (round1Label) waveParts.push(`R1 ${round1Label}`);
   if (round2Label) waveParts.push(`R2 ${round2Label}`);
 
+  const round1Word = formatWaveWord(player.waveRound1);
+  const round2Word = formatWaveWord(player.waveRound2);
+  const wavePair = (round1Word && round2Word) ? `${round1Word}/${round2Word}` : null;
   const penaltyValue = Number.isFinite(player.weatherWavePenalty)
     ? player.weatherWavePenalty
     : null;
-
-  if (penaltyValue !== null && penaltyValue > 0) {
-    const waveText = waveParts.length > 0 ? `: ${waveParts.join(', ')}` : '';
-    notes.push(`🌦️ Weather wave${waveText} (penalty=${penaltyValue.toFixed(2)})`);
+  if (wavePair || waveParts.length > 0) {
+    const waveLabel = wavePair || waveParts.join(', ');
+    const valueSuffix = penaltyValue !== null && penaltyValue !== 0
+      ? ` (${penaltyValue > 0 ? 'penalty' : 'boost'}=${Math.abs(penaltyValue).toFixed(2)})`
+      : '';
+    notes.push(`☁️ ${waveLabel}${valueSuffix}`);
   }
 
   return notes.join(' | ');
@@ -5194,7 +5597,7 @@ function buildRunFingerprint({
 
   return {
     algorithm: 'sha256',
-    createdAt: new Date().toISOString(),
+    createdAt: formatTimestamp(new Date()),
     eventId,
     season,
     tournament: tournament || null,
@@ -5432,7 +5835,7 @@ function upsertCourseContextPastPerformanceWeights(courseContext, regressionMap)
   }
 
   if (updated) {
-    courseContext.updatedAt = new Date().toISOString();
+    courseContext.updatedAt = formatTimestamp(new Date());
   }
 
   return { updated, updates, context: courseContext };
@@ -5906,7 +6309,7 @@ async function getOrCreateApproachSnapshot({ period, snapshotPath, apiKey, cache
   });
 
   if (fetched?.payload) {
-    const archiveStamp = new Date().toISOString().slice(0, 10);
+    const archiveStamp = formatDateKey(new Date());
     if (normalizedPeriod === 'ytd') {
       if (snapshotPath) {
         writeJsonFile(snapshotPath, fetched.payload);
@@ -5951,7 +6354,7 @@ async function refreshYtdApproachSnapshot({ apiKey, cacheDir, ttlMs }) {
 
   if (fetched?.payload) {
     writeJsonFile(APPROACH_SNAPSHOT_YTD_LATEST_PATH, fetched.payload);
-    const archiveStamp = new Date().toISOString().slice(0, 10);
+    const archiveStamp = formatDateKey(new Date());
     const archivePath = path.resolve(APPROACH_SNAPSHOT_DIR, `approach_ytd_${archiveStamp}.json`);
     if (!fs.existsSync(archivePath)) {
       writeJsonFile(archivePath, fetched.payload);
@@ -5994,7 +6397,7 @@ function deleteArchiveBackups(outputDir) {
 function buildBackupPath(filePath) {
   const archiveDir = path.resolve(OUTPUT_DIR, 'archive');
   ensureDirectory(archiveDir);
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const timestamp = formatTimestampForFilename(new Date());
   const baseName = path.basename(filePath);
   return path.resolve(archiveDir, `${baseName}.${timestamp}.bak`);
 }
@@ -6140,6 +6543,10 @@ function formatRankingPlayers(players, groups = null, groupStats = null) {
       confidenceFactor: typeof player.confidenceFactor === 'number' ? player.confidenceFactor : null,
       teeTimeMultiplier: typeof player.teeTimeMultiplier === 'number' ? player.teeTimeMultiplier : null,
       teeTimeMinutes: typeof player.teeTimeMinutes === 'number' ? player.teeTimeMinutes : null,
+      waveRound1: player.waveRound1 ?? null,
+      waveRound2: player.waveRound2 ?? null,
+      weatherWavePenaltyR1: typeof player.weatherWavePenaltyR1 === 'number' ? player.weatherWavePenaltyR1 : null,
+      weatherWavePenaltyR2: typeof player.weatherWavePenaltyR2 === 'number' ? player.weatherWavePenaltyR2 : null,
       notes
     };
   });
@@ -6184,7 +6591,7 @@ function buildSignalContributionReport(players, groups, options = {}) {
   });
 
   return {
-    generatedAt: new Date().toISOString(),
+    generatedAt: formatTimestamp(new Date()),
     playerCount: players.length,
     reportCount: reportPlayers.length,
     players: reportPlayers
@@ -6994,15 +7401,6 @@ function writeDeltaPlayerScoresFiles(targets, deltaScoresByEvent, options = {}) 
 }
 
 async function runAdaptiveOptimizer() {
-  // PHASE 2 (planned, no wiring yet):
-  // Centralize output root resolution with `utilities/outputPaths.js`.
-  // Target replacements in this function:
-  // - tournamentDir/preEventOutputDir/postEventOutputDir/validationOutputsDir
-  // - seedRunsDir/analysisOutputDir/regressionOutputDir/dryRunOutputDir
-  // Planned resolver mapping:
-  // - resolveTournamentRoot, resolveModeRoot, resolveSeedRunRoot
-  // - resolveValidationRoot, resolveAnalysisRoot, resolveRegressionRoot, resolveDryRunRoot
-  // Keep current behavior + fallback semantics during migration (legacy reads remain enabled).
   const requiredFiles = [
     { name: 'Configuration Sheet', path: null },
     { name: 'Tournament Field', path: null },
@@ -7012,7 +7410,102 @@ async function runAdaptiveOptimizer() {
 
   const CURRENT_EVENT_ID = OVERRIDE_EVENT_ID;
   const CURRENT_SEASON = OVERRIDE_SEASON ?? 2026;
-  const tournamentNameFallback = TOURNAMENT_NAME || 'Sony Open';
+  const tournamentNameFallback = TOURNAMENT_NAME;
+  let resultsJsonPath = null;
+  let resultsTextPath = null;
+  let preEventRankingPath = null;
+  let preEventRankingCsvPath = null;
+  let signalReportPath = null;
+  let dryRunTemplatePath = null;
+  let dryRunDeltaScoresPath = null;
+  let validationRunSummary = null;
+  let optimizationObjectiveWeights = null;
+  let summaryOutputBaseName = null;
+  let summaryTournamentSlug = null;
+  let seedRunsParentDir = null;
+  const emitCleanSummaryLog = (extraOptions = {}) => writeCleanRunSummaryLog({
+    summaryOutputBaseName,
+    summaryTournamentSlug,
+    isPostRun: IS_POST_TOURNAMENT_RUN,
+    outputDir: seedRunsParentDir || OUTPUT_DIR,
+    tournamentName: TOURNAMENT_NAME,
+    tournamentNameFallback,
+    canonicalTournamentName,
+    currentEventId: CURRENT_EVENT_ID,
+    currentSeason: CURRENT_SEASON,
+    runContext,
+    courseContextEntryFinal,
+    sharedConfig,
+    courseTemplateKey,
+    shouldRunPreEventArtifacts: SHOULD_RUN_PRE_EVENT_ARTIFACTS,
+    regressionSnapshot,
+    rampSummary,
+    rampPlayers,
+    rampMaxEvents,
+    validationData,
+    validationOutputsDir,
+    validationTemplateName,
+    applyValidationOutputs,
+    rankingsSnapshot,
+    approachSkillSnapshot,
+    playerDecompositionsSnapshot,
+    skillRatingsValueSnapshot,
+    skillRatingsRankSnapshot,
+    datagolfApproachPeriod: DATAGOLF_APPROACH_PERIOD,
+    approachDataCurrentSource,
+    approachDataCurrentCount: Array.isArray(approachDataCurrent) ? approachDataCurrent.length : null,
+    approachSnapshotYtd,
+    approachSnapshotL12,
+    approachSnapshotL24,
+    approachBlendWeights,
+    approachBlendWeightsRaw: APPROACH_BLEND_WEIGHTS_RAW,
+    approachEventOnlyMeta,
+    approachYtdUpdatedThisRun,
+    fieldUpdatesSnapshot,
+    fieldUpdatesUpdatedThisRun,
+    fieldDataLength: fieldData?.length || 0,
+    weatherEnabled: WEATHER_ENABLED,
+    weatherWaveSummary,
+    lastFiveYears,
+    effectiveSeason,
+    tours,
+    datagolfHistoricalEventId: DATAGOLF_HISTORICAL_EVENT_ID,
+    datagolfCacheDir: DATAGOLF_CACHE_DIR,
+    step1cUsedRounds,
+    historyData,
+    allEventRounds,
+    roundsByYear,
+    hasCurrentResults: HAS_CURRENT_RESULTS,
+    trainingMetricNotes,
+    validationYears,
+    approachDeltaPriorMode,
+    approachDeltaPriorFiles,
+    approachDeltaPriorMeta,
+    approachDeltaRowsUsed: Array.isArray(approachDeltaRows) ? approachDeltaRows.length : null,
+    approachDeltaRowsTotal: Array.isArray(approachDeltaRowsAll) ? approachDeltaRowsAll.length : null,
+    approachDeltaPriorWeight: APPROACH_DELTA_PRIOR_WEIGHT,
+    approachDeltaPriorLabel: APPROACH_DELTA_PRIOR_LABEL,
+    optimizationObjectiveWeights,
+    optimizationApproachCap: APPROACH_GROUP_CAP,
+    optimizationLoeoPenalty: OPT_LOEO_PENALTY,
+    optimizationLoeoTopN: OPT_LOEO_TOP_N,
+    validationRunSummary,
+    resultsJsonPath,
+    resultsTextPath,
+    preEventRankingPath,
+    preEventRankingCsvPath,
+    signalReportPath,
+    dryRunTemplatePath,
+    dryRunDeltaScoresPath,
+    resolveFileTimestamp,
+    resolveCourseNumFromHistoryRow,
+    formatSnapshotUsageLine,
+    resolveSnapshotUpdatedAt,
+    buildHistoricalCachePaths,
+    courseContextPath: COURSE_CONTEXT_PATH,
+    templateFilePath: path.resolve(ROOT_DIR, 'utilities', 'weightTemplates.js'),
+    ...extraOptions
+  });
   const shouldUpsertManifest = !!TOURNAMENT_NAME;
   const manifestUpsert = shouldUpsertManifest
     ? ensureManifestEntry({
@@ -7298,7 +7791,11 @@ async function runAdaptiveOptimizer() {
       const seedSuffix = OPT_SEED_RAW
         ? `_seed-${String(OPT_SEED_RAW).toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_\-]/g, '')}`
         : '';
-      const logContext = `${runContext}${seedSuffix}${outputTagSuffix}`;
+      const kfoldTag = resolveKFoldTag(process.env.EVENT_KFOLD_K);
+      const kfoldTagSuffix = runContext === 'post_event'
+        ? `_${String(kfoldTag.tag || 'LOEO')}`
+        : '';
+      const logContext = `${runContext}${seedSuffix}${kfoldTagSuffix}${outputTagSuffix}`;
       LOGGING_HANDLE = setupLogging(
         loggingDir,
         canonicalTournamentSlug || TOURNAMENT_NAME || OVERRIDE_EVENT_ID || 'event',
@@ -7319,7 +7816,7 @@ async function runAdaptiveOptimizer() {
     }
   }
   const isSeedRunDir = outputDir && path.basename(outputDir) === 'seed_runs';
-  const seedRunsParentDir = isSeedRunDir ? path.dirname(outputDir) : null;
+  seedRunsParentDir = isSeedRunDir ? path.dirname(outputDir) : null;
   const parentAnalysisDir = seedRunsParentDir ? path.resolve(seedRunsParentDir, 'analysis') : null;
   const parentRegressionDir = seedRunsParentDir ? path.resolve(seedRunsParentDir, 'course_history_regression') : null;
   const parentHasRamp = parentAnalysisDir && fs.existsSync(path.resolve(parentAnalysisDir, 'early_season_ramp_sg_total.json'));
@@ -8236,40 +8733,117 @@ async function runAdaptiveOptimizer() {
   }
 
   let weatherWaveSummary = null;
+  const weatherPenaltyCachePath = preEventOutputDir
+    ? path.resolve(preEventOutputDir, WEATHER_PENALTY_CACHE_FILENAME)
+    : null;
+  const applyCachedWeatherPenalties = (payload, sourceLabel) => {
+    if (!payload || typeof payload !== 'object') return false;
+    if (!payload.penalties || typeof payload.penalties !== 'object') return false;
+    const penalties = payload.penalties || {};
+    const r1Am = penalties.R1_AM?.total ?? 0;
+    const r1Pm = penalties.R1_PM?.total ?? 0;
+    const r2Am = penalties.R2_AM?.total ?? 0;
+    const r2Pm = penalties.R2_PM?.total ?? 0;
+
+    const basePenalties = getBaselineWavePenaltyAdjustments();
+    const weatherAdjustments = getNetWeatherWaveAdjustments({ r1Am, r1Pm, r2Am, r2Pm });
+    const combinedPenalties = {
+      R1_AM: (basePenalties.R1_AM || 0) + (weatherAdjustments.adjustments.R1_AM || 0),
+      R1_PM: (basePenalties.R1_PM || 0) + (weatherAdjustments.adjustments.R1_PM || 0),
+      R2_AM: (basePenalties.R2_AM || 0) + (weatherAdjustments.adjustments.R2_AM || 0),
+      R2_PM: (basePenalties.R2_PM || 0) + (weatherAdjustments.adjustments.R2_PM || 0)
+    };
+
+    process.env.MODEL_WEATHER_WAVE_ENABLED = '1';
+    process.env.MODEL_WEATHER_WAVE_R1_EARLY_PENALTY = String(combinedPenalties.R1_AM);
+    process.env.MODEL_WEATHER_WAVE_R1_LATE_PENALTY = String(combinedPenalties.R1_PM);
+    process.env.MODEL_WEATHER_WAVE_R2_EARLY_PENALTY = String(combinedPenalties.R2_AM);
+    process.env.MODEL_WEATHER_WAVE_R2_LATE_PENALTY = String(combinedPenalties.R2_PM);
+
+    weatherWaveSummary = {
+      ...payload,
+      enabled: true,
+      source: sourceLabel || payload.source || 'cache',
+      cachePath: weatherPenaltyCachePath || payload.cachePath || null,
+      basePenalties,
+      weatherAdjustments,
+      combinedPenalties
+    };
+    console.log(`ℹ️  Weather adjustments loaded from cache (weather-only: R1 AM=${r1Am}, R1 PM=${r1Pm}, R2 AM=${r2Am}, R2 PM=${r2Pm}; net: R1 AM=${weatherAdjustments.adjustments.R1_AM}, R1 PM=${weatherAdjustments.adjustments.R1_PM}, R2 AM=${weatherAdjustments.adjustments.R2_AM}, R2 PM=${weatherAdjustments.adjustments.R2_PM}; combined: R1 AM=${combinedPenalties.R1_AM}, R1 PM=${combinedPenalties.R1_PM}, R2 AM=${combinedPenalties.R2_AM}, R2 PM=${combinedPenalties.R2_PM}).`);
+    return true;
+  };
+
   if (WEATHER_ENABLED) {
     process.env.MODEL_WEATHER_WAVE_ENABLED = '0';
     process.env.MODEL_WEATHER_WAVE_R1_EARLY_PENALTY = '0';
     process.env.MODEL_WEATHER_WAVE_R1_LATE_PENALTY = '0';
     process.env.MODEL_WEATHER_WAVE_R2_EARLY_PENALTY = '0';
     process.env.MODEL_WEATHER_WAVE_R2_LATE_PENALTY = '0';
-    try {
-      const weatherResult = await computeWeatherWavePenalties({
-        fieldUpdatesPayload: fieldUpdatesSnapshot?.payload,
-        courseContextEntry: courseContextEntryFinal,
-        cacheDir: DATAGOLF_CACHE_DIR,
-        apiKey: WEATHER_API_KEY,
-        eventId: CURRENT_EVENT_ID
-      });
-      if (weatherResult?.enabled) {
-        weatherWaveSummary = weatherResult;
-        const penalties = weatherResult.penalties || {};
-        const r1Am = penalties.R1_AM?.total ?? 0;
-        const r1Pm = penalties.R1_PM?.total ?? 0;
-        const r2Am = penalties.R2_AM?.total ?? 0;
-        const r2Pm = penalties.R2_PM?.total ?? 0;
 
-        process.env.MODEL_WEATHER_WAVE_ENABLED = '1';
-        process.env.MODEL_WEATHER_WAVE_R1_EARLY_PENALTY = String(r1Am);
-        process.env.MODEL_WEATHER_WAVE_R1_LATE_PENALTY = String(r1Pm);
-        process.env.MODEL_WEATHER_WAVE_R2_EARLY_PENALTY = String(r2Am);
-        process.env.MODEL_WEATHER_WAVE_R2_LATE_PENALTY = String(r2Pm);
-
-        console.log(`✓ Weather penalties computed (R1 AM=${r1Am}, R1 PM=${r1Pm}, R2 AM=${r2Am}, R2 PM=${r2Pm}).`);
-      } else {
-        console.warn(`ℹ️  Weather penalties unavailable (${weatherResult?.reason || 'unknown'}).`);
+    if (IS_POST_TOURNAMENT_RUN) {
+      const cached = loadWeatherPenaltyCache(weatherPenaltyCachePath);
+      if (!applyCachedWeatherPenalties(cached, weatherPenaltyCachePath ? `cache:${path.basename(weatherPenaltyCachePath)}` : 'cache')) {
+        console.log('ℹ️  Weather penalties skipped for post-tournament run (no cached penalties found).');
       }
-    } catch (error) {
-      console.warn(`ℹ️  Weather penalty computation failed: ${error.message}`);
+    } else {
+      try {
+        const weatherResult = await computeWeatherWavePenalties({
+          fieldUpdatesPayload: fieldUpdatesSnapshot?.payload,
+          courseContextEntry: courseContextEntryFinal,
+          cacheDir: DATAGOLF_CACHE_DIR,
+          apiKey: WEATHER_API_KEY,
+          eventId: CURRENT_EVENT_ID
+        });
+        if (weatherResult?.enabled) {
+          weatherWaveSummary = weatherResult;
+          const penalties = weatherResult.penalties || {};
+          const r1Am = penalties.R1_AM?.total ?? 0;
+          const r1Pm = penalties.R1_PM?.total ?? 0;
+          const r2Am = penalties.R2_AM?.total ?? 0;
+          const r2Pm = penalties.R2_PM?.total ?? 0;
+
+          const basePenalties = getBaselineWavePenaltyAdjustments();
+          const weatherAdjustments = getNetWeatherWaveAdjustments({ r1Am, r1Pm, r2Am, r2Pm });
+          const combinedPenalties = {
+            R1_AM: (basePenalties.R1_AM || 0) + (weatherAdjustments.adjustments.R1_AM || 0),
+            R1_PM: (basePenalties.R1_PM || 0) + (weatherAdjustments.adjustments.R1_PM || 0),
+            R2_AM: (basePenalties.R2_AM || 0) + (weatherAdjustments.adjustments.R2_AM || 0),
+            R2_PM: (basePenalties.R2_PM || 0) + (weatherAdjustments.adjustments.R2_PM || 0)
+          };
+
+          process.env.MODEL_WEATHER_WAVE_ENABLED = '1';
+          process.env.MODEL_WEATHER_WAVE_R1_EARLY_PENALTY = String(combinedPenalties.R1_AM);
+          process.env.MODEL_WEATHER_WAVE_R1_LATE_PENALTY = String(combinedPenalties.R1_PM);
+          process.env.MODEL_WEATHER_WAVE_R2_EARLY_PENALTY = String(combinedPenalties.R2_AM);
+          process.env.MODEL_WEATHER_WAVE_R2_LATE_PENALTY = String(combinedPenalties.R2_PM);
+
+          weatherWaveSummary = {
+            ...weatherResult,
+            basePenalties,
+            weatherAdjustments,
+            combinedPenalties
+          };
+
+          const cachePayload = {
+            ...weatherResult,
+            generatedAt: formatTimestamp(new Date()),
+            eventId: CURRENT_EVENT_ID || null,
+            season: effectiveSeason || null,
+            tournamentName: canonicalTournamentName || TOURNAMENT_NAME || tournamentNameFallback || null,
+            cachePath: weatherPenaltyCachePath || null,
+            basePenalties,
+            weatherAdjustments,
+            combinedPenalties
+          };
+          writeWeatherPenaltyCache(weatherPenaltyCachePath, cachePayload);
+
+          console.log(`✓ Weather adjustments computed (weather-only: R1 AM=${r1Am}, R1 PM=${r1Pm}, R2 AM=${r2Am}, R2 PM=${r2Pm}; net: R1 AM=${weatherAdjustments.adjustments.R1_AM}, R1 PM=${weatherAdjustments.adjustments.R1_PM}, R2 AM=${weatherAdjustments.adjustments.R2_AM}, R2 PM=${weatherAdjustments.adjustments.R2_PM}; combined: R1 AM=${combinedPenalties.R1_AM}, R1 PM=${combinedPenalties.R1_PM}, R2 AM=${combinedPenalties.R2_AM}, R2 PM=${combinedPenalties.R2_PM}).`);
+        } else {
+          console.warn(`ℹ️  Weather penalties unavailable (${weatherResult?.reason || 'unknown'}).`);
+        }
+      } catch (error) {
+        console.warn(`ℹ️  Weather penalty computation failed: ${error.message}`);
+      }
     }
   }
   const fieldIdSetForDelta = new Set(
@@ -8541,6 +9115,81 @@ async function runAdaptiveOptimizer() {
   };
   const approachSkillPeriod = String(approachSkillSnapshot?.payload?.time_period || '').trim().toLowerCase();
 
+  const parseApproachBlendWeights = raw => {
+    if (!raw) return null;
+    const parts = String(raw)
+      .split(/[\s,/]+/)
+      .map(value => value.trim())
+      .filter(Boolean)
+      .map(value => parseFloat(value));
+    if (parts.length < 2 || parts.some(value => Number.isNaN(value))) return null;
+    const [ytd, l12, l24] = parts;
+    return {
+      ytd: ytd ?? 0,
+      l12: l12 ?? 0,
+      l24: l24 ?? 0
+    };
+  };
+
+  const blendApproachSnapshotRows = ({ ytdRows, l12Rows, l24Rows, weights }) => {
+    const sourceList = [
+      { key: 'ytd', rows: ytdRows || [], weight: weights.ytd || 0 },
+      { key: 'l12', rows: l12Rows || [], weight: weights.l12 || 0 },
+      { key: 'l24', rows: l24Rows || [], weight: weights.l24 || 0 }
+    ];
+    const idKeys = new Set(['dg_id', 'dgId', 'dgID', 'player_name', 'playerName', 'name', 'rank']);
+    const maps = sourceList.map(source => {
+      const map = new Map();
+      (source.rows || []).forEach(row => {
+        const dgId = String(row?.dg_id ?? row?.dgId ?? row?.dgID ?? '').trim();
+        if (!dgId) return;
+        map.set(dgId, row);
+      });
+      return map;
+    });
+    const allIds = new Set();
+    maps.forEach(map => map.forEach((_, key) => allIds.add(key)));
+    const output = [];
+
+    allIds.forEach(dgId => {
+      const rowsForId = sourceList.map((source, idx) => ({
+        key: source.key,
+        weight: source.weight,
+        row: maps[idx].get(dgId) || null
+      })).filter(entry => entry.row);
+      if (!rowsForId.length) return;
+      const availableWeight = rowsForId.reduce((sum, entry) => sum + entry.weight, 0);
+      if (availableWeight <= 0) return;
+
+      const baseRow = rowsForId.find(entry => entry.key === 'ytd')?.row
+        || rowsForId[0].row;
+      const merged = { ...baseRow };
+      const keySet = new Set();
+      rowsForId.forEach(entry => {
+        Object.keys(entry.row || {}).forEach(key => keySet.add(key));
+      });
+
+      keySet.forEach(key => {
+        if (idKeys.has(key)) return;
+        const values = rowsForId
+          .map(entry => ({
+            weight: entry.weight,
+            value: entry.row?.[key]
+          }))
+          .filter(entry => typeof entry.value === 'number' && Number.isFinite(entry.value));
+        if (values.length === 0) return;
+        const weightSum = values.reduce((sum, entry) => sum + entry.weight, 0);
+        if (weightSum <= 0) return;
+        const blended = values.reduce((sum, entry) => sum + entry.value * (entry.weight / weightSum), 0);
+        merged[key] = blended;
+      });
+
+      output.push(merged);
+    });
+
+    return output;
+  };
+
   if (approachSnapshotRows.l12.length === 0) {
     const latestL12 = resolveLatestApproachSnapshotArchive('l12');
     if (latestL12?.payload) {
@@ -8562,12 +9211,41 @@ async function runAdaptiveOptimizer() {
     }
   }
 
-  const approachDataCurrent = hasApproachCsv
+  const approachBlendWeightsRaw = parseApproachBlendWeights(APPROACH_BLEND_WEIGHTS_RAW);
+  const approachBlendWeights = approachBlendWeightsRaw
+    ? (() => {
+        const total = (approachBlendWeightsRaw.ytd || 0)
+          + (approachBlendWeightsRaw.l12 || 0)
+          + (approachBlendWeightsRaw.l24 || 0);
+        if (!Number.isFinite(total) || total <= 0) return null;
+        return {
+          ytd: (approachBlendWeightsRaw.ytd || 0) / total,
+          l12: (approachBlendWeightsRaw.l12 || 0) / total,
+          l24: (approachBlendWeightsRaw.l24 || 0) / total
+        };
+      })()
+    : null;
+
+  let approachDataCurrent = hasApproachCsv
     ? approachData
     : (approachSnapshotRows.ytd.length > 0 ? approachSnapshotRows.ytd : approachData);
   let approachDataCurrentSource = hasApproachCsv
     ? 'csv_primary'
     : (approachSnapshotRows.ytd.length > 0 ? 'snapshot_ytd' : 'csv_fallback');
+  if (!hasApproachCsv && approachBlendWeights) {
+    const blendedRows = blendApproachSnapshotRows({
+      ytdRows: approachSnapshotRows.ytd,
+      l12Rows: approachSnapshotRows.l12,
+      l24Rows: approachSnapshotRows.l24,
+      weights: approachBlendWeights
+    });
+    if (blendedRows.length > 0) {
+      approachDataCurrent = blendedRows;
+      approachDataCurrentSource = 'snapshot_blend';
+    } else {
+      console.warn('ℹ️  Approach blend requested but no blended rows produced; falling back to snapshot/CSV policy.');
+    }
+  }
   if (!hasApproachCsv && approachSnapshotRows.ytd.length === 0 && approachSkillRows.length > 0) {
     approachDataCurrentSource = 'api_fallback';
   }
@@ -8593,6 +9271,9 @@ async function runAdaptiveOptimizer() {
   console.log(`   - Current-season rankings (baseline/optimization): ${approachDataCurrentSource}`);
   console.log(`   - Step 1b (event-only correlations): ${approachEventOnlyAvailable ? 'event_only' : 'latest_snapshot_fallback'}`);
   console.log(`   - Step 1c (event+similar+putting correlations): latest snapshot (${approachDataCurrentSource})`);
+  if (!hasApproachCsv && approachBlendWeights) {
+    console.log(`   - Approach blend weights: ytd=${(approachBlendWeights.ytd * 100).toFixed(0)}%, l12=${(approachBlendWeights.l12 * 100).toFixed(0)}%, l24=${(approachBlendWeights.l24 * 100).toFixed(0)}%`);
+  }
 
   const fieldIntegritySummary = evaluateFieldIntegrity({
     fieldData,
@@ -8771,8 +9452,8 @@ async function runAdaptiveOptimizer() {
     );
 
     if (rankingCsvPath) {
-      const resultMetricSpecs = buildResultsMetricSpecs();
-      const csvModelById = parseRankingCsvModelValues(rankingCsvPath, resultMetricSpecs);
+      const resultMetricSpecs = resultsCsvUtils.buildResultsMetricSpecs();
+      const csvModelById = resultsCsvUtils.parseRankingCsvModelValues(rankingCsvPath, resultMetricSpecs);
       csvModelById.forEach((entry, dgId) => {
         const existing = rankingsById.get(dgId) || {};
         rankingsById.set(dgId, {
@@ -8793,8 +9474,8 @@ async function runAdaptiveOptimizer() {
         .map(entry => [String(entry.dgId).trim(), entry.finishPosition])
     );
 
-    const actualMetricsById = buildActualMetricsFromHistory(historyData, CURRENT_EVENT_ID, effectiveSeason);
-    const actualTrendsById = buildActualTrendsFromHistory(historyData, CURRENT_EVENT_ID, effectiveSeason);
+    const actualMetricsById = resultsCsvUtils.buildActualMetricsFromHistory(historyData, CURRENT_EVENT_ID, effectiveSeason);
+    const actualTrendsById = resultsCsvUtils.buildActualTrendsFromHistory(historyData, CURRENT_EVENT_ID, effectiveSeason);
 
     let approachDeltaPathForResults = null;
     let approachDeltaPathFallback = null;
@@ -8963,11 +9644,11 @@ async function runAdaptiveOptimizer() {
             const deltaSlug = canonicalTournamentSlug
               || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback)
               || `event-${CURRENT_EVENT_ID || 'unknown'}`;
-            const dateStamp = new Date().toISOString().slice(0, 10).replace(/-/g, '_');
+            const dateStamp = formatDateKey(new Date()).replace(/-/g, '_');
             const outputName = `approach_deltas_${deltaSlug}_${dateStamp}.json`;
             const outputPath = path.resolve(APPROACH_DELTA_DIR, outputName);
             const meta = {
-              generatedAt: new Date().toISOString(),
+              generatedAt: formatTimestamp(new Date()),
               previousPath: previousSource,
               currentPath: currentSource,
               fieldCount: fieldIdSet.size,
@@ -9046,8 +9727,8 @@ async function runAdaptiveOptimizer() {
       return merged;
     };
 
-    const approachDeltaPrimaryById = buildApproachDeltaMap(approachDeltaPrimaryRows);
-    const approachDeltaFallbackById = buildApproachDeltaMap(approachDeltaFallbackRows);
+    const approachDeltaPrimaryById = resultsCsvUtils.buildApproachDeltaMap(approachDeltaPrimaryRows);
+    const approachDeltaFallbackById = resultsCsvUtils.buildApproachDeltaMap(approachDeltaFallbackRows);
     const mergedApproachDeltaRows = [];
     const mergedIds = new Set([
       ...approachDeltaFallbackById.keys(),
@@ -9060,9 +9741,9 @@ async function runAdaptiveOptimizer() {
       );
       if (mergedRow) mergedApproachDeltaRows.push(mergedRow);
     });
-    const approachDeltaById = buildApproachDeltaMap(mergedApproachDeltaRows);
+    const approachDeltaById = resultsCsvUtils.buildApproachDeltaMap(mergedApproachDeltaRows);
 
-    const resultsCsv = buildPostEventResultsCsv({
+    const resultsCsv = resultsCsvUtils.buildPostEventResultsCsv({
       rankingsById,
       resultsById,
       actualMetricsById,
@@ -9535,11 +10216,11 @@ async function runAdaptiveOptimizer() {
         const deltaSlug = canonicalTournamentSlug
           || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback)
           || `event-${CURRENT_EVENT_ID || 'unknown'}`;
-        const dateStamp = new Date().toISOString().slice(0, 10).replace(/-/g, '_');
+        const dateStamp = formatDateKey(new Date()).replace(/-/g, '_');
         const outputName = `approach_deltas_${deltaSlug}_${dateStamp}.json`;
         const outputPath = path.resolve(APPROACH_DELTA_DIR, outputName);
         const meta = {
-          generatedAt: new Date().toISOString(),
+          generatedAt: formatTimestamp(new Date()),
           previousPath: previousSource,
           currentPath: currentSource,
           fieldCount: fieldIdSet.size,
@@ -9574,6 +10255,41 @@ async function runAdaptiveOptimizer() {
     }
   }
 
+  const resolveApproachDeltaSnapshotSourcesForEvent = ({
+    season,
+    eventId,
+    tournamentSlug,
+    tournamentName,
+    manifestEntries
+  }) => {
+    const manifestFallback = buildManifestApproachCsvFallback({
+      dataRootDir: DATA_ROOT_DIR,
+      season,
+      eventId,
+      tournamentSlug,
+      tournamentName
+    });
+    const snapshotPair = resolveApproachSnapshotPairForEvent({
+      dataRootDir: DATA_ROOT_DIR,
+      approachSnapshotDir: APPROACH_SNAPSHOT_DIR,
+      season,
+      eventId,
+      tournamentSlug,
+      tournamentName,
+      manifestEntries,
+      csvFallback: {
+        prePath: manifestFallback?.eventPre?.path || null,
+        postPath: manifestFallback?.eventPost?.path || null
+      }
+    });
+
+    return {
+      previousPath: snapshotPair.prePath,
+      currentPath: snapshotPair.postPath,
+      source: snapshotPair.selectionSource
+    };
+  };
+
   const approachDeltaData = loadApproachDeltaRows(APPROACH_DELTA_PATH);
   let approachDeltaRowsAll = Array.isArray(approachDeltaData.rows) ? approachDeltaData.rows : [];
   let approachDeltaRows = approachDeltaRowsAll.filter(row => {
@@ -9581,6 +10297,31 @@ async function runAdaptiveOptimizer() {
     if (row.tournament_field === false) return false;
     return true;
   });
+  let approachDeltaPriorPath = null;
+  let approachDeltaPriorData = null;
+  let approachDeltaPriorRows = null;
+  if (HAS_CURRENT_RESULTS && manifestEntries && manifestEntry) {
+    const previousManifestEntry = resolvePreviousManifestEntry(manifestEntries, manifestEntry);
+    if (previousManifestEntry?.tournamentName || previousManifestEntry?.tournamentSlug) {
+      approachDeltaPriorPath = findApproachDeltaFile(
+        [APPROACH_DELTA_DIR, OUTPUT_DIR, DATA_DIR, DEFAULT_DATA_DIR],
+        previousManifestEntry.tournamentName,
+        previousManifestEntry.tournamentSlug
+      );
+    }
+    if (approachDeltaPriorPath) {
+      approachDeltaPriorData = loadApproachDeltaRows(approachDeltaPriorPath);
+      const priorRowsAll = Array.isArray(approachDeltaPriorData.rows) ? approachDeltaPriorData.rows : [];
+      const priorRows = priorRowsAll.filter(row => {
+        if (!row) return false;
+        if (row.tournament_field === false) return false;
+        return true;
+      });
+      if (priorRows.length > 0) {
+        approachDeltaPriorRows = priorRows;
+      }
+    }
+  }
   if (!IS_PRE_TOURNAMENT_RUN) {
     if (!APPROACH_DELTA_PATH) {
       logApproachDeltaHealthFailure({ reason: 'missing_delta_file', filePath: null, sample: null });
@@ -9608,23 +10349,43 @@ async function runAdaptiveOptimizer() {
   let approachDeltaPriorFiles = APPROACH_DELTA_PATH ? [APPROACH_DELTA_PATH] : [];
   let approachDeltaPlayerSummary = null;
 
-  if (HAS_CURRENT_RESULTS && approachDeltaRows.length > 0) {
+  if (HAS_CURRENT_RESULTS && (approachDeltaPriorRows || approachDeltaRows).length > 0) {
+    if (approachDeltaPriorRows) {
+      approachDeltaRowsAll = Array.isArray(approachDeltaPriorData?.rows) ? approachDeltaPriorData.rows : approachDeltaRowsAll;
+      approachDeltaRows = approachDeltaPriorRows;
+      approachDeltaPriorMode = 'previous_event';
+      if (manifestEventDateInfo?.time) {
+        const snapshotSources = resolveApproachDeltaSnapshotSourcesForEvent({
+          season: CURRENT_SEASON,
+          eventId: CURRENT_EVENT_ID,
+          tournamentSlug: canonicalTournamentSlug,
+          tournamentName: canonicalTournamentName || TOURNAMENT_NAME || tournamentNameFallback,
+          manifestEntries
+        });
+        approachDeltaPriorMeta = {
+          ...(approachDeltaPriorData?.meta || {}),
+          source: 'previous_event',
+          previousPath: snapshotSources.previousPath,
+          currentPath: snapshotSources.currentPath,
+          selectionSource: snapshotSources.source
+        };
+      } else {
+        approachDeltaPriorMeta = {
+          ...(approachDeltaPriorData?.meta || {}),
+          source: 'previous_event'
+        };
+      }
+      approachDeltaPriorFiles = approachDeltaPriorPath ? [approachDeltaPriorPath] : [];
+      console.log(`✓ Using previous-event approach delta for prior: ${path.basename(approachDeltaPriorPath)}`);
+    }
     approachDeltaCorrelations = computeApproachDeltaCorrelations(approachDeltaRows, resultsCurrent, approachDeltaMetricSpecs);
     approachDeltaAlignmentMap = buildApproachDeltaAlignmentMap(metricConfig, approachDeltaCorrelations);
-    approachDeltaPriorMode = 'current_event';
+    if (!approachDeltaPriorMode) approachDeltaPriorMode = 'current_event';
     console.log(`✓ Computed approach delta correlations (${approachDeltaCorrelations.length})`);
   } else if (!HAS_CURRENT_RESULTS) {
-    const rollingEntries = getApproachDeltaFileEntries(
-      [APPROACH_DELTA_DIR, OUTPUT_DIR, DATA_DIR, DEFAULT_DATA_DIR]
-    );
-    const rollingResult = buildRollingApproachDeltaRows(
-      rollingEntries,
-      approachDeltaMetricSpecs,
-      fieldIdSetForDelta,
-      APPROACH_DELTA_ROLLING_EVENTS
-    );
-
-    if (IS_PRE_TOURNAMENT_RUN && rollingResult?.meta?.filesUsed?.length) {
+    let priorDeltaPath = null;
+    let priorDeltaRows = null;
+    if (IS_PRE_TOURNAMENT_RUN) {
       const manifestEntriesForDelta = loadSeasonManifestEntries(DATA_ROOT_DIR, CURRENT_SEASON);
       const currentManifestEntry = resolveManifestEntryForEvent(manifestEntriesForDelta, {
         eventId: CURRENT_EVENT_ID,
@@ -9635,34 +10396,87 @@ async function runAdaptiveOptimizer() {
         ? resolvePreviousManifestEntry(manifestEntriesForDelta, currentManifestEntry)
         : null;
       if (previousManifestEntry?.tournamentName || previousManifestEntry?.tournamentSlug) {
-        const priorDeltaPath = findApproachDeltaFile(
+        priorDeltaPath = findApproachDeltaFile(
           [APPROACH_DELTA_DIR, OUTPUT_DIR, DATA_DIR, DEFAULT_DATA_DIR],
           previousManifestEntry.tournamentName,
           previousManifestEntry.tournamentSlug
         );
-        if (priorDeltaPath && !rollingResult.meta.filesUsed.includes(priorDeltaPath)) {
-          APPROACH_DELTA_ROLLING_RED_FLAG_NOTE = '🚩 RED FLAG: prior-week approach delta missing; rolling baseline used.';
+      }
+      if (priorDeltaPath) {
+        const priorDeltaData = loadApproachDeltaRows(priorDeltaPath);
+        const priorRowsAll = Array.isArray(priorDeltaData?.rows) ? priorDeltaData.rows : [];
+        const filteredRows = priorRowsAll.filter(row => row && row.tournament_field !== false);
+        if (filteredRows.length > 0) {
+          approachDeltaRowsAll = filteredRows;
+          approachDeltaRows = filteredRows;
+          approachDeltaAlignmentMap = buildApproachDeltaAlignmentFromRollingRows(
+            approachDeltaMetricSpecs,
+            approachDeltaRows
+          );
+          approachDeltaPriorMode = 'previous_event';
+          approachDeltaPriorMeta = {
+            ...(priorDeltaData?.meta || {}),
+            source: 'previous_event',
+            selectionSource: 'manifest'
+          };
+          approachDeltaPriorFiles = [priorDeltaPath];
+          console.log(`✓ Using previous-event approach delta (manifest): ${path.basename(priorDeltaPath)}`);
+          priorDeltaRows = filteredRows;
         }
       }
     }
 
-    if (rollingResult.rows.length > 0) {
-      approachDeltaRowsAll = rollingResult.rows;
-      approachDeltaRows = rollingResult.rows;
-      approachDeltaAlignmentMap = buildApproachDeltaAlignmentFromRollingRows(
-        approachDeltaMetricSpecs,
-        approachDeltaRows
+    if (!priorDeltaRows) {
+      const rollingEntries = getApproachDeltaFileEntries(
+        [APPROACH_DELTA_DIR, OUTPUT_DIR, DATA_DIR, DEFAULT_DATA_DIR]
       );
-      approachDeltaPriorMode = 'rolling_average';
-      approachDeltaPriorMeta = rollingResult.meta || null;
-      approachDeltaPriorFiles = rollingResult.meta?.filesUsed || [];
-      console.log(`✓ Built rolling approach delta baseline (${rollingResult.meta?.fileCount || 0} files).`);
-    } else if (!APPROACH_DELTA_PATH) {
-      approachDeltaPriorFiles = [];
-      console.log('ℹ️  Approach delta prior unavailable (no delta JSON found).');
-    } else {
-      approachDeltaPriorFiles = [];
-      console.log('ℹ️  Approach delta prior skipped (missing current results and no rolling baseline).');
+      const rollingResult = buildRollingApproachDeltaRows(
+        rollingEntries,
+        approachDeltaMetricSpecs,
+        fieldIdSetForDelta,
+        APPROACH_DELTA_ROLLING_EVENTS
+      );
+
+      if (IS_PRE_TOURNAMENT_RUN && rollingResult?.meta?.filesUsed?.length) {
+        const manifestEntriesForDelta = loadSeasonManifestEntries(DATA_ROOT_DIR, CURRENT_SEASON);
+        const currentManifestEntry = resolveManifestEntryForEvent(manifestEntriesForDelta, {
+          eventId: CURRENT_EVENT_ID,
+          tournamentSlug: normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
+          tournamentName: TOURNAMENT_NAME || tournamentNameFallback
+        });
+        const previousManifestEntry = currentManifestEntry
+          ? resolvePreviousManifestEntry(manifestEntriesForDelta, currentManifestEntry)
+          : null;
+        if (previousManifestEntry?.tournamentName || previousManifestEntry?.tournamentSlug) {
+          const priorDeltaPath = findApproachDeltaFile(
+            [APPROACH_DELTA_DIR, OUTPUT_DIR, DATA_DIR, DEFAULT_DATA_DIR],
+            previousManifestEntry.tournamentName,
+            previousManifestEntry.tournamentSlug
+          );
+          if (priorDeltaPath && !rollingResult.meta.filesUsed.includes(priorDeltaPath)) {
+            APPROACH_DELTA_ROLLING_RED_FLAG_NOTE = '🚩 RED FLAG: prior-week approach delta missing; rolling baseline used.';
+          }
+        }
+      }
+
+      if (rollingResult.rows.length > 0) {
+        approachDeltaRowsAll = rollingResult.rows;
+        approachDeltaRows = rollingResult.rows;
+        approachDeltaAlignmentMap = buildApproachDeltaAlignmentFromRollingRows(
+          approachDeltaMetricSpecs,
+          approachDeltaRows
+        );
+        approachDeltaPriorMode = 'rolling_average';
+        approachDeltaPriorMeta = rollingResult.meta || null;
+        approachDeltaPriorFiles = rollingResult.meta?.filesUsed || [];
+        console.log(`✓ Built rolling approach delta baseline (${rollingResult.meta?.fileCount || 0} files).`);
+      } else if (!APPROACH_DELTA_PATH) {
+        approachDeltaPriorFiles = [];
+        console.log('ℹ️  Approach delta prior unavailable (no delta JSON found).');
+      } else {
+        approachDeltaPriorFiles = [];
+        console.log('ℹ️  Approach delta prior skipped (missing current results and no rolling baseline).');
+      }
     }
   } else if (!APPROACH_DELTA_PATH) {
     approachDeltaPriorFiles = [];
@@ -9702,7 +10516,12 @@ async function runAdaptiveOptimizer() {
     deltaScoresById,
     playerRampById: rampById,
     playerRampWeight: PAST_PERF_RAMP_WEIGHT,
-    playerRampMaxEvents: rampMaxEvents
+    playerRampMaxEvents: rampMaxEvents,
+    weatherHourlyPenalties: weatherWaveSummary?.hourlyPenalties || null,
+    weatherDateStart: weatherWaveSummary?.dateStart || null,
+    weatherTimeZone: resolveTimeZone(courseContextEntryFinal) || null,
+    weatherRoundDurationHours: getEnvNumberValue('WEATHER_ROUND_DURATION_HOURS', 4.25),
+    weatherBasePenalties: weatherWaveSummary?.basePenalties || null
   };
 
   const runRanking = ({ roundsRawData, approachRawData, groupWeights, metricWeights, includeCurrentEventRounds = false, fieldDataOverride = null }) => {
@@ -10089,13 +10908,23 @@ async function runAdaptiveOptimizer() {
     'SG Putting',
     'Poor Shots'
   ];
+  const TRAINING_EXCLUDED_LABELS = [
+    'Birdie Chances Created',
+    'SG Total',
+    'SG Approach',
+    'Greens in Regulation',
+    'Fairway Proximity',
+    'Rough Proximity'
+  ];
+  const TRAINING_EXCLUDED_SET = new Set(TRAINING_EXCLUDED_LABELS);
   let trainingMetricNotes = {
     included: [],
-    excluded: ['Birdie Chances Created', 'SG Total'],
+    excluded: TRAINING_EXCLUDED_LABELS.slice(),
     derived: ['Birdies or Better = birdies + eagles (from historical rounds when available)']
   };
 
   const coreMetricSpecs = HISTORICAL_CORE_METRIC_LABELS
+    .filter(label => !TRAINING_EXCLUDED_SET.has(label))
     .map(label => ({ label, index: GENERATED_METRIC_LABELS.indexOf(label) }))
     .filter(spec => spec.index >= 0);
   if (coreMetricSpecs.length > 0 && allEventRounds.length > 0) {
@@ -10175,8 +11004,13 @@ async function runAdaptiveOptimizer() {
           metricWeights: eventOnlyTemplate.metricWeights,
           includeCurrentEventRounds: true
         });
-        eventOnlyGeneratedMetricCorrelations = computeGeneratedMetricCorrelations(eventOnlyRanking.players, resultsCurrent);
+        eventOnlyGeneratedMetricCorrelations = computeGeneratedMetricCorrelationsForLabels(
+          eventOnlyRanking.players,
+          resultsCurrent,
+          eventOnlyMetricSpecs
+        );
         const eventOnlyMetricSpecs = GENERATED_METRIC_LABELS
+          .filter(label => !TRAINING_EXCLUDED_SET.has(label))
           .map((label, index) => ({ label, index }))
           .filter(spec => spec.index >= 0);
         eventOnlyGeneratedTop20Correlations = computeGeneratedMetricTopNCorrelationsForLabels(
@@ -10188,7 +11022,7 @@ async function runAdaptiveOptimizer() {
         eventOnlyGeneratedTop20Logistic = trainTopNLogisticModel(
           eventOnlyRanking.players,
           resultsCurrent,
-          GENERATED_METRIC_LABELS,
+          eventOnlyMetricSpecs.map(spec => spec.label),
           { topN: 20 }
         );
         step1bUsedRounds = eventOnlyRounds;
@@ -10233,11 +11067,11 @@ async function runAdaptiveOptimizer() {
       const metricSpecsForTraining = HISTORICAL_METRIC_LABELS
         .filter(label => !APPROACH_BUCKET_LABELS.has(label))
         .map((label, index) => ({ label, index }))
-        .filter(spec => spec.label !== 'Birdie Chances Created' && spec.label !== 'SG Total');
+        .filter(spec => !TRAINING_EXCLUDED_SET.has(spec.label));
       const metricLabelsForTraining = metricSpecsForTraining.map(spec => spec.label);
       trainingMetricNotes = {
         included: metricLabelsForTraining,
-        excluded: ['Birdie Chances Created', 'SG Total'],
+        excluded: TRAINING_EXCLUDED_LABELS.slice(),
         derived: ['Birdies or Better = birdies + eagles (from historical rounds when available)']
       };
       console.log(`Training metrics included (${trainingMetricNotes.included.length}): ${trainingMetricNotes.included.join(', ')}`);
@@ -10440,12 +11274,18 @@ async function runAdaptiveOptimizer() {
       ]);
       const eventIdListForMetrics = Array.from(eventIdSetForMetrics.values());
       const includeApproachBuckets = approachDataCurrent.length > 0;
-      TOP20_METRIC_LABELS = includeApproachBuckets
+      TOP20_METRIC_LABELS = (includeApproachBuckets
         ? GENERATED_METRIC_LABELS.slice()
-        : GENERATED_METRIC_LABELS.filter(label => !APPROACH_BUCKET_LABELS.has(label));
+        : GENERATED_METRIC_LABELS.filter(label => !APPROACH_BUCKET_LABELS.has(label)))
+        .filter(label => !TRAINING_EXCLUDED_SET.has(label));
       const top20MetricSpecs = TOP20_METRIC_LABELS
         .map(label => ({ label, index: GENERATED_METRIC_LABELS.indexOf(label) }))
         .filter(spec => spec.index >= 0);
+      trainingMetricNotes = {
+        included: TOP20_METRIC_LABELS.slice(),
+        excluded: TRAINING_EXCLUDED_LABELS.slice(),
+        derived: ['Birdies or Better = birdies + eagles (from historical rounds when available)']
+      };
       console.log(`ℹ️  Current-season metric scope: season=${effectiveSeason}, events=[${eventIdListForMetrics.join(', ')}] (event + similar + putting).`);
       console.log(`   Similar events: ${similarCourseIds.length ? similarCourseIds.join(', ') : 'none'}`);
       console.log(`   Putting events: ${puttingCourseIds.length ? puttingCourseIds.join(', ') : 'none'}`);
@@ -10492,7 +11332,11 @@ async function runAdaptiveOptimizer() {
           currentGeneratedMetricCorrelations = [{ index: 0, label: singleMetric.label, correlation: singleMetric.correlation, samples: singleMetric.samples }];
           currentGeneratedTop20Correlations = [{ index: 0, label: singleMetric.label, correlation: singleMetric.correlation, samples: singleMetric.samples }];
         } else {
-          currentGeneratedMetricCorrelations = computeGeneratedMetricCorrelations(currentRankingForMetrics.players, resultsCurrent);
+          currentGeneratedMetricCorrelations = computeGeneratedMetricCorrelationsForLabels(
+            currentRankingForMetrics.players,
+            resultsCurrent,
+            top20MetricSpecs
+          );
           currentGeneratedTop20Correlations = computeGeneratedMetricTopNCorrelationsForLabels(
             currentRankingForMetrics.players,
             resultsCurrent,
@@ -10639,7 +11483,7 @@ async function runAdaptiveOptimizer() {
               metricLabels: TOP20_METRIC_LABELS
             });
             const blendMeta = {
-              createdAt: new Date().toISOString(),
+              createdAt: formatTimestamp(new Date()),
               eventId: CURRENT_EVENT_ID || null,
               season: CURRENT_SEASON || null,
               mode: 'post_event',
@@ -10805,11 +11649,15 @@ async function runAdaptiveOptimizer() {
     const manifestSlug = manifestMatch?.tournamentSlug
       ? normalizeTournamentSlug(manifestMatch.tournamentSlug)
       : null;
+    const outputTagRaw = String(process.env.OUTPUT_TAG || '').trim();
     const outputBaseName = buildOutputBaseName({
       tournamentSlug: manifestSlug || canonicalTournamentSlug || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
       tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
-      eventId: CURRENT_EVENT_ID
+      eventId: CURRENT_EVENT_ID,
+      outputTag: outputTagRaw || null
     });
+    summaryOutputBaseName = outputBaseName;
+    summaryTournamentSlug = manifestSlug || canonicalTournamentSlug || null;
     const preEventModeRoot = preEventOutputDir || OUTPUT_DIR;
 
     const signalContributionReport = buildSignalContributionReport(
@@ -10818,7 +11666,7 @@ async function runAdaptiveOptimizer() {
       { limit: Math.max(10, Math.floor(getEnvNumberValue('MODEL_SIGNAL_REPORT_PLAYERS', 50))) }
     );
 
-    const signalReportPath = signalContributionReport
+    signalReportPath = signalContributionReport
       ? buildArtifactPath({
         artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_SIGNAL_CONTRIBUTIONS_JSON,
         outputBaseName,
@@ -10831,14 +11679,14 @@ async function runAdaptiveOptimizer() {
       fs.writeFileSync(signalReportPath, JSON.stringify(signalContributionReport, null, 2));
     }
 
-    const preEventRankingPath = buildArtifactPath({
+    preEventRankingPath = buildArtifactPath({
       artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_RANKINGS_JSON,
       outputBaseName,
       tournamentSlug: manifestSlug || canonicalTournamentSlug,
       tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
       modeRoot: preEventModeRoot
     });
-    const preEventRankingCsvPath = buildArtifactPath({
+    preEventRankingCsvPath = buildArtifactPath({
       artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_RANKINGS_CSV,
       outputBaseName,
       tournamentSlug: manifestSlug || canonicalTournamentSlug,
@@ -10846,7 +11694,7 @@ async function runAdaptiveOptimizer() {
       modeRoot: preEventModeRoot
     });
     fs.writeFileSync(preEventRankingPath, JSON.stringify({
-      timestamp: new Date().toISOString(),
+      timestamp: formatTimestamp(new Date()),
       eventId: CURRENT_EVENT_ID,
       season: CURRENT_SEASON,
       tournament: TOURNAMENT_NAME || 'Event',
@@ -10861,7 +11709,7 @@ async function runAdaptiveOptimizer() {
     fs.writeFileSync(preEventRankingCsvPath, rankingCsvContent);
 
     const output = {
-      timestamp: new Date().toISOString(),
+      timestamp: formatTimestamp(new Date()),
       mode: 'pre_event_training',
       eventId: CURRENT_EVENT_ID,
       season: CURRENT_SEASON,
@@ -11241,10 +12089,10 @@ async function runAdaptiveOptimizer() {
     console.log(`✅ JSON results saved to: ${outputPath}`);
     console.log(`✅ Text results saved to: ${textOutputPath}\n`);
 
-    const resultsJsonPath = outputPath;
-    const resultsTextPath = textOutputPath;
-    let dryRunTemplatePath = null;
-    let dryRunDeltaScoresPath = null;
+    resultsJsonPath = outputPath;
+    resultsTextPath = textOutputPath;
+    dryRunTemplatePath = null;
+    dryRunDeltaScoresPath = null;
 
     if (WRITE_TEMPLATES || DRY_RUN) {
       if (DRY_RUN && !WRITE_TEMPLATES) {
@@ -11305,337 +12153,7 @@ async function runAdaptiveOptimizer() {
       }
     }
 
-    const summaryLogPath = LOGGING_HANDLE?.logFile
-      ? LOGGING_HANDLE.logFile
-      : (buildArtifactPath({
-        artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_LOG_TXT,
-        outputBaseName,
-        tournamentSlug: manifestSlug || canonicalTournamentSlug,
-        tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
-        modeRoot: OUTPUT_DIR
-      }) || path.resolve(OUTPUT_DIR, `${outputBaseName}_pre_event_log.txt`));
-    const summaryTimestamp = new Date().toISOString();
-    const historyYearsForLog = (() => {
-      const base = Array.isArray(lastFiveYears) ? lastFiveYears : [];
-      if (IS_PRE_TOURNAMENT_RUN) {
-        const filtered = base.filter(year => Number(year) < effectiveSeason);
-        return filtered.length ? filtered : base;
-      }
-      return base;
-    })();
-    const historyYearRangeLabel = historyYearsForLog.length
-      ? `${Math.min(...historyYearsForLog)}–${Math.max(...historyYearsForLog)}`
-      : 'n/a';
-    const historyCachePaths = buildHistoricalCachePaths({
-      cacheDir: DATAGOLF_CACHE_DIR,
-      tours,
-      years: historyYearsForLog,
-      eventId: DATAGOLF_HISTORICAL_EVENT_ID,
-      fileFormat: 'json'
-    });
-    const historySourceRangeLabel = historyCachePaths.length
-      ? `${historyCachePaths[0]} … ${historyYearsForLog[historyYearsForLog.length - 1]}`
-      : 'history cache';
-    const resolveYearFromRow = row => {
-      const raw = row?.year ?? row?.season ?? row?.season_year ?? row?.seasonYear ?? null;
-      const parsed = parseInt(String(raw || '').trim(), 10);
-      return Number.isNaN(parsed) ? null : parsed;
-    };
-    const eventCoursePairsForStep1c = (() => {
-      const pairs = new Map();
-      const addPair = (eventId, courseNum) => {
-        const eventKey = String(eventId || '').trim();
-        const courseKey = String(courseNum || '').trim();
-        if (!eventKey || !courseKey) return;
-        pairs.set(`${eventKey}|${courseKey}`, { eventId: eventKey, courseNum: courseKey });
-      };
-      const baseCourses = Array.isArray(courseContextEntryFinal?.courseNums)
-        ? courseContextEntryFinal.courseNums
-        : [courseContextEntryFinal?.courseNum || sharedConfig.courseNum].filter(Boolean);
-      baseCourses.forEach(courseNum => addPair(CURRENT_EVENT_ID, courseNum));
-      const similarMap = courseContextEntryFinal?.similarCourseCourseNums || {};
-      Object.entries(similarMap).forEach(([eventId, courseNums]) => {
-        (courseNums || []).forEach(courseNum => addPair(eventId, courseNum));
-      });
-      const puttingMap = courseContextEntryFinal?.puttingCourseCourseNums || {};
-      Object.entries(puttingMap).forEach(([eventId, courseNums]) => {
-        (courseNums || []).forEach(courseNum => addPair(eventId, courseNum));
-      });
-      return Array.from(pairs.values());
-    })();
-    const step1cRoundsSource = Array.isArray(step1cUsedRounds) && step1cUsedRounds.length > 0
-      ? step1cUsedRounds
-      : historyData;
-    const eventCourseYearSummary = eventCoursePairsForStep1c.map(pair => {
-      const yearCounts = {};
-      let total = 0;
-      const yearPool = Array.from(new Set(
-        (step1cRoundsSource || []).map(row => resolveYearFromRow(row)).filter(year => year !== null)
-      ));
-      const yearsToCount = yearPool.length > 0 ? yearPool : historyYearsForLog;
-      yearsToCount.forEach(year => {
-        const count = (step1cRoundsSource || []).reduce((acc, row) => {
-          const rowEventId = String(row?.event_id || '').trim();
-          if (rowEventId !== String(pair.eventId)) return acc;
-          const rowCourseNum = resolveCourseNumFromHistoryRow(row);
-          if (String(rowCourseNum || '').trim() !== String(pair.courseNum)) return acc;
-          const rowYear = resolveYearFromRow(row);
-          if (rowYear !== year) return acc;
-          return acc + 1;
-        }, 0);
-        yearCounts[year] = count;
-        total += count;
-      });
-      return { ...pair, yearCounts, total };
-    });
-    eventCourseYearSummary.sort((a, b) => {
-      const eventDiff = Number(a.eventId) - Number(b.eventId);
-      if (!Number.isNaN(eventDiff) && eventDiff !== 0) return eventDiff;
-      const courseDiff = Number(a.courseNum) - Number(b.courseNum);
-      if (!Number.isNaN(courseDiff) && courseDiff !== 0) return courseDiff;
-      return String(a.courseNum).localeCompare(String(b.courseNum));
-    });
-    const regressionSnapshotPath = regressionSnapshot?.path || null;
-    const regressionCompletedAt = regressionSnapshotPath ? resolveFileTimestamp(regressionSnapshotPath) : null;
-    const rampSummaryPath = rampSummary?.path || null;
-    const rampCompletedAt = rampSummaryPath ? resolveFileTimestamp(rampSummaryPath) : null;
-    const selectedTemplateKey = courseContextEntryFinal?.templateKey || courseTemplateKey || String(CURRENT_EVENT_ID);
-    const templateFilePath = path.resolve(ROOT_DIR, 'utilities', 'weightTemplates.js');
-    const validationFiles = [];
-    if (validationData?.weightTemplatesPath && fs.existsSync(validationData.weightTemplatesPath)) {
-      validationFiles.push(validationData.weightTemplatesPath);
-      const jsonPath = validationData.weightTemplatesPath.replace(/\.csv$/i, '.json');
-      if (jsonPath && fs.existsSync(jsonPath)) validationFiles.push(jsonPath);
-    } else if (validationOutputsDir) {
-      const fallbackJson = path.resolve(validationOutputsDir, 'Weight_Templates.json');
-      const fallbackCsv = path.resolve(validationOutputsDir, 'Weight_Templates.csv');
-      if (fs.existsSync(fallbackJson)) validationFiles.push(fallbackJson);
-      if (fs.existsSync(fallbackCsv)) validationFiles.push(fallbackCsv);
-    }
-
-    const summaryLines = [];
-    summaryLines.push(`Logging to ${summaryLogPath}`);
-    summaryLines.push('');
-    summaryLines.push('=== PRE-EVENT RUN SUMMARY ===');
-    summaryLines.push(`Event: ${CURRENT_EVENT_ID} (${canonicalTournamentName || TOURNAMENT_NAME || 'Event'})`);
-    summaryLines.push(`CourseNum: ${sharedConfig.courseNum || 'n/a'}`);
-    summaryLines.push(`CourseNameKey: ${sharedConfig.courseNameKey || courseContextEntryFinal?.courseNameKey || 'n/a'}`);
-    summaryLines.push(`Season: ${CURRENT_SEASON}`);
-    summaryLines.push(`Run Mode: ${runContext}`);
-    summaryLines.push(`Timestamp: ${summaryTimestamp}`);
-    summaryLines.push('');
-    summaryLines.push('🔄 Course context / configuration');
-    summaryLines.push('- Config source: course_context.json');
-    summaryLines.push(`- Config file: ${COURSE_CONTEXT_PATH}`);
-    summaryLines.push(`- Applied overrides: eventId=${CURRENT_EVENT_ID}, courseNum=${sharedConfig.courseNum || 'n/a'}`);
-    summaryLines.push(`- Course type: ${courseContextEntryFinal?.courseType || sharedConfig.courseType || 'n/a'}`);
-    summaryLines.push(`- Template key: ${courseContextEntryFinal?.templateKey || courseTemplateKey || 'n/a'}`);
-    summaryLines.push('');
-    summaryLines.push('🔄 Course history regression');
-    summaryLines.push(`- Inputs ${SHOULD_RUN_PRE_EVENT_ARTIFACTS ? 'generated' : 'skipped'}`);
-    if (regressionSnapshotPath) {
-      summaryLines.push(`- Regression snapshot: ${regressionSnapshotPath}`);
-      if (regressionCompletedAt) summaryLines.push(`- Completed date: ${regressionCompletedAt}`);
-    }
-    summaryLines.push('');
-    summaryLines.push('🔄 Player ramp summary');
-    if (rampSummaryPath) {
-      summaryLines.push(`- File: ${rampSummaryPath}`);
-      if (rampCompletedAt) summaryLines.push(`- Completed date: ${rampCompletedAt}`);
-    }
-    if (rampPlayers.length > 0) {
-      summaryLines.push(`- Loaded: ${rampPlayers.length} players (maxEvents=${rampMaxEvents})`);
-    }
-    summaryLines.push('');
-    summaryLines.push('🔄 Templates');
-    summaryLines.push('');
-    summaryLines.push(`- Selected template: ${selectedTemplateKey} (eventId=${CURRENT_EVENT_ID})`);
-    summaryLines.push(`\tFile: ${templateFilePath}`);
-    if (validationTemplateName) {
-      const validationMode = applyValidationOutputs ? 'applied' : 'reporting only';
-      summaryLines.push(`- Validation template loaded: ${validationTemplateName} (${validationMode})`);
-      if (validationFiles.length > 0) {
-        summaryLines.push(`\tFiles:`);
-        validationFiles.forEach(filePath => summaryLines.push(`\t- ${filePath}`));
-      }
-    }
-    summaryLines.push('');
-    summaryLines.push('🔄 Data sources (used this run)');
-    summaryLines.push('');
-    summaryLines.push('DataGolf');
-    const dataGolfLines = [];
-    const dataGolfUpdatedLines = [];
-    if (rankingsSnapshot?.payload && rankingsSnapshot?.source === 'api' && rankingsSnapshot?.path) {
-      dataGolfUpdatedLines.push('- Rankings: updated (not used)');
-    }
-    if (fieldUpdatesSnapshot?.payload) {
-      const fieldLine = formatSnapshotUsageLine('Field updates', fieldUpdatesSnapshot);
-      dataGolfLines.push(fieldUpdatesUpdatedThisRun ? `${fieldLine} (updated this run)` : fieldLine);
-    }
-    if (approachSkillSnapshot?.payload) {
-      const label = `Approach skill (${DATAGOLF_APPROACH_PERIOD === 'l24' ? 'last 24 months' : DATAGOLF_APPROACH_PERIOD})`;
-      if (approachDataCurrentSource === 'api_fallback') {
-        dataGolfLines.push(formatSnapshotUsageLine(label, approachSkillSnapshot));
-      } else {
-        dataGolfUpdatedLines.push(`- ${label}: updated (not used)`);
-      }
-    }
-    if (playerDecompositionsSnapshot?.payload) {
-      const line = formatSnapshotUsageLine('Player decompositions', playerDecompositionsSnapshot);
-      if (IS_POST_TOURNAMENT_RUN) dataGolfLines.push(line);
-      else dataGolfUpdatedLines.push('- Player decompositions: updated (not used)');
-    }
-    if (skillRatingsValueSnapshot?.payload) {
-      const line = formatSnapshotUsageLine('Skill ratings (value)', skillRatingsValueSnapshot);
-      if (IS_POST_TOURNAMENT_RUN) dataGolfLines.push(line);
-      else dataGolfUpdatedLines.push('- Skill ratings (value): updated (not used)');
-    }
-    if (skillRatingsRankSnapshot?.payload) {
-      const line = formatSnapshotUsageLine('Skill ratings (rank)', skillRatingsRankSnapshot);
-      if (IS_POST_TOURNAMENT_RUN) dataGolfLines.push(line);
-      else dataGolfUpdatedLines.push('- Skill ratings (rank): updated (not used)');
-    }
-    if (dataGolfLines.length === 0) {
-      summaryLines.push('- None');
-    } else {
-      dataGolfLines.filter(Boolean).forEach(line => summaryLines.push(line));
-    }
-    if (dataGolfUpdatedLines.length > 0) {
-      summaryLines.push('');
-      summaryLines.push('DataGolf (updated, not used)');
-      dataGolfUpdatedLines.forEach(line => summaryLines.push(line));
-    }
-    if (approachDataCurrentSource === 'snapshot_ytd' && approachSnapshotYtd?.path) {
-      summaryLines.push('');
-      summaryLines.push('Approach snapshots');
-      const eventAligned = approachSnapshotYtd?.source === 'snapshot_archive' ? ' (event-aligned)' : '';
-      const snapshotUpdatedAt = resolveSnapshotUpdatedAt(approachSnapshotYtd);
-      const updatedSuffix = snapshotUpdatedAt ? ` (last updated ${snapshotUpdatedAt})` : '';
-      const runUpdatedSuffix = approachYtdUpdatedThisRun ? ' (updated this run)' : '';
-      summaryLines.push(`- YTD snapshot used: ${approachSnapshotYtd.path}${eventAligned}${updatedSuffix}${runUpdatedSuffix}`);
-    }
-    summaryLines.push('');
-    summaryLines.push('Field');
-    if (fieldUpdatesSnapshot?.path && fs.existsSync(fieldUpdatesSnapshot.path)) {
-      const fieldUpdatedAt = resolveSnapshotUpdatedAt(fieldUpdatesSnapshot);
-      const fieldUpdatedSuffix = fieldUpdatedAt ? ` (last updated ${fieldUpdatedAt})` : '';
-      const fieldLabel = fieldUpdatesSnapshot.source === 'csv_field' ? 'CSV' : 'cache';
-      summaryLines.push(`- Field updates ${fieldLabel}: ${fieldUpdatesSnapshot.path}${fieldUpdatedSuffix}`);
-    } else if (FIELD_PATH) {
-      summaryLines.push(`- Field updates: ${FIELD_PATH}`);
-    }
-    summaryLines.push(`- Field loaded: ${fieldData.length} players`);
-    summaryLines.push('');
-    summaryLines.push('Weather (Meteoblue)');
-    if (weatherWaveSummary?.enabled) {
-      const penalties = weatherWaveSummary.penalties || {};
-      const r1Am = penalties.R1_AM?.total ?? 0;
-      const r1Pm = penalties.R1_PM?.total ?? 0;
-      const r2Am = penalties.R2_AM?.total ?? 0;
-      const r2Pm = penalties.R2_PM?.total ?? 0;
-      summaryLines.push(`- Forecast used: yes (source=${weatherWaveSummary.source || 'unknown'})`);
-      summaryLines.push(`- Location: ${weatherWaveSummary.locationQuery || 'n/a'} (lat=${Number.isFinite(weatherWaveSummary.lat) ? weatherWaveSummary.lat : 'n/a'}, lon=${Number.isFinite(weatherWaveSummary.lon) ? weatherWaveSummary.lon : 'n/a'})`);
-      summaryLines.push(`- Wave penalties (total): R1_AM=${r1Am}, R1_PM=${r1Pm}, R2_AM=${r2Am}, R2_PM=${r2Pm}`);
-    } else if (WEATHER_ENABLED) {
-      summaryLines.push(`- Forecast used: no (${weatherWaveSummary?.reason || 'unavailable'})`);
-    } else {
-      summaryLines.push('- Forecast used: no (weather disabled)');
-    }
-    summaryLines.push('');
-    summaryLines.push('Historical Rounds');
-    summaryLines.push(`- Years used: ${historyYearRangeLabel} (eventId=${CURRENT_EVENT_ID}, courseNum=${sharedConfig.courseNum || 'n/a'})`);
-    if (historyCachePaths.length > 0) {
-      summaryLines.push('- Cache files:');
-      historyCachePaths.forEach(filePath => summaryLines.push(`\t- ${filePath}`));
-    }
-    summaryLines.push('');
-    summaryLines.push('--- STEP 1a: HISTORICAL METRIC CORRELATIONS ---');
-    summaryLines.push(`- Event: ${CURRENT_EVENT_ID} | CourseNum: ${sharedConfig.courseNum || 'n/a'}`);
-    summaryLines.push(`- Years evaluated: ${historyYearRangeLabel}`);
-    summaryLines.push(`- Rounds used (all players): ${allEventRounds.length}`);
-    if (historyCachePaths.length > 0) {
-      summaryLines.push('- Source files (rounds by year):');
-      historyYearsForLog.forEach(year => {
-        const filePath = historyCachePaths.find(candidate => candidate.includes(`_${year}_`)) || 'n/a';
-        const roundsAll = allEventRounds.filter(row => resolveYearFromRow(row) === year).length;
-        summaryLines.push(`\t- ${year}: ${filePath} (all players=${roundsAll})`);
-      });
-    }
-    summaryLines.push('');
-    summaryLines.push('--- STEP 1b: CURRENT-SEASON EVENT-ONLY CORRELATIONS ---');
-    summaryLines.push(`- Event: ${CURRENT_EVENT_ID} | CourseNum: ${sharedConfig.courseNum || 'n/a'}`);
-    const step1bRounds = (IS_PRE_TOURNAMENT_RUN && !HAS_CURRENT_RESULTS)
-      ? 0
-      : (roundsByYear[effectiveSeason]?.length || 0);
-    const step1bNote = (IS_PRE_TOURNAMENT_RUN && !HAS_CURRENT_RESULTS)
-      ? ' (pre-event; current-season results ignored)'
-      : '';
-    summaryLines.push(`- Rounds used: ${step1bRounds}${step1bNote}`);
-    if (approachSnapshotYtd?.path) {
-      summaryLines.push(`- Approach snapshot: ${approachSnapshotYtd.path}`);
-    }
-    if (IS_PRE_TOURNAMENT_RUN && !HAS_CURRENT_RESULTS) {
-      summaryLines.push('- Status: skipped (no current-season results)');
-    }
-    summaryLines.push('');
-    summaryLines.push('--- STEP 1c: EVENT + SIMILAR + PUTTING CORRELATIONS ---');
-    summaryLines.push(`- Event: ${CURRENT_EVENT_ID} | CourseNum: ${sharedConfig.courseNum || 'n/a'}`);
-    const step1cYearList = Array.from(new Set(
-      (step1cRoundsSource || []).map(row => resolveYearFromRow(row)).filter(year => year !== null)
-    )).sort((a, b) => a - b);
-    const step1cYearsForLog = step1cYearList.length > 0 ? step1cYearList : historyYearsForLog;
-    summaryLines.push(`- Years used: ${step1cYearsForLog.join(', ') || historyYearRangeLabel}`);
-    summaryLines.push('- Events included (event + similar + putting) with rounds by year (actual rows used):');
-    if (eventCourseYearSummary.length === 0) {
-      summaryLines.push('\t- none');
-    } else {
-      eventCourseYearSummary.forEach(entry => {
-        const yearParts = step1cYearsForLog.map(year => `${year}: ${entry.yearCounts?.[year] ?? 0}`).join(', ');
-        summaryLines.push(`\t- Event ${entry.eventId} / Course ${entry.courseNum} | ${yearParts} | Total: ${entry.total} | Source: ${historySourceRangeLabel}`);
-      });
-    }
-    if (historyCachePaths.length > 0) {
-      summaryLines.push('- History source files:');
-      historyCachePaths.forEach(filePath => summaryLines.push(`\t- ${filePath}`));
-    }
-    if (approachSnapshotYtd?.path) {
-      summaryLines.push(`- Approach snapshot: ${approachSnapshotYtd.path}`);
-    }
-    summaryLines.push('- Rounds used: multi-season event+similar+putting (see events/courseNums above)');
-    if (trainingMetricNotes?.included?.length) {
-      summaryLines.push(`- Metrics included: ${trainingMetricNotes.included.length} (${trainingMetricNotes.included.join(', ')})`);
-    }
-    if (trainingMetricNotes?.excluded?.length) {
-      summaryLines.push(`- Metrics excluded: ${trainingMetricNotes.excluded.join(', ')}`);
-    }
-    summaryLines.push('');
-    summaryLines.push('--- STEP 1d: CURRENT-SEASON TEMPLATE BASELINE ---');
-    summaryLines.push(`- Years evaluated: ${validationYears.join(', ') || 'none'}`);
-    summaryLines.push('- Rounds by year (actual rows used):');
-    validationYears.forEach(year => {
-      const rounds = roundsByYear[year] || [];
-      summaryLines.push(`\t- ${year}: ${rounds.length} rounds`);
-    });
-    if (IS_PRE_TOURNAMENT_RUN && !HAS_CURRENT_RESULTS) {
-      summaryLines.push('- Status: skipped (no current-season results to evaluate templates)');
-    }
-    summaryLines.push(`- Approach usage: current season (${effectiveSeason}) only`);
-    summaryLines.push('');
-    summaryLines.push('✅ Outputs');
-    if (resultsJsonPath) summaryLines.push(`- Results JSON: ${resultsJsonPath}`);
-    if (resultsTextPath) summaryLines.push(`- Results TXT: ${resultsTextPath}`);
-    if (preEventRankingPath) summaryLines.push(`- Pre-event rankings JSON: ${preEventRankingPath}`);
-    if (preEventRankingCsvPath) summaryLines.push(`- Pre-event rankings CSV: ${preEventRankingCsvPath}`);
-    if (signalReportPath) summaryLines.push(`- Signal contribution report: ${signalReportPath}`);
-    if (dryRunTemplatePath) summaryLines.push(`- Dryrun templates: ${dryRunTemplatePath}`);
-    if (dryRunDeltaScoresPath) summaryLines.push(`- Dryrun delta scores: ${dryRunDeltaScoresPath}`);
-    summaryLines.push(`- Completed: ${summaryTimestamp}`);
-
-    try {
-      fs.writeFileSync(summaryLogPath, summaryLines.join('\n'));
-    } catch (error) {
-      console.warn(`⚠️  Unable to write pre-event summary log: ${error.message}`);
-    }
+    emitCleanSummaryLog();
 
     if (LOGGING_HANDLE && typeof LOGGING_HANDLE.teardown === 'function') {
       LOGGING_HANDLE.teardown();
@@ -11704,7 +12222,7 @@ async function runAdaptiveOptimizer() {
         approachRawData: useApproach ? approachDataCurrent : [],
         groupWeights: adjustedGroupWeights,
         metricWeights: config.metricWeights,
-        includeCurrentEventRounds: resolveIncludeCurrentEventRounds(useApproach ? currentEventRoundsDefaults.currentSeasonBaseline : currentEventRoundsDefaults.historicalEvaluation)
+        includeCurrentEventRounds: resolveIncludeCurrentEventRounds(useApproach ? false : currentEventRoundsDefaults.historicalEvaluation)
       });
 
       perYear[year] = evaluateRankings(ranking.players, results, {
@@ -11911,10 +12429,120 @@ async function runAdaptiveOptimizer() {
   const MAX_TESTS = MAX_TESTS_OVERRIDE
     ?? (Number.isNaN(parsedEnvTests) ? 1500 : parsedEnvTests);
   const optimizedResults = [];
-  const WEIGHT_OBJECTIVE = {
+  const defaultObjectiveWeights = {
     correlation: 0.3,
     top20: 0.5,
     alignment: 0.2
+  };
+  const WEIGHT_OBJECTIVE = resolveObjectiveWeights(defaultObjectiveWeights, {
+    correlation: OPT_OBJECTIVE_CORR,
+    top20: OPT_OBJECTIVE_TOP20,
+    alignment: OPT_OBJECTIVE_ALIGN
+  });
+  optimizationObjectiveWeights = WEIGHT_OBJECTIVE;
+  const objectiveOverrideApplied = [OPT_OBJECTIVE_CORR, OPT_OBJECTIVE_TOP20, OPT_OBJECTIVE_ALIGN]
+    .some(value => typeof value === 'number' && Number.isFinite(value));
+  if (objectiveOverrideApplied) {
+    console.log(`ℹ️  Objective weights override: corr=${WEIGHT_OBJECTIVE.correlation.toFixed(2)}, top20=${WEIGHT_OBJECTIVE.top20.toFixed(2)}, align=${WEIGHT_OBJECTIVE.alignment.toFixed(2)}`);
+  }
+  const approachCapEnabled = typeof APPROACH_GROUP_CAP === 'number' && APPROACH_GROUP_CAP > 0 && APPROACH_GROUP_CAP < 1;
+  let loggedApproachCap = false;
+
+  const aggregateLoeoEvaluations = folds => {
+    if (!Array.isArray(folds) || folds.length === 0) return null;
+    const totals = folds.reduce((acc, evaluation) => {
+      const weight = evaluation?.matchedPlayers || 0;
+      acc.matchedPlayers += weight;
+      acc.correlation += (evaluation?.correlation || 0) * weight;
+      acc.rmse += (evaluation?.rmse || 0) * weight;
+      acc.rSquared += (evaluation?.rSquared || 0) * weight;
+      acc.meanError += (evaluation?.meanError || 0) * weight;
+      acc.stdDevError += (evaluation?.stdDevError || 0) * weight;
+      acc.mae += (evaluation?.mae || 0) * weight;
+      if (typeof evaluation?.top10 === 'number') {
+        acc.top10 += evaluation.top10 * weight;
+      }
+      if (typeof evaluation?.top20 === 'number') {
+        acc.top20 += evaluation.top20 * weight;
+        acc.top20WeightedScore += (evaluation?.top20WeightedScore || 0) * weight;
+      }
+      return acc;
+    }, {
+      correlation: 0,
+      rmse: 0,
+      rSquared: 0,
+      meanError: 0,
+      stdDevError: 0,
+      mae: 0,
+      top10: 0,
+      top20: 0,
+      top20WeightedScore: 0,
+      matchedPlayers: 0
+    });
+
+    if (totals.matchedPlayers === 0) return null;
+    return {
+      correlation: totals.correlation / totals.matchedPlayers,
+      rmse: totals.rmse / totals.matchedPlayers,
+      rSquared: totals.rSquared / totals.matchedPlayers,
+      meanError: totals.meanError / totals.matchedPlayers,
+      stdDevError: totals.stdDevError / totals.matchedPlayers,
+      mae: totals.mae / totals.matchedPlayers,
+      top10: totals.top10 > 0 ? totals.top10 / totals.matchedPlayers : null,
+      top20: totals.top20 > 0 ? totals.top20 / totals.matchedPlayers : null,
+      top20WeightedScore: totals.top20WeightedScore > 0 ? totals.top20WeightedScore / totals.matchedPlayers : null,
+      matchedPlayers: totals.matchedPlayers
+    };
+  };
+
+  const runCurrentSeasonLoeo = ({ groupWeights, metricWeights }) => {
+    const yearRows = historyData.filter(row => {
+      const rowYear = parseInt(String(row?.year || row?.season || '').trim(), 10);
+      return !Number.isNaN(rowYear) && rowYear === effectiveSeason;
+    });
+    if (!yearRows.length) return null;
+
+    const events = new Map();
+    yearRows.forEach(row => {
+      const eventId = String(row?.event_id || '').trim();
+      if (!eventId) return;
+      if (!events.has(eventId)) events.set(eventId, []);
+      events.get(eventId).push(row);
+    });
+
+    const eventEntries = Array.from(events.entries());
+    if (eventEntries.length < 3) return null;
+
+    const fieldDataOverride = buildFieldDataFromHistory(yearRows, null);
+    const useApproach = approachDataCurrent.length > 0;
+    const adjustedGroupWeights = useApproach
+      ? groupWeights
+      : removeApproachGroupWeights(groupWeights);
+
+    const foldEvaluations = [];
+    eventEntries.forEach(([eventId, eventRows]) => {
+      const testRows = eventRows || [];
+      const trainingRows = yearRows.filter(row => String(row?.event_id || '').trim() !== String(eventId).trim());
+      if (trainingRows.length < 30 || testRows.length < 10) return;
+      const ranking = runRanking({
+        roundsRawData: trainingRows,
+        approachRawData: useApproach ? approachDataCurrent : [],
+        groupWeights: adjustedGroupWeights,
+        metricWeights,
+        includeCurrentEventRounds: false,
+        fieldDataOverride
+      });
+      const testResults = buildResultsFromRows(testRows);
+      if (!testResults.length) return;
+      const evaluation = evaluateRankings(ranking.players, testResults, {
+        includeTopN: true,
+        includeTopNDetails: false,
+        includeAdjusted: true
+      });
+      foldEvaluations.push(evaluation);
+    });
+
+    return aggregateLoeoEvaluations(foldEvaluations);
   };
   
   for (let i = 0; i < MAX_TESTS; i++) {
@@ -11927,7 +12555,19 @@ async function runAdaptiveOptimizer() {
       weights[groupName] = Math.max(0.001, weights[groupName] * (1 + adjustment));
     }
 
-    const normalizedWeights = normalizeWeights(weights);
+    let normalizedWeights = normalizeWeights(weights);
+    if (approachCapEnabled) {
+      if (!loggedApproachCap) {
+        const approachTotal = Object.entries(normalizedWeights)
+          .filter(([key]) => String(key).toLowerCase().startsWith('approach'))
+          .reduce((sum, [, value]) => sum + (value || 0), 0);
+        if (approachTotal > APPROACH_GROUP_CAP) {
+          console.log(`ℹ️  Approach group cap enabled: ${APPROACH_GROUP_CAP.toFixed(2)} (pre-cap=${approachTotal.toFixed(2)})`);
+          loggedApproachCap = true;
+        }
+      }
+      normalizedWeights = applyApproachGroupCap(normalizedWeights, APPROACH_GROUP_CAP);
+    }
     let adjustedMetricWeights = adjustMetricWeights(optimizationTemplate.metricWeights, metricConfig, METRIC_GRID_RANGE);
     if (validationMetricConstraints && Object.keys(validationMetricConstraints).length > 0) {
       adjustedMetricWeights = applyMetricWeightConstraints(metricConfig, adjustedMetricWeights, validationMetricConstraints);
@@ -11976,6 +12616,35 @@ async function runAdaptiveOptimizer() {
     if (scoreDiff !== 0) return scoreDiff;
     return b.correlation - a.correlation;
   });
+  if (OPT_LOEO_PENALTY > 0 && OPT_LOEO_TOP_N > 0) {
+    const candidateCount = Math.min(OPT_LOEO_TOP_N, optimizedResults.length);
+    let loeoApplied = 0;
+    console.log(`ℹ️  Applying LOEO penalty to top ${candidateCount} candidates (weight=${OPT_LOEO_PENALTY.toFixed(2)}).`);
+    optimizedResults.slice(0, candidateCount).forEach(candidate => {
+      const loeoEvaluation = runCurrentSeasonLoeo({
+        groupWeights: candidate.weights,
+        metricWeights: candidate.metricWeights
+      });
+      const loeoScore = loeoEvaluation ? buildTop20CompositeScore(loeoEvaluation) : 0;
+      if (loeoEvaluation) {
+        candidate.loeoEvaluation = loeoEvaluation;
+        candidate.loeoScore = loeoScore;
+        candidate.combinedScore = (1 - OPT_LOEO_PENALTY) * candidate.combinedScore + OPT_LOEO_PENALTY * loeoScore;
+        loeoApplied += 1;
+      }
+    });
+    if (loeoApplied > 0) {
+      optimizedResults.sort((a, b) => {
+        const scoreDiff = (b.combinedScore || 0) - (a.combinedScore || 0);
+        if (scoreDiff !== 0) return scoreDiff;
+        return b.correlation - a.correlation;
+      });
+      console.log(`ℹ️  LOEO penalty applied to ${loeoApplied} candidates; rankings updated.`);
+    } else {
+      console.log('ℹ️  LOEO penalty skipped (no valid LOEO evaluations).');
+    }
+  }
+
   const bestOptimized = optimizedResults[0];
   
   console.log(`\n✅ Best Optimized: ${bestOptimized.correlation.toFixed(4)}`);
@@ -12779,7 +13448,7 @@ async function runAdaptiveOptimizer() {
   console.log(`ℹ️  Standard template selection: ${effectiveStandardTemplateKey || 'none'} (source=${effectiveStandardTemplateSource}${effectiveStandardTemplateRaw ? `, raw=${effectiveStandardTemplateRaw}` : ''})`);
 
   const output = {
-    timestamp: new Date().toISOString(),
+    timestamp: formatTimestamp(new Date()),
     eventId: CURRENT_EVENT_ID,
     tournament: TOURNAMENT_NAME || 'Sony Open',
     dryRun: DRY_RUN,
@@ -12969,6 +13638,9 @@ async function runAdaptiveOptimizer() {
       top20CompositeScore: bestOptimized.top20Score,
       combinedObjectiveScore: bestOptimized.combinedScore,
       objectiveWeights: WEIGHT_OBJECTIVE,
+      loeoPenaltyWeight: OPT_LOEO_PENALTY || 0,
+      loeoTopN: OPT_LOEO_TOP_N || 0,
+      loeoScore: typeof bestOptimized.loeoScore === 'number' ? bestOptimized.loeoScore : null,
       rankingsCurrentYear: formatRankingPlayers(optimizedRankingCurrent.players),
       metricStatsDiagnostics,
       baselineTemplate: bestTemplate.name,
@@ -13007,13 +13679,19 @@ async function runAdaptiveOptimizer() {
   const baseName = normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback)
     || `event-${CURRENT_EVENT_ID}`;
   const outputTagRaw = String(process.env.OUTPUT_TAG || '').trim();
+  const kfoldTag = resolveKFoldTag(process.env.EVENT_KFOLD_K);
+  const outputTagForBase = IS_POST_TOURNAMENT_RUN
+    ? [kfoldTag.tag, outputTagRaw].filter(Boolean).join('_')
+    : (outputTagRaw || null);
   const outputBaseName = buildOutputBaseName({
     tournamentSlug: canonicalTournamentSlug || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
     tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
     eventId: CURRENT_EVENT_ID,
     seed: OPT_SEED_RAW || null,
-    outputTag: outputTagRaw || null
+    outputTag: outputTagForBase
   });
+  summaryOutputBaseName = outputBaseName;
+  summaryTournamentSlug = canonicalTournamentSlug || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback) || null;
 
   const outputPath = buildArtifactPath({
     artifactType: OUTPUT_ARTIFACTS.POST_EVENT_RESULTS_JSON,
@@ -13027,6 +13705,7 @@ async function runAdaptiveOptimizer() {
     console.log(`🗄️  Backed up previous JSON results to: ${backupJsonPath}`);
   }
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
+  resultsJsonPath = outputPath;
 
   
   const validationTypeToUpdate = effectiveStandardTemplateKey;
@@ -13045,6 +13724,122 @@ async function runAdaptiveOptimizer() {
   const shouldUpdateStandardTemplate = typeof validationImprovementPct === 'number'
     ? validationImprovementPct >= 0.01
     : false;
+
+  const buildHumanSummaryLines = () => {
+    const lines = [];
+    const formatPct = value => (typeof value === 'number' ? `${value.toFixed(1)}%` : 'n/a');
+    const formatNum = (value, digits = 4) => (typeof value === 'number' ? value.toFixed(digits) : 'n/a');
+    const baselineTop20 = baselineEvaluation?.top20WeightedScore ?? null;
+    const optimizedTop20 = bestOptimized?.top20WeightedScore ?? null;
+    const baselineCorr = baselineEvaluation?.correlation ?? null;
+    const optimizedCorr = bestOptimized?.correlation ?? null;
+    const seedToken = OPT_SEED_RAW ? `OPT_SEED=${OPT_SEED_RAW}` : 'OPT_SEED=<seed>';
+    const envPrefix = [
+      TOURNAMENT_NAME ? `TOURNAMENT_NAME=\"${TOURNAMENT_NAME}\"` : null,
+      CURRENT_EVENT_ID ? `CURRENT_EVENT_ID=${CURRENT_EVENT_ID}` : null,
+      CURRENT_SEASON ? `CURRENT_SEASON=${CURRENT_SEASON}` : null,
+      OUTPUT_DIR ? `OUTPUT_DIR=\"${OUTPUT_DIR}\"` : null,
+      seedToken
+    ].filter(Boolean).join(' ');
+    const runArgs = [
+      '--event', CURRENT_EVENT_ID ? String(CURRENT_EVENT_ID) : null,
+      '--season', CURRENT_SEASON ? String(CURRENT_SEASON) : null,
+      '--name', TOURNAMENT_NAME ? `"${TOURNAMENT_NAME}"` : null,
+      IS_POST_TOURNAMENT_RUN ? '--post' : null,
+      LOGGING_ENABLED ? '--log' : null
+    ].filter(Boolean).join(' ');
+    const kfoldHasSummary = baselineEventKFoldSummary && optimizedEventKFoldSummary
+      && baselineEventKFoldSummary.matchedPlayers
+      && optimizedEventKFoldSummary.matchedPlayers;
+    const kfoldCorrDelta = kfoldHasSummary
+      ? optimizedEventKFoldSummary.correlation - baselineEventKFoldSummary.correlation
+      : null;
+    const kfoldRmseDelta = kfoldHasSummary
+      ? optimizedEventKFoldSummary.rmse - baselineEventKFoldSummary.rmse
+      : null;
+    const kfoldTop20WDelta = kfoldHasSummary
+      ? optimizedEventKFoldSummary.top20WeightedScore - baselineEventKFoldSummary.top20WeightedScore
+      : null;
+    const optimizedConfidenceScore = optimizedEventKFoldSummary?.confidence?.score;
+    const optimizedConfidenceText = typeof optimizedConfidenceScore === 'number'
+      ? `${(optimizedConfidenceScore * 100).toFixed(0)}%`
+      : 'n/a';
+
+    const avgTop20Weighted = resultsMap => {
+      const values = Object.values(resultsMap || {})
+        .map(entry => entry?.top20WeightedScore)
+        .filter(value => typeof value === 'number' && Number.isFinite(value));
+      if (!values.length) return null;
+      return values.reduce((sum, value) => sum + value, 0) / values.length;
+    };
+
+    const baselineMultiAvg = avgTop20Weighted(baselineMultiYearResults);
+    const optimizedMultiAvg = avgTop20Weighted(optimizedMultiYearResults);
+    const baselineFailures = Object.values(baselineMultiYearResults || {}).filter(entry => {
+      const stress = evaluateStressTest(entry, { minPlayers: 20, minCorr: 0.1, minTop20Weighted: 60 });
+      return stress?.status === 'fail';
+    }).length;
+    const optimizedFailures = Object.values(optimizedMultiYearResults || {}).filter(entry => {
+      const stress = evaluateStressTest(entry, { minPlayers: 20, minCorr: 0.1, minTop20Weighted: 60 });
+      return stress?.status === 'fail';
+    }).length;
+
+    lines.push('HUMAN READABLE SUMMARY');
+    lines.push('  • Correlation ≈ “ranking agreement” (higher is better).');
+    lines.push('  • RMSE/MAE ≈ “how far off the predicted finish positions are” (lower is better).');
+    lines.push('  • Top-20% = how often the model’s Top‑20 includes actual Top‑20 finishers.');
+    lines.push('');
+    lines.push(`  Current‑year baseline vs optimized:`);
+    lines.push(`    - Correlation: ${formatNum(baselineCorr)} → ${formatNum(optimizedCorr)} (${formatNum((optimizedCorr ?? 0) - (baselineCorr ?? 0), 4)})`);
+    lines.push(`    - Top‑20 weighted: ${formatPct(baselineTop20)} → ${formatPct(optimizedTop20)}`);
+    lines.push(`    - Verdict: ${optimizedCorr > baselineCorr ? 'Optimized improved current‑year fit.' : 'Optimized did not improve current‑year fit.'}`);
+    lines.push('');
+    lines.push('  Multi‑year validation (stability across years):');
+    lines.push(`    - Avg Top‑20 weighted: ${formatPct(baselineMultiAvg)} → ${formatPct(optimizedMultiAvg)}`);
+    lines.push(`    - Stress fails (lower is better): ${baselineFailures} → ${optimizedFailures}`);
+    lines.push('');
+
+    if (baselineEventKFoldSummary && optimizedEventKFoldSummary && baselineEventKFoldSummary.matchedPlayers && optimizedEventKFoldSummary.matchedPlayers) {
+      const corrDelta = optimizedEventKFoldSummary.correlation - baselineEventKFoldSummary.correlation;
+      const rmseDelta = optimizedEventKFoldSummary.rmse - baselineEventKFoldSummary.rmse;
+      const top20WDelta = optimizedEventKFoldSummary.top20WeightedScore - baselineEventKFoldSummary.top20WeightedScore;
+      lines.push('  Event K‑fold (generalization across events):');
+      lines.push(`    - Δ Corr=${formatNum(corrDelta)}, Δ RMSE=${formatNum(rmseDelta, 2)}, Δ Top‑20W=${formatNum(top20WDelta, 1)}%`);
+      lines.push(`    - Verdict: ${kfoldGateApplied ? 'Regression detected; avoid using optimized weights.' : 'No regression detected.'}`);
+    } else {
+      lines.push('  Event K‑fold: not enough data to interpret.');
+    }
+
+    lines.push('');
+    lines.push(`  Recommendation: ${recommendationApproach}`);
+    if (recommendationNote) {
+      lines.push(`  Note: ${recommendationNote}`);
+    }
+
+    if (kfoldGateApplied) {
+      const kfoldSummaryLine = kfoldHasSummary
+        ? `    - K-fold deltas: Δ Corr=${formatNum(kfoldCorrDelta)}, Δ RMSE=${formatNum(kfoldRmseDelta, 2)}, Δ Top-20W=${formatNum(kfoldTop20WDelta, 1)}%`
+        : '    - K-fold deltas: n/a (insufficient data)';
+      const confidenceLine = `    - Optimized fold confidence: ${optimizedConfidenceText} (gate=${(KFOLD_GATE_CONFIDENCE * 100).toFixed(0)}%)`;
+      lines.push('');
+      lines.push('  Layman recommendation (regression detected):');
+      lines.push('    - Do NOT upsert/write templates. Stick with baseline weights.');
+      lines.push('    - Regression means the optimized weights did worse when generalized across events.');
+      lines.push(kfoldSummaryLine);
+      lines.push(confidenceLine);
+      lines.push('    - Re-run a few alternates to confirm stability before changing weights.');
+      lines.push('    - If alternates still regress, keep baseline and wait for more data.');
+      lines.push('');
+      lines.push('  Alternate tests (copy/paste):');
+      lines.push(`    - ${envPrefix} APPROACH_GROUP_CAP=0.35 OUTPUT_TAG=exp_cap node core/optimizer.js${runArgs ? ` ${runArgs}` : ''}`);
+      lines.push(`    - ${envPrefix} APPROACH_BLEND_WEIGHTS=\"0.6,0.3,0.1\" OUTPUT_TAG=exp_blend node core/optimizer.js${runArgs ? ` ${runArgs}` : ''}`);
+      lines.push(`    - ${envPrefix} OPT_LOEO_PENALTY=0.25 OPT_LOEO_TOP_N=50 OUTPUT_TAG=exp_loeo node core/optimizer.js${runArgs ? ` ${runArgs}` : ''}`);
+      lines.push(`    - ${envPrefix} EVENT_KFOLD_K=5 OUTPUT_TAG=kfold5 node core/optimizer.js${runArgs ? ` ${runArgs}` : ''}`);
+    }
+
+    return lines;
+  };
+  const humanSummaryLines = buildHumanSummaryLines();
 
   const textLines = [];
   textLines.push('='.repeat(100));
@@ -13544,7 +14339,7 @@ async function runAdaptiveOptimizer() {
   }
   textLines.push('');
     textLines.push('EVENT K-FOLD SETTINGS');
-    textLines.push(`  EVENT_KFOLD_K: ${process.env.EVENT_KFOLD_K || 'LOEO (default)'}`);
+    textLines.push(`  EVENT_KFOLD_K: ${resolveKFoldTag(process.env.EVENT_KFOLD_K).tag}`);
     textLines.push(`  EVENT_KFOLD_SEED: ${process.env.EVENT_KFOLD_SEED || (OPT_SEED_RAW || `${CURRENT_EVENT_ID}-${CURRENT_SEASON}`)}`);
     textLines.push(`  OPT_SEED: ${OPT_SEED_RAW || 'n/a'}`);
     textLines.push('');
@@ -13697,6 +14492,9 @@ async function runAdaptiveOptimizer() {
   }
   textLines.push('');
   textLines.push('---');
+  textLines.push('');
+  humanSummaryLines.forEach(line => textLines.push(line));
+  textLines.push('');
   const textOutputPath = buildArtifactPath({
     artifactType: OUTPUT_ARTIFACTS.POST_EVENT_RESULTS_TXT,
     outputBaseName,
@@ -13709,6 +14507,7 @@ async function runAdaptiveOptimizer() {
     console.log(`🗄️  Backed up previous text results to: ${backupTextPath}`);
   }
   fs.writeFileSync(textOutputPath, textLines.join('\n'));
+  resultsTextPath = textOutputPath;
 
   const optimizedTop20Desc = typeof bestOptimized.top20 === 'number' ? `${bestOptimized.top20.toFixed(1)}%` : 'n/a';
   const optimizedTop20WeightedDesc = typeof bestOptimized.top20WeightedScore === 'number' ? `${bestOptimized.top20WeightedScore.toFixed(1)}%` : 'n/a';
@@ -13866,11 +14665,16 @@ async function runAdaptiveOptimizer() {
         dryRun: validationDryRun,
         dryRunDir: null
       });
+      if (validationResult?.inputSummary) {
+        validationRunSummary = validationResult.inputSummary;
+      }
       console.log(`✅ Validation outputs written to: ${validationResult.outputDir}`);
     }
   } catch (error) {
     console.warn(`⚠️  Validation runner failed: ${error.message}`);
   }
+
+  emitCleanSummaryLog({ humanSummaryLines });
 
   const shouldSummarizeSeeds = !!OPT_SEED_RAW || (OUTPUT_DIR && path.basename(OUTPUT_DIR) === 'seed_runs');
   if (shouldSummarizeSeeds) {

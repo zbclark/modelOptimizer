@@ -8,6 +8,7 @@ const { parsePosition } = require('../utilities/dataPrep');
 const { parseEventDate } = require('../utilities/dataPrep');
 const { getDataGolfHistoricalRounds } = require('../utilities/dataGolfClient');
 const { extractHistoricalRowsFromSnapshotPayload } = require('../utilities/extractHistoricalRows');
+const { formatTimestamp, formatDateKey } = require('../utilities/timeUtils');
 
 const args = process.argv.slice(2);
 let OVERRIDE_DIR = null;
@@ -456,7 +457,7 @@ groupByPlayerSeason.forEach((events, key) => {
     events: window.map((event, idx) => ({
       index: idx + 1,
       eventId: event.eventId,
-      eventCompleted: event.eventCompleted.toISOString().slice(0, 10),
+      eventCompleted: formatDateKey(event.eventCompleted),
       performance: event.performance
     }))
   });
@@ -600,7 +601,7 @@ const peakTimingSummary = buildPeakTimingSummary();
 
 const output = {
   meta: {
-    createdAt: new Date().toISOString(),
+    createdAt: formatTimestamp(new Date()),
     source: sourceMeta,
     window: {
       maxEvents,

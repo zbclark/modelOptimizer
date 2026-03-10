@@ -232,6 +232,83 @@ const WEIGHT_TEMPLATES = {
       }
     }
   },
+  TPC_SAWGRASS: {
+    name: "TPC_SAWGRASS",
+    eventId: "11",
+    description: "The PLAYERS Championship (TPC Sawgrass) 2026 stub — 2026-03-12",
+    groupWeights: {
+      "Driving Performance": 0.09,
+      "Approach - Short (<100)": 0.148,
+      "Approach - Mid (100-150)": 0.19,
+      "Approach - Long (150-200)": 0.16,
+      "Approach - Very Long (>200)": 0.035,
+      "Putting": 0.115,
+      "Around the Green": 0.1,
+      "Scoring": 0.105,
+      "Course Management": 0.057
+    },
+    metricWeights: {
+      "Driving Performance": {
+        "Driving Distance": { weight: 0.061 },
+        "Driving Accuracy": { weight: 0.41 },
+        "SG OTT": { weight: 0.529 }
+      },
+      "Approach - Short (<100)": {
+        "Approach <100 GIR": { weight: 0.12 },
+        "Approach <100 SG": { weight: 0.34 },
+        "Approach <100 Prox": { weight: 0.54 }
+      },
+      "Approach - Mid (100-150)": {
+        "Approach <150 FW GIR": { weight: 0.1 },
+        "Approach <150 FW SG": { weight: 0.3 },
+        "Approach <150 FW Prox": { weight: 0.6 },
+        "Approach <150 Rough GIR": { weight: 0.1 },
+        "Approach <150 Rough SG": { weight: 0.3 },
+        "Approach <150 Rough Prox": { weight: 0.6 }
+      },
+      "Approach - Long (150-200)": {
+        "Approach <200 FW GIR": { weight: 0.09 },
+        "Approach <200 FW SG": { weight: 0.28 },
+        "Approach <200 FW Prox": { weight: 0.63 },
+        "Approach >150 Rough GIR": { weight: 0.09 },
+        "Approach >150 Rough SG": { weight: 0.28 },
+        "Approach >150 Rough Prox": { weight: 0.63 }
+      },
+      "Approach - Very Long (>200)": {
+        "Approach >200 FW GIR": { weight: 0.09 },
+        "Approach >200 FW SG": { weight: 0.24 },
+        "Approach >200 FW Prox": { weight: 0.67 }
+      },
+      "Putting": {
+        "SG Putting": { weight: 1 }
+      },
+      "Around the Green": {
+        "SG Around Green": { weight: 1 }
+      },
+      "Scoring": {
+        "SG T2G": { weight: 0.19 },
+        "Scoring Average": { weight: 0.11 },
+        "Birdie Chances Created": { weight: 0.1 },
+        "Scoring: Approach <100 SG": { weight: 0.15 },
+        "Scoring: Approach <150 FW SG": { weight: 0.15 },
+        "Scoring: Approach <150 Rough SG": { weight: 0.15 },
+        "Scoring: Approach <200 FW SG": { weight: 0.07 },
+        "Scoring: Approach >200 FW SG": { weight: 0.03 },
+        "Scoring: Approach >150 Rough SG": { weight: 0.05 }
+      },
+      "Course Management": {
+        "Scrambling": { weight: 0.12 },
+        "Great Shots": { weight: 0.08 },
+        "Poor Shot Avoidance": { weight: 0.08 },
+        "Course Management: Approach <100 Prox": { weight: 0.12 },
+        "Course Management: Approach <150 FW Prox": { weight: 0.12 },
+        "Course Management: Approach <150 Rough Prox": { weight: 0.16 },
+        "Course Management: Approach >150 Rough Prox": { weight: 0.18 },
+        "Course Management: Approach <200 FW Prox": { weight: 0.11 },
+        "Course Management: Approach >200 FW Prox": { weight: 0.03 }
+      }
+    }
+  },
   TPC_LOUISIANA: {
     name: "TPC_LOUISIANA",
     eventId: "18",

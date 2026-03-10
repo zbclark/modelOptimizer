@@ -46,16 +46,19 @@ if (!TOURNAMENT_NAME && !EVENT_ID) {
   process.exit(1);
 }
 
-const baseName = (TOURNAMENT_NAME || `event_${EVENT_ID}`)
-  .toLowerCase()
-  .replace(/\s+/g, '_')
-  .replace(/[^a-z0-9_\-]/g, '');
+const tournamentSlug = normalizeTournamentSlug(TOURNAMENT_NAME || '');
+const baseName = buildOutputBaseName({
+  tournamentName: TOURNAMENT_NAME,
+  tournamentSlug: tournamentSlug || null,
+  eventId: EVENT_ID
+});
 
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const escapedBaseName = escapeRegExp(baseName);
-const seedJsonRegex = new RegExp(`^(?:optimizer_)?${escapedBaseName}_seed-.+_(?:post_(?:tournament|event)_)?results\\.json$`);
-const seedResultRegex = new RegExp(`^(?:optimizer_)?${escapedBaseName}_seed-.+_(?:post_(?:tournament|event)_)?results\\.(json|txt)$`);
-const seedLogRegex = new RegExp(`^(?:optimizer_)?${escapedBaseName}_seed-.*(?:_post_(?:tournament|event)_)?log\\.(?:txt|log)$`);
+const basePattern = escapedBaseName.replace(/[-_]/g, '[-_]');
+const seedJsonRegex = new RegExp(`^(?:optimizer_)?${basePattern}_seed-.+(?:_(?:LOEO|KFOLD\\d+))?_(?:post_(?:tournament|event)_)?results\\.json$`);
+const seedResultRegex = new RegExp(`^(?:optimizer_)?${basePattern}_seed-.+(?:_(?:LOEO|KFOLD\\d+))?_(?:post_(?:tournament|event)_)?results\\.(json|txt)$`);
+const seedLogRegex = new RegExp(`^(?:optimizer_)?${basePattern}_seed-.*(?:_(?:LOEO|KFOLD\\d+))?(?:_post_(?:tournament|event)_)?log\\.(?:txt|log)$`);
 
 function normalizeTournamentSlug(value) {
   const normalized = String(value || '')
@@ -301,14 +304,22 @@ console.log(`✅ Seed summary written to: ${summaryPath}`);
 
 const bestSeed = best.seed || null;
 const keptFiles = new Set([summaryPath]);
+const bestTagMatch = best?.file ? best.file.match(/_(LOEO|KFOLD\d+)_post_(?:event|tournament)_results\.json$/i) : null;
+const bestTag = bestTagMatch ? bestTagMatch[1] : null;
 
 if (bestSeed) {
   const legacyBase = `${baseName}_seed-${bestSeed}`;
   const optimizerBase = `optimizer_${baseName}_seed-${bestSeed}`;
+  const tagVariants = bestTag ? [bestTag] : [];
+  if (!tagVariants.includes('LOEO')) tagVariants.push('LOEO');
   const candidateNames = [
     // Current naming (preferred).
     `${legacyBase}_post_event_results.json`,
     `${legacyBase}_post_event_results.txt`,
+
+    // Tagged naming (LOEO/KFOLD).
+    ...tagVariants.map(tag => `${legacyBase}_${tag}_post_event_results.json`),
+    ...tagVariants.map(tag => `${legacyBase}_${tag}_post_event_results.txt`),
 
     // Back-compat for older naming.
     `${legacyBase}_post_tournament_results.json`,
@@ -317,13 +328,17 @@ if (bestSeed) {
     // Back-compat for legacy optimizer_-prefixed artifacts.
     `${optimizerBase}_post_event_results.json`,
     `${optimizerBase}_post_event_results.txt`,
+    ...tagVariants.map(tag => `${optimizerBase}_${tag}_post_event_results.json`),
+    ...tagVariants.map(tag => `${optimizerBase}_${tag}_post_event_results.txt`),
     `${optimizerBase}_post_tournament_results.json`,
     `${optimizerBase}_post_tournament_results.txt`,
 
     // Keep the best seed log output as well (new + legacy).
     `${legacyBase}_post_event_log.txt`,
+    ...tagVariants.map(tag => `${legacyBase}_${tag}_post_event_log.txt`),
     `${legacyBase}_post_tournament_log.txt`,
     `${optimizerBase}_post_event_log.txt`,
+    ...tagVariants.map(tag => `${optimizerBase}_${tag}_post_event_log.txt`),
     `${optimizerBase}_post_tournament_log.txt`,
     `${legacyBase}_log.txt`,
     `${optimizerBase}_log.txt`,
@@ -341,6 +356,12 @@ if (bestSeed) {
     }
   });
 }
+
+const summaryLogPattern = /_post_(?:event|tournament)_log\.txt$/i;
+fs.readdirSync(effectiveOutputDir).forEach(name => {
+  if (!summaryLogPattern.test(name)) return;
+  keptFiles.add(path.resolve(effectiveOutputDir, name));
+});
 
 const skipCleanup = ['1', 'true', 'yes'].includes(String(process.env.SKIP_SEED_CLEANUP || '').trim().toLowerCase());
 if (skipCleanup) {

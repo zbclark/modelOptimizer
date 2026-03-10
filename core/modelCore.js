@@ -941,6 +941,11 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     if (index >= rampMaxEvents) return 0;
     return Math.max(0, Math.min(1, 1 - (index / rampMaxEvents)));
   };
+  const getEventYear = (eventKey, event) => {
+    if (typeof event?.year === 'number' && !Number.isNaN(event.year)) return event.year;
+    const keyYear = parseInt(String(eventKey || '').split('-').pop(), 10);
+    return Number.isFinite(keyYear) ? keyYear : null;
+  };
   const traceMetricNames = [
     'strokesGainedTotal', 'drivingDistance', 'drivingAccuracy', 'strokesGainedT2G',
     'strokesGainedApp', 'strokesGainedArg', 'strokesGainedOTT', 'strokesGainedPutt',
@@ -1398,7 +1403,9 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     const minutes = teeTimes
       .map(entry => {
         if (entry && typeof entry === 'object') {
-          return parseTeeTimeValue(entry.time || entry.tee_time || entry.teeTime || entry.start || entry.startTime);
+          return parseTeeTimeValue(
+            entry.time || entry.tee_time || entry.teeTime || entry.teetime || entry.start || entry.startTime
+          );
         }
         return parseTeeTimeValue(entry);
       })
@@ -1471,6 +1478,16 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     return null;
   };
 
+  const addDaysToDateKey = (dateKey, days = 0) => {
+    if (!dateKey) return null;
+    const safe = String(dateKey).trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(safe)) return null;
+    const [year, month, day] = safe.split('-').map(value => parseInt(value, 10));
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
+    const dt = new Date(Date.UTC(year, month - 1, day + days));
+    return dt.toISOString().slice(0, 10);
+  };
+
   const resolveWaveForRound = (player, roundNum) => {
     if (!player || !roundNum) return null;
     const waveByRound = player.waveByRound || {};
@@ -1487,7 +1504,81 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     return null;
   };
 
-  const applyWeatherWavePenalty = (metrics, player) => {
+  const parseTeeTimeToMinutes = value => {
+    if (!value) return null;
+    if (value instanceof Date && !isNaN(value.getTime())) {
+      return value.getHours() * 60 + value.getMinutes();
+    }
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      const dt = new Date(value);
+      if (!isNaN(dt.getTime())) {
+        return dt.getHours() * 60 + dt.getMinutes();
+      }
+    }
+    if (typeof value !== 'string') return null;
+    const raw = value.trim();
+    if (!raw) return null;
+    const parsed = new Date(raw);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.getHours() * 60 + parsed.getMinutes();
+    }
+    const timeMatch = raw.match(/^\s*(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?\s*$/i);
+    if (timeMatch) {
+      const hours = parseInt(timeMatch[1], 10);
+      const minutes = parseInt(timeMatch[2] || '0', 10);
+      const meridiem = (timeMatch[3] || '').toUpperCase();
+      if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+      let normalizedHours = hours % 12;
+      if (meridiem === 'PM') normalizedHours += 12;
+      return normalizedHours * 60 + minutes;
+    }
+    return null;
+  };
+
+  const getRoundTeeTimeMinutes = (player, roundNum) => {
+    if (!player || !Array.isArray(player.teeTimes)) return null;
+    const entry = player.teeTimes.find(item => {
+      if (!item || typeof item !== 'object') return false;
+      const entryRound = Number(item.round_num ?? item.roundNum ?? item.round ?? NaN);
+      return Number.isFinite(entryRound) && entryRound === Number(roundNum);
+    });
+    if (!entry) return null;
+    return parseTeeTimeToMinutes(
+      entry.time || entry.tee_time || entry.teeTime || entry.teetime || entry.start || entry.startTime
+    );
+  };
+
+  const sumHourlyPenaltyForRound = (roundNum, player) => {
+    const hourlyPenalties = config?.weatherHourlyPenalties;
+    const dateStart = config?.weatherDateStart;
+    if (!hourlyPenalties || !dateStart) return null;
+    const teeMinutes = getRoundTeeTimeMinutes(player, roundNum);
+    if (!Number.isFinite(teeMinutes)) return null;
+    const roundDurationHours = typeof config?.weatherRoundDurationHours === 'number'
+      ? config.weatherRoundDurationHours
+      : 4.25;
+    const durationMinutes = roundDurationHours * 60;
+    const endMinutes = teeMinutes + durationMinutes;
+    const baseDate = addDaysToDateKey(dateStart, roundNum - 1);
+    if (!baseDate) return null;
+
+    const startHour = Math.floor(teeMinutes / 60);
+    const endHour = Math.floor((endMinutes - 1) / 60);
+    let total = 0;
+    for (let hourIndex = startHour; hourIndex <= endHour; hourIndex += 1) {
+      const dayOffset = Math.floor(hourIndex / 24);
+      const hour = ((hourIndex % 24) + 24) % 24;
+      const dateKey = addDaysToDateKey(baseDate, dayOffset);
+      if (!dateKey) continue;
+      const penaltyForHour = hourlyPenalties?.[dateKey]?.[hour];
+      if (typeof penaltyForHour === 'number' && Number.isFinite(penaltyForHour)) {
+        total += penaltyForHour;
+      }
+    }
+    return total;
+  };
+
+  const applyWeatherWavePenalty = (metrics, player, courseSetupWeights) => {
     const enabled = getEnvNumber('MODEL_WEATHER_WAVE_ENABLED', 0) > 0;
     if (!enabled || !Array.isArray(metrics)) {
       return { metrics, summary: { enabled: false } };
@@ -1496,10 +1587,11 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     const round1Wave = resolveWaveForRound(player, 1);
     const round2Wave = resolveWaveForRound(player, 2);
 
-    const penaltyR1Early = getEnvNumber('MODEL_WEATHER_WAVE_R1_EARLY_PENALTY', 0);
-    const penaltyR1Late = getEnvNumber('MODEL_WEATHER_WAVE_R1_LATE_PENALTY', 0);
-    const penaltyR2Early = getEnvNumber('MODEL_WEATHER_WAVE_R2_EARLY_PENALTY', 0);
-    const penaltyR2Late = getEnvNumber('MODEL_WEATHER_WAVE_R2_LATE_PENALTY', 0);
+    const basePenalties = config?.weatherBasePenalties || null;
+    const penaltyR1Early = basePenalties ? (basePenalties.R1_AM || 0) : getEnvNumber('MODEL_WEATHER_WAVE_R1_EARLY_PENALTY', 0);
+    const penaltyR1Late = basePenalties ? (basePenalties.R1_PM || 0) : getEnvNumber('MODEL_WEATHER_WAVE_R1_LATE_PENALTY', 0);
+    const penaltyR2Early = basePenalties ? (basePenalties.R2_AM || 0) : getEnvNumber('MODEL_WEATHER_WAVE_R2_EARLY_PENALTY', 0);
+    const penaltyR2Late = basePenalties ? (basePenalties.R2_PM || 0) : getEnvNumber('MODEL_WEATHER_WAVE_R2_LATE_PENALTY', 0);
 
     const roundPenalty = (roundWave, earlyPenalty, latePenalty) => {
       if (roundWave === 'early') return earlyPenalty;
@@ -1507,8 +1599,13 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       return 0;
     };
 
-    const r1Penalty = roundPenalty(round1Wave, penaltyR1Early, penaltyR1Late);
-    const r2Penalty = roundPenalty(round2Wave, penaltyR2Early, penaltyR2Late);
+    const r1Base = roundPenalty(round1Wave, penaltyR1Early, penaltyR1Late);
+    const r2Base = roundPenalty(round2Wave, penaltyR2Early, penaltyR2Late);
+
+    const r1Hourly = sumHourlyPenaltyForRound(1, player);
+    const r2Hourly = sumHourlyPenaltyForRound(2, player);
+    const r1Penalty = Number.isFinite(r1Hourly) ? (r1Base + r1Hourly) : r1Base;
+    const r2Penalty = Number.isFinite(r2Hourly) ? (r2Base + r2Hourly) : r2Base;
     const totalPenalty = r1Penalty + r2Penalty;
 
     if (!Number.isFinite(totalPenalty) || totalPenalty === 0) {
@@ -1525,14 +1622,60 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       };
     }
 
-    const sgIndices = [0, 3, 4, 5, 6, 7];
     const adjusted = [...metrics];
-    sgIndices.forEach(index => {
+
+    const sgIndices = {
+      app: 4,
+      arg: 5,
+      ott: 6,
+      putt: 7
+    };
+
+    const approachBucketIndices = {
+      under100: [18],
+      from100to150: [21, 24],
+      from150to200: [30, 27],
+      over200: [33]
+    };
+
+    const bucketWeightsRaw = {
+      under100: Number(courseSetupWeights?.under100) || 0,
+      from100to150: Number(courseSetupWeights?.from100to150) || 0,
+      from150to200: Number(courseSetupWeights?.from150to200) || 0,
+      over200: Number(courseSetupWeights?.over200) || 0
+    };
+    const bucketWeightTotal = Object.values(bucketWeightsRaw).reduce((sum, value) => sum + value, 0);
+    const normalizedBucketWeights = bucketWeightTotal > 0
+      ? Object.fromEntries(
+          Object.entries(bucketWeightsRaw).map(([key, value]) => [key, value / bucketWeightTotal])
+        )
+      : { under100: 0.25, from100to150: 0.25, from150to200: 0.25, over200: 0.25 };
+
+    const totalSlices = 5;
+    const slicePenalty = totalPenalty / totalSlices;
+
+    Object.values(sgIndices).forEach(index => {
       const value = adjusted[index];
       if (typeof value === 'number' && !Number.isNaN(value)) {
-        adjusted[index] = value - totalPenalty;
+        adjusted[index] = value + slicePenalty;
       }
     });
+
+    const applyBucketPenalty = (indices, weight) => {
+      if (!Array.isArray(indices) || indices.length === 0) return;
+      const perIndexPenalty = (slicePenalty * weight) / indices.length;
+      indices.forEach(index => {
+        const value = adjusted[index];
+        if (typeof value === 'number' && !Number.isNaN(value)) {
+          adjusted[index] = value + perIndexPenalty;
+        }
+      });
+    };
+
+    applyBucketPenalty(approachBucketIndices.under100, normalizedBucketWeights.under100);
+    applyBucketPenalty(approachBucketIndices.from100to150, normalizedBucketWeights.from100to150);
+    applyBucketPenalty(approachBucketIndices.from150to200, normalizedBucketWeights.from150to200);
+    applyBucketPenalty(approachBucketIndices.over200, normalizedBucketWeights.over200);
 
     return {
       metrics: adjusted,
@@ -1660,7 +1803,7 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     // Apply trends to metrics using the helper function
     let adjustedMetrics = applyTrends(updatedMetrics, trends, data.name);
 
-    const weatherWaveAdjustment = applyWeatherWavePenalty(adjustedMetrics, data);
+    const weatherWaveAdjustment = applyWeatherWavePenalty(adjustedMetrics, data, courseSetupWeights);
     adjustedMetrics = weatherWaveAdjustment.metrics;
 
     if (shouldTracePlayer(data.name)) {
@@ -1965,12 +2108,6 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       console.error(`Got NaN for refinedWeightedScore for ${data.name}, setting to 0`);
     }
     
-    const getEventYear = (eventKey, event) => {
-      if (typeof event?.year === 'number' && !Number.isNaN(event.year)) return event.year;
-      const keyYear = parseInt(String(eventKey || '').split('-').pop(), 10);
-      return Number.isFinite(keyYear) ? keyYear : null;
-    };
-
     const courseHistoryCount = CURRENT_EVENT_ID
       ? Object.entries(pastPerformances).filter(([eventKey, event]) => {
           const eventId = event?.eventId ? String(event.eventId) : null;
@@ -2137,6 +2274,12 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
       waveRound2: weatherWaveAdjustment.summary?.round2Wave ?? null,
       weatherWavePenalty: Number.isFinite(weatherWaveAdjustment.summary?.totalPenalty)
         ? weatherWaveAdjustment.summary.totalPenalty
+        : null,
+      weatherWavePenaltyR1: Number.isFinite(weatherWaveAdjustment.summary?.r1Penalty)
+        ? weatherWaveAdjustment.summary.r1Penalty
+        : null,
+      weatherWavePenaltyR2: Number.isFinite(weatherWaveAdjustment.summary?.r2Penalty)
+        ? weatherWaveAdjustment.summary.r2Penalty
         : null,
       // Debug fields for calculation sheet
       isLowConfidencePlayer: isLowConfidencePlayer,

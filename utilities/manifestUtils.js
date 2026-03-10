@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { formatDateKey } = require('./timeUtils');
 
 const slugifyTournament = value => {
   const normalized = String(value || '')
@@ -18,11 +19,143 @@ const parseDateToUtcMs = value => {
   return Number.isNaN(parsed) ? NaN : parsed;
 };
 
+const parseApproachSnapshotDateFromFilename = filePath => {
+  const baseName = path.basename(filePath || '');
+  const match = baseName.match(/(\d{4})[-_](\d{2})[-_](\d{2})/);
+  if (!match) return NaN;
+  const [, year, month, day] = match;
+  const iso = `${year}-${month}-${day}T00:00:00Z`;
+  return Date.parse(iso);
+};
+
+const listApproachSnapshotArchives = approachSnapshotDir => {
+  if (!approachSnapshotDir || !fs.existsSync(approachSnapshotDir)) return [];
+  const entries = [];
+  const files = fs.readdirSync(approachSnapshotDir);
+  files.forEach(name => {
+    if (!name.toLowerCase().endsWith('.json')) return;
+    const lower = name.toLowerCase();
+    if (lower === 'approach_l24.json' || lower === 'approach_l12.json' || lower === 'approach_ytd_latest.json') return;
+    const match = name.match(/^approach_([a-z0-9]+)_(\d{4}-\d{2}-\d{2})\.json$/i);
+    if (!match) return;
+    const period = String(match[1] || '').toLowerCase();
+    const dateStamp = match[2];
+    const time = Date.parse(`${dateStamp}T00:00:00Z`);
+    entries.push({
+      period,
+      name,
+      path: path.resolve(approachSnapshotDir, name),
+      time: Number.isNaN(time) ? 0 : time
+    });
+  });
+  entries.sort((a, b) => (b.time || 0) - (a.time || 0));
+  return entries;
+};
+
+const buildApproachSnapshotCandidates = ({ approachSnapshotDir }) => {
+  const candidates = [];
+  const seen = new Set();
+
+  listApproachSnapshotArchives(approachSnapshotDir)
+    .filter(entry => entry.period === 'ytd')
+    .forEach(entry => {
+      if (!entry?.path || seen.has(entry.path)) return;
+      seen.add(entry.path);
+      candidates.push({
+        path: entry.path,
+        time: entry.time || 0,
+        date: entry.name.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null,
+        source: 'snapshot_archive',
+        priority: 3
+      });
+    });
+
+  const latestPath = approachSnapshotDir
+    ? path.resolve(approachSnapshotDir, 'approach_ytd_latest.json')
+    : null;
+  if (latestPath && fs.existsSync(latestPath) && !seen.has(latestPath)) {
+    seen.add(latestPath);
+    const latestTime = parseApproachSnapshotDateFromFilename(latestPath);
+    candidates.push({
+      path: latestPath,
+      time: Number.isNaN(latestTime) ? 0 : latestTime,
+      date: null,
+      source: 'snapshot_latest',
+      priority: 2
+    });
+  }
+
+  return candidates.filter(entry => typeof entry.time === 'number' && entry.time > 0);
+};
+
+const selectApproachSnapshotsForEvent = ({ eventDateMs, candidates }) => {
+  if (!eventDateMs || Number.isNaN(eventDateMs)) return { pre: null, post: null };
+  const valid = (candidates || []).filter(entry => typeof entry?.time === 'number' && entry.time > 0);
+  const pre = valid
+    .filter(entry => entry.time <= eventDateMs)
+    .sort((a, b) => (b.time - a.time) || ((b.priority || 0) - (a.priority || 0)))[0] || null;
+  const post = valid
+    .filter(entry => entry.time > eventDateMs)
+    .sort((a, b) => (a.time - b.time) || ((b.priority || 0) - (a.priority || 0)))[0] || null;
+  return { pre, post };
+};
+
+const resolveApproachSnapshotPairForEvent = ({
+  dataRootDir,
+  season,
+  eventId,
+  tournamentSlug,
+  tournamentName,
+  manifestEntries = null,
+  approachSnapshotDir,
+  csvFallback = null
+} = {}) => {
+  const entries = Array.isArray(manifestEntries) && manifestEntries.length
+    ? manifestEntries
+    : loadSeasonManifestEntries(dataRootDir, season);
+  const match = resolveManifestEntryForEvent(entries, { eventId, tournamentSlug, tournamentName });
+  const eventDateMs = parseDateToUtcMs(match?.date);
+  if (!eventDateMs || Number.isNaN(eventDateMs)) {
+    return {
+      eventDate: match?.date || null,
+      eventDateMs: null,
+      prePath: null,
+      postPath: null,
+      selectionSource: 'missing_date'
+    };
+  }
+
+  const candidates = buildApproachSnapshotCandidates({ approachSnapshotDir });
+  const { pre, post } = selectApproachSnapshotsForEvent({ eventDateMs, candidates });
+  let prePath = pre?.path || null;
+  let postPath = post?.path || null;
+  let selectionSource = (prePath || postPath)
+    ? (pre?.source === 'snapshot_latest' || post?.source === 'snapshot_latest' ? 'snapshot_latest' : 'snapshot_archive')
+    : 'missing_snapshots';
+
+  if (!prePath && csvFallback?.prePath) {
+    prePath = csvFallback.prePath;
+    selectionSource = 'csv_fallback';
+  }
+  if (!postPath && csvFallback?.postPath) {
+    postPath = csvFallback.postPath;
+    selectionSource = 'csv_fallback';
+  }
+
+  return {
+    eventDate: match?.date || null,
+    eventDateMs,
+    prePath,
+    postPath,
+    selectionSource
+  };
+};
+
 const formatDateUtc = dateValue => {
   if (!dateValue) return '';
   const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
   if (Number.isNaN(date.getTime())) return '';
-  return date.toISOString().slice(0, 10);
+  return formatDateKey(date);
 };
 
 const getThursdayOfWeek = (dateValue = new Date()) => {
@@ -105,7 +238,10 @@ const resolvePreviousManifestEntry = (entries, currentEntry) => {
   const currentTime = parseDateToUtcMs(currentEntry.date);
   if (Number.isNaN(currentTime)) return null;
   const currentIndex = sorted.findIndex(entry => entry.time === currentTime && entry.eventId === currentEntry.eventId);
-  if (currentIndex === -1) return sorted.find(entry => entry.time < currentTime) || null;
+  if (currentIndex === -1) {
+    const priorEntries = sorted.filter(entry => entry.time < currentTime);
+    return priorEntries.length ? priorEntries[priorEntries.length - 1] : null;
+  }
   return currentIndex > 0 ? sorted[currentIndex - 1] : null;
 };
 
@@ -194,5 +330,6 @@ module.exports = {
   resolveNextManifestEntry,
   resolvePreviousManifestEntry,
   resolveEventStartDateFromManifest,
-  ensureManifestEntry
+  ensureManifestEntry,
+  resolveApproachSnapshotPairForEvent
 };

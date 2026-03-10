@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-09T21:07:56.821Z",
+  "generatedAt": "2026-03-10T13:18:33-05:00",
   "entries": [
     {
       "tournament": "american-express",
@@ -15,17 +15,17 @@
       "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/american-express_top20_template_blend.json"
     },
     {
-      "tournament": "pebble-beach",
-      "displayName": "Pebble Beach (2026)",
-      "eventId": "5",
+      "tournament": "arnold-palmer-invitational",
+      "displayName": "Arnold Palmer Invitational (2026)",
+      "eventId": "9",
       "courseType": "TECHNICAL",
       "source": "top20_blend",
       "alignmentScores": {
-        "POWER": 0.016936563832203936,
-        "TECHNICAL": 0.021407073990099865,
-        "BALANCED": 0.015662445679202597
+        "POWER": 0.017899965889311385,
+        "TECHNICAL": 0.02582224508808332,
+        "BALANCED": 0.017377810834884964
       },
-      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/pebble-beach_top20_template_blend.json"
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/arnold-palmer-invitational_top20_template_blend.json"
     },
     {
       "tournament": "cognizant-classic",
@@ -67,6 +67,19 @@
       "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/genesis-invitational_top20_template_blend.json"
     },
     {
+      "tournament": "pebble-beach",
+      "displayName": "Pebble Beach (2026)",
+      "eventId": "5",
+      "courseType": "TECHNICAL",
+      "source": "top20_blend",
+      "alignmentScores": {
+        "POWER": 0.016936563832203936,
+        "TECHNICAL": 0.021407073990099865,
+        "BALANCED": 0.015662445679202597
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/pebble-beach_top20_template_blend.json"
+    },
+    {
       "tournament": "sony-open",
       "displayName": "Sony Open (2026)",
       "eventId": "6",
@@ -91,15 +104,6 @@
         "BALANCED": 0.019067155692461504
       },
       "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/wm-phoenix-open_top20_template_blend.json"
-    },
-    {
-      "tournament": "arnold-palmer-invitational",
-      "displayName": "Arnold Palmer Invitational (2026)",
-      "eventId": "9",
-      "courseType": "TECHNICAL",
-      "source": "course_context",
-      "alignmentScores": null,
-      "blendSource": null
     }
   ]
 }

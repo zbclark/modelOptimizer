@@ -5,6 +5,7 @@ const { loadCsv } = require('../utilities/csvLoader');
 const { buildPlayerData } = require('../utilities/dataPrep');
 const { getSharedConfig } = require('../utilities/configParser');
 const { buildMetricGroupsFromConfig } = require('../utilities/metricConfigBuilder');
+const { formatTimestamp } = require('../utilities/timeUtils');
 const { aggregatePlayerData, calculatePlayerMetrics, prepareRankingOutput } = require('../core/modelCore');
 const { getDeltaPlayerScoresForEvent } = require('../utilities/deltaPlayerScores');
 
@@ -360,7 +361,7 @@ const runParity = () => {
     success: true,
     players: sortedData,
     groupStats,
-    timestamp: new Date().toISOString(),
+    timestamp: formatTimestamp(new Date()),
     message: "Rankings generated successfully!"
   };
 
@@ -532,7 +533,7 @@ const runParity = () => {
   });
 
   const output = {
-    timestamp: new Date().toISOString(),
+    timestamp: formatTimestamp(new Date()),
     eventId: currentEventId,
     season: seasonValue,
     tournament: TOURNAMENT_NAME || fallbackTournament,
