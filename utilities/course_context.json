@@ -546,8 +546,8 @@
           "665"
         ]
       },
-      "similarCoursesWeight": 0.7,
-      "puttingCoursesWeight": 0.8,
+      "similarCoursesWeight": 0.15,
+      "puttingCoursesWeight": 0.2,
       "shotDistribution": {
         "under100": 0.103,
         "from100to150": 0.306,
@@ -1238,8 +1238,8 @@
           "665"
         ]
       },
-      "similarCoursesWeight": 0.7,
-      "puttingCoursesWeight": 0.8,
+      "similarCoursesWeight": 0.15,
+      "puttingCoursesWeight": 0.2,
       "shotDistribution": {
         "under100": 0.103,
         "from100to150": 0.306,

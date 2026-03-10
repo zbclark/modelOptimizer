@@ -1,4 +1,4 @@
-Logging to /workspaces/modelOptimizer/data/2026/the-players/pre_event/the_players_pre_event_log.txt
+Logging to /workspaces/modelOptimizer/data/2026/the-players/pre_event/the_players_pre_event_final_15_20_log.txt
 🔄 Generating course history regression inputs...
 ✓ Course history regression inputs generated.
 ✓ Loaded player ramp summary (555 players, maxEvents=6)
@@ -97,9 +97,7 @@ Training metrics included (11): Driving Distance, Driving Accuracy, SG T2G, SG A
 Training metrics excluded: Birdie Chances Created, SG Total, SG Approach, Greens in Regulation, Fairway Proximity, Rough Proximity
 Derived metrics: Birdies or Better = birdies + eagles (from historical rounds when available)
 ✓ Computed 11 historical metric correlations (no current results).
-🗄️  Backed up previous JSON results to: /workspaces/modelOptimizer/data/2026/the-players/pre_event/archive/the-players_pre_event_results.json.2026-03-10T16-10-48-05-00.bak
-🗄️  Backed up previous text results to: /workspaces/modelOptimizer/data/2026/the-players/pre_event/archive/the-players_pre_event_results.txt.2026-03-10T16-10-48-05-00.bak
 ✅ Pre-event training output saved (rankings generated).
-✅ JSON results saved to: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_pre_event_results.json
-✅ Text results saved to: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_pre_event_results.txt
+✅ JSON results saved to: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_results.json
+✅ Text results saved to: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_results.txt
 

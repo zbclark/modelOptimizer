@@ -1,4 +1,4 @@
-Logging to /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_pre_event_log.txt
+Logging to /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_log.txt
 
 === PRE-EVENT RUN SUMMARY ===
 Event: 11 (The PLAYERS)
@@ -6,7 +6,7 @@ CourseNum: 11
 CourseNameKey: TPC_SAWGRASS
 Season: 2026
 Run Mode: pre_event
-Timestamp: 2026-03-10T16:10:48-05:00
+Timestamp: 2026-03-10T17:05:29-05:00
 
 🔄 Course context / configuration
 - Config source: course_context.json
@@ -18,7 +18,7 @@ Timestamp: 2026-03-10T16:10:48-05:00
 🔄 Course history regression
 - Inputs generated
 - Regression snapshot: /workspaces/modelOptimizer/data/2026/the-players/pre_event/course_history_regression/course_history_regression.json
-- Completed date: 2026-03-10T16:10:39-05:00
+- Completed date: 2026-03-10T17:05:13-05:00
 
 🔄 Player ramp summary
 - File: /workspaces/modelOptimizer/data/2026/the-players/pre_event/analysis/early_season_ramp_sg_total.json
@@ -54,7 +54,7 @@ Field
 Weather (Meteoblue)
 - Forecast used: yes (source=cache)
 - Location: Ponte Vedra Beach FL (lat=26.7153, lon=-80.0534)
-- Wave adjustments (+ improves, - worsens): R1_AM=-0.0014801078902157317, R1_PM=0.03427587501199086, R2_AM=-0.19537847119075546, R2_PM=-0.48267218345922996
+- Wave adjustments (+ improves, - worsens): R1_AM=-0.001480107890215732, R1_PM=0.034275875011990864, R2_AM=-0.19537847119075546, R2_PM=-0.48267218345923
 - Baseline advantage (Late/Early vs Early/Late): 0.10
 - Weather-only advantage (Late/Early vs Early/Late): 0.00
 - Total implied advantage (Late/Early vs Early/Late): 0.32
@@ -113,9 +113,9 @@ Historical Rounds
 - Current snapshot: /workspaces/modelOptimizer/data/approach_snapshot/approach_ytd_2026-03-09.json
 
 ✅ Outputs
-- Results JSON: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_pre_event_results.json
-- Results TXT: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_pre_event_results.txt
-- Pre-event rankings JSON: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_pre_event_rankings.json
-- Pre-event rankings CSV: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_pre_event_rankings.csv
-- Signal contribution report: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_signal_contributions.json
-- Completed: 2026-03-10T16:10:48-05:00
+- Results JSON: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_results.json
+- Results TXT: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_results.txt
+- Pre-event rankings JSON: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_rankings.json
+- Pre-event rankings CSV: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_rankings.csv
+- Signal contribution report: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_signal_contributions.json
+- Completed: 2026-03-10T17:05:29-05:00
