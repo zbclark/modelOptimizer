@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-10T13:18:33-05:00",
+  "generatedAt": "2026-03-10T22:33:59-05:00",
   "templates": {
     "POWER": {
       "Driving Distance": {
@@ -226,93 +226,93 @@
       },
       "Approach <100 GIR": {
         "templateWeight": 0.5416733628781372,
-        "recommendedWeight": 0.5556603045296075,
-        "correlation": 0.18310901950097594
+        "recommendedWeight": 0.5369217215649648,
+        "correlation": 0.18698421119056494
       },
       "Approach <100 SG": {
         "templateWeight": 0.28150151210364915,
-        "recommendedWeight": 0.3184001936272674,
-        "correlation": 0.07242537514580312
+        "recommendedWeight": 0.33765450911407385,
+        "correlation": 0.08660762431311873
       },
       "Approach <100 Prox": {
         "templateWeight": 0.17682512501821368,
-        "recommendedWeight": 0.12593950184312508,
-        "correlation": 0.00166954698327282
+        "recommendedWeight": 0.12542376932096141,
+        "correlation": 0.0015412810636122928
       },
       "Approach <150 FW GIR": {
         "templateWeight": 0.16871286515095002,
-        "recommendedWeight": 0.1830998092888042,
-        "correlation": 0.13181963345631592
+        "recommendedWeight": 0.18186886112352882,
+        "correlation": 0.13682335178857577
       },
       "Approach <150 FW SG": {
         "templateWeight": 0.22077980622490406,
-        "recommendedWeight": 0.24301103221520437,
-        "correlation": 0.1607734789334877
+        "recommendedWeight": 0.2338638256477552,
+        "correlation": 0.15779607256242978
       },
       "Approach <150 FW Prox": {
         "templateWeight": 0.14178458058301113,
-        "recommendedWeight": 0.13256376124301503,
-        "correlation": 0.049872705885149506
+        "recommendedWeight": 0.13649341358217618,
+        "correlation": 0.05698571451626847
       },
       "Approach <150 Rough GIR": {
         "templateWeight": 0.19902719647682282,
-        "recommendedWeight": 0.1923376144977484,
-        "correlation": 0.15015724895418897
+        "recommendedWeight": 0.20417326224172277,
+        "correlation": 0.17157816799404527
       },
       "Approach <150 Rough SG": {
         "templateWeight": 0.19959620238158393,
-        "recommendedWeight": 0.19286926824657236,
-        "correlation": 0.12574736151921512
+        "recommendedWeight": 0.20481738632558993,
+        "correlation": 0.1461045762000307
       },
       "Approach <150 Rough Prox": {
         "templateWeight": 0.07009934918272813,
-        "recommendedWeight": 0.05611851450865548,
-        "correlation": 0.03822680264309336
+        "recommendedWeight": 0.03878325107922699,
+        "correlation": 0.0195145838469833
       },
       "Approach <200 FW GIR": {
         "templateWeight": 0.22569603858573556,
-        "recommendedWeight": 0.22989533511554278,
-        "correlation": 0.2095170932392883
+        "recommendedWeight": 0.21643303959855587,
+        "correlation": 0.1963151383242439
       },
       "Approach <200 FW SG": {
         "templateWeight": 0.24566860330334503,
-        "recommendedWeight": 0.23831158744122993,
-        "correlation": 0.16022390530395955
+        "recommendedWeight": 0.2534479334058191,
+        "correlation": 0.18347024668777517
       },
       "Approach <200 FW Prox": {
         "templateWeight": 0.11175799725210407,
-        "recommendedWeight": 0.11417543574023395,
-        "correlation": 0.02838874884182195
+        "recommendedWeight": 0.10542126070797679,
+        "correlation": 0.017514114593020665
       },
       "Approach >150 Rough GIR": {
         "templateWeight": 0.18806052115787514,
-        "recommendedWeight": 0.19325189575630294,
-        "correlation": 0.16528382408313094
+        "recommendedWeight": 0.19653722940027246,
+        "correlation": 0.17310009376984709
       },
       "Approach >150 Rough SG": {
         "templateWeight": 0.1786932862755395,
-        "recommendedWeight": 0.18783389364442338,
-        "correlation": 0.17398634551165365
+        "recommendedWeight": 0.1890126840615468,
+        "correlation": 0.17922554618233116
       },
       "Approach >150 Rough Prox": {
         "templateWeight": 0.050123553425400806,
-        "recommendedWeight": 0.036531852302266965,
-        "correlation": -0.007211953191050963
+        "recommendedWeight": 0.039147852825829055,
+        "correlation": -0.01079481967074064
       },
       "Approach >200 FW GIR": {
         "templateWeight": 0.34339903879905065,
-        "recommendedWeight": 0.3399218767320057,
-        "correlation": 0.15632425559021051
+        "recommendedWeight": 0.34644108285435177,
+        "correlation": 0.16849265550362252
       },
       "Approach >200 FW SG": {
         "templateWeight": 0.3482619156133355,
-        "recommendedWeight": 0.32363228392801185,
-        "correlation": 0.12304179931496126
+        "recommendedWeight": 0.3314284474984218,
+        "correlation": 0.13459417281894537
       },
       "Approach >200 FW Prox": {
         "templateWeight": 0.3083390455876138,
-        "recommendedWeight": 0.33644583933998257,
-        "correlation": 0.13114198959105866
+        "recommendedWeight": 0.32213046964722636,
+        "correlation": 0.12669005070949846
       },
       "SG Putting": {
         "templateWeight": 1,
@@ -418,207 +418,207 @@
     "BALANCED": {
       "Driving Distance": {
         "templateWeight": 0.061,
-        "recommendedWeight": 0.061,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Driving Accuracy": {
         "templateWeight": 0.41,
-        "recommendedWeight": 0.41,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "SG OTT": {
         "templateWeight": 0.529,
-        "recommendedWeight": 0.529,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <100 GIR": {
         "templateWeight": 0.12,
-        "recommendedWeight": 0.12,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <100 SG": {
         "templateWeight": 0.34,
-        "recommendedWeight": 0.34,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <100 Prox": {
         "templateWeight": 0.54,
-        "recommendedWeight": 0.54,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW GIR": {
         "templateWeight": 0.1,
-        "recommendedWeight": 0.05,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW SG": {
         "templateWeight": 0.3,
-        "recommendedWeight": 0.15,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 FW Prox": {
         "templateWeight": 0.6,
-        "recommendedWeight": 0.3,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 Rough GIR": {
         "templateWeight": 0.1,
-        "recommendedWeight": 0.05,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 Rough SG": {
         "templateWeight": 0.3,
-        "recommendedWeight": 0.15,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <150 Rough Prox": {
         "templateWeight": 0.6,
-        "recommendedWeight": 0.3,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW GIR": {
         "templateWeight": 0.09,
-        "recommendedWeight": 0.045,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW SG": {
         "templateWeight": 0.28,
-        "recommendedWeight": 0.14,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach <200 FW Prox": {
         "templateWeight": 0.63,
-        "recommendedWeight": 0.315,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >150 Rough GIR": {
         "templateWeight": 0.09,
-        "recommendedWeight": 0.045,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >150 Rough SG": {
         "templateWeight": 0.28,
-        "recommendedWeight": 0.14,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >150 Rough Prox": {
         "templateWeight": 0.63,
-        "recommendedWeight": 0.315,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW GIR": {
         "templateWeight": 0.09,
-        "recommendedWeight": 0.09,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW SG": {
         "templateWeight": 0.24,
-        "recommendedWeight": 0.24,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Approach >200 FW Prox": {
         "templateWeight": 0.67,
-        "recommendedWeight": 0.67,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "SG Putting": {
         "templateWeight": 1,
-        "recommendedWeight": 1,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "SG Around Green": {
         "templateWeight": 1,
-        "recommendedWeight": 1,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "SG T2G": {
         "templateWeight": 0.19,
-        "recommendedWeight": 0.18999999999999995,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring Average": {
         "templateWeight": 0.11,
-        "recommendedWeight": 0.10999999999999997,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Birdie Chances Created": {
         "templateWeight": 0.1,
-        "recommendedWeight": 0.09999999999999998,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <100 SG": {
         "templateWeight": 0.15,
-        "recommendedWeight": 0.14999999999999997,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <150 FW SG": {
         "templateWeight": 0.15,
-        "recommendedWeight": 0.14999999999999997,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <150 Rough SG": {
         "templateWeight": 0.15,
-        "recommendedWeight": 0.14999999999999997,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach <200 FW SG": {
         "templateWeight": 0.07,
-        "recommendedWeight": 0.06999999999999999,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach >200 FW SG": {
         "templateWeight": 0.03,
-        "recommendedWeight": 0.029999999999999992,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Scoring: Approach >150 Rough SG": {
         "templateWeight": 0.05,
-        "recommendedWeight": 0.04999999999999999,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Scrambling": {
         "templateWeight": 0.12,
-        "recommendedWeight": 0.12,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Great Shots": {
         "templateWeight": 0.08,
-        "recommendedWeight": 0.08,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Poor Shot Avoidance": {
         "templateWeight": 0.08,
-        "recommendedWeight": 0.08,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <100 Prox": {
         "templateWeight": 0.12,
-        "recommendedWeight": 0.12,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <150 FW Prox": {
         "templateWeight": 0.12,
-        "recommendedWeight": 0.12,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <150 Rough Prox": {
         "templateWeight": 0.16,
-        "recommendedWeight": 0.16,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach >150 Rough Prox": {
         "templateWeight": 0.18,
-        "recommendedWeight": 0.18,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach <200 FW Prox": {
         "templateWeight": 0.11,
-        "recommendedWeight": 0.11,
+        "recommendedWeight": 0,
         "correlation": 0
       },
       "Course Management: Approach >200 FW Prox": {
         "templateWeight": 0.03,
-        "recommendedWeight": 0.03,
+        "recommendedWeight": 0,
         "correlation": 0
       }
     }
@@ -735,7 +735,7 @@
           "Driving Performance": 0.10492271740099328,
           "Approach - Short (<100)": 0.10834216073681345,
           "Approach - Mid (100-150)": 0.13237650866572037,
-          "Approach - Long (150-200)": 0.11651874747828245,
+          "Approach - Long (150-200)": 0.11651874747828243,
           "Approach - Very Long (>200)": 0.0735862808229391,
           "Putting": 0.11033426114499051,
           "Around the Green": 0.10015574767636692,
@@ -756,64 +756,64 @@
           },
           "Approach - Short (<100)": {
             "Approach <100 GIR": {
-              "weight": 0.5051681188179518
+              "weight": 0.48901416798636316
             },
             "Approach <100 SG": {
-              "weight": 0.24310819214395113
+              "weight": 0.259706739977405
             },
             "Approach <100 Prox": {
-              "weight": 0.2517236890380971
+              "weight": 0.25127909203623194
             }
           },
           "Approach - Mid (100-150)": {
             "Approach <150 FW GIR": {
-              "weight": 0.13121678389215646
+              "weight": 0.13015562168071218
             },
             "Approach <150 FW SG": {
-              "weight": 0.20731155865565928
+              "weight": 0.19942603575268586
             },
             "Approach <150 FW Prox": {
-              "weight": 0.179756785802713
+              "weight": 0.18314441712957608
             },
             "Approach <150 Rough GIR": {
-              "weight": 0.16332935157555067
+              "weight": 0.17353249618242514
             },
             "Approach <150 Rough SG": {
-              "weight": 0.16433631743171834
+              "weight": 0.17463641922397483
             },
             "Approach <150 Rough Prox": {
-              "weight": 0.15404920264220226
+              "weight": 0.13910501003062598
             }
           },
           "Approach - Long (150-200)": {
             "Approach <200 FW GIR": {
-              "weight": 0.1716875969364131
+              "weight": 0.16008216976659678
             },
             "Approach <200 FW SG": {
-              "weight": 0.1904593741475319
+              "weight": 0.2035079482549363
             },
             "Approach <200 FW Prox": {
-              "weight": 0.17198758893675886
+              "weight": 0.16444088632274403
             },
             "Approach >150 Rough GIR": {
-              "weight": 0.15201214830071383
+              "weight": 0.15484433247654958
             },
             "Approach >150 Rough SG": {
-              "weight": 0.16332418178681454
+              "weight": 0.16434038042226579
             },
             "Approach >150 Rough Prox": {
-              "weight": 0.15052910989176788
+              "weight": 0.15278428275690759
             }
           },
           "Approach - Very Long (>200)": {
             "Approach >200 FW GIR": {
-              "weight": 0.29584671051441425
+              "weight": 0.30146671579229883
             },
             "Approach >200 FW SG": {
-              "weight": 0.29323542318419943
+              "weight": 0.299956253848346
             },
             "Approach >200 FW Prox": {
-              "weight": 0.41091786630138644
+              "weight": 0.39857703035935527
             }
           },
           "Putting": {
@@ -1001,8 +1001,8 @@
           "Driving Performance": 0.1344238196197128,
           "Approach - Short (<100)": 0.07043671185399689,
           "Approach - Mid (100-150)": 0.09275569380233936,
-          "Approach - Long (150-200)": 0.10814115991608436,
-          "Approach - Very Long (>200)": 0.09431645758055157,
+          "Approach - Long (150-200)": 0.10814115991608435,
+          "Approach - Very Long (>200)": 0.09431645758055159,
           "Putting": 0.10450768420022116,
           "Around the Green": 0.08769215511225649,
           "Scoring": 0.1772963549256259,
@@ -1022,64 +1022,64 @@
           },
           "Approach - Short (<100)": {
             "Approach <100 GIR": {
-              "weight": 0.6153979904474424
+              "weight": 0.5986027453443981
             },
             "Approach <100 SG": {
-              "weight": 0.3263915931820557
+              "weight": 0.3427917885890719
             },
             "Approach <100 Prox": {
-              "weight": -0.05821041637050192
+              "weight": -0.05860546606653008
             }
           },
           "Approach - Mid (100-150)": {
             "Approach <150 FW GIR": {
-              "weight": 0.22243013163752623
+              "weight": 0.22136382238452113
             },
             "Approach <150 FW SG": {
-              "weight": 0.24839872012600456
+              "weight": 0.24047494942861075
             },
             "Approach <150 FW Prox": {
-              "weight": 0.0594539436547599
+              "weight": 0.06285800628594558
             },
             "Approach <150 Rough GIR": {
-              "weight": 0.23535074550754267
+              "weight": 0.24560337925827813
             },
             "Approach <150 Rough SG": {
-              "weight": 0.20754067572476162
+              "weight": 0.2178907369402176
             },
             "Approach <150 Rough Prox": {
-              "weight": 0.026825783349405097
+              "weight": 0.011809105702426768
             }
           },
           "Approach - Long (150-200)": {
             "Approach <200 FW GIR": {
-              "weight": 0.297256664674367
+              "weight": 0.2855645392510353
             },
             "Approach <200 FW SG": {
-              "weight": 0.24051651539182858
+              "weight": 0.2536625687707346
             },
             "Approach <200 FW Prox": {
-              "weight": 0.03136874467977569
+              "weight": 0.023765664482509434
             },
             "Approach >150 Rough GIR": {
-              "weight": 0.23194877365906252
+              "weight": 0.23480211564478204
             },
             "Approach >150 Rough SG": {
-              "weight": 0.19776560988927838
+              "weight": 0.19878940002874143
             },
             "Approach >150 Rough Prox": {
-              "weight": 0.0011436917056878704
+              "weight": 0.003415711822197324
             }
           },
           "Approach - Very Long (>200)": {
             "Approach >200 FW GIR": {
-              "weight": 0.3937269002238968
+              "weight": 0.3993469055017814
             },
             "Approach >200 FW SG": {
-              "weight": 0.33861121893153034
+              "weight": 0.3453320495956769
             },
             "Approach >200 FW Prox": {
-              "weight": 0.2676618808445729
+              "weight": 0.2553210449025417
             }
           },
           "Putting": {
@@ -1268,7 +1268,7 @@
           "Approach - Short (<100)": 0.07257008079643164,
           "Approach - Mid (100-150)": 0.09535288076128112,
           "Approach - Long (150-200)": 0.09309455246858347,
-          "Approach - Very Long (>200)": 0.07814081632593964,
+          "Approach - Very Long (>200)": 0.07814081632593965,
           "Putting": 0.11412304537071456,
           "Around the Green": 0.08239466177236258,
           "Scoring": 0.17626733127891464,
@@ -1288,64 +1288,64 @@
           },
           "Approach - Short (<100)": {
             "Approach <100 GIR": {
-              "weight": 0.46534184202623013
+              "weight": 0.44918789119464153
             },
             "Approach <100 SG": {
-              "weight": 0.22775541869647653
+              "weight": 0.24435396652993036
             },
             "Approach <100 Prox": {
-              "weight": 0.30690273927729333
+              "weight": 0.30645814227542806
             }
           },
           "Approach - Mid (100-150)": {
             "Approach <150 FW GIR": {
-              "weight": 0.16933986906060083
+              "weight": 0.16692205403148258
             },
             "Approach <150 FW SG": {
-              "weight": 0.23783736734613684
+              "weight": 0.22785996527752614
             },
             "Approach <150 FW Prox": {
-              "weight": 0.2957084724667404
+              "weight": 0.29687986269023814
             },
             "Approach <150 Rough GIR": {
-              "weight": 0.15679352381048353
+              "weight": 0.166066673300752
             },
             "Approach <150 Rough SG": {
-              "weight": 0.12876472815565235
+              "weight": 0.1383570910706998
             },
             "Approach <150 Rough Prox": {
-              "weight": 0.011556039160386033
+              "weight": -0.0039143536293013825
             }
           },
           "Approach - Long (150-200)": {
             "Approach <200 FW GIR": {
-              "weight": 0.1785640086567614
+              "weight": 0.16695858148694506
             },
             "Approach <200 FW SG": {
-              "weight": 0.2235936236366747
+              "weight": 0.23664219774407913
             },
             "Approach <200 FW Prox": {
-              "weight": 0.2186857753794667
+              "weight": 0.21113907276545188
             },
             "Approach >150 Rough GIR": {
-              "weight": 0.1354738464154655
+              "weight": 0.13830603059130125
             },
             "Approach >150 Rough SG": {
-              "weight": 0.15023801185968985
+              "weight": 0.1512542104951411
             },
             "Approach >150 Rough Prox": {
-              "weight": 0.09344473405194187
+              "weight": 0.09569990691708158
             }
           },
           "Approach - Very Long (>200)": {
             "Approach >200 FW GIR": {
-              "weight": 0.3128492480605354
+              "weight": 0.31846925333841997
             },
             "Approach >200 FW SG": {
-              "weight": 0.21854267947894457
+              "weight": 0.2252635101430911
             },
             "Approach >200 FW Prox": {
-              "weight": 0.4686080724605201
+              "weight": 0.45626723651848883
             }
           },
           "Putting": {
@@ -1533,8 +1533,8 @@
           "Driving Performance": 0.12082214566591674,
           "Approach - Short (<100)": 0.10668885191384755,
           "Approach - Mid (100-150)": 0.12499821355319453,
-          "Approach - Long (150-200)": 0.11134458947184163,
-          "Approach - Very Long (>200)": 0.07047949519523265,
+          "Approach - Long (150-200)": 0.11134458947184162,
+          "Approach - Very Long (>200)": 0.07047949519523267,
           "Putting": 0.11606974045240279,
           "Around the Green": 0.09532058897056558,
           "Scoring": 0.1441299853067247,
@@ -1554,64 +1554,64 @@
           },
           "Approach - Short (<100)": {
             "Approach <100 GIR": {
-              "weight": 0.3963152414086982
+              "weight": 0.3801612905771096
             },
             "Approach <100 SG": {
-              "weight": 0.3278004018923139
+              "weight": 0.34439894972576773
             },
             "Approach <100 Prox": {
-              "weight": 0.2758843566989879
+              "weight": 0.27543975969712264
             }
           },
           "Approach - Mid (100-150)": {
             "Approach <150 FW GIR": {
-              "weight": 0.14354484962412636
+              "weight": 0.14248368741268208
             },
             "Approach <150 FW SG": {
-              "weight": 0.22642939104177853
+              "weight": 0.2185438681388051
             },
             "Approach <150 FW Prox": {
-              "weight": 0.1893188886917563
+              "weight": 0.19270652001861938
             },
             "Approach <150 Rough GIR": {
-              "weight": 0.12823138175961918
+              "weight": 0.13843452636649364
             },
             "Approach <150 Rough SG": {
-              "weight": 0.1649156965017184
+              "weight": 0.1752157982939749
             },
             "Approach <150 Rough Prox": {
-              "weight": 0.14755979238100125
+              "weight": 0.13261559976942494
             }
           },
           "Approach - Long (150-200)": {
             "Approach <200 FW GIR": {
-              "weight": 0.18391373040168071
+              "weight": 0.17230830323186436
             },
             "Approach <200 FW SG": {
-              "weight": 0.20269398473403455
+              "weight": 0.21574255884143895
             },
             "Approach <200 FW Prox": {
-              "weight": 0.17415972198435484
+              "weight": 0.16661301937034
             },
             "Approach >150 Rough GIR": {
-              "weight": 0.12872366837284197
+              "weight": 0.1315558525486777
             },
             "Approach >150 Rough SG": {
-              "weight": 0.18038129910471098
+              "weight": 0.18139749774016217
             },
             "Approach >150 Rough Prox": {
-              "weight": 0.1301275954023771
+              "weight": 0.1323827682675168
             }
           },
           "Approach - Very Long (>200)": {
             "Approach >200 FW GIR": {
-              "weight": 0.3014737475881494
+              "weight": 0.307093752866034
             },
             "Approach >200 FW SG": {
-              "weight": 0.2810181217500623
+              "weight": 0.2877389524142089
             },
             "Approach >200 FW Prox": {
-              "weight": 0.4175081306617884
+              "weight": 0.4051672947197572
             }
           },
           "Putting": {
@@ -1799,8 +1799,8 @@
           "Driving Performance": 0.11907680942423443,
           "Approach - Short (<100)": 0.07526941504076716,
           "Approach - Mid (100-150)": 0.09381414588497129,
-          "Approach - Long (150-200)": 0.09408312314570061,
-          "Approach - Very Long (>200)": 0.07501136728999999,
+          "Approach - Long (150-200)": 0.09408312314570058,
+          "Approach - Very Long (>200)": 0.07501136729,
           "Putting": 0.10561415416348902,
           "Around the Green": 0.08609767122375324,
           "Scoring": 0.19739885813861072,
@@ -1820,64 +1820,64 @@
           },
           "Approach - Short (<100)": {
             "Approach <100 GIR": {
-              "weight": 0.5397940171029444
+              "weight": 0.5236400662713557
             },
             "Approach <100 SG": {
-              "weight": 0.33964485944945777
+              "weight": 0.3562434072829116
             },
             "Approach <100 Prox": {
-              "weight": 0.12056112344759791
+              "weight": 0.12011652644573265
             }
           },
           "Approach - Mid (100-150)": {
             "Approach <150 FW GIR": {
-              "weight": 0.17976959840446788
+              "weight": 0.17870843619302357
             },
             "Approach <150 FW SG": {
-              "weight": 0.23824731412849112
+              "weight": 0.2303617912255177
             },
             "Approach <150 FW Prox": {
-              "weight": 0.10213461779792403
+              "weight": 0.10552224912478708
             },
             "Approach <150 Rough GIR": {
-              "weight": 0.20287401393393184
+              "weight": 0.21307715854080628
             },
             "Approach <150 Rough SG": {
-              "weight": 0.21055532773263314
+              "weight": 0.22085542952488962
             },
             "Approach <150 Rough Prox": {
-              "weight": 0.06641912800255206
+              "weight": 0.051474935390975765
             }
           },
           "Approach - Long (150-200)": {
             "Approach <200 FW GIR": {
-              "weight": 0.1935648968242584
+              "weight": 0.18267796483519128
             },
             "Approach <200 FW SG": {
-              "weight": 0.26463858783192173
+              "weight": 0.2790858650724836
             },
             "Approach <200 FW Prox": {
-              "weight": 0.09111365672882513
+              "weight": 0.08387515135676335
             },
             "Approach >150 Rough GIR": {
-              "weight": 0.22995468515980585
+              "weight": 0.23387976436555505
             },
             "Approach >150 Rough SG": {
-              "weight": 0.18663315302918543
+              "weight": 0.18851788714201
             },
             "Approach >150 Rough Prox": {
-              "weight": -0.03409502042600334
+              "weight": -0.03196336722799674
             }
           },
           "Approach - Very Long (>200)": {
             "Approach >200 FW GIR": {
-              "weight": 0.3390959742483646
+              "weight": 0.3447159795262492
             },
             "Approach >200 FW SG": {
-              "weight": 0.3550763426746101
+              "weight": 0.3617971733387566
             },
             "Approach >200 FW Prox": {
-              "weight": 0.30582768307702535
+              "weight": 0.2934868471349942
             }
           },
           "Putting": {
@@ -2065,8 +2065,8 @@
           "Driving Performance": 0.13882971560891455,
           "Approach - Short (<100)": 0.07825262929137865,
           "Approach - Mid (100-150)": 0.09853777907528338,
-          "Approach - Long (150-200)": 0.09869952310235175,
-          "Approach - Very Long (>200)": 0.07052092250250801,
+          "Approach - Long (150-200)": 0.09869952310235172,
+          "Approach - Very Long (>200)": 0.07052092250250802,
           "Putting": 0.10057705386080615,
           "Around the Green": 0.07151433198975228,
           "Scoring": 0.198585035967785,
@@ -2086,64 +2086,64 @@
           },
           "Approach - Short (<100)": {
             "Approach <100 GIR": {
-              "weight": 0.4908631649440105
+              "weight": 0.47470921411242195
             },
             "Approach <100 SG": {
-              "weight": 0.30538877097860917
+              "weight": 0.321987318812063
             },
             "Approach <100 Prox": {
-              "weight": 0.20374806407738033
+              "weight": 0.20330346707551505
             }
           },
           "Approach - Mid (100-150)": {
             "Approach <150 FW GIR": {
-              "weight": 0.18446876537928344
+              "weight": 0.18337831206168542
             },
             "Approach <150 FW SG": {
-              "weight": 0.22755079938803782
+              "weight": 0.21944761354349188
             },
             "Approach <150 FW Prox": {
-              "weight": 0.13419938900318965
+              "weight": 0.13768052862476457
             },
             "Approach <150 Rough GIR": {
-              "weight": 0.2041228919072244
+              "weight": 0.21460767243041648
             },
             "Approach <150 Rough SG": {
-              "weight": 0.23354628798927723
+              "weight": 0.24413070199293496
             },
             "Approach <150 Rough Prox": {
-              "weight": 0.01611186633298743
+              "weight": 0.0007551713467067306
             }
           },
           "Approach - Long (150-200)": {
             "Approach <200 FW GIR": {
-              "weight": 0.21969693795926812
+              "weight": 0.20892956779395916
             },
             "Approach <200 FW SG": {
-              "weight": 0.23886059497572784
+              "weight": 0.2531899302682119
             },
             "Approach <200 FW Prox": {
-              "weight": 0.17611887741357157
+              "weight": 0.16926929608925356
             },
             "Approach >150 Rough GIR": {
-              "weight": 0.20244573886113026
+              "weight": 0.2062449564944082
             },
             "Approach >150 Rough SG": {
-              "weight": 0.15471377776926973
+              "weight": 0.1564524712915572
             },
             "Approach >150 Rough Prox": {
-              "weight": -0.008164073021032423
+              "weight": -0.005913778062610016
             }
           },
           "Approach - Very Long (>200)": {
             "Approach >200 FW GIR": {
-              "weight": 0.25345378601909513
+              "weight": 0.2590737912969797
             },
             "Approach >200 FW SG": {
-              "weight": 0.33757468563414283
+              "weight": 0.34429551629828936
             },
             "Approach >200 FW Prox": {
-              "weight": 0.4089715283467621
+              "weight": 0.3966306924047309
             }
           },
           "Putting": {
@@ -2331,7 +2331,7 @@
           "Driving Performance": 0.12056604392303658,
           "Approach - Short (<100)": 0.10682420997391112,
           "Approach - Mid (100-150)": 0.11888562835612555,
-          "Approach - Long (150-200)": 0.1113605850390958,
+          "Approach - Long (150-200)": 0.11136058503909578,
           "Approach - Very Long (>200)": 0.07150356633728452,
           "Putting": 0.12239730714950045,
           "Around the Green": 0.09269854123339472,
@@ -2352,64 +2352,64 @@
           },
           "Approach - Short (<100)": {
             "Approach <100 GIR": {
-              "weight": 0.4874848014073936
+              "weight": 0.47080393669791376
             },
             "Approach <100 SG": {
-              "weight": 0.3226498514770262
+              "weight": 0.3390533927617588
             },
             "Approach <100 Prox": {
-              "weight": -0.18986534711558023
+              "weight": -0.1901426705403275
             }
           },
           "Approach - Mid (100-150)": {
             "Approach <150 FW GIR": {
-              "weight": 0.17458078770035268
+              "weight": 0.1688477965651656
             },
             "Approach <150 FW SG": {
-              "weight": 0.26654985766077044
+              "weight": 0.25074860455320075
             },
             "Approach <150 FW Prox": {
-              "weight": -0.06602943930682369
+              "weight": -0.060501739946424576
             },
             "Approach <150 Rough GIR": {
-              "weight": 0.19940105535222627
+              "weight": 0.20569437199969282
             },
             "Approach <150 Rough SG": {
-              "weight": 0.19729093725828947
+              "weight": 0.20374818966617375
             },
             "Approach <150 Rough Prox": {
-              "weight": -0.09614792272153756
+              "weight": -0.11045929726934253
             }
           },
           "Approach - Long (150-200)": {
             "Approach <200 FW GIR": {
-              "weight": 0.20866032959291844
+              "weight": 0.19431249622168173
             },
             "Approach <200 FW SG": {
-              "weight": 0.21631166464904905
+              "weight": 0.22748703657990108
             },
             "Approach <200 FW Prox": {
-              "weight": -0.10457422399510677
+              "weight": -0.11126322986115084
             },
             "Approach >150 Rough GIR": {
-              "weight": 0.17336632534807234
+              "weight": 0.17440233186576143
             },
             "Approach >150 Rough SG": {
-              "weight": 0.14555859872759627
+              "weight": 0.1450140703349661
             },
             "Approach >150 Rough Prox": {
-              "weight": -0.15152885768725713
+              "weight": -0.1475208351365389
             }
           },
           "Approach - Very Long (>200)": {
             "Approach >200 FW GIR": {
-              "weight": 0.42157021931069183
+              "weight": 0.4147850186378169
             },
             "Approach >200 FW SG": {
-              "weight": 0.4388283260718529
+              "weight": 0.43300008549394603
             },
             "Approach >200 FW Prox": {
-              "weight": -0.13960145461745516
+              "weight": -0.15221489586823694
             }
           },
           "Putting": {
@@ -2597,7 +2597,7 @@
           "Driving Performance": 0.12653267014027966,
           "Approach - Short (<100)": 0.07928703987621441,
           "Approach - Mid (100-150)": 0.09769546899300924,
-          "Approach - Long (150-200)": 0.10365296541634508,
+          "Approach - Long (150-200)": 0.10365296541634507,
           "Approach - Very Long (>200)": 0.07132367362737455,
           "Putting": 0.10581184047299974,
           "Around the Green": 0.08231412276945974,
@@ -2618,64 +2618,64 @@
           },
           "Approach - Short (<100)": {
             "Approach <100 GIR": {
-              "weight": 0.5409388852182739
+              "weight": 0.5247849343866854
             },
             "Approach <100 SG": {
-              "weight": 0.316846656588069
+              "weight": 0.33344520442152287
             },
             "Approach <100 Prox": {
-              "weight": 0.1422144581936571
+              "weight": 0.14176986119179186
             }
           },
           "Approach - Mid (100-150)": {
             "Approach <150 FW GIR": {
-              "weight": 0.18981001169756156
+              "weight": 0.18874884948611725
             },
             "Approach <150 FW SG": {
-              "weight": 0.21676474776658916
+              "weight": 0.20887922486361576
             },
             "Approach <150 FW Prox": {
-              "weight": 0.15213883107859982
+              "weight": 0.1555264624054629
             },
             "Approach <150 Rough GIR": {
-              "weight": 0.16894471559899835
+              "weight": 0.1791478602058728
             },
             "Approach <150 Rough SG": {
-              "weight": 0.18955503715991207
+              "weight": 0.19985513895216855
             },
             "Approach <150 Rough Prox": {
-              "weight": 0.08278665669833903
+              "weight": 0.06784246408676273
             }
           },
           "Approach - Long (150-200)": {
             "Approach <200 FW GIR": {
-              "weight": 0.21766945701116064
+              "weight": 0.20606402984134425
             },
             "Approach <200 FW SG": {
-              "weight": 0.20527810485198245
+              "weight": 0.2183266789593868
             },
             "Approach <200 FW Prox": {
-              "weight": 0.13627659680092521
+              "weight": 0.12872989418691036
             },
             "Approach >150 Rough GIR": {
-              "weight": 0.1703633300289442
+              "weight": 0.1731955142047799
             },
             "Approach >150 Rough SG": {
-              "weight": 0.18122299843381082
+              "weight": 0.182239197069262
             },
             "Approach >150 Rough Prox": {
-              "weight": 0.08918951287317685
+              "weight": 0.09144468573831656
             }
           },
           "Approach - Very Long (>200)": {
             "Approach >200 FW GIR": {
-              "weight": 0.31204161419097387
+              "weight": 0.3176616194688585
             },
             "Approach >200 FW SG": {
-              "weight": 0.3212804947282233
+              "weight": 0.3280013253923698
             },
             "Approach >200 FW Prox": {
-              "weight": 0.36667789108080295
+              "weight": 0.3543370551387718
             }
           },
           "Putting": {

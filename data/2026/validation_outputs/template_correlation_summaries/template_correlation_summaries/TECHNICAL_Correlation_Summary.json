@@ -20,110 +20,110 @@
     },
     {
       "metric": "Approach <100 GIR",
-      "avgDelta": 0.08700029213916527,
-      "avgCorrelation": 0.18310901950097594,
+      "avgDelta": 0.10195913776758063,
+      "avgCorrelation": 0.18698421119056494,
       "samples": 8
     },
     {
       "metric": "Approach <100 SG",
-      "avgDelta": 0.07544361552970137,
-      "avgCorrelation": 0.07242537514580312,
+      "avgDelta": 0.06030973574828062,
+      "avgCorrelation": 0.08660762431311873,
       "samples": 8
     },
     {
       "metric": "Approach <100 Prox",
-      "avgDelta": -0.788956958326362,
-      "avgCorrelation": 0.00166954698327282,
+      "avgDelta": -0.916922463790842,
+      "avgCorrelation": 0.0015412810636122928,
       "samples": 8
     },
     {
       "metric": "Approach <150 FW GIR",
-      "avgDelta": 0.13264309120555404,
-      "avgCorrelation": 0.13181963345631592,
+      "avgDelta": 0.13365350787222066,
+      "avgCorrelation": 0.13682335178857577,
       "samples": 8
     },
     {
       "metric": "Approach <150 FW SG",
-      "avgDelta": 0.09052245717001778,
-      "avgCorrelation": 0.1607734789334877,
+      "avgDelta": 0.08355404870007245,
+      "avgCorrelation": 0.15779607256242978,
       "samples": 8
     },
     {
       "metric": "Approach <150 FW Prox",
-      "avgDelta": 0.6870597386240511,
-      "avgCorrelation": 0.049872705885149506,
+      "avgDelta": 0.7505127782415375,
+      "avgCorrelation": 0.05698571451626847,
       "samples": 8
     },
     {
       "metric": "Approach <150 Rough GIR",
-      "avgDelta": -0.03311324116942568,
-      "avgCorrelation": 0.15015724895418897,
+      "avgDelta": -0.017920105923524048,
+      "avgCorrelation": 0.17157816799404527,
       "samples": 8
     },
     {
       "metric": "Approach <150 Rough SG",
-      "avgDelta": 0.002712941555041209,
-      "avgCorrelation": 0.12574736151921512,
+      "avgDelta": 0.06061184865886637,
+      "avgCorrelation": 0.1461045762000307,
       "samples": 8
     },
     {
       "metric": "Approach <150 Rough Prox",
-      "avgDelta": 5.901417216202362,
-      "avgCorrelation": 0.03822680264309336,
+      "avgDelta": 4.631309121940068,
+      "avgCorrelation": 0.0195145838469833,
       "samples": 8
     },
     {
       "metric": "Approach <200 FW GIR",
-      "avgDelta": 0.11440700563076492,
-      "avgCorrelation": 0.2095170932392883,
+      "avgDelta": 0.10302602885480863,
+      "avgCorrelation": 0.1963151383242439,
       "samples": 8
     },
     {
       "metric": "Approach <200 FW SG",
-      "avgDelta": 0.09071623277085422,
-      "avgCorrelation": 0.16022390530395955,
+      "avgDelta": 0.09519608249763015,
+      "avgCorrelation": 0.18347024668777517,
       "samples": 8
     },
     {
       "metric": "Approach <200 FW Prox",
-      "avgDelta": -2.6882862055949417,
-      "avgCorrelation": 0.02838874884182195,
+      "avgDelta": -3.370425549857237,
+      "avgCorrelation": 0.017514114593020665,
       "samples": 8
     },
     {
       "metric": "Approach >150 Rough GIR",
-      "avgDelta": 0.07899120120363484,
-      "avgCorrelation": 0.16528382408313094,
+      "avgDelta": 0.08378167251511026,
+      "avgCorrelation": 0.17310009376984709,
       "samples": 8
     },
     {
       "metric": "Approach >150 Rough SG",
-      "avgDelta": 0.18358426011453782,
-      "avgCorrelation": 0.17398634551165365,
+      "avgDelta": 0.08890803060634105,
+      "avgCorrelation": 0.17922554618233116,
       "samples": 8
     },
     {
       "metric": "Approach >150 Rough Prox",
-      "avgDelta": 0.863371607290405,
-      "avgCorrelation": -0.007211953191050963,
+      "avgDelta": 0.27506354718111625,
+      "avgCorrelation": -0.01079481967074064,
       "samples": 8
     },
     {
       "metric": "Approach >200 FW GIR",
-      "avgDelta": 0.14272231856650683,
-      "avgCorrelation": 0.15632425559021051,
+      "avgDelta": 0.14942416282880192,
+      "avgCorrelation": 0.16849265550362252,
       "samples": 8
     },
     {
       "metric": "Approach >200 FW SG",
-      "avgDelta": 0.1039904175854702,
-      "avgCorrelation": 0.12304179931496126,
+      "avgDelta": 0.061251346547218845,
+      "avgCorrelation": 0.13459417281894537,
       "samples": 8
     },
     {
       "metric": "Approach >200 FW Prox",
-      "avgDelta": 3.1058968154527857,
-      "avgCorrelation": 0.13114198959105866,
+      "avgDelta": 3.1368544657260093,
+      "avgCorrelation": 0.12669005070949846,
       "samples": 8
     },
     {
@@ -259,5 +259,5 @@
       "samples": 8
     }
   ],
-  "generatedAt": "2026-03-10T13:18:33-05:00"
+  "generatedAt": "2026-03-10T22:33:59-05:00"
 }

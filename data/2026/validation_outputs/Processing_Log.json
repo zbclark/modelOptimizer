@@ -1,13 +1,17 @@
 {
-  "generatedAt": "2026-03-10T13:18:33-05:00",
-  "tournament": "arnold-palmer-invitational",
-  "eventId": "9",
-  "season": 2026,
-  "skipMetricAnalysis": true,
+  "generatedAt": "2026-03-10T22:33:59-05:00",
+  "tournament": "wm-phoenix-open",
+  "eventId": "3",
+  "season": "2026",
+  "skipMetricAnalysis": false,
   "dataProcessed": {
-    "predictionsCount": 72,
-    "resultsCount": 72,
-    "metricAnalysis": null,
+    "predictionsCount": 123,
+    "resultsCount": 123,
+    "metricAnalysis": {
+      "metrics": 43,
+      "top10Finishers": 12,
+      "totalFinishers": 123
+    },
     "modelDeltaTrends": {
       "metrics": 11,
       "totalSamples": 9823,
@@ -16,10 +20,10 @@
     }
   },
   "inputs": {
-    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/arnold-palmer-invitational/pre_event/arnold-palmer-invitational_pre_event_rankings.json",
-    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/arnold-palmer-invitational/pre_event/arnold-palmer-invitational_pre_event_rankings.csv",
-    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/arnold-palmer-invitational/post_event/arnold-palmer-invitational_results.json",
-    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/arnold-palmer-invitational/post_event/arnold-palmer-invitational_results.csv",
+    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/pre_event/wm-phoenix-open_pre_event_rankings.json",
+    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/pre_event/wm-phoenix-open_pre_event_rankings.csv",
+    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/post_event/wm-phoenix-open_results.json",
+    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/post_event/wm-phoenix-open_results.csv",
     "configCsvPath": null
   },
   "sources": {
@@ -39,6 +43,20 @@
     {
       "label": "calibrationReport.csv",
       "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/Calibration_Report.csv",
+      "existedBefore": true,
+      "written": true,
+      "overwritten": true
+    },
+    {
+      "label": "metricAnalysis.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/wm-phoenix-open_metric_analysis.json",
+      "existedBefore": true,
+      "written": true,
+      "overwritten": true
+    },
+    {
+      "label": "metricAnalysis.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/wm-phoenix-open_metric_analysis.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true

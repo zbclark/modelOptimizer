@@ -195,8 +195,8 @@ const getBaselineWavePenaltyAdjustments = () => {
 
   return {
     R1_AM: 0,
-    R1_PM: perRoundAdv,
-    R2_AM: perRoundAdv,
+    R1_PM: -perRoundAdv,
+    R2_AM: -perRoundAdv,
     R2_PM: 0
   };
 };
@@ -1535,7 +1535,7 @@ const computeWeatherWavePenalties = async ({
     const hour = Number(hourValue);
     const penalty = computePenaltyForStats(stats).total;
     if (!hourlyPenalties[dateKey]) hourlyPenalties[dateKey] = {};
-    hourlyPenalties[dateKey][hour] = Number.isFinite(penalty) ? -penalty : 0;
+    hourlyPenalties[dateKey][hour] = Number.isFinite(penalty) ? penalty : 0;
   });
 
   return {
@@ -3011,10 +3011,26 @@ function generateSheetLikePlayerNotes(player, groups, groupStats) {
     : null;
   if (wavePair || waveParts.length > 0) {
     const waveLabel = wavePair || waveParts.join(', ');
-    const valueSuffix = penaltyValue !== null && penaltyValue !== 0
-      ? ` (${penaltyValue > 0 ? 'penalty' : 'boost'}=${Math.abs(penaltyValue).toFixed(2)})`
-      : '';
-    notes.push(`☁️ ${waveLabel}${valueSuffix}`);
+    const r1Value = Number.isFinite(player.weatherWavePenaltyR1)
+      ? player.weatherWavePenaltyR1
+      : null;
+    const r2Value = Number.isFinite(player.weatherWavePenaltyR2)
+      ? player.weatherWavePenaltyR2
+      : null;
+    const formatWaveValue = value => (
+      value === null || value === 0
+        ? null
+        : `${value > 0 ? 'penalty' : 'boost'}=${Math.abs(value).toFixed(2)}`
+    );
+    const r1Suffix = formatWaveValue(r1Value);
+    const r2Suffix = formatWaveValue(r2Value);
+    const totalSuffix = formatWaveValue(penaltyValue);
+    const detailParts = [];
+    if (r1Suffix) detailParts.push(`R1 ${r1Suffix}`);
+    if (r2Suffix) detailParts.push(`R2 ${r2Suffix}`);
+    if (totalSuffix) detailParts.push(`Net ${totalSuffix}`);
+    const valueSuffix = detailParts.length > 0 ? ` (${detailParts.join(', ')})` : '';
+    notes.push(`Wave / ⛈️: ${waveLabel}${valueSuffix}`);
   }
 
   return notes.join(' | ');

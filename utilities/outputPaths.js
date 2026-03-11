@@ -81,6 +81,7 @@ function resolveValidationSubdir({ validationRoot, kind }) {
   if (key === 'METRIC_ANALYSIS') return path.resolve(validationRoot, VALIDATION_SUBDIRS.METRIC_ANALYSIS);
   if (key === 'TEMPLATE_CORRELATION_SUMMARIES') return path.resolve(validationRoot, VALIDATION_SUBDIRS.TEMPLATE_CORRELATION_SUMMARIES);
   if (key === 'TOP20_BLEND') return path.resolve(validationRoot, VALIDATION_SUBDIRS.TOP20_BLEND);
+  if (key === 'SEASON_SUMMARIES') return path.resolve(validationRoot, VALIDATION_SUBDIRS.SEASON_SUMMARIES);
   return null;
 }
 
@@ -187,6 +188,12 @@ function buildArtifactFilename({ artifactType, outputBaseName, tournamentSlug, t
       return `${String(templateName || 'TEMPLATE').toUpperCase()}_Correlation_Summary.json`;
     case OUTPUT_ARTIFACTS.VALIDATION_TEMPLATE_CORRELATION_SUMMARY_CSV:
       return `${String(templateName || 'TEMPLATE').toUpperCase()}_Correlation_Summary.csv`;
+    case OUTPUT_ARTIFACTS.VALIDATION_SEASON_POST_EVENT_SUMMARY_JSON:
+      return 'Season_Post_Event_Summary.json';
+    case OUTPUT_ARTIFACTS.VALIDATION_SEASON_POST_EVENT_SUMMARY_CSV:
+      return 'Season_Post_Event_Summary.csv';
+    case OUTPUT_ARTIFACTS.VALIDATION_SEASON_POST_EVENT_SUMMARY_MD:
+      return 'Season_Post_Event_Summary.md';
     default:
       return null;
   }
@@ -255,6 +262,11 @@ function resolveArtifactDir({
     case OUTPUT_ARTIFACTS.VALIDATION_TEMPLATE_CORRELATION_SUMMARY_JSON:
     case OUTPUT_ARTIFACTS.VALIDATION_TEMPLATE_CORRELATION_SUMMARY_CSV:
       return validationSubdirs.templateCorrelations || null;
+
+    case OUTPUT_ARTIFACTS.VALIDATION_SEASON_POST_EVENT_SUMMARY_JSON:
+    case OUTPUT_ARTIFACTS.VALIDATION_SEASON_POST_EVENT_SUMMARY_CSV:
+    case OUTPUT_ARTIFACTS.VALIDATION_SEASON_POST_EVENT_SUMMARY_MD:
+      return validationSubdirs.seasonSummaries || validationRoot;
 
     default:
       return null;

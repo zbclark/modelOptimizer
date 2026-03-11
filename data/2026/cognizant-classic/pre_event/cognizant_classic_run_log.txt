@@ -1,66 +1,10 @@
 Logging to /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/cognizant_classic_run_log.txt
 🔄 Generating course history regression inputs...
-✓ Course history regression inputs generated.
+ℹ️  Course history regression generation skipped (exit 1).
 ✓ Loaded player ramp summary (348 players, maxEvents=6)
-ℹ️  Course history regression loaded; no course_context updates needed.
+✓ Updated course_context past performance weights (2 entries, source=json).
 
 🔄 Loading configuration...
-ℹ️  Configuration sheet missing; using course_context.json defaults.
-✓ Configuration loaded
-✓ Applied course context overrides (eventId)
-ℹ️  Current-event rounds policy: default
-   Defaults: metrics=include, baseline=exclude, optimization=exclude, historical=exclude
-🔄 Building metric config...
-✓ Metric config built
 
---- LOADING ALL AVAILABLE TEMPLATES ---
-✓ Loaded POWER template
-✓ Loaded TECHNICAL template
-✓ Loaded BALANCED template
-✓ Loaded TPC_LOUISIANA template
-✓ Loaded PEBBLE_BEACH_GOLF_LINKS template
-✓ Loaded WAIALAE_COUNTRY_CLUB template
-✓ Loaded THE_RIVIERA_COUNTRY_CLUB template
-✓ Loaded PETE_DYE_STADIUM_COURSE template
-✓ Loaded TORREY_PINES_GOLF_COURSE template
-✓ Loaded WM_PHOENIX_OPEN_STADIUM_COURSE template
-✓ Loaded PGA_NATIONAL_RESORT_CHAMPION_COURSE template
-✓ Loaded BAY_HILL_CLUB_AND_LODGE template
-✓ Loaded event-specific weights (eventId: 10) from template: PGA_NATIONAL_RESORT_CHAMPION_COURSE
-✓ Validation course type selected from summaries: TECHNICAL
-✓ DataGolf rankings loaded (api, updated 2026-03-02 12:35:19 UTC)
-ℹ️  Loaded L12 approach snapshot from archive (approach_l12_2026-02-23.json).
-✓ Approach snapshot l24 ready (snapshot, updated 2026-02-23 14:52:29 UTC)
-ℹ️  Skipping L12 approach snapshot refresh (not end-of-season post-tournament run; cached snapshot found).
-✓ Approach snapshot ytd ready (api, updated 2026-03-02 14:45:09 UTC)
-ℹ️  Using event-aligned YTD snapshot for pre-tournament run: approach_ytd_2026-02-25.json.
-✓ DataGolf field updates loaded (cache-stale, Cognizant Classic)
-✓ DataGolf historical rounds loaded (cache, pga 2026)
-✓ Loaded validation template: VALIDATION_TECHNICAL
-ℹ️  Validation template is included in Step 1d template testing.
-ℹ️  Validation outputs loaded for reporting only (no template/constraint influence).
-   To apply validation templates/constraints, set APPLY_VALIDATION_OUTPUTS=true.
-
-🔄 Loading data...
-✓ Loaded field (cache/API): 123 players
-ℹ️  Weather penalties unavailable (missing-location).
-✓ Loaded history (robust merged-source): 95264 rounds
-ℹ️  History source: refreshPolicy=prefer-cache, api(cache=6, stale=0, api=0, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
-ℹ️  History rows for event 10: 2527 (season 2026: 379)
-✓ Loaded approach: 0 rows (source: DataGolf approach skill (skipped, l24))
-✓ Using YTD approach snapshot for current season (176 rows, file: approach_ytd_2026-02-25.json, field overlap 107/123)
-ℹ️  Approach usage summary:
-   - Current-season rankings (baseline/optimization): snapshot_ytd
-   - Step 1b (event-only correlations): latest_snapshot_fallback
-   - Step 1c (event+similar+putting correlations): latest snapshot (snapshot_ytd)
-ℹ️  Derived 123 results from historical data.
-ℹ️  Manifest approach entries: current=10:cognizant-classic@2026-02-26, next=9:arnold-palmer-invitational@2026-03-05.
-ℹ️  Manifest approach CSVs: pre=none, post=none.
-ℹ️  Event-only snapshot selection: pre=approach_ytd_2026-02-25.json (snapshot_archive), post=approach_ytd_latest.json (snapshot_latest).
-✓ Event-only approach metrics enabled (pre=approach_ytd_2026-02-25.json, post=approach_ytd_latest.json, overlap 94.3%).
-ℹ️  No approach delta JSON found; attempting auto-generation (post-tournament).
-✓ Refreshed YTD approach snapshot for delta generation.
-ℹ️  Approach delta pre/post selection: pre=Genesis Invitational (2026) - Approach Skill (1).csv (approach_csv), post=approach_ytd_2026-02-25.json (snapshot_archive).
-ℹ️  Approach delta sources resolved: current=/workspaces/modelOptimizer/data/approach_snapshot/approach_ytd_2026-02-25.json (176 rows), previous=/workspaces/modelOptimizer/data/2026/genesis-invitational/inputs/Genesis Invitational (2026) - Approach Skill (1).csv (325 rows)
-✓ Approach delta JSON generated: /workspaces/modelOptimizer/data/approach_deltas/approach_deltas_cognizant-classic_2026_03_04.json
-✅ Approach delta ready: /workspaces/modelOptimizer/data/approach_deltas/approach_deltas_cognizant-classic_2026_03_04.json
+❌ Configuration unavailable: course_context.json entry missing and Configuration Sheet not found.
+   Fix: add a course_context entry for this event or provide a Configuration Sheet CSV in the inputs folder.

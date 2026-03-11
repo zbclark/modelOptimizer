@@ -36,7 +36,7 @@ Logging to /workspaces/modelOptimizer/data/2026/the-players/pre_event/the_player
 ℹ️  Skipping YTD approach snapshot refresh (post-tournament run; cached snapshot found).
 ℹ️  Using event-aligned YTD snapshot for pre-tournament run: approach_ytd_2026-03-09.json.
 ✓ DataGolf field updates loaded (cache-stale, THE PLAYERS Championship)
-ℹ️  Field updates name differs but event_id matches: expected THE PLAYERS, got THE PLAYERS Championship
+ℹ️  Field updates name differs but event_id matches: expected The PLAYERS, got THE PLAYERS Championship
 ✓ DataGolf historical rounds loaded (cache, pga 2026)
 ✓ Loaded validation template: VALIDATION_TECHNICAL
 ℹ️  Validation template is included in Step 1d template testing.
@@ -45,7 +45,7 @@ Logging to /workspaces/modelOptimizer/data/2026/the-players/pre_event/the_player
 
 🔄 Loading data...
 ✓ Loaded field (cache/API): 123 players
-✓ Weather adjustments computed (weather-only: R1 AM=0.0001034763210523772, R1 PM=0.00433564031241476, R2 AM=0.09317904093111072, R2 PM=0.0997404448187778; net: R1 AM=0.0042321639913623825, R1 PM=0, R2 AM=0.006561403887667072, R2 PM=0; combined: R1 AM=0.0042321639913623825, R1 PM=0.05, R2 AM=0.056561403887667075, R2 PM=0).
+✓ Weather adjustments computed (weather-only: R1 AM=0, R1 PM=0.13037235133488012, R2 AM=0.0029506277105029043, R2 PM=0.008647811479675927; net: R1 AM=0.13037235133488012, R1 PM=0, R2 AM=0.005697183769173024, R2 PM=0; combined: R1 AM=0.13037235133488012, R1 PM=-0.05, R2 AM=-0.04430281623082698, R2 PM=0).
 ℹ️  Pre-tournament: prior event 9 found via API; cache updated.
 ✓ Loaded history (robust merged-source): 95883 rounds
 ℹ️  History source: refreshPolicy=prefer-cache, api(cache=6, stale=0, api=0, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
@@ -97,6 +97,8 @@ Training metrics included (11): Driving Distance, Driving Accuracy, SG T2G, SG A
 Training metrics excluded: Birdie Chances Created, SG Total, SG Approach, Greens in Regulation, Fairway Proximity, Rough Proximity
 Derived metrics: Birdies or Better = birdies + eagles (from historical rounds when available)
 ✓ Computed 11 historical metric correlations (no current results).
+🗄️  Backed up previous JSON results to: /workspaces/modelOptimizer/data/2026/the-players/pre_event/archive/the-players_final_15_20_pre_event_results.json.2026-03-10T19-05-43-05-00.bak
+🗄️  Backed up previous text results to: /workspaces/modelOptimizer/data/2026/the-players/pre_event/archive/the-players_final_15_20_pre_event_results.txt.2026-03-10T19-05-43-05-00.bak
 ✅ Pre-event training output saved (rankings generated).
 ✅ JSON results saved to: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_results.json
 ✅ Text results saved to: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_results.txt

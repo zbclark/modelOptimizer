@@ -605,7 +605,7 @@ function calculateHistoricalAverages(historicalRounds, similarRounds = [], putti
     if (values.length < minPoints) return null;
     
     // Convert percentages if needed
-    const isPercentage = ['drivingAccuracy', 'greensInReg', 'scrambling'].includes(metricKey);
+    const isPercentage = ['drivingAccuracy', 'drivingAccuracyRel', 'greensInReg', 'scrambling'].includes(metricKey);
     const adjustedValues = values.map(v => {
       if (!isPercentage) return v;
       return v > 1 ? v/100 : v; // Convert 0-100% to 0-1 decimal
@@ -1379,6 +1379,18 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     if (typeof value !== 'string') return null;
     const raw = value.trim();
     if (!raw) return null;
+    const dateTimeMatch = raw.match(/^\s*(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})/);
+    if (dateTimeMatch) {
+      const [, year, month, day, hour, minute] = dateTimeMatch;
+      const yr = parseInt(year, 10);
+      const mo = parseInt(month, 10);
+      const dy = parseInt(day, 10);
+      const hr = parseInt(hour, 10);
+      const min = parseInt(minute, 10);
+      if ([yr, mo, dy, hr, min].every(Number.isFinite)) {
+        return new Date(yr, mo - 1, dy, hr, min, 0, 0);
+      }
+    }
     const parsed = new Date(raw);
     if (!isNaN(parsed.getTime())) return parsed;
 
@@ -1518,6 +1530,14 @@ function calculatePlayerMetrics(players, { groups, pastPerformance, config = {} 
     if (typeof value !== 'string') return null;
     const raw = value.trim();
     if (!raw) return null;
+    const dateTimeMatch = raw.match(/^\s*(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})/);
+    if (dateTimeMatch) {
+      const hour = parseInt(dateTimeMatch[4], 10);
+      const minute = parseInt(dateTimeMatch[5], 10);
+      if (!Number.isNaN(hour) && !Number.isNaN(minute)) {
+        return hour * 60 + minute;
+      }
+    }
     const parsed = new Date(raw);
     if (!isNaN(parsed.getTime())) {
       return parsed.getHours() * 60 + parsed.getMinutes();

@@ -409,18 +409,23 @@ function writeCleanRunSummaryLog(options = {}) {
     if (weatherWaveSummary.cachePath && fs.existsSync(weatherWaveSummary.cachePath)) {
       summaryLines.push(`- Penalty cache: ${weatherWaveSummary.cachePath}`);
     }
-    summaryLines.push(`- Wave adjustments (+ improves, - worsens): R1_AM=${r1AmAvg}, R1_PM=${r1PmAvg}, R2_AM=${r2AmAvg}, R2_PM=${r2PmAvg}`);
-    if (basePenalties) {
-      const baseAdv = (basePenalties.R1_PM || 0) + (basePenalties.R2_AM || 0)
-        - ((basePenalties.R1_AM || 0) + (basePenalties.R2_PM || 0));
+    summaryLines.push(`- Wave adjustments (negative=boost, positive=penalty): R1_AM=${r1AmAvg}, R1_PM=${r1PmAvg}, R2_AM=${r2AmAvg}, R2_PM=${r2PmAvg}`);
+    const baseAdv = basePenalties
+      ? (basePenalties.R1_PM || 0) + (basePenalties.R2_AM || 0)
+        - ((basePenalties.R1_AM || 0) + (basePenalties.R2_PM || 0))
+      : null;
+    if (baseAdv !== null) {
       summaryLines.push(`- Baseline advantage (Late/Early vs Early/Late): ${baseAdv.toFixed(2)}`);
     }
-    if (weatherAdjustments) {
+    const totalAdv = (r1PmAvg + r2AmAvg) - (r1AmAvg + r2PmAvg);
+    if (baseAdv !== null) {
+      const weatherAdv = totalAdv - baseAdv;
+      summaryLines.push(`- Weather-only advantage (Late/Early vs Early/Late): ${weatherAdv.toFixed(2)}`);
+    } else if (weatherAdjustments) {
       const weatherAdv = (weatherAdjustments.R1_PM || 0) + (weatherAdjustments.R2_AM || 0)
         - ((weatherAdjustments.R1_AM || 0) + (weatherAdjustments.R2_PM || 0));
       summaryLines.push(`- Weather-only advantage (Late/Early vs Early/Late): ${weatherAdv.toFixed(2)}`);
     }
-    const totalAdv = (r1PmAvg + r2AmAvg) - (r1AmAvg + r2PmAvg);
     summaryLines.push(`- Total implied advantage (Late/Early vs Early/Late): ${totalAdv.toFixed(2)}`);
   } else if (weatherEnabled) {
     summaryLines.push(`- Forecast used: no (${weatherWaveSummary?.reason || 'unavailable'})`);

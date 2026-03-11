@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-09T21:24:03.698Z",
+  "updatedAt": "2026-03-10T22:33:06-05:00",
   "sourceDir": "apps-scripts/modelOptimizer/data",
   "defaultTours": [
     "pga"
@@ -415,7 +415,7 @@
         "from150to200": 0.375,
         "over200": 0.295
       },
-      "pastPerformanceWeight": 0.1,
+      "pastPerformanceWeight": 0.4,
       "locationLat": 28.5383,
       "locationLon": -81.3792,
       "locationCity": "Orlando",
@@ -555,14 +555,13 @@
         "over200": 0.285
       },
       "pastPerformanceWeight": 0.3,
-      "locationLat": null,
-      "locationLon": null,
+      "locationLat": 30.2397,
+      "locationLon": -81.3856,
       "locationQuery": "Ponte Vedra Beach FL",
       "locationCity": "Ponte Vedra Beach",
       "locationState": "Florida",
       "locationCountry": "United States",
       "timezone": "America/New_York"
-
     },
     "12": {
       "sourcePath": null,
@@ -1193,7 +1192,7 @@
         "from150to200": 0.375,
         "over200": 0.295
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.4
     },
     "11": {
       "sourcePath": null,
@@ -1247,8 +1246,8 @@
         "over200": 0.285
       },
       "pastPerformanceWeight": 0.3,
-      "locationLat": null,
-      "locationLon": null,
+      "locationLat": 30.2397,
+      "locationLon": -81.3856,
       "locationQuery": "Ponte Vedra Beach FL",
       "locationCity": "Ponte Vedra Beach",
       "locationState": "Florida",

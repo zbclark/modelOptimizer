@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-10T13:18:33-05:00",
+  "generatedAt": "2026-03-10T22:33:59-05:00",
   "entries": [
     {
       "tournament": "american-express",
@@ -91,6 +91,15 @@
         "BALANCED": 0.018641001230173898
       },
       "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/sony-open_top20_template_blend.json"
+    },
+    {
+      "tournament": "the-players",
+      "displayName": "The Players (2026)",
+      "eventId": "11",
+      "courseType": "BALANCED",
+      "source": "course_context",
+      "alignmentScores": null,
+      "blendSource": null
     },
     {
       "tournament": "wm-phoenix-open",

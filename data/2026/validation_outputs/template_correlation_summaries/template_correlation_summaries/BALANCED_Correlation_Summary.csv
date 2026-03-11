@@ -1,6 +1,49 @@
 "BALANCED - Aggregated Metric Analysis"
-"Tournaments: "
+"Tournaments: The Players (2026)"
 
 "Metric","Avg Delta (Top 10 vs Field)","Avg Correlation","Tournament Count"
+"Driving Distance","0.000","0.0000",1
+"Driving Accuracy","0.000","0.0000",1
+"SG OTT","0.000","0.0000",1
+"Approach <100 GIR","0.000","0.0000",1
+"Approach <100 SG","0.000","0.0000",1
+"Approach <100 Prox","0.000","0.0000",1
+"Approach <150 FW GIR","0.000","0.0000",1
+"Approach <150 FW SG","0.000","0.0000",1
+"Approach <150 FW Prox","0.000","0.0000",1
+"Approach <150 Rough GIR","0.000","0.0000",1
+"Approach <150 Rough SG","0.000","0.0000",1
+"Approach <150 Rough Prox","0.000","0.0000",1
+"Approach <200 FW GIR","0.000","0.0000",1
+"Approach <200 FW SG","0.000","0.0000",1
+"Approach <200 FW Prox","0.000","0.0000",1
+"Approach >150 Rough GIR","0.000","0.0000",1
+"Approach >150 Rough SG","0.000","0.0000",1
+"Approach >150 Rough Prox","0.000","0.0000",1
+"Approach >200 FW GIR","0.000","0.0000",1
+"Approach >200 FW SG","0.000","0.0000",1
+"Approach >200 FW Prox","0.000","0.0000",1
+"SG Putting","0.000","0.0000",1
+"SG Around Green","0.000","0.0000",1
+"SG T2G","0.000","0.0000",1
+"Scoring Average","0.000","0.0000",1
+"Birdie Chances Created","0.000","0.0000",1
+"Birdies or Better","0.000","0.0000",1
+"Greens in Regulation","0.000","0.0000",1
+"Scoring: Approach <100 SG","0.000","0.0000",1
+"Scoring: Approach <150 FW SG","0.000","0.0000",1
+"Scoring: Approach <150 Rough SG","0.000","0.0000",1
+"Scoring: Approach >150 Rough SG","0.000","0.0000",1
+"Scoring: Approach <200 FW SG","0.000","0.0000",1
+"Scoring: Approach >200 FW SG","0.000","0.0000",1
+"Scrambling","0.000","0.0000",1
+"Great Shots","0.000","0.0000",1
+"Poor Shot Avoidance","0.000","0.0000",1
+"Course Management: Approach <100 Prox","0.000","0.0000",1
+"Course Management: Approach <150 FW Prox","0.000","0.0000",1
+"Course Management: Approach <150 Rough Prox","0.000","0.0000",1
+"Course Management: Approach >150 Rough Prox","0.000","0.0000",1
+"Course Management: Approach <200 FW Prox","0.000","0.0000",1
+"Course Management: Approach >200 FW Prox","0.000","0.0000",1
 
 "Note: Metrics show average delta and correlation across all tournaments of this type"

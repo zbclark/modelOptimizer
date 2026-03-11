@@ -6,7 +6,7 @@ CourseNum: 11
 CourseNameKey: TPC_SAWGRASS
 Season: 2026
 Run Mode: pre_event
-Timestamp: 2026-03-10T17:05:29-05:00
+Timestamp: 2026-03-10T19:05:43-05:00
 
 🔄 Course context / configuration
 - Config source: course_context.json
@@ -18,7 +18,7 @@ Timestamp: 2026-03-10T17:05:29-05:00
 🔄 Course history regression
 - Inputs generated
 - Regression snapshot: /workspaces/modelOptimizer/data/2026/the-players/pre_event/course_history_regression/course_history_regression.json
-- Completed date: 2026-03-10T17:05:13-05:00
+- Completed date: 2026-03-10T19:05:34-05:00
 
 🔄 Player ramp summary
 - File: /workspaces/modelOptimizer/data/2026/the-players/pre_event/analysis/early_season_ramp_sg_total.json
@@ -52,12 +52,12 @@ Field
 - Field loaded: 123 players
 
 Weather (Meteoblue)
-- Forecast used: yes (source=cache)
-- Location: Ponte Vedra Beach FL (lat=26.7153, lon=-80.0534)
-- Wave adjustments (+ improves, - worsens): R1_AM=-0.001480107890215732, R1_PM=0.034275875011990864, R2_AM=-0.19537847119075546, R2_PM=-0.48267218345923
-- Baseline advantage (Late/Early vs Early/Late): 0.10
-- Weather-only advantage (Late/Early vs Early/Late): 0.00
-- Total implied advantage (Late/Early vs Early/Late): 0.32
+- Forecast used: yes (source=api)
+- Location: Ponte Vedra Beach FL (lat=30.2397, lon=-81.3856)
+- Wave adjustments (negative=boost, positive=penalty): R1_AM=0.001888263195362731, R1_PM=0.2275164688725506, R2_AM=-0.03696817576288265, R2_PM=0.03094598987588288
+- Baseline advantage (Late/Early vs Early/Late): -0.10
+- Weather-only advantage (Late/Early vs Early/Late): 0.26
+- Total implied advantage (Late/Early vs Early/Late): 0.16
 
 Historical Rounds
 - Years used: 2021–2025 (eventId=11, courseNum=11)
@@ -118,4 +118,4 @@ Historical Rounds
 - Pre-event rankings JSON: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_rankings.json
 - Pre-event rankings CSV: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_pre_event_rankings.csv
 - Signal contribution report: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_final_15_20_signal_contributions.json
-- Completed: 2026-03-10T17:05:29-05:00
+- Completed: 2026-03-10T19:05:43-05:00
