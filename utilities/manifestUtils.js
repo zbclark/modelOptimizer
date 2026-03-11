@@ -29,25 +29,30 @@ const parseApproachSnapshotDateFromFilename = filePath => {
 };
 
 const listApproachSnapshotArchives = approachSnapshotDir => {
-  if (!approachSnapshotDir || !fs.existsSync(approachSnapshotDir)) return [];
+  if (!approachSnapshotDir) return [];
   const entries = [];
-  const files = fs.readdirSync(approachSnapshotDir);
-  files.forEach(name => {
-    if (!name.toLowerCase().endsWith('.json')) return;
-    const lower = name.toLowerCase();
-    if (lower === 'approach_l24.json' || lower === 'approach_l12.json' || lower === 'approach_ytd_latest.json') return;
-    const match = name.match(/^approach_([a-z0-9]+)_(\d{4}-\d{2}-\d{2})\.json$/i);
-    if (!match) return;
-    const period = String(match[1] || '').toLowerCase();
-    const dateStamp = match[2];
-    const time = Date.parse(`${dateStamp}T00:00:00Z`);
-    entries.push({
-      period,
-      name,
-      path: path.resolve(approachSnapshotDir, name),
-      time: Number.isNaN(time) ? 0 : time
+  const collect = baseDir => {
+    if (!baseDir || !fs.existsSync(baseDir)) return;
+    const files = fs.readdirSync(baseDir);
+    files.forEach(name => {
+      if (!name.toLowerCase().endsWith('.json')) return;
+      const lower = name.toLowerCase();
+      if (lower === 'approach_l24.json' || lower === 'approach_l12.json' || lower === 'approach_ytd_latest.json') return;
+      const match = name.match(/^approach_([a-z0-9]+)_(\d{4}-\d{2}-\d{2})\.json$/i);
+      if (!match) return;
+      const period = String(match[1] || '').toLowerCase();
+      const dateStamp = match[2];
+      const time = Date.parse(`${dateStamp}T00:00:00Z`);
+      entries.push({
+        period,
+        name,
+        path: path.resolve(baseDir, name),
+        time: Number.isNaN(time) ? 0 : time
+      });
     });
-  });
+  };
+  collect(approachSnapshotDir);
+  collect(path.resolve(approachSnapshotDir, 'archive'));
   entries.sort((a, b) => (b.time || 0) - (a.time || 0));
   return entries;
 };
@@ -66,7 +71,7 @@ const buildApproachSnapshotCandidates = ({ approachSnapshotDir }) => {
         time: entry.time || 0,
         date: entry.name.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null,
         source: 'snapshot_archive',
-        priority: 3
+        priority: 4
       });
     });
 
@@ -81,7 +86,7 @@ const buildApproachSnapshotCandidates = ({ approachSnapshotDir }) => {
       time: Number.isNaN(latestTime) ? 0 : latestTime,
       date: null,
       source: 'snapshot_latest',
-      priority: 2
+      priority: 1
     });
   }
 

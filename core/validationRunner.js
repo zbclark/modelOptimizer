@@ -59,7 +59,10 @@ const WRITE_RESULTS_EXTRAS = ['1', 'true', 'yes'].includes(
 const SEASON_MANIFEST_NAME = 'manifest.json';
 const STANDARD_TEMPLATE_TYPES = new Set(['POWER', 'TECHNICAL', 'BALANCED']);
 const APPROACH_SNAPSHOT_DIR = path.resolve(ROOT_DIR, 'data', 'approach_snapshot');
+const APPROACH_SNAPSHOT_ARCHIVE_DIR = path.resolve(APPROACH_SNAPSHOT_DIR, 'archive');
 const APPROACH_SNAPSHOT_YTD_LATEST_PATH = path.resolve(APPROACH_SNAPSHOT_DIR, 'approach_ytd_latest.json');
+const APPROACH_SNAPSHOT_L12_PATH = path.resolve(APPROACH_SNAPSHOT_DIR, 'approach_l12.json');
+const APPROACH_SNAPSHOT_L24_PATH = path.resolve(APPROACH_SNAPSHOT_DIR, 'approach_l24.json');
 
 const readJsonFile = filePath => {
   if (!filePath || !fs.existsSync(filePath)) return null;
@@ -105,25 +108,29 @@ const loadApproachRowsFromPath = sourcePath => {
 };
 
 const listApproachSnapshotArchives = () => {
-  if (!APPROACH_SNAPSHOT_DIR || !fs.existsSync(APPROACH_SNAPSHOT_DIR)) return [];
   const entries = [];
-  const files = fs.readdirSync(APPROACH_SNAPSHOT_DIR);
-  files.forEach(name => {
-    if (!name.toLowerCase().endsWith('.json')) return;
-    const lower = name.toLowerCase();
-    if (lower === 'approach_l24.json' || lower === 'approach_l12.json' || lower === 'approach_ytd_latest.json') return;
-    const match = name.match(/^approach_([a-z0-9]+)_(\d{4}-\d{2}-\d{2})\.json$/i);
-    if (!match) return;
-    const period = String(match[1] || '').toLowerCase();
-    const dateStamp = match[2];
-    const time = Date.parse(`${dateStamp}T00:00:00Z`);
-    entries.push({
-      period,
-      name,
-      path: path.resolve(APPROACH_SNAPSHOT_DIR, name),
-      time: Number.isNaN(time) ? 0 : time
+  const collect = baseDir => {
+    if (!baseDir || !fs.existsSync(baseDir)) return;
+    const files = fs.readdirSync(baseDir);
+    files.forEach(name => {
+      if (!name.toLowerCase().endsWith('.json')) return;
+      const lower = name.toLowerCase();
+      if (lower === 'approach_l24.json' || lower === 'approach_l12.json' || lower === 'approach_ytd_latest.json') return;
+      const match = name.match(/^approach_([a-z0-9]+)_(\d{4}-\d{2}-\d{2})\.json$/i);
+      if (!match) return;
+      const period = String(match[1] || '').toLowerCase();
+      const dateStamp = match[2];
+      const time = Date.parse(`${dateStamp}T00:00:00Z`);
+      entries.push({
+        period,
+        name,
+        path: path.resolve(baseDir, name),
+        time: Number.isNaN(time) ? 0 : time
+      });
     });
-  });
+  };
+  collect(APPROACH_SNAPSHOT_DIR);
+  collect(APPROACH_SNAPSHOT_ARCHIVE_DIR);
   entries.sort((a, b) => (b.time || 0) - (a.time || 0));
   return entries;
 };
@@ -145,23 +152,9 @@ const buildApproachSnapshotCandidates = ({ dataRootDir, season, manifestEntries 
         time: entry.time || 0,
         date: entry.name.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null,
         source: 'snapshot_archive',
-        priority: 3
+        priority: 4
       });
     });
-
-  if (APPROACH_SNAPSHOT_YTD_LATEST_PATH && fs.existsSync(APPROACH_SNAPSHOT_YTD_LATEST_PATH)) {
-    const latestTime = parseApproachSnapshotDateFromFilename(APPROACH_SNAPSHOT_YTD_LATEST_PATH);
-    if (!seen.has(APPROACH_SNAPSHOT_YTD_LATEST_PATH)) {
-      seen.add(APPROACH_SNAPSHOT_YTD_LATEST_PATH);
-      candidates.push({
-        path: APPROACH_SNAPSHOT_YTD_LATEST_PATH,
-        time: Number.isNaN(latestTime) ? 0 : latestTime,
-        date: null,
-        source: 'snapshot_latest',
-        priority: 2
-      });
-    }
-  }
 
   entries.forEach(entry => {
     const eventTime = parseDateToUtcMs(entry.date);
@@ -178,9 +171,33 @@ const buildApproachSnapshotCandidates = ({ dataRootDir, season, manifestEntries 
       time: eventTime,
       date: entry.date,
       source: 'approach_csv',
-      priority: 1
+      priority: 3
     });
   });
+
+  const addSnapshotFallback = (filePath, source, priority) => {
+    if (!filePath || !fs.existsSync(filePath) || seen.has(filePath)) return;
+    let time = parseApproachSnapshotDateFromFilename(filePath);
+    if (Number.isNaN(time)) {
+      try {
+        time = fs.statSync(filePath).mtimeMs || 0;
+      } catch (error) {
+        time = 0;
+      }
+    }
+    seen.add(filePath);
+    candidates.push({
+      path: filePath,
+      time: Number.isNaN(time) ? 0 : time,
+      date: null,
+      source,
+      priority
+    });
+  };
+
+  addSnapshotFallback(APPROACH_SNAPSHOT_L12_PATH, 'snapshot_l12', 2);
+  addSnapshotFallback(APPROACH_SNAPSHOT_L24_PATH, 'snapshot_l24', 2);
+  addSnapshotFallback(APPROACH_SNAPSHOT_YTD_LATEST_PATH, 'snapshot_latest', 1);
 
   return candidates.filter(entry => typeof entry.time === 'number' && entry.time > 0);
 };

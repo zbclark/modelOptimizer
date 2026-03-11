@@ -227,6 +227,7 @@ const computeApproachDeltas = ({ previousRows, currentRows }) => {
 };
 
 const APPROACH_SNAPSHOT_DIR = path.resolve(__dirname, '..', 'data', 'approach_snapshot');
+const APPROACH_SNAPSHOT_ARCHIVE_DIR = path.resolve(APPROACH_SNAPSHOT_DIR, 'archive');
 const SNAPSHOT_PREFIX = 'snapshot:';
 
 const resolveWildcardPath = (inputPath) => {
@@ -254,15 +255,31 @@ const resolveWildcardPath = (inputPath) => {
 };
 
 const listYtdArchives = () => {
-  if (!fs.existsSync(APPROACH_SNAPSHOT_DIR)) return [];
-  return fs.readdirSync(APPROACH_SNAPSHOT_DIR)
-    .filter(name => /^approach_ytd_\d{4}-\d{2}-\d{2}\.json$/i.test(name))
-    .map(name => ({
-      name,
-      path: path.resolve(APPROACH_SNAPSHOT_DIR, name),
-      date: name.match(/\d{4}-\d{2}-\d{2}/)?.[0] || ''
-    }))
-    .sort((a, b) => a.date.localeCompare(b.date));
+  const entries = [];
+  const collect = baseDir => {
+    if (!baseDir || !fs.existsSync(baseDir)) return;
+    fs.readdirSync(baseDir)
+      .filter(name => /^approach_ytd_\d{4}-\d{2}-\d{2}\.json$/i.test(name))
+      .forEach(name => {
+        entries.push({
+          name,
+          path: path.resolve(baseDir, name),
+          date: name.match(/\d{4}-\d{2}-\d{2}/)?.[0] || ''
+        });
+      });
+  };
+  collect(APPROACH_SNAPSHOT_DIR);
+  collect(APPROACH_SNAPSHOT_ARCHIVE_DIR);
+  return entries.sort((a, b) => a.date.localeCompare(b.date));
+};
+
+const resolveSnapshotPath = (fileName) => {
+  if (!fileName) return null;
+  const direct = path.resolve(APPROACH_SNAPSHOT_DIR, fileName);
+  if (fs.existsSync(direct)) return direct;
+  const archived = path.resolve(APPROACH_SNAPSHOT_ARCHIVE_DIR, fileName);
+  if (fs.existsSync(archived)) return archived;
+  return direct;
 };
 
 const resolveSnapshotSelector = (selector) => {
@@ -270,13 +287,13 @@ const resolveSnapshotSelector = (selector) => {
   if (!normalized) return null;
 
   if (normalized === 'l24') {
-    return path.resolve(APPROACH_SNAPSHOT_DIR, 'approach_l24.json');
+    return resolveSnapshotPath('approach_l24.json');
   }
   if (normalized === 'l12') {
-    return path.resolve(APPROACH_SNAPSHOT_DIR, 'approach_l12.json');
+    return resolveSnapshotPath('approach_l12.json');
   }
   if (normalized === 'ytd_latest' || normalized === 'latest') {
-    return path.resolve(APPROACH_SNAPSHOT_DIR, 'approach_ytd_latest.json');
+    return resolveSnapshotPath('approach_ytd_latest.json');
   }
 
   if (normalized === 'current') {
@@ -293,7 +310,7 @@ const resolveSnapshotSelector = (selector) => {
   }
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
-    return path.resolve(APPROACH_SNAPSHOT_DIR, `approach_ytd_${normalized}.json`);
+    return resolveSnapshotPath(`approach_ytd_${normalized}.json`);
   }
 
   return null;

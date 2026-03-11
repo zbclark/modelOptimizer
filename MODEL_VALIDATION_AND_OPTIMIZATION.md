@@ -461,16 +461,16 @@ Below is a step‑by‑step view of **exact data used**, **time windows**, and *
 
 **Approach snapshot retention (Node):**
 
-- **Latest files (always kept):** **THESE NO LONGER EXIST!!**
+- **Latest files (always kept):**
   - `data/approach_snapshot/approach_l24.json`
   - `data/approach_snapshot/approach_l12.json`
   - `data/approach_snapshot/approach_ytd_latest.json`
 - **Archive files (rotated):**
-  - `approach_l24_YYYY-MM-DD.json`
-  - `approach_l12_YYYY-MM-DD.json`
-  - `approach_ytd_YYYY-MM-DD.json`
+  - `data/approach_snapshot/archive/approach_l24_YYYY-MM-DD.json`
+  - `data/approach_snapshot/archive/approach_l12_YYYY-MM-DD.json`
+  - `data/approach_snapshot/archive/approach_ytd_YYYY-MM-DD.json`
 - **Default retention policy (Node):**
-  - **YTD:** keep last **4** weekly archives (current + recent history for delta generation)
+  - **YTD:** keep last **4** weekly snapshots in `approach_snapshot/`; older weekly YTD snapshots are moved to `approach_snapshot/archive/`
   - **L24:** keep **all** dated archives (multi‑season baseline)
   - **L12:** keep **all** dated archives (end‑of‑season snapshots)
 - **Env overrides:**

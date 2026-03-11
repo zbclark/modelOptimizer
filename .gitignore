@@ -29,6 +29,8 @@ data/2026/wm-phoenix-open
 # Archive folders
 data/2025/**/[Aa][Rr][Cc][Hh][Ii][Vv][Ee]/
 data/2026/**/[Aa][Rr][Cc][Hh][Ii][Vv][Ee]/
+!data/approach_snapshot/archive/
+!data/approach_snapshot/archive/**
 !/ARCHIVE/
 !/ARCHIVE/**
 
