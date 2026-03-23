@@ -1,0 +1,400 @@
+{
+  "version": 3,
+  "tournament": "valspar",
+  "courseType": "BALANCED",
+  "top10Finishers": 0,
+  "totalFinishers": 0,
+  "generatedAt": "2026-03-23T09:19:23-05:00",
+  "metrics": [
+    {
+      "metric": "Driving Distance",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Driving Accuracy",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "SG OTT",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <100 GIR",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <100 SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <100 Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <150 FW GIR",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <150 FW SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <150 FW Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <150 Rough GIR",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <150 Rough SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <150 Rough Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <200 FW GIR",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <200 FW SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach <200 FW Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach >150 Rough GIR",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach >150 Rough SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach >150 Rough Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach >200 FW GIR",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach >200 FW SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Approach >200 FW Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "SG Putting",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "SG Around Green",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "SG T2G",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Scoring Average",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Birdie Chances Created",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Birdies or Better",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Greens in Regulation",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Scoring: Approach <100 SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Scoring: Approach <150 FW SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Scoring: Approach <150 Rough SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Scoring: Approach >150 Rough SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Scoring: Approach <200 FW SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Scoring: Approach >200 FW SG",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Scrambling",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Great Shots",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Poor Shot Avoidance",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Course Management: Approach <100 Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Course Management: Approach <150 FW Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Course Management: Approach <150 Rough Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Course Management: Approach >150 Rough Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Course Management: Approach <200 FW Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    },
+    {
+      "metric": "Course Management: Approach >200 FW Prox",
+      "top10Avg": 0,
+      "fieldAvg": 0,
+      "delta": 0,
+      "correlation": 0,
+      "top10Count": 0,
+      "fieldCount": 0
+    }
+  ],
+  "eventId": "475",
+  "courseTypeSource": "course_context",
+  "detectedCourseType": "BALANCED"
+}

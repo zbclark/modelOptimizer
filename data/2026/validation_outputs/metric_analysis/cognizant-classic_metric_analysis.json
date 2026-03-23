@@ -1,10 +1,10 @@
 {
   "version": 3,
   "tournament": "cognizant-classic",
-  "courseType": "TECHNICAL",
+  "courseType": "BALANCED",
   "top10Finishers": 12,
   "totalFinishers": 123,
-  "generatedAt": "2026-03-10T22:33:57-05:00",
+  "generatedAt": "2026-03-16T21:17:11-05:00",
   "metrics": [
     {
       "metric": "Driving Distance",
@@ -395,5 +395,6 @@
     }
   ],
   "eventId": "10",
-  "courseTypeSource": "course_context"
+  "courseTypeSource": "course_context",
+  "detectedCourseType": "TECHNICAL"
 }

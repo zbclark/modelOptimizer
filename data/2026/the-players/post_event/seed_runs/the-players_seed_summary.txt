@@ -1,0 +1,19 @@
+====================================================================================================
+MODEL OPTIMIZER SEED SUMMARY
+====================================================================================================
+Base: the-players
+Directory: /workspaces/modelOptimizer/data/2026/the-players/post_event/seed_runs
+Seeds analyzed: 2
+
+Top seed ranking (sorted by correlation, then Top-20, then Top-20 Weighted):
+
+1. seed=a | corr=0.8187 | top20=80.0% | top20W=81.8% | rmse=22.74 | mae=18.62 | players=123 | rec=optimized | baseline=TPC_SAWGRASS | file=the-players_seed-a_loeo_post_event_results.json
+2. seed=a | corr=0.8113 | top20=80.0% | top20W=81.6% | rmse=22.95 | mae=18.74 | players=123 | rec=optimized | baseline=TPC_SAWGRASS | file=the-players_seed-a_kfold3_post_event_results.json
+
+Best seed:
+seed=a | file=the-players_seed-a_loeo_post_event_results.json
+Recommendation for best seed: Use optimized weights | baseline=TPC_SAWGRASS
+Note: Optimized weights recommended over baseline template.
+
+Recommendation rollup (from results.json):
+- optimized: Use optimized weights | baseline=TPC_SAWGRASS | seeds=a, a | count=2

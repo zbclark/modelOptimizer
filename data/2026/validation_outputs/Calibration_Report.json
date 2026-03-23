@@ -1528,6 +1528,215 @@
       }
     },
     {
+      "name": "The PLAYERS",
+      "topFinishers": [
+        {
+          "name": "Young, Cameron",
+          "dgId": "26651",
+          "actualFinish": 1,
+          "predictedRank": 13,
+          "missScore": 12,
+          "inTopXPredicted": "Top 20"
+        },
+        {
+          "name": "Fitzpatrick, Matt",
+          "dgId": "17646",
+          "actualFinish": 2,
+          "predictedRank": 49,
+          "missScore": 47,
+          "inTopXPredicted": "Top 50"
+        },
+        {
+          "name": "Schauffele, Xander",
+          "dgId": "19895",
+          "actualFinish": 3,
+          "predictedRank": 59,
+          "missScore": 56,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "MacIntyre, Robert",
+          "dgId": "23323",
+          "actualFinish": 4,
+          "predictedRank": 80,
+          "missScore": 76,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "Yellamaraju, Sudarshan",
+          "dgId": "29925",
+          "actualFinish": 5,
+          "predictedRank": 21,
+          "missScore": 16,
+          "inTopXPredicted": "Top 50"
+        },
+        {
+          "name": "Aberg, Ludvig",
+          "dgId": "23950",
+          "actualFinish": 5,
+          "predictedRank": 3,
+          "missScore": 2,
+          "inTopXPredicted": "Top 20"
+        },
+        {
+          "name": "Bridgeman, Jacob",
+          "dgId": "29433",
+          "actualFinish": 5,
+          "predictedRank": 20,
+          "missScore": 15,
+          "inTopXPredicted": "Top 20"
+        },
+        {
+          "name": "Fleetwood, Tommy",
+          "dgId": "12294",
+          "actualFinish": 8,
+          "predictedRank": 63,
+          "missScore": 55,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "Straka, Sepp",
+          "dgId": "17511",
+          "actualFinish": 8,
+          "predictedRank": 64,
+          "missScore": 56,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "Thomas, Justin",
+          "dgId": "14139",
+          "actualFinish": 8,
+          "predictedRank": 79,
+          "missScore": 71,
+          "inTopXPredicted": "Outside Top 50"
+        }
+      ],
+      "calibrationBuckets": {
+        "bucketCount": 10,
+        "totalPredictions": 123,
+        "matchedCount": 121,
+        "buckets": [
+          {
+            "bucket": 0,
+            "minPct": 0,
+            "maxPct": 0.1,
+            "count": 12,
+            "top5": 2,
+            "top10": 2,
+            "top20": 4
+          },
+          {
+            "bucket": 1,
+            "minPct": 0.1,
+            "maxPct": 0.2,
+            "count": 12,
+            "top5": 2,
+            "top10": 2,
+            "top20": 5
+          },
+          {
+            "bucket": 2,
+            "minPct": 0.2,
+            "maxPct": 0.3,
+            "count": 12,
+            "top5": 0,
+            "top10": 0,
+            "top20": 1
+          },
+          {
+            "bucket": 3,
+            "minPct": 0.3,
+            "maxPct": 0.4,
+            "count": 12,
+            "top5": 1,
+            "top10": 1,
+            "top20": 1
+          },
+          {
+            "bucket": 4,
+            "minPct": 0.4,
+            "maxPct": 0.5,
+            "count": 11,
+            "top5": 1,
+            "top10": 1,
+            "top20": 1
+          },
+          {
+            "bucket": 5,
+            "minPct": 0.5,
+            "maxPct": 0.6,
+            "count": 13,
+            "top5": 0,
+            "top10": 2,
+            "top20": 3
+          },
+          {
+            "bucket": 6,
+            "minPct": 0.6,
+            "maxPct": 0.7,
+            "count": 12,
+            "top5": 1,
+            "top10": 2,
+            "top20": 3
+          },
+          {
+            "bucket": 7,
+            "minPct": 0.7,
+            "maxPct": 0.8,
+            "count": 12,
+            "top5": 0,
+            "top10": 0,
+            "top20": 2
+          },
+          {
+            "bucket": 8,
+            "minPct": 0.8,
+            "maxPct": 0.9,
+            "count": 12,
+            "top5": 0,
+            "top10": 0,
+            "top20": 1
+          },
+          {
+            "bucket": 9,
+            "minPct": 0.9,
+            "maxPct": 1,
+            "count": 13,
+            "top5": 0,
+            "top10": 0,
+            "top20": 0
+          }
+        ]
+      },
+      "plattCalibration": {
+        "top10": {
+          "available": true,
+          "a": -1.0857113988171807,
+          "b": -1.6993205058409688,
+          "samples": 121,
+          "logLoss": 0.2777088288510506,
+          "brier": 0.07471084050723055,
+          "baseRate": 0.08264462809917356
+        },
+        "top20": {
+          "available": true,
+          "a": -1.0577696628222806,
+          "b": -0.9960853042459439,
+          "samples": 121,
+          "logLoss": 0.4458110281232974,
+          "brier": 0.13877790219480673,
+          "baseRate": 0.17355371900826447
+        }
+      },
+      "accuracyMetrics": {
+        "top5Predicted": 3,
+        "top10Predicted": 4,
+        "top20Predicted": 5,
+        "avgMissTop5": 32,
+        "avgMissTop10": 40.6
+      }
+    },
+    {
       "name": "WM Phoenix Open (2026)",
       "topFinishers": [
         {
@@ -1755,95 +1964,95 @@
   ],
   "calibrationBuckets": {
     "bucketCount": 10,
-    "totalPredictions": 887,
-    "matchedCount": 881,
+    "totalPredictions": 1010,
+    "matchedCount": 1002,
     "buckets": [
       {
         "bucket": 0,
         "minPct": 0,
         "maxPct": 0.1,
-        "count": 92,
-        "top5": 7,
-        "top10": 16,
-        "top20": 27
+        "count": 104,
+        "top5": 9,
+        "top10": 18,
+        "top20": 31
       },
       {
         "bucket": 1,
         "minPct": 0.1,
         "maxPct": 0.2,
-        "count": 88,
-        "top5": 10,
-        "top10": 17,
-        "top20": 29
+        "count": 100,
+        "top5": 12,
+        "top10": 19,
+        "top20": 34
       },
       {
         "bucket": 2,
         "minPct": 0.2,
         "maxPct": 0.3,
-        "count": 86,
+        "count": 98,
         "top5": 2,
         "top10": 10,
-        "top20": 19
+        "top20": 20
       },
       {
         "bucket": 3,
         "minPct": 0.3,
         "maxPct": 0.4,
-        "count": 87,
-        "top5": 7,
-        "top10": 12,
-        "top20": 20
+        "count": 99,
+        "top5": 8,
+        "top10": 13,
+        "top20": 21
       },
       {
         "bucket": 4,
         "minPct": 0.4,
         "maxPct": 0.5,
-        "count": 85,
-        "top5": 5,
-        "top10": 7,
-        "top20": 16
+        "count": 96,
+        "top5": 6,
+        "top10": 8,
+        "top20": 17
       },
       {
         "bucket": 5,
         "minPct": 0.5,
         "maxPct": 0.6,
-        "count": 90,
+        "count": 103,
         "top5": 4,
-        "top10": 5,
-        "top20": 12
+        "top10": 7,
+        "top20": 15
       },
       {
         "bucket": 6,
         "minPct": 0.6,
         "maxPct": 0.7,
-        "count": 88,
-        "top5": 1,
-        "top10": 4,
-        "top20": 13
+        "count": 100,
+        "top5": 2,
+        "top10": 6,
+        "top20": 16
       },
       {
         "bucket": 7,
         "minPct": 0.7,
         "maxPct": 0.8,
-        "count": 87,
+        "count": 99,
         "top5": 2,
         "top10": 7,
-        "top20": 15
+        "top20": 17
       },
       {
         "bucket": 8,
         "minPct": 0.8,
         "maxPct": 0.9,
-        "count": 88,
+        "count": 100,
         "top5": 2,
         "top10": 4,
-        "top20": 14
+        "top20": 15
       },
       {
         "bucket": 9,
         "minPct": 0.9,
         "maxPct": 1,
-        "count": 90,
+        "count": 103,
         "top5": 3,
         "top10": 8,
         "top20": 14
@@ -1853,30 +2062,30 @@
   "plattCalibration": {
     "top10": {
       "available": true,
-      "a": -0.989830709230983,
-      "b": -1.555967063704364,
-      "samples": 881,
-      "logLoss": 0.3229055997358018,
-      "brier": 0.09028919798573293,
-      "baseRate": 0.1021566401816118
+      "a": -1.000906688153355,
+      "b": -1.5721807395904008,
+      "samples": 1002,
+      "logLoss": 0.3176760379030529,
+      "brier": 0.08844298758100912,
+      "baseRate": 0.0998003992015968
     },
     "top20": {
       "available": true,
-      "a": -0.7949023087920197,
-      "b": -0.9317563909286716,
-      "samples": 881,
-      "logLoss": 0.49666104147930673,
-      "brier": 0.15916154990129497,
-      "baseRate": 0.20317820658342792
+      "a": -0.8255027151446532,
+      "b": -0.9388360146043832,
+      "samples": 1002,
+      "logLoss": 0.49096287624467083,
+      "brier": 0.15680770138885441,
+      "baseRate": 0.1996007984031936
     }
   },
   "plattSamples": {
-    "top10Count": 881,
-    "top20Count": 881
+    "top10Count": 1002,
+    "top20Count": 1002
   },
-  "totalTop5": 43,
-  "predictedTop5InTop20": 16,
-  "totalTop10": 90,
-  "predictedTop10InTop30": 47,
-  "generatedAt": "2026-03-10T22:33:59-05:00"
+  "totalTop5": 50,
+  "predictedTop5InTop20": 19,
+  "totalTop10": 100,
+  "predictedTop10InTop30": 51,
+  "generatedAt": "2026-03-23T09:19:21-05:00"
 }

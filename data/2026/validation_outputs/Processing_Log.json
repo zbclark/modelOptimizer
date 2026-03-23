@@ -1,35 +1,35 @@
 {
-  "generatedAt": "2026-03-10T22:33:59-05:00",
-  "tournament": "wm-phoenix-open",
-  "eventId": "3",
-  "season": "2026",
+  "generatedAt": "2026-03-23T09:19:23-05:00",
+  "tournament": "valspar",
+  "eventId": "475",
+  "season": 2026,
   "skipMetricAnalysis": false,
   "dataProcessed": {
-    "predictionsCount": 123,
-    "resultsCount": 123,
+    "predictionsCount": 135,
+    "resultsCount": 0,
     "metricAnalysis": {
       "metrics": 43,
-      "top10Finishers": 12,
-      "totalFinishers": 123
+      "top10Finishers": 0,
+      "totalFinishers": 0
     },
     "modelDeltaTrends": {
       "metrics": 11,
-      "totalSamples": 9823,
-      "tournamentCount": 8,
+      "totalSamples": 11165,
+      "tournamentCount": 9,
       "source": "season_aggregate"
     }
   },
   "inputs": {
-    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/pre_event/wm-phoenix-open_pre_event_rankings.json",
-    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/pre_event/wm-phoenix-open_pre_event_rankings.csv",
-    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/post_event/wm-phoenix-open_results.json",
-    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/post_event/wm-phoenix-open_results.csv",
+    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/the-valspar/pre_event/the-valspar_pre_event_rankings.json",
+    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/the-valspar/pre_event/the-valspar_pre_event_rankings.csv",
+    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/the-valspar/post_event/the-valspar_results.json",
+    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/the-valspar/post_event/the-valspar_results.csv",
     "configCsvPath": null
   },
   "sources": {
     "rankings": "json",
-    "results": "json",
-    "resultsGeneratedFrom": "existing_json",
+    "results": "missing",
+    "resultsGeneratedFrom": "cache",
     "config": "course_context"
   },
   "outputs": [
@@ -49,17 +49,17 @@
     },
     {
       "label": "metricAnalysis.json",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/wm-phoenix-open_metric_analysis.json",
-      "existedBefore": true,
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/valspar_metric_analysis.json",
+      "existedBefore": false,
       "written": true,
-      "overwritten": true
+      "overwritten": false
     },
     {
       "label": "metricAnalysis.csv",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/wm-phoenix-open_metric_analysis.csv",
-      "existedBefore": true,
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/metric_analysis/valspar_metric_analysis.csv",
+      "existedBefore": false,
       "written": true,
-      "overwritten": true
+      "overwritten": false
     },
     {
       "label": "courseTypeClassification.json",
@@ -77,42 +77,42 @@
     },
     {
       "label": "powerCorrelationSummary.json",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/POWER_Correlation_Summary.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/POWER_Correlation_Summary.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "powerCorrelationSummary.csv",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/POWER_Correlation_Summary.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/POWER_Correlation_Summary.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "technicalCorrelationSummary.json",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/TECHNICAL_Correlation_Summary.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/TECHNICAL_Correlation_Summary.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "technicalCorrelationSummary.csv",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/TECHNICAL_Correlation_Summary.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/TECHNICAL_Correlation_Summary.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "balancedCorrelationSummary.json",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/BALANCED_Correlation_Summary.json",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/BALANCED_Correlation_Summary.json",
       "existedBefore": true,
       "written": true,
       "overwritten": true
     },
     {
       "label": "balancedCorrelationSummary.csv",
-      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/template_correlation_summaries/BALANCED_Correlation_Summary.csv",
+      "path": "/workspaces/modelOptimizer/data/2026/validation_outputs/template_correlation_summaries/BALANCED_Correlation_Summary.csv",
       "existedBefore": true,
       "written": true,
       "overwritten": true

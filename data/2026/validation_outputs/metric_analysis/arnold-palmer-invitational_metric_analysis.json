@@ -1,10 +1,10 @@
 {
   "version": 3,
   "tournament": "arnold-palmer-invitational",
-  "courseType": "TECHNICAL",
+  "courseType": "BALANCED",
   "top10Finishers": 10,
   "totalFinishers": 72,
-  "generatedAt": "2026-03-10T03:35:16.303Z",
+  "generatedAt": "2026-03-16T21:17:11-05:00",
   "metrics": [
     {
       "metric": "Driving Distance",
@@ -395,5 +395,6 @@
     }
   ],
   "eventId": "9",
-  "courseTypeSource": "course_context"
+  "courseTypeSource": "course_context",
+  "detectedCourseType": "BALANCED"
 }

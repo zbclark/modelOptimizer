@@ -52,5 +52,41 @@
     "tournamentSlug": "the-players",
     "tournamentName": "The PLAYERS",
     "date": "2026-03-11"
+  },
+  {
+    "eventId": "475",
+    "tournamentSlug": "the-valspar",
+    "tournamentName": "The Valspar Championship",
+    "date": "2026-03-19"
+  },
+  {
+    "eventId": "20",
+    "tournamentSlug": "texas-childrens-open",
+    "tournamentName": "Texas Children's Open",
+    "date": "2025-03-26"
+  },
+  {
+    "eventId": "41",
+    "tournamentSlug": "valero-texas-open",
+    "tournamentName": "Valero Texas Open",
+    "date": "2025-04-02"
+  },
+  {
+    "eventId": "14",
+    "tournamentSlug": "masters-tournament",
+    "tournamentName": "The Masters Tournament",
+    "date": "2025-04-09"
+  },
+  {
+    "eventId": "12",
+    "tournamentSlug": "rbc-heritage",
+    "tournamentName": "RBC Heritage",
+    "date": "2025-04-16"
+  },
+  {
+    "eventId": "18",
+    "tournamentSlug": "zurich-classic",
+    "tournamentName": "Zurich Classic",
+    "date": "2025-04-23"
   }
 ]

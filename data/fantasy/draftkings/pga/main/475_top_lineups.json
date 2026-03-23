@@ -1,0 +1,1048 @@
+{
+  "tour": "pga",
+  "site": "draftkings",
+  "slate": "main",
+  "eventId": "475",
+  "salaryCap": 50000,
+  "lineupSize": 6,
+  "topN": 20,
+  "ownershipWeight": 0.001,
+  "minSalaryUsed": null,
+  "minProjPoints": null,
+  "maxOwnership": null,
+  "maxExposure": 0.2,
+  "modelMarket": "top_10",
+  "probThreshold": 0.12,
+  "modelMarketAlt": null,
+  "probThresholdAlt": null,
+  "poolSizeBeforeThreshold": 135,
+  "poolSizeAfterThreshold": 131,
+  "lockedPlayers": [],
+  "excludedPlayers": [],
+  "event_name": "Valspar Championship",
+  "last_updated": "2026-03-19 01:42:35 UTC",
+  "lineup_salary_totals": [
+    50000,
+    50000,
+    50000,
+    50000,
+    50000,
+    50000,
+    49800,
+    50000,
+    49900,
+    50000,
+    50000,
+    50000,
+    49900,
+    50000,
+    50000,
+    50000,
+    50000,
+    50000,
+    50000,
+    50000
+  ],
+  "lineups": [
+    {
+      "rank": 1,
+      "totalSalary": 50000,
+      "totalPoints": 360.01000000000005,
+      "totalOwnership": 77.91,
+      "players": [
+        {
+          "dgId": 19895,
+          "name": "Schauffele, Xander",
+          "salary": 10900,
+          "projPoints": 72.83,
+          "projOwnership": 23.36
+        },
+        {
+          "dgId": 17646,
+          "name": "Fitzpatrick, Matt",
+          "salary": 9800,
+          "projPoints": 71.41,
+          "projOwnership": 22.15
+        },
+        {
+          "dgId": 23505,
+          "name": "McGreevy, Max",
+          "salary": 7500,
+          "projPoints": 56.24,
+          "projOwnership": 7.24
+        },
+        {
+          "dgId": 22985,
+          "name": "Smotherman, Austin",
+          "salary": 7400,
+          "projPoints": 54.18,
+          "projOwnership": 14.83
+        },
+        {
+          "dgId": 28159,
+          "name": "Meissner, Mac",
+          "salary": 7400,
+          "projPoints": 53.98,
+          "projOwnership": 7.3
+        },
+        {
+          "dgId": 23504,
+          "name": "Hoey, Rico",
+          "salary": 7000,
+          "projPoints": 51.37,
+          "projOwnership": 3.03
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "totalSalary": 50000,
+      "totalPoints": 359.6,
+      "totalOwnership": 91.25999999999999,
+      "players": [
+        {
+          "dgId": 17646,
+          "name": "Fitzpatrick, Matt",
+          "salary": 9800,
+          "projPoints": 71.41,
+          "projOwnership": 22.15
+        },
+        {
+          "dgId": 29433,
+          "name": "Bridgeman, Jacob",
+          "salary": 9600,
+          "projPoints": 65.25,
+          "projOwnership": 29.77
+        },
+        {
+          "dgId": 17536,
+          "name": "Spaun, J.J.",
+          "salary": 8700,
+          "projPoints": 61.15,
+          "projOwnership": 14.24
+        },
+        {
+          "dgId": 23505,
+          "name": "McGreevy, Max",
+          "salary": 7500,
+          "projPoints": 56.24,
+          "projOwnership": 7.24
+        },
+        {
+          "dgId": 22985,
+          "name": "Smotherman, Austin",
+          "salary": 7400,
+          "projPoints": 54.18,
+          "projOwnership": 14.83
+        },
+        {
+          "dgId": 23504,
+          "name": "Hoey, Rico",
+          "salary": 7000,
+          "projPoints": 51.37,
+          "projOwnership": 3.03
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "totalSalary": 50000,
+      "totalPoints": 359.40000000000003,
+      "totalOwnership": 83.72999999999999,
+      "players": [
+        {
+          "dgId": 17646,
+          "name": "Fitzpatrick, Matt",
+          "salary": 9800,
+          "projPoints": 71.41,
+          "projOwnership": 22.15
+        },
+        {
+          "dgId": 29433,
+          "name": "Bridgeman, Jacob",
+          "salary": 9600,
+          "projPoints": 65.25,
+          "projOwnership": 29.77
+        },
+        {
+          "dgId": 17536,
+          "name": "Spaun, J.J.",
+          "salary": 8700,
+          "projPoints": 61.15,
+          "projOwnership": 14.24
+        },
+        {
+          "dgId": 23505,
+          "name": "McGreevy, Max",
+          "salary": 7500,
+          "projPoints": 56.24,
+          "projOwnership": 7.24
+        },
+        {
+          "dgId": 28159,
+          "name": "Meissner, Mac",
+          "salary": 7400,
+          "projPoints": 53.98,
+          "projOwnership": 7.3
+        },
+        {
+          "dgId": 23504,
+          "name": "Hoey, Rico",
+          "salary": 7000,
+          "projPoints": 51.37,
+          "projOwnership": 3.03
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "totalSalary": 50000,
+      "totalPoints": 359.27,
+      "totalOwnership": 77.89999999999999,
+      "players": [
+        {
+          "dgId": 19895,
+          "name": "Schauffele, Xander",
+          "salary": 10900,
+          "projPoints": 72.83,
+          "projOwnership": 23.36
+        },
+        {
+          "dgId": 17646,
+          "name": "Fitzpatrick, Matt",
+          "salary": 9800,
+          "projPoints": 71.41,
+          "projOwnership": 22.15
+        },
+        {
+          "dgId": 18103,
+          "name": "Bezuidenhout, Christiaan",
+          "salary": 7700,
+          "projPoints": 55.46,
+          "projOwnership": 6.08
+        },
+        {
+          "dgId": 23505,
+          "name": "McGreevy, Max",
+          "salary": 7500,
+          "projPoints": 56.24,
+          "projOwnership": 7.24
+        },
+        {
+          "dgId": 22985,
+          "name": "Smotherman, Austin",
+          "salary": 7400,
+          "projPoints": 54.18,
+          "projOwnership": 14.83
+        },
+        {
+          "dgId": 29197,
+          "name": "Brennan, Michael",
+          "salary": 6700,
+          "projPoints": 49.15,
+          "projOwnership": 4.24
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "totalSalary": 50000,
+      "totalPoints": 353.68,
+      "totalOwnership": 75.27,
+      "players": [
+        {
+          "dgId": 19895,
+          "name": "Schauffele, Xander",
+          "salary": 10900,
+          "projPoints": 72.83,
+          "projOwnership": 23.36
+        },
+        {
+          "dgId": 17536,
+          "name": "Spaun, J.J.",
+          "salary": 8700,
+          "projPoints": 61.15,
+          "projOwnership": 14.24
+        },
+        {
+          "dgId": 18554,
+          "name": "Rai, Aaron",
+          "salary": 7900,
+          "projPoints": 56.08,
+          "projOwnership": 9.46
+        },
+        {
+          "dgId": 18103,
+          "name": "Bezuidenhout, Christiaan",
+          "salary": 7700,
+          "projPoints": 55.46,
+          "projOwnership": 6.08
+        },
+        {
+          "dgId": 22985,
+          "name": "Smotherman, Austin",
+          "salary": 7400,
+          "projPoints": 54.18,
+          "projOwnership": 14.83
+        },
+        {
+          "dgId": 28159,
+          "name": "Meissner, Mac",
+          "salary": 7400,
+          "projPoints": 53.98,
+          "projOwnership": 7.3
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "totalSalary": 50000,
+      "totalPoints": 352.2,
+      "totalOwnership": 62.95,
+      "players": [
+        {
+          "dgId": 19895,
+          "name": "Schauffele, Xander",
+          "salary": 10900,
+          "projPoints": 72.83,
+          "projOwnership": 23.36
+        },
+        {
+          "dgId": 17536,
+          "name": "Spaun, J.J.",
+          "salary": 8700,
+          "projPoints": 61.15,
+          "projOwnership": 14.24
+        },
+        {
+          "dgId": 18554,
+          "name": "Rai, Aaron",
+          "salary": 7900,
+          "projPoints": 56.08,
+          "projOwnership": 9.46
+        },
+        {
+          "dgId": 28635,
+          "name": "McCarty, Matt",
+          "salary": 7800,
+          "projPoints": 55.31,
+          "projOwnership": 6.78
+        },
+        {
+          "dgId": 18103,
+          "name": "Bezuidenhout, Christiaan",
+          "salary": 7700,
+          "projPoints": 55.46,
+          "projOwnership": 6.08
+        },
+        {
+          "dgId": 23504,
+          "name": "Hoey, Rico",
+          "salary": 7000,
+          "projPoints": 51.37,
+          "projOwnership": 3.03
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "totalSalary": 49800,
+      "totalPoints": 349.95,
+      "totalOwnership": 73.46000000000001,
+      "players": [
+        {
+          "dgId": 29433,
+          "name": "Bridgeman, Jacob",
+          "salary": 9600,
+          "projPoints": 65.25,
+          "projOwnership": 29.77
+        },
+        {
+          "dgId": 15466,
+          "name": "Cantlay, Patrick",
+          "salary": 9400,
+          "projPoints": 63.87,
+          "projOwnership": 14.07
+        },
+        {
+          "dgId": 18554,
+          "name": "Rai, Aaron",
+          "salary": 7900,
+          "projPoints": 56.08,
+          "projOwnership": 9.46
+        },
+        {
+          "dgId": 28635,
+          "name": "McCarty, Matt",
+          "salary": 7800,
+          "projPoints": 55.31,
+          "projOwnership": 6.78
+        },
+        {
+          "dgId": 18103,
+          "name": "Bezuidenhout, Christiaan",
+          "salary": 7700,
+          "projPoints": 55.46,
+          "projOwnership": 6.08
+        },
+        {
+          "dgId": 28159,
+          "name": "Meissner, Mac",
+          "salary": 7400,
+          "projPoints": 53.98,
+          "projOwnership": 7.3
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "totalSalary": 50000,
+      "totalPoints": 349.04999999999995,
+      "totalOwnership": 87.49,
+      "players": [
+        {
+          "dgId": 29433,
+          "name": "Bridgeman, Jacob",
+          "salary": 9600,
+          "projPoints": 65.25,
+          "projOwnership": 29.77
+        },
+        {
+          "dgId": 15466,
+          "name": "Cantlay, Patrick",
+          "salary": 9400,
+          "projPoints": 63.87,
+          "projOwnership": 14.07
+        },
+        {
+          "dgId": 22760,
+          "name": "Hisatsune, Ryo",
+          "salary": 8600,
+          "projPoints": 59.39,
+          "projOwnership": 23.17
+        },
+        {
+          "dgId": 18554,
+          "name": "Rai, Aaron",
+          "salary": 7900,
+          "projPoints": 56.08,
+          "projOwnership": 9.46
+        },
+        {
+          "dgId": 28635,
+          "name": "McCarty, Matt",
+          "salary": 7800,
+          "projPoints": 55.31,
+          "projOwnership": 6.78
+        },
+        {
+          "dgId": 29197,
+          "name": "Brennan, Michael",
+          "salary": 6700,
+          "projPoints": 49.15,
+          "projOwnership": 4.24
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "totalSalary": 49900,
+      "totalPoints": 346.21999999999997,
+      "totalOwnership": 71.14,
+      "players": [
+        {
+          "dgId": 15466,
+          "name": "Cantlay, Patrick",
+          "salary": 9400,
+          "projPoints": 63.87,
+          "projOwnership": 14.07
+        },
+        {
+          "dgId": 22760,
+          "name": "Hisatsune, Ryo",
+          "salary": 8600,
+          "projPoints": 59.39,
+          "projOwnership": 23.17
+        },
+        {
+          "dgId": 13126,
+          "name": "Taylor, Nick",
+          "salary": 8400,
+          "projPoints": 58.23,
+          "projOwnership": 12.15
+        },
+        {
+          "dgId": 27819,
+          "name": "Castillo, Ricky",
+          "salary": 7900,
+          "projPoints": 54.29,
+          "projOwnership": 7.23
+        },
+        {
+          "dgId": 28635,
+          "name": "McCarty, Matt",
+          "salary": 7800,
+          "projPoints": 55.31,
+          "projOwnership": 6.78
+        },
+        {
+          "dgId": 18474,
+          "name": "Smalley, Alex",
+          "salary": 7800,
+          "projPoints": 55.13,
+          "projOwnership": 7.74
+        }
+      ]
+    },
+    {
+      "rank": 10,
+      "totalSalary": 50000,
+      "totalPoints": 345.97999999999996,
+      "totalOwnership": 72.49000000000001,
+      "players": [
+        {
+          "dgId": 15466,
+          "name": "Cantlay, Patrick",
+          "salary": 9400,
+          "projPoints": 63.87,
+          "projOwnership": 14.07
+        },
+        {
+          "dgId": 22760,
+          "name": "Hisatsune, Ryo",
+          "salary": 8600,
+          "projPoints": 59.39,
+          "projOwnership": 23.17
+        },
+        {
+          "dgId": 13126,
+          "name": "Taylor, Nick",
+          "salary": 8400,
+          "projPoints": 58.23,
+          "projOwnership": 12.15
+        },
+        {
+          "dgId": 17780,
+          "name": "Pendrith, Taylor",
+          "salary": 8300,
+          "projPoints": 56.59,
+          "projOwnership": 6
+        },
+        {
+          "dgId": 18474,
+          "name": "Smalley, Alex",
+          "salary": 7800,
+          "projPoints": 55.13,
+          "projOwnership": 7.74
+        },
+        {
+          "dgId": 14502,
+          "name": "Cauley, Bud",
+          "salary": 7500,
+          "projPoints": 52.77,
+          "projOwnership": 9.36
+        }
+      ]
+    },
+    {
+      "rank": 11,
+      "totalSalary": 50000,
+      "totalPoints": 343.29,
+      "totalOwnership": 85.2,
+      "players": [
+        {
+          "dgId": 23602,
+          "name": "Hojgaard, Nicolai",
+          "salary": 8900,
+          "projPoints": 59.34,
+          "projOwnership": 13.53
+        },
+        {
+          "dgId": 23014,
+          "name": "Theegala, Sahith",
+          "salary": 8800,
+          "projPoints": 58.43,
+          "projOwnership": 19.25
+        },
+        {
+          "dgId": 22760,
+          "name": "Hisatsune, Ryo",
+          "salary": 8600,
+          "projPoints": 59.39,
+          "projOwnership": 23.17
+        },
+        {
+          "dgId": 13126,
+          "name": "Taylor, Nick",
+          "salary": 8400,
+          "projPoints": 58.23,
+          "projOwnership": 12.15
+        },
+        {
+          "dgId": 18474,
+          "name": "Smalley, Alex",
+          "salary": 7800,
+          "projPoints": 55.13,
+          "projOwnership": 7.74
+        },
+        {
+          "dgId": 14502,
+          "name": "Cauley, Bud",
+          "salary": 7500,
+          "projPoints": 52.77,
+          "projOwnership": 9.36
+        }
+      ]
+    },
+    {
+      "rank": 12,
+      "totalSalary": 50000,
+      "totalPoints": 341.81,
+      "totalOwnership": 70.81,
+      "players": [
+        {
+          "dgId": 17576,
+          "name": "Conners, Corey",
+          "salary": 9000,
+          "projPoints": 59.51,
+          "projOwnership": 19.64
+        },
+        {
+          "dgId": 23014,
+          "name": "Theegala, Sahith",
+          "salary": 8800,
+          "projPoints": 58.43,
+          "projOwnership": 19.25
+        },
+        {
+          "dgId": 13126,
+          "name": "Taylor, Nick",
+          "salary": 8400,
+          "projPoints": 58.23,
+          "projOwnership": 12.15
+        },
+        {
+          "dgId": 17780,
+          "name": "Pendrith, Taylor",
+          "salary": 8300,
+          "projPoints": 56.59,
+          "projOwnership": 6
+        },
+        {
+          "dgId": 18474,
+          "name": "Smalley, Alex",
+          "salary": 7800,
+          "projPoints": 55.13,
+          "projOwnership": 7.74
+        },
+        {
+          "dgId": 28309,
+          "name": "Coody, Pierceson",
+          "salary": 7700,
+          "projPoints": 53.92,
+          "projOwnership": 6.03
+        }
+      ]
+    },
+    {
+      "rank": 13,
+      "totalSalary": 49900,
+      "totalPoints": 338.86,
+      "totalOwnership": 71.74,
+      "players": [
+        {
+          "dgId": 17576,
+          "name": "Conners, Corey",
+          "salary": 9000,
+          "projPoints": 59.51,
+          "projOwnership": 19.64
+        },
+        {
+          "dgId": 23602,
+          "name": "Hojgaard, Nicolai",
+          "salary": 8900,
+          "projPoints": 59.34,
+          "projOwnership": 13.53
+        },
+        {
+          "dgId": 23014,
+          "name": "Theegala, Sahith",
+          "salary": 8800,
+          "projPoints": 58.43,
+          "projOwnership": 19.25
+        },
+        {
+          "dgId": 17780,
+          "name": "Pendrith, Taylor",
+          "salary": 8300,
+          "projPoints": 56.59,
+          "projOwnership": 6
+        },
+        {
+          "dgId": 14502,
+          "name": "Cauley, Bud",
+          "salary": 7500,
+          "projPoints": 52.77,
+          "projOwnership": 9.36
+        },
+        {
+          "dgId": 21407,
+          "name": "Reitan, Kristoffer",
+          "salary": 7400,
+          "projPoints": 52.22,
+          "projOwnership": 3.96
+        }
+      ]
+    },
+    {
+      "rank": 14,
+      "totalSalary": 50000,
+      "totalPoints": 338.76,
+      "totalOwnership": 70.27,
+      "players": [
+        {
+          "dgId": 17576,
+          "name": "Conners, Corey",
+          "salary": 9000,
+          "projPoints": 59.51,
+          "projOwnership": 19.64
+        },
+        {
+          "dgId": 23602,
+          "name": "Hojgaard, Nicolai",
+          "salary": 8900,
+          "projPoints": 59.34,
+          "projOwnership": 13.53
+        },
+        {
+          "dgId": 23014,
+          "name": "Theegala, Sahith",
+          "salary": 8800,
+          "projPoints": 58.43,
+          "projOwnership": 19.25
+        },
+        {
+          "dgId": 17780,
+          "name": "Pendrith, Taylor",
+          "salary": 8300,
+          "projPoints": 56.59,
+          "projOwnership": 6
+        },
+        {
+          "dgId": 16283,
+          "name": "Rodgers, Patrick",
+          "salary": 7600,
+          "projPoints": 52.67,
+          "projOwnership": 7.89
+        },
+        {
+          "dgId": 21407,
+          "name": "Reitan, Kristoffer",
+          "salary": 7400,
+          "projPoints": 52.22,
+          "projOwnership": 3.96
+        }
+      ]
+    },
+    {
+      "rank": 15,
+      "totalSalary": 50000,
+      "totalPoints": 338.08,
+      "totalOwnership": 64.98,
+      "players": [
+        {
+          "dgId": 18841,
+          "name": "Hovland, Viktor",
+          "salary": 10400,
+          "projPoints": 65.09,
+          "projOwnership": 20.94
+        },
+        {
+          "dgId": 23602,
+          "name": "Hojgaard, Nicolai",
+          "salary": 8900,
+          "projPoints": 59.34,
+          "projOwnership": 13.53
+        },
+        {
+          "dgId": 27819,
+          "name": "Castillo, Ricky",
+          "salary": 7900,
+          "projPoints": 54.29,
+          "projOwnership": 7.23
+        },
+        {
+          "dgId": 28309,
+          "name": "Coody, Pierceson",
+          "salary": 7700,
+          "projPoints": 53.92,
+          "projOwnership": 6.03
+        },
+        {
+          "dgId": 16283,
+          "name": "Rodgers, Patrick",
+          "salary": 7600,
+          "projPoints": 52.67,
+          "projOwnership": 7.89
+        },
+        {
+          "dgId": 14502,
+          "name": "Cauley, Bud",
+          "salary": 7500,
+          "projPoints": 52.77,
+          "projOwnership": 9.36
+        }
+      ]
+    },
+    {
+      "rank": 16,
+      "totalSalary": 50000,
+      "totalPoints": 337.70000000000005,
+      "totalOwnership": 65.69,
+      "players": [
+        {
+          "dgId": 18841,
+          "name": "Hovland, Viktor",
+          "salary": 10400,
+          "projPoints": 65.09,
+          "projOwnership": 20.94
+        },
+        {
+          "dgId": 17576,
+          "name": "Conners, Corey",
+          "salary": 9000,
+          "projPoints": 59.51,
+          "projOwnership": 19.64
+        },
+        {
+          "dgId": 27819,
+          "name": "Castillo, Ricky",
+          "salary": 7900,
+          "projPoints": 54.29,
+          "projOwnership": 7.23
+        },
+        {
+          "dgId": 28309,
+          "name": "Coody, Pierceson",
+          "salary": 7700,
+          "projPoints": 53.92,
+          "projOwnership": 6.03
+        },
+        {
+          "dgId": 16283,
+          "name": "Rodgers, Patrick",
+          "salary": 7600,
+          "projPoints": 52.67,
+          "projOwnership": 7.89
+        },
+        {
+          "dgId": 21407,
+          "name": "Reitan, Kristoffer",
+          "salary": 7400,
+          "projPoints": 52.22,
+          "projOwnership": 3.96
+        }
+      ]
+    },
+    {
+      "rank": 17,
+      "totalSalary": 50000,
+      "totalPoints": 336.28,
+      "totalOwnership": 66.64,
+      "players": [
+        {
+          "dgId": 18841,
+          "name": "Hovland, Viktor",
+          "salary": 10400,
+          "projPoints": 65.09,
+          "projOwnership": 20.94
+        },
+        {
+          "dgId": 14636,
+          "name": "Spieth, Jordan",
+          "salary": 9300,
+          "projPoints": 59.78,
+          "projOwnership": 19.46
+        },
+        {
+          "dgId": 23604,
+          "name": "Clark, Wyndham",
+          "salary": 8000,
+          "projPoints": 54.05,
+          "projOwnership": 8.74
+        },
+        {
+          "dgId": 27819,
+          "name": "Castillo, Ricky",
+          "salary": 7900,
+          "projPoints": 54.29,
+          "projOwnership": 7.23
+        },
+        {
+          "dgId": 28309,
+          "name": "Coody, Pierceson",
+          "salary": 7700,
+          "projPoints": 53.92,
+          "projOwnership": 6.03
+        },
+        {
+          "dgId": 29197,
+          "name": "Brennan, Michael",
+          "salary": 6700,
+          "projPoints": 49.15,
+          "projOwnership": 4.24
+        }
+      ]
+    },
+    {
+      "rank": 18,
+      "totalSalary": 50000,
+      "totalPoints": 335.16999999999996,
+      "totalOwnership": 61.69000000000001,
+      "players": [
+        {
+          "dgId": 18841,
+          "name": "Hovland, Viktor",
+          "salary": 10400,
+          "projPoints": 65.09,
+          "projOwnership": 20.94
+        },
+        {
+          "dgId": 14636,
+          "name": "Spieth, Jordan",
+          "salary": 9300,
+          "projPoints": 59.78,
+          "projOwnership": 19.46
+        },
+        {
+          "dgId": 27364,
+          "name": "Thompson, Davis",
+          "salary": 8200,
+          "projPoints": 54.88,
+          "projOwnership": 4.35
+        },
+        {
+          "dgId": 23604,
+          "name": "Clark, Wyndham",
+          "salary": 8000,
+          "projPoints": 54.05,
+          "projOwnership": 8.74
+        },
+        {
+          "dgId": 21407,
+          "name": "Reitan, Kristoffer",
+          "salary": 7400,
+          "projPoints": 52.22,
+          "projOwnership": 3.96
+        },
+        {
+          "dgId": 29197,
+          "name": "Brennan, Michael",
+          "salary": 6700,
+          "projPoints": 49.15,
+          "projOwnership": 4.24
+        }
+      ]
+    },
+    {
+      "rank": 19,
+      "totalSalary": 50000,
+      "totalPoints": 333.26,
+      "totalOwnership": 64.26,
+      "players": [
+        {
+          "dgId": 14139,
+          "name": "Thomas, Justin",
+          "salary": 9500,
+          "projPoints": 60.27,
+          "projOwnership": 18.44
+        },
+        {
+          "dgId": 14636,
+          "name": "Spieth, Jordan",
+          "salary": 9300,
+          "projPoints": 59.78,
+          "projOwnership": 19.46
+        },
+        {
+          "dgId": 24968,
+          "name": "Griffin, Ben",
+          "salary": 9200,
+          "projPoints": 59.59,
+          "projOwnership": 9.23
+        },
+        {
+          "dgId": 16283,
+          "name": "Rodgers, Patrick",
+          "salary": 7600,
+          "projPoints": 52.67,
+          "projOwnership": 7.89
+        },
+        {
+          "dgId": 13764,
+          "name": "Parry, John",
+          "salary": 7300,
+          "projPoints": 50.89,
+          "projOwnership": 4.14
+        },
+        {
+          "dgId": 17488,
+          "name": "Im, Sungjae",
+          "salary": 7100,
+          "projPoints": 50.06,
+          "projOwnership": 5.1
+        }
+      ]
+    },
+    {
+      "rank": 20,
+      "totalSalary": 50000,
+      "totalPoints": 332.40000000000003,
+      "totalOwnership": 51.440000000000005,
+      "players": [
+        {
+          "dgId": 14636,
+          "name": "Spieth, Jordan",
+          "salary": 9300,
+          "projPoints": 59.78,
+          "projOwnership": 19.46
+        },
+        {
+          "dgId": 24968,
+          "name": "Griffin, Ben",
+          "salary": 9200,
+          "projPoints": 59.59,
+          "projOwnership": 9.23
+        },
+        {
+          "dgId": 13872,
+          "name": "Bradley, Keegan",
+          "salary": 8500,
+          "projPoints": 55.93,
+          "projOwnership": 5.42
+        },
+        {
+          "dgId": 27364,
+          "name": "Thompson, Davis",
+          "salary": 8200,
+          "projPoints": 54.88,
+          "projOwnership": 4.35
+        },
+        {
+          "dgId": 23604,
+          "name": "Clark, Wyndham",
+          "salary": 8000,
+          "projPoints": 54.05,
+          "projOwnership": 8.74
+        },
+        {
+          "dgId": 23475,
+          "name": "Novak, Andrew",
+          "salary": 6800,
+          "projPoints": 48.17,
+          "projOwnership": 4.24
+        }
+      ]
+    }
+  ]
+}
