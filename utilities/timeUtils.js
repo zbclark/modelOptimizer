@@ -15,6 +15,48 @@ const parseOffsetToIso = offsetText => {
   return `${sign}${hours}:${minutes}`;
 };
 
+const UTC_TIMESTAMP_WITH_LABEL = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.\d+)?\s*UTC$/i;
+const ISO_TIMESTAMP_WITH_TZ = /T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})$/i;
+const SIMPLE_TIMESTAMP = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.\d+)?$/;
+const CENTRAL_LABEL_REGEX = /\bCT\b|\bCST\b|\bCDT\b/i;
+
+const parseUtcTimestampString = value => {
+  if (!value) return null;
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
+  const utcMatch = trimmed.match(UTC_TIMESTAMP_WITH_LABEL);
+  if (utcMatch) {
+    const [, year, month, day, hour, minute, second] = utcMatch;
+    return new Date(Date.UTC(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+      Number(second)
+    ));
+  }
+
+  if (ISO_TIMESTAMP_WITH_TZ.test(trimmed)) {
+    const parsed = new Date(trimmed);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  if (SIMPLE_TIMESTAMP.test(trimmed)) {
+    const parsed = new Date(`${trimmed}Z`);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  return null;
+};
+
+const parseTimestampToMs = value => {
+  const parsed = parseUtcTimestampString(value);
+  if (!parsed) return null;
+  const ms = parsed.getTime();
+  return Number.isNaN(ms) ? null : ms;
+};
+
 const buildParts = (date, timeZone) => {
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone,
@@ -59,6 +101,72 @@ const formatTimestamp = (dateValue = new Date(), timeZoneOverride = null) => {
   }
 };
 
+const formatCentralTimestamp = (dateValue = new Date(), timeZoneOverride = null, label = 'CT') => {
+  const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return null;
+  const timeZone = getTimeZone(timeZoneOverride);
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    const parts = formatter.formatToParts(date);
+    const map = {};
+    parts.forEach(part => {
+      if (part.type && part.value) {
+        map[part.type] = part.value;
+      }
+    });
+    if (!map.year || !map.month || !map.day || !map.hour || !map.minute || !map.second) {
+      return null;
+    }
+    return `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}:${map.second} ${label}`;
+  } catch (error) {
+    return null;
+  }
+};
+
+const buildCentralTimestampFromUtcString = (value, options = {}) => {
+  if (!value) return null;
+  const parsed = parseUtcTimestampString(value);
+  if (!parsed) return null;
+  const label = typeof options.label === 'string' ? options.label : 'CT';
+  const timeZoneOverride = options.timeZoneOverride || null;
+  return formatCentralTimestamp(parsed, timeZoneOverride, label);
+};
+
+const convertTimestampStringToCentral = (value, options = {}) => {
+  if (typeof value !== 'string') return value;
+  if (!value.trim() || CENTRAL_LABEL_REGEX.test(value)) return value;
+  const parsed = parseUtcTimestampString(value);
+  if (!parsed) return value;
+  const label = typeof options.label === 'string' ? options.label : 'CT';
+  const formatted = formatCentralTimestamp(parsed, options.timeZoneOverride || null, label);
+  return formatted || value;
+};
+
+const convertPayloadTimestampsToCentral = (payload, options = {}) => {
+  if (payload === null || payload === undefined) return payload;
+  if (typeof payload === 'string') return convertTimestampStringToCentral(payload, options);
+  if (Array.isArray(payload)) {
+    return payload.map(entry => convertPayloadTimestampsToCentral(entry, options));
+  }
+  if (typeof payload === 'object') {
+    const output = {};
+    Object.entries(payload).forEach(([key, value]) => {
+      output[key] = convertPayloadTimestampsToCentral(value, options);
+    });
+    return output;
+  }
+  return payload;
+};
+
 const formatDateKey = (dateValue = new Date(), timeZoneOverride = null) => {
   const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
   if (Number.isNaN(date.getTime())) return null;
@@ -93,5 +201,10 @@ module.exports = {
   getTimeZone,
   formatTimestamp,
   formatDateKey,
-  formatTimestampForFilename
+  formatTimestampForFilename,
+  formatCentralTimestamp,
+  buildCentralTimestampFromUtcString,
+  parseTimestampToMs,
+  convertTimestampStringToCentral,
+  convertPayloadTimestampsToCentral
 };

@@ -1,7 +1,7 @@
 const COURSE_HISTORY_REGRESSION = {
   "11": {
-    "slope": -2.243949852013001,
-    "pValue": 0.0011812015523275932
+    "slope": -2.7288976670175065,
+    "pValue": 2.838850496900136e-7
   },
   "12": {
     "slope": -5.381344994887318,
@@ -11,40 +11,35 @@ const COURSE_HISTORY_REGRESSION = {
     "slope": -1.2133482129250956,
     "pValue": 0.15870370594050387
   },
-  "510": {
-    "slope": -1.5199808712921337,
-    "pValue": 0.011399679864861678
-  },
   "665": {
     "slope": -0.9414115804834621,
     "pValue": 0.26862406139293826
   },
-  "752": {
-    "slope": -1.8447598786549433,
-    "pValue": 0.016142659832632633
+  "714": {
+    "slope": 1.5656819970763178,
+    "pValue": 0.28820684629056914
   },
   "meta": {
-    "generatedAt": "2026-03-10T17:03:56-05:00",
-    "eventId": "11",
+    "generatedAt": "2026-03-17T20:58:15-05:00",
+    "eventId": "475",
     "season": 2026,
     "mode": "pre_event",
-    "courseNum": "11",
-    "courseNameKey": "TPC_SAWGRASS",
-    "templateKey": "TPC_SAWGRASS",
+    "courseNum": "665",
+    "courseNameKey": "INNISBROOK_COPPERHEAD",
+    "templateKey": "INNISBROOK_COPPERHEAD",
     "tours": [
       "pga"
     ],
     "eventScope": {
-      "eventId": "11",
+      "eventId": "475",
       "similarEventIds": [
-        "21",
-        "475",
+        "11",
         "12",
-        "13"
+        "21"
       ],
       "puttingEventIds": [
-        "3",
-        "475"
+        "11",
+        "18"
       ]
     },
     "yearScope": {

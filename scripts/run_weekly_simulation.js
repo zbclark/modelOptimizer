@@ -1,0 +1,618 @@
+const fs = require('fs');
+const path = require('path');
+
+const ROOT_DIR = path.resolve(__dirname, '..');
+const DATA_DIR = path.resolve(ROOT_DIR, 'data');
+
+const ensureDir = dirPath => {
+  if (!dirPath) return;
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
+
+const parseArgs = () => {
+  const args = process.argv.slice(2);
+  const result = {};
+  for (let i = 0; i < args.length; i += 1) {
+    const raw = args[i];
+    if (!raw.startsWith('--')) continue;
+    const key = raw.replace(/^--/, '').trim();
+    const next = args[i + 1];
+    if (!next || next.startsWith('--')) {
+      result[key] = true;
+      continue;
+    }
+    result[key] = next;
+    i += 1;
+  }
+  return result;
+};
+
+const readCsv = filePath => {
+  if (!filePath || !fs.existsSync(filePath)) return [];
+  const raw = fs.readFileSync(filePath, 'utf8');
+  const lines = raw.split(/\r?\n/).filter(Boolean);
+  if (!lines.length) return [];
+  const headers = lines[0].split(',').map(header => header.replace(/^"|"$/g, '').trim());
+  const rows = [];
+  for (let i = 1; i < lines.length; i += 1) {
+    const line = lines[i];
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    for (let j = 0; j < line.length; j += 1) {
+      const char = line[j];
+      if (char === '"') {
+        if (inQuotes && line[j + 1] === '"') {
+          current += '"';
+          j += 1;
+          continue;
+        }
+        inQuotes = !inQuotes;
+        continue;
+      }
+      if (char === ',' && !inQuotes) {
+        values.push(current);
+        current = '';
+        continue;
+      }
+      current += char;
+    }
+    values.push(current);
+    const row = {};
+    headers.forEach((header, index) => {
+      row[header] = values[index] ?? '';
+    });
+    rows.push(row);
+  }
+  return rows;
+};
+
+const writeCsv = (filePath, rows, headers) => {
+  ensureDir(path.dirname(filePath));
+  const lines = [headers.join(',')];
+  for (const row of rows) {
+    const values = headers.map(header => {
+      const raw = row[header] ?? '';
+      const text = String(raw);
+      if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    });
+    lines.push(values.join(','));
+  }
+  fs.writeFileSync(filePath, `${lines.join('\n')}\n`);
+};
+
+const resolveWageringInputsDir = () => path.resolve(DATA_DIR, 'wagering');
+
+const collectOddsEvalFiles = ({ market, oddsSource }) => {
+  const wageringDir = resolveWageringInputsDir();
+  if (!fs.existsSync(wageringDir)) return [];
+  const marketSlug = String(market || 'win').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  const oddsSourceKey = String(oddsSource || 'historical').trim().toLowerCase();
+  const entries = fs.readdirSync(wageringDir)
+    .map(name => path.resolve(wageringDir, name))
+    .filter(entry => fs.existsSync(entry) && fs.statSync(entry).isDirectory());
+
+  const files = [];
+  entries.forEach(dir => {
+    const inputsDir = path.resolve(dir, 'inputs');
+    if (!fs.existsSync(inputsDir) || !fs.statSync(inputsDir).isDirectory()) return;
+    fs.readdirSync(inputsDir)
+      .filter(file => file.endsWith('_odds_eval.csv'))
+      .filter(file => file.includes(`_${marketSlug}_${oddsSourceKey}`))
+      .forEach(file => files.push(path.resolve(inputsDir, file)));
+  });
+  return files;
+};
+
+const extractTournamentSlug = filePath => {
+  if (!filePath) return '';
+  const normalized = String(filePath).replace(/\\/g, '/');
+  const marker = '/data/wagering/';
+  const idx = normalized.indexOf(marker);
+  if (idx >= 0) {
+    const remainder = normalized.slice(idx + marker.length);
+    const parts = remainder.split('/').filter(Boolean);
+    if (parts.length) return parts[0];
+  }
+  const base = path.basename(normalized);
+  const match = base.match(/^(.*)_.*_odds_eval\.csv$/i);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return '';
+};
+
+const normalizeMarketType = value => {
+  if (!value) return '';
+  const raw = String(value).trim().toLowerCase();
+  if (raw.startsWith('outright_')) {
+    return raw.replace(/^outright_/, '');
+  }
+  return raw;
+};
+
+const buildBetKey = ({ event, market, book, dgId }) => {
+  const normalizedMarket = normalizeMarketType(market || '');
+  const normalizedBook = String(book || '').trim().toLowerCase();
+  const normalizedDgId = String(dgId || '').trim().toLowerCase();
+  return `${event || ''}||${normalizedMarket}||${normalizedBook}||${normalizedDgId}`;
+};
+
+const buildOutcomeKey = ({ event, market, book, dgId }) => {
+  const normalizedMarket = normalizeMarketType(market || '');
+  const normalizedBook = String(book || '').trim().toLowerCase();
+  const normalizedDgId = String(dgId || '').trim().toLowerCase();
+  return `${event || ''}||${normalizedMarket}||${normalizedBook}||${normalizedDgId}`;
+};
+
+const readJson = filePath => {
+  if (!filePath || !fs.existsSync(filePath)) return null;
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+};
+
+const oddsMetaCache = new Map();
+const resolveOddsMeta = ({ oddsSourcePath, dgId, playerName, isHistorical }) => {
+  if (!oddsSourcePath) {
+    return { odds_generated_at: '', graded_at: '' };
+  }
+  if (oddsMetaCache.has(oddsSourcePath)) {
+    const cached = oddsMetaCache.get(oddsSourcePath);
+    return cached;
+  }
+  const payload = readJson(oddsSourcePath);
+  if (!payload) {
+    const empty = { odds_generated_at: '', graded_at: '' };
+    oddsMetaCache.set(oddsSourcePath, empty);
+    return empty;
+  }
+
+  const eventCompleted = payload.event_completed || '';
+  const lastUpdated = payload.last_updated || '';
+  let closeTime = '';
+
+  if (Array.isArray(payload.odds)) {
+    const normalizedPlayer = String(playerName || '').trim().toLowerCase();
+    const match = payload.odds.find(entry => {
+      if (!entry) return false;
+      if (dgId && Number(entry.dg_id) === Number(dgId)) return true;
+      const entryName = String(entry.player_name || '').trim().toLowerCase();
+      if (entryName && normalizedPlayer && entryName === normalizedPlayer) return true;
+      const p1Id = entry.p1_dg_id ? Number(entry.p1_dg_id) : null;
+      const p2Id = entry.p2_dg_id ? Number(entry.p2_dg_id) : null;
+      const p3Id = entry.p3_dg_id ? Number(entry.p3_dg_id) : null;
+      if (dgId && [p1Id, p2Id, p3Id].includes(Number(dgId))) return true;
+      const names = [entry.p1_player_name, entry.p2_player_name, entry.p3_player_name]
+        .map(name => String(name || '').trim().toLowerCase())
+        .filter(Boolean);
+      return normalizedPlayer && names.includes(normalizedPlayer);
+    });
+    closeTime = match?.close_time || '';
+  }
+
+  const oddsGeneratedAt = isHistorical
+    ? (closeTime || lastUpdated || '')
+    : (lastUpdated || '');
+  const gradedAt = isHistorical
+    ? (closeTime || eventCompleted || '')
+    : '';
+  const meta = {
+    odds_generated_at: oddsGeneratedAt,
+    graded_at: gradedAt
+  };
+  oddsMetaCache.set(oddsSourcePath, meta);
+  return meta;
+};
+
+const collectOddsEvalFilesAll = () => {
+  const wageringDir = resolveWageringInputsDir();
+  if (!fs.existsSync(wageringDir)) return [];
+  const entries = fs.readdirSync(wageringDir)
+    .map(name => path.resolve(wageringDir, name))
+    .filter(entry => fs.existsSync(entry) && fs.statSync(entry).isDirectory());
+
+  const files = [];
+  entries.forEach(dir => {
+    const inputsDir = path.resolve(dir, 'inputs');
+    if (!fs.existsSync(inputsDir) || !fs.statSync(inputsDir).isDirectory()) return;
+    fs.readdirSync(inputsDir)
+      .filter(file => file.endsWith('_odds_eval.csv'))
+      .forEach(file => files.push(path.resolve(inputsDir, file)));
+  });
+  return files;
+};
+
+const collectOddsEvalFilesAllMarkets = ({ oddsSource, eventId }) => {
+  const wageringDir = resolveWageringInputsDir();
+  if (!fs.existsSync(wageringDir)) return [];
+  const oddsSourceKey = String(oddsSource || 'historical').trim().toLowerCase();
+  const entries = fs.readdirSync(wageringDir)
+    .map(name => path.resolve(wageringDir, name))
+    .filter(entry => fs.existsSync(entry) && fs.statSync(entry).isDirectory());
+
+  const files = [];
+  entries.forEach(dir => {
+    const inputsDir = path.resolve(dir, 'inputs');
+    if (!fs.existsSync(inputsDir) || !fs.statSync(inputsDir).isDirectory()) return;
+    fs.readdirSync(inputsDir)
+      .filter(file => file.endsWith('_odds_eval.csv'))
+      .filter(file => file.includes(`_${oddsSourceKey}`))
+      .forEach(file => files.push(path.resolve(inputsDir, file)));
+  });
+
+  if (!eventId) return files;
+  return files.filter(filePath => {
+    const rows = readCsv(filePath);
+    return rows.some(row => String(row.event_id || '').trim() === String(eventId));
+  });
+};
+
+const buildOutcomeIndex = ({ eventId }) => {
+  const files = collectOddsEvalFilesAll();
+  const index = new Map();
+  files.forEach(filePath => {
+    const rows = readCsv(filePath);
+    rows.forEach(row => {
+      if (eventId && String(row.event_id || '').trim() !== String(eventId)) return;
+      const dgId = row.player_id || row.dg_id || '';
+      if (!dgId) return;
+      const market = normalizeMarketType(row.market_type || '');
+      const book = String(row.book || '').trim().toLowerCase();
+      const oddsSourcePath = row.odds_source_path || '';
+      let winFactor = row.outcome === '' ? null : Number(row.outcome);
+      let betOutcomeText = '';
+      let isPush = false;
+
+      if (oddsSourcePath) {
+        const payload = readJson(oddsSourcePath);
+        if (payload && Array.isArray(payload.odds)) {
+          const entry = payload.odds.find(item => String(item?.dg_id || '') === String(dgId));
+          if (entry) {
+            if (typeof entry.bet_outcome_numeric === 'number') {
+              winFactor = entry.bet_outcome_numeric;
+            }
+            betOutcomeText = String(entry.bet_outcome_text || '');
+          }
+        }
+      }
+
+      if (!Number.isFinite(winFactor)) {
+        const text = String(betOutcomeText || '').toLowerCase();
+        const deadHeatMatch = text.match(/dead-heat:\s*(\d+)\s*for\s*(\d+)/i);
+        if (deadHeatMatch) {
+          const numerator = Number(deadHeatMatch[1]);
+          const denominator = Number(deadHeatMatch[2]);
+          if (Number.isFinite(numerator) && Number.isFinite(denominator) && denominator > 0) {
+            winFactor = numerator / denominator;
+          }
+        }
+        if (!Number.isFinite(winFactor)) {
+          if (text.includes('paid in full') || text.includes('win')) {
+            winFactor = 1;
+          } else if (text.includes('loss')) {
+            winFactor = 0;
+          } else if (text.includes('push') || text.includes('wash') || text.includes('tie')) {
+            isPush = true;
+            winFactor = 0;
+          }
+        }
+      }
+
+      if (!Number.isFinite(winFactor)) return;
+      const key = buildOutcomeKey({
+        event: row.event_id || '',
+        market,
+        book,
+        dgId
+      });
+      if (!index.has(key)) {
+        index.set(key, {
+          winFactor,
+          isPush,
+          odds: Number(row.odds_decimal),
+          betOutcomeText
+        });
+      }
+    });
+  });
+  return index;
+};
+
+const normalizeExistingRow = row => ({
+  season: row.season || '',
+  book: row.book || '',
+  odd_source: row.odd_source || row.odds_source || '',
+  tournament_slug: row.tournament_slug || row.tournamentSlug || '',
+  event: row.event || row.event_id || '',
+  odds_generated_at: row.odds_generated_at || row.oddsGeneratedAt || row.generated_at || row.run_timestamp || '',
+  odds_graded_at: row.odds_graded_at || row.oddsGradedAt || row.graded_at || row.gradedAt || '',
+  player: row.player || row.player_name || '',
+  dg_id: row.dg_id || row.dgId || row.player_id || '',
+  market: row.market || '',
+  odds: row.odds || row.odds_decimal || '',
+  stake: row.stake || '',
+  'settled stake': row['settled stake'] || row.settled_stake || row.settledStake || '',
+  'total return': row['total return'] || row.total_return || row.totalReturn || '',
+  net: row.net || '',
+  roi: row.roi || '',
+  '': row[''] || row.empty || '',
+  p_model: row.p_model || row.pModel || '',
+  p_implied: row.p_implied || row.pImplied || '',
+  edge: row.edge || ''
+});
+
+const mergeRow = (existing, incoming, allowedKeys = null) => {
+  const merged = { ...existing };
+  Object.entries(incoming).forEach(([key, value]) => {
+    if (key === 'odds_generated_at' && merged[key]) return;
+    if (allowedKeys && !allowedKeys.has(key)) return;
+    if (value !== '' && value !== null && value !== undefined) {
+      merged[key] = value;
+      return;
+    }
+    if (!(key in merged)) {
+      merged[key] = value;
+    }
+  });
+  return merged;
+};
+
+const main = () => {
+  const args = parseArgs();
+  const season = args.season;
+  const market = args.market || 'win';
+  const oddsSource = args.oddsSource || args.odds_source || 'historical';
+  const oddsSourceKey = String(oddsSource || 'historical').trim().toLowerCase();
+  const isHistorical = oddsSourceKey === 'historical';
+  const stake = args.stake ? Number(args.stake) : 10;
+  const eventId = args.eventId || args.event_id || null;
+  const reset = String(args.reset || 'false').toLowerCase() === 'true';
+  const updateExisting = String(args.updateExisting || args.update_existing || 'true').toLowerCase() !== 'false';
+
+  if (!season) {
+    console.error('❌ Missing --season.');
+    process.exit(1);
+  }
+
+  const isAllMarkets = String(market || '').trim().toLowerCase() === 'all';
+  const oddsEvalFiles = isAllMarkets
+    ? collectOddsEvalFilesAllMarkets({ oddsSource: oddsSourceKey, eventId })
+    : collectOddsEvalFiles({ market, oddsSource: oddsSourceKey });
+
+  if (!oddsEvalFiles.length) {
+    console.error('❌ Could not find any odds_eval CSV files under data/wagering/*/inputs.');
+    process.exit(1);
+  }
+
+  const inputRows = [];
+  oddsEvalFiles.forEach(filePath => {
+    const rows = readCsv(filePath);
+    rows.forEach(row => {
+      if (String(row.season || '').trim() !== String(season)) return;
+      inputRows.push({ ...row, _filePath: filePath });
+    });
+  });
+
+  if (!inputRows.length) {
+    console.error('❌ No odds_eval rows found for the requested season.');
+    process.exit(1);
+  }
+
+  const betRows = [];
+  inputRows.forEach(row => {
+    const pModel = Number(row.p_model);
+    const pImplied = Number(row.p_implied);
+    const oddsDecimal = Number(row.odds_decimal);
+    const edge = Number(row.edge);
+    if (!Number.isFinite(pModel) || !Number.isFinite(pImplied)) return;
+    if (!Number.isFinite(oddsDecimal) || oddsDecimal <= 0) return;
+    if (!Number.isFinite(edge) || edge <= 0) return;
+    const marketValue = normalizeMarketType(row.market_type || market);
+    const bookValue = String(row.book || '').trim();
+    const playerName = String(row.player_name || '').trim();
+    if (!playerName) return;
+
+    const oddsMeta = resolveOddsMeta({
+      oddsSourcePath: row.odds_source_path,
+      dgId: row.player_id,
+      playerName: playerName,
+      isHistorical
+    });
+
+    betRows.push({
+      season: String(row.season || season),
+      book: bookValue,
+      odd_source: oddsSourceKey,
+      tournament_slug: extractTournamentSlug(row._filePath),
+      event: row.event_id || eventId || '',
+      odds_generated_at: oddsMeta.odds_generated_at || row.run_timestamp || '',
+      odds_graded_at: oddsMeta.graded_at || '',
+      player: playerName,
+      dg_id: String(row.player_id || '').trim(),
+      market: marketValue,
+      odds: oddsDecimal,
+      stake: Number.isFinite(stake) ? stake : '',
+      'settled stake': '',
+      'total return': '',
+      net: '',
+      roi: '',
+      '': '',
+      p_model: pModel,
+      p_implied: pImplied,
+      edge
+    });
+  });
+
+  const outputDir = resolveWageringInputsDir();
+  ensureDir(outputDir);
+  const outputCsv = path.resolve(outputDir, 'betting-card.csv');
+  const inputsJson = path.resolve(outputDir, 'inputs.json');
+  const inputsCsv = path.resolve(outputDir, 'inputs.csv');
+
+  const existingRows = (!reset && updateExisting && fs.existsSync(outputCsv))
+    ? readCsv(outputCsv)
+    : [];
+  const normalizedExisting = existingRows
+    .map(normalizeExistingRow);
+
+  const existingEventKeys = new Set(
+    normalizedExisting
+      .filter(row => row.tournament_slug || row.event)
+      .map(row => `${row.odd_source || ''}||${row.tournament_slug || ''}||${row.event || ''}`)
+  );
+
+  const rowList = [...normalizedExisting];
+  const rowIndex = new Map();
+  rowList.forEach((row, idx) => {
+    if (!row.dg_id) return;
+    const key = buildBetKey({
+      event: row.event,
+      market: row.market,
+      book: row.book,
+      dgId: row.dg_id
+    });
+    if (!rowIndex.has(key)) {
+      rowIndex.set(key, idx);
+    }
+  });
+
+  const historicalUpdateKeys = new Set([
+    'odd_source',
+    'odds_graded_at',
+    'settled stake',
+    'total return',
+    'net',
+    'roi'
+  ]);
+  const liveRows = oddsSourceKey === 'live'
+    ? [...betRows].sort((a, b) => Number(b.edge) - Number(a.edge)).slice(0, 10)
+    : betRows;
+
+  const emptyRowIndexes = rowList
+    .map((row, idx) => (!row.player ? idx : null))
+    .filter(idx => idx !== null);
+
+  liveRows.forEach((row, index) => {
+    const key = buildBetKey({
+      event: row.event,
+      market: row.market,
+      book: row.book,
+      dgId: row.dg_id
+    });
+    if (rowIndex.has(key)) {
+      const idx = rowIndex.get(key);
+      if (isHistorical) {
+        rowList[idx] = mergeRow(rowList[idx], row, historicalUpdateKeys);
+      } else {
+        rowList[idx] = mergeRow(rowList[idx], row);
+      }
+      return;
+    }
+    if (isHistorical) {
+      return;
+    }
+    if (oddsSourceKey === 'live' && emptyRowIndexes.length) {
+      const targetIdx = emptyRowIndexes.shift();
+      rowList[targetIdx] = mergeRow(rowList[targetIdx], row);
+      rowIndex.set(key, targetIdx);
+      return;
+    }
+    rowIndex.set(key, rowList.length);
+    rowList.push(row);
+  });
+
+  if (updateExisting) {
+    const outcomeIndex = buildOutcomeIndex({ eventId: eventId || null });
+    rowList.forEach(row => {
+      if (row.net && row.roi && row['total return'] && row['settled stake']) return;
+      const key = buildOutcomeKey({
+        event: row.event,
+        market: row.market,
+        book: row.book,
+        dgId: row.dg_id
+      });
+      const outcome = outcomeIndex.get(key);
+      if (!outcome) return;
+      const stakeValue = Number(row.stake);
+      const oddsValue = Number(row.odds) || Number(outcome.odds);
+      if (!Number.isFinite(stakeValue) || !Number.isFinite(oddsValue)) return;
+      const settledStake = stakeValue;
+      let totalReturn = 0;
+      if (outcome.isPush) {
+        totalReturn = settledStake;
+      } else if (Number.isFinite(outcome.winFactor) && outcome.winFactor > 0) {
+        totalReturn = settledStake * oddsValue * outcome.winFactor;
+      }
+      const net = totalReturn - settledStake;
+      row['settled stake'] = settledStake.toFixed(2);
+      row['total return'] = totalReturn.toFixed(2);
+      row.net = net.toFixed(2);
+      row.roi = settledStake > 0 ? (net / settledStake).toFixed(4) : '';
+    });
+  }
+
+  writeCsv(outputCsv, rowList, [
+    'season',
+    'book',
+    'odd_source',
+    'tournament_slug',
+    'event',
+    'odds_generated_at',
+    'odds_graded_at',
+    'player',
+    'dg_id',
+    'market',
+    'odds',
+    'stake',
+    'settled stake',
+    'total return',
+    'net',
+    'roi',
+    '',
+    'p_model',
+    'p_implied',
+    'edge'
+  ]);
+
+  const inputsPayload = {
+    season: String(season),
+    market: String(market),
+    odds_source: oddsSourceKey,
+    generated_at: new Date().toISOString(),
+    odds_eval_files: oddsEvalFiles
+  };
+
+  const existingInputs = fs.existsSync(inputsJson)
+    ? JSON.parse(fs.readFileSync(inputsJson, 'utf8'))
+    : {};
+  const mergedInputs = { ...existingInputs };
+  if (!mergedInputs[oddsSourceKey]) {
+    mergedInputs[oddsSourceKey] = [];
+  }
+  if (!Array.isArray(mergedInputs[oddsSourceKey])) {
+    mergedInputs[oddsSourceKey] = [mergedInputs[oddsSourceKey]];
+  }
+  mergedInputs[oddsSourceKey].push(inputsPayload);
+  fs.writeFileSync(inputsJson, `${JSON.stringify(mergedInputs, null, 2)}\n`);
+
+  const inputRowsForCsv = Object.entries(mergedInputs).flatMap(([source, payloads]) => {
+    const list = Array.isArray(payloads) ? payloads : [payloads];
+    return list.flatMap(payload => (payload.odds_eval_files || []).map(filePath => ({
+      season: payload.season || String(season),
+      market: payload.market || String(market),
+      odds_source: source,
+      odds_eval_path: filePath,
+      generated_at: payload.generated_at || ''
+    })));
+  });
+  writeCsv(inputsCsv, inputRowsForCsv, ['season', 'market', 'odds_source', 'odds_eval_path', 'generated_at']);
+
+  console.log(`✓ Betting card saved to ${outputCsv}`);
+  console.log(`✓ Inputs saved to ${inputsJson} and ${inputsCsv}`);
+};
+
+main();

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-11T12:15:07-05:00",
+  "updatedAt": "2026-03-16T22:06:08-05:00",
   "sourceDir": "apps-scripts/modelOptimizer/data",
   "defaultTours": [
     "pga"
@@ -16,7 +16,7 @@
         "202"
       ],
       "courseNameKey": "PETE_DYE_STADIUM_COURSE",
-      "courseType": "TECHNICAL",
+      "courseType": "BALANCED",
       "pastPerformance": true,
       "similarCourseIds": [
         "3",
@@ -69,7 +69,7 @@
         "510"
       ],
       "courseNameKey": "WM_PHOENIX_OPEN_STADIUM_COURSE",
-      "courseType": "TECHNICAL",
+      "courseType": "BALANCED",
       "pastPerformance": true,
       "similarCourseIds": [
         "536",
@@ -127,7 +127,7 @@
         "104"
       ],
       "courseNameKey": "TORREY_PINES_GOLF_COURSE_NORTH_COURSE",
-      "courseType": "TECHNICAL",
+      "courseType": "BALANCED",
       "pastPerformance": true,
       "similarCourseIds": [
         "505",
@@ -167,7 +167,7 @@
         "5"
       ],
       "courseNameKey": "PEBBLE_BEACH_GOLF_LINKS",
-      "courseType": "TECHNICAL",
+      "courseType": "BALANCED",
       "pastPerformance": true,
       "similarCourseIds": [
         "493",
@@ -212,7 +212,7 @@
         "6"
       ],
       "courseNameKey": "WAIALAE_COUNTRY_CLUB",
-      "courseType": "TECHNICAL",
+      "courseType": "BALANCED",
       "pastPerformance": true,
       "similarCourseIds": [
         "12",
@@ -286,7 +286,7 @@
         "939"
       ],
       "courseNameKey": "THE_RIVIERA_COUNTRY_CLUB",
-      "courseType": "TECHNICAL",
+      "courseType": "BALANCED",
       "pastPerformance": true,
       "similarCourseIds": [
         "14",
@@ -360,7 +360,7 @@
       ],
       "locationQuery": "Orlando FL",
       "courseNameKey": "BAY_HILL_CLUB_AND_LODGE",
-      "courseType": "TECHNICAL",
+      "courseType": "BALANCED",
       "pastPerformance": true,
       "similarCourseIds": [
         "10",
@@ -512,7 +512,7 @@
         "11"
       ],
       "courseNameKey": "TPC_SAWGRASS",
-      "courseType": "BALANCED",
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
       "similarCourseIds": [
         "475",
@@ -868,7 +868,7 @@
         "from150to200": 0.354,
         "over200": 0.425
       },
-      "pastPerformanceWeight": 0.25
+      "pastPerformanceWeight": 0.1
     },
     "41": {
       "sourcePath": null,
@@ -969,7 +969,7 @@
     "475": {
       "sourcePath": null,
       "eventId": "475",
-      "templateKey": "BALANCED",
+      "templateKey": "INNISBROOK_COPPERHEAD",
       "courseNum": "665",
       "courseNums": [
         "665"
@@ -978,21 +978,17 @@
       "courseType": "BALANCED",
       "pastPerformance": true,
       "similarCourseIds": [
+        "11",
         "12",
-        "21",
-        "6",
-        "10"
+        "21"
       ],
       "puttingCourseIds": [
         "11",
-        "3"
+        "18"
       ],
       "similarCourseCourseNums": {
-        "6": [
-          "6"
-        ],
-        "10": [
-          "928"
+        "11": [
+          "11"
         ],
         "12": [
           "12"
@@ -1002,22 +998,29 @@
         ]
       },
       "puttingCourseCourseNums": {
-        "3": [
-          "510"
-        ],
         "11": [
           "11"
+        ],
+        "18": [
+          "714"
         ]
       },
-      "similarCoursesWeight": 0.4,
-      "puttingCoursesWeight": 0.6,
+      "similarCoursesWeight": 0.15,
+      "puttingCoursesWeight": 0.2,
       "shotDistribution": {
-        "under100": 0.073,
-        "from100to150": 0.238,
-        "from150to200": 0.37,
-        "over200": 0.319
+        "under100": 0.067,
+        "from100to150": 0.212,
+        "from150to200": 0.412,
+        "over200": 0.309
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.1,
+      "locationLat": 28.1117,
+      "locationLon": -82.7562,
+      "locationQuery": "Palm Harbor FL",
+      "locationCity": "Palm Harbor",
+      "locationState": "Florida",
+      "locationCountry": "United States",
+      "timezone": "America/New_York"
     }
   },
   "byCourseNum": {
@@ -1447,7 +1450,7 @@
         "from150to200": 0.354,
         "over200": 0.425
       },
-      "pastPerformanceWeight": 0.25
+      "pastPerformanceWeight": 0.1
     },
     "104": {
       "sourcePath": null,
@@ -1667,15 +1670,22 @@
           "11"
         ]
       },
-      "similarCoursesWeight": 0.4,
-      "puttingCoursesWeight": 0.6,
+      "similarCoursesWeight": 0.15,
+      "puttingCoursesWeight": 0.2,
       "shotDistribution": {
-        "under100": 0.073,
-        "from100to150": 0.238,
-        "from150to200": 0.37,
-        "over200": 0.319
+        "under100": 0.067,
+        "from100to150": 0.212,
+        "from150to200": 0.412,
+        "over200": 0.309
       },
-      "pastPerformanceWeight": 0.1
+      "pastPerformanceWeight": 0.1,
+      "locationLat": 28.1117,
+      "locationLon": -82.7562,
+      "locationQuery": "Palm Harbor FL",
+      "locationCity": "Palm Harbor",
+      "locationState": "Florida",
+      "locationCountry": "United States",
+      "timezone": "America/New_York"
     },
     "704": {
       "sourcePath": null,

@@ -18,7 +18,13 @@ const { parse } = require('csv-parse/sync');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const { setupLogging } = require('../utilities/logging');
-const { formatTimestamp, formatDateKey, formatTimestampForFilename } = require('../utilities/timeUtils');
+const {
+  formatTimestamp,
+  formatDateKey,
+  formatTimestampForFilename,
+  buildCentralTimestampFromUtcString,
+  parseTimestampToMs
+} = require('../utilities/timeUtils');
 const { loadCsv } = require('../utilities/csvLoader');
 const { buildPlayerData } = require('../utilities/dataPrep');
 const { generatePlayerRankings, cleanMetricValue, calculateMetricTrends } = require('./modelCore');
@@ -47,7 +53,8 @@ const {
   getDataGolfFieldUpdates,
   getDataGolfPlayerDecompositions,
   getDataGolfSkillRatings,
-  getDataGolfHistoricalRounds
+  getDataGolfHistoricalRounds,
+  getDataGolfLiveTournamentStats
 } = require('../utilities/dataGolfClient');
 const { getMeteoblueLocation, getMeteoblueForecast } = require('../utilities/weatherClient');
 const buildRecentYears = require('../utilities/buildRecentYears');
@@ -394,6 +401,7 @@ let OVERRIDE_APPROACH_DELTA_IGNORE_LAG = false;
 let FORCE_RUN_MODE = null;
 let FORCE_PRE_FLAG = false;
 let FORCE_POST_FLAG = false;
+let FORCE_FIELD_UPDATES = false;
 let RUN_VALIDATION_ONLY = false;
 let RUN_RESULTS_ONLY = false;
 let RUN_DELTA_ONLY = false;
@@ -481,6 +489,14 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--post' || args[i] === '--postTournament' || args[i] === '--post-tournament') {
     FORCE_RUN_MODE = 'post';
     FORCE_POST_FLAG = true;
+  }
+  if (
+    args[i] === '--forceFieldUpdates'
+    || args[i] === '--force-field-updates'
+    || args[i] === '--refreshFieldUpdates'
+    || args[i] === '--refresh-field-updates'
+  ) {
+    FORCE_FIELD_UPDATES = true;
   }
   if (args[i] === '--dryRun' || args[i] === '--dry-run') {
     DRY_RUN = true;
@@ -755,24 +771,82 @@ function formatSnapshotUsageLine(label, snapshot) {
   return `- ${label}: used (${sourceLabel})`;
 }
 
-function buildHistoricalCachePaths({ cacheDir, tours = [], years = [], eventId = 'all' }) {
+function buildHistoricalCacheSuffix({ tour = 'pga', eventId = 'all', year }) {
+  const safeTour = String(tour || 'pga').trim().toLowerCase() || 'pga';
+  const safeEventId = String(eventId ?? 'all').trim().toLowerCase() || 'all';
+  const safeYear = String(year || '').trim();
+  return `${safeTour}_${safeEventId}_${safeYear || 'year'}`
+    .replace(/[^a-z0-9._-]/g, '_');
+}
+
+function buildHistoricalCachePaths({ cacheDir, tours = [], years = [], eventId = 'all', fileFormat = 'json' }) {
   const safeEventId = String(eventId ?? 'all').trim().toLowerCase() || 'all';
   const cachePaths = [];
   (tours || []).forEach(tour => {
     const safeTour = String(tour || 'pga').trim().toLowerCase() || 'pga';
     (years || []).forEach(year => {
-      const safeYear = String(year || '').trim();
-      const cacheSuffix = `${safeTour}_${safeEventId}_${safeYear || 'year'}`
-        .replace(/[^a-z0-9._-]/g, '_');
-      const cachePath = cacheDir
-        ? path.resolve(cacheDir, `datagolf_historical_rounds_${cacheSuffix}.json`)
-        : null;
-      if (cachePath && fs.existsSync(cachePath)) {
-        cachePaths.push(cachePath);
-      }
+      const cachePath = resolveHistoricalCachePath({
+        cacheDir,
+        tour: safeTour,
+        year,
+        eventId: safeEventId,
+        fileFormat
+      });
+      if (cachePath && fs.existsSync(cachePath)) cachePaths.push(cachePath);
     });
   });
   return cachePaths;
+}
+
+function buildHistoricalCachePath({ cacheDir, tour = 'pga', year, eventId = 'all' }) {
+  if (!cacheDir) return null;
+  const cacheSuffix = buildHistoricalCacheSuffix({ tour, eventId, year });
+  return path.resolve(cacheDir, `datagolf_historical_rounds_${cacheSuffix}.json`);
+}
+
+function resolveHistoricalCachePath({ cacheDir, tour = 'pga', year, eventId = 'all' }) {
+  if (!cacheDir) return null;
+  const primaryPath = buildHistoricalCachePath({ cacheDir, tour, year, eventId });
+  if (primaryPath && fs.existsSync(primaryPath)) return primaryPath;
+
+  const safeTour = String(tour || 'pga').trim().toLowerCase() || 'pga';
+  const safeEventId = String(eventId ?? 'all').trim().toLowerCase() || 'all';
+  const safeYear = String(year || '').trim();
+  const legacySuffix = `${safeTour}_${safeEventId}_${safeYear || 'year'}`
+    .replace(/[^a-z0-9._-]/g, '_');
+  const legacyPath = path.resolve(cacheDir, `datagolf_historical_rounds_${legacySuffix}.json`);
+  if (legacyPath && fs.existsSync(legacyPath)) {
+    if (primaryPath && !fs.existsSync(primaryPath)) {
+      try {
+        fs.renameSync(legacyPath, primaryPath);
+        console.log(`ℹ️  Historical cache renamed: ${path.basename(legacyPath)} → ${path.basename(primaryPath)}`);
+        return primaryPath;
+      } catch (error) {
+        console.warn(`⚠️  Unable to rename historical cache ${path.basename(legacyPath)}: ${error.message}`);
+        return legacyPath;
+      }
+    }
+    return legacyPath;
+  }
+
+  const legacyWithFormatSuffix = `${safeTour}_${safeEventId}_${safeYear || 'year'}_json`
+    .replace(/[^a-z0-9._-]/g, '_');
+  const legacyWithFormatPath = path.resolve(cacheDir, `datagolf_historical_rounds_${legacyWithFormatSuffix}.json`);
+  if (legacyWithFormatPath && fs.existsSync(legacyWithFormatPath)) {
+    if (primaryPath && !fs.existsSync(primaryPath)) {
+      try {
+        fs.renameSync(legacyWithFormatPath, primaryPath);
+        console.log(`ℹ️  Historical cache renamed: ${path.basename(legacyWithFormatPath)} → ${path.basename(primaryPath)}`);
+        return primaryPath;
+      } catch (error) {
+        console.warn(`⚠️  Unable to rename historical cache ${path.basename(legacyWithFormatPath)}: ${error.message}`);
+        return legacyWithFormatPath;
+      }
+    }
+    return legacyWithFormatPath;
+  }
+
+  return primaryPath;
 }
 
 function resolveCourseNumFromHistoryRow(row) {
@@ -781,6 +855,21 @@ function resolveCourseNumFromHistoryRow(row) {
   if (courseNum === null || courseNum === undefined) return null;
   const trimmed = String(courseNum).trim();
   return trimmed ? trimmed : null;
+}
+
+function extractEventHistoricalRows({ payload, eventId, season }) {
+  const eventIdStr = String(eventId || '').trim();
+  const seasonStr = String(season || '').trim();
+  if (!payload || !eventIdStr || !seasonStr) return [];
+  return extractHistoricalRowsFromSnapshotPayload(payload)
+    .map(normalizeHistoricalRoundRow)
+    .filter(Boolean)
+    .filter(row => {
+      const rowEvent = String(row['event_id'] || '').trim();
+      if (rowEvent !== eventIdStr) return false;
+      const rowSeason = String(row['season'] || row['year'] || '').trim();
+      return rowSeason === seasonStr;
+    });
 }
 
 function buildStep1cCourseFilterMap(courseContextEntry, currentEventId) {
@@ -2361,7 +2450,6 @@ function buildRollingApproachDeltaRows(entries, metricSpecs, fieldIdSet, maxFile
     rows.forEach(row => {
       const dgId = String(row?.dg_id || row?.dgId || '').trim();
       if (!dgId) return;
-      if (fieldIdSet && !fieldIdSet.has(dgId)) return;
       let target = accum.get(dgId);
       if (!target) {
         target = {
@@ -2390,7 +2478,7 @@ function buildRollingApproachDeltaRows(entries, metricSpecs, fieldIdSet, maxFile
     const outputRow = {
       dg_id: entry.dg_id,
       player_name: entry.player_name,
-      tournament_field: fieldIdSet ? true : null
+      tournament_field: fieldIdSet ? fieldIdSet.has(entry.dg_id) : null
     };
     metricSpecs.forEach(spec => {
       const count = entry.counts[spec.key] || 0;
@@ -5851,6 +5939,21 @@ function writeJsonFile(filePath, payload) {
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
 }
 
+function getPayloadLastUpdated(payload) {
+  if (!payload || typeof payload !== 'object') return null;
+  return payload.last_updated || payload.lastUpdated || null;
+}
+
+function appendCentralLastUpdated(payload) {
+  if (!payload || typeof payload !== 'object') return payload;
+  if (payload.last_updated_ct) return payload;
+  const lastUpdated = getPayloadLastUpdated(payload);
+  if (!lastUpdated) return payload;
+  const centralValue = buildCentralTimestampFromUtcString(lastUpdated);
+  if (!centralValue) return payload;
+  return { ...payload, last_updated_ct: centralValue };
+}
+
 function loadCourseHistoryRegressionMap(options = {}) {
   const { outputDir = null } = options;
   const candidates = [];
@@ -6181,31 +6284,46 @@ function normalizeHistoricalRoundRow(row) {
 
 function hasHistoricalResultsInCache({ cacheDir, tour, eventId, season }) {
   if (!cacheDir || !eventId || !season) return false;
-  const cachePaths = buildHistoricalCachePaths({
-    cacheDir,
-    tours: [tour || 'pga'],
-    years: [season],
-    eventId: 'all',
-    fileFormat: 'json'
-  });
-  const cachePath = Array.isArray(cachePaths) && cachePaths.length > 0 ? cachePaths[0] : null;
-  if (!cachePath || !fs.existsSync(cachePath)) return false;
-  const payload = readJsonFile(cachePath);
-  if (!payload) return false;
+  const cachePaths = [
+    ...buildHistoricalCachePaths({
+      cacheDir,
+      tours: [tour || 'pga'],
+      years: [season],
+      eventId: 'all',
+      fileFormat: 'json'
+    }),
+    ...buildHistoricalCachePaths({
+      cacheDir,
+      tours: [tour || 'pga'],
+      years: [season],
+      eventId: eventId,
+      fileFormat: 'json'
+    })
+  ];
   const eventKey = String(eventId || '').trim();
-  const directEvent = payload?.[eventKey] || null;
-  const directScores = Array.isArray(directEvent?.scores) ? directEvent.scores : null;
-  if (directScores && directScores.some(entry => entry && entry.fin_text)) return true;
-  const rows = extractHistoricalRowsFromSnapshotPayload(payload)
-    .map(normalizeHistoricalRoundRow)
-    .filter(Boolean);
-  return rows.some(row => {
-    const rowEvent = String(row?.event_id || '').trim();
-    if (rowEvent !== eventKey) return false;
-    const rowSeason = String(row?.season || row?.year || '').trim();
-    if (String(season).trim() && rowSeason !== String(season).trim()) return false;
-    return !!normalizeFinishPosition(row?.fin_text);
-  });
+  const seasonKey = String(season).trim();
+
+  for (const cachePath of cachePaths) {
+    if (!cachePath || !fs.existsSync(cachePath)) continue;
+    const payload = readJsonFile(cachePath);
+    if (!payload) continue;
+    const directEvent = payload?.[eventKey] || null;
+    const directScores = Array.isArray(directEvent?.scores) ? directEvent.scores : null;
+    if (directScores && directScores.some(entry => entry && entry.fin_text)) return true;
+    const rows = extractHistoricalRowsFromSnapshotPayload(payload)
+      .map(normalizeHistoricalRoundRow)
+      .filter(Boolean);
+    const hasMatch = rows.some(row => {
+      const rowEvent = String(row?.event_id || '').trim();
+      if (rowEvent !== eventKey) return false;
+      const rowSeason = String(row?.season || row?.year || '').trim();
+      if (seasonKey && rowSeason !== seasonKey) return false;
+      return !!normalizeFinishPosition(row?.fin_text);
+    });
+    if (hasMatch) return true;
+  }
+
+  return false;
 }
 
 function resolveApproachOverrideEntry(rawPath, sourceLabel) {
@@ -6307,6 +6425,32 @@ function hasSnapshotArchiveForDate(candidates, date) {
   return (candidates || []).some(entry => entry?.source === 'snapshot_archive' && entry?.date === date);
 }
 
+function normalizeApproachSnapshotArchiveName({ period, filePath, dateStamp }) {
+  if (!filePath || !fs.existsSync(filePath)) return { filePath, dateStamp };
+  const payload = readJsonFile(filePath);
+  const updatedRaw = getPayloadLastUpdated(payload);
+  const updatedMs = parseTimestampToMs(updatedRaw);
+  if (!updatedMs) return { filePath, dateStamp };
+  const updatedStamp = formatDateKey(new Date(updatedMs));
+  if (!updatedStamp || updatedStamp === dateStamp) return { filePath, dateStamp };
+
+  const targetName = `approach_${period}_${updatedStamp}.json`;
+  const targetPath = path.resolve(path.dirname(filePath), targetName);
+  if (fs.existsSync(targetPath)) {
+    console.warn(`⚠️  Snapshot archive name mismatch (${path.basename(filePath)}); target exists (${path.basename(targetPath)}).`);
+    return { filePath: targetPath, dateStamp: updatedStamp };
+  }
+
+  try {
+    fs.renameSync(filePath, targetPath);
+    console.log(`ℹ️  Renamed approach snapshot: ${path.basename(filePath)} → ${path.basename(targetPath)}`);
+    return { filePath: targetPath, dateStamp: updatedStamp };
+  } catch (error) {
+    console.warn(`⚠️  Unable to rename snapshot ${path.basename(filePath)}: ${error.message}`);
+    return { filePath, dateStamp };
+  }
+}
+
 function listApproachSnapshotArchives() {
   const entries = [];
   const collect = baseDir => {
@@ -6319,12 +6463,16 @@ function listApproachSnapshotArchives() {
       const match = name.match(/^approach_([a-z0-9]+)_(\d{4}-\d{2}-\d{2})\.json$/i);
       if (!match) return;
       const period = String(match[1] || '').toLowerCase();
-      const dateStamp = match[2];
+      let dateStamp = match[2];
+      let filePath = path.resolve(baseDir, name);
+      const normalized = normalizeApproachSnapshotArchiveName({ period, filePath, dateStamp });
+      filePath = normalized.filePath;
+      dateStamp = normalized.dateStamp;
       const time = Date.parse(`${dateStamp}T00:00:00Z`);
       entries.push({
         period,
-        name,
-        path: path.resolve(baseDir, name),
+        name: path.basename(filePath || name),
+        path: filePath,
         time: Number.isNaN(time) ? 0 : time,
         baseDir
       });
@@ -6485,7 +6633,7 @@ function loadApproachSnapshotFromDisk(snapshotPath) {
   return { source: 'snapshot', path: snapshotPath, payload };
 }
 
-async function getOrCreateApproachSnapshot({ period, snapshotPath, apiKey, cacheDir, ttlMs, season, eventId, isPostTournament }) {
+async function getOrCreateApproachSnapshot({ period, snapshotPath, apiKey, cacheDir, ttlMs, season, eventId, isPostTournament, cacheFirst = false }) {
   const loadSnapshot = (pathValue) => {
     if (typeof loadApproachSnapshotFromDisk === 'function') {
       return loadApproachSnapshotFromDisk(pathValue);
@@ -6538,28 +6686,53 @@ async function getOrCreateApproachSnapshot({ period, snapshotPath, apiKey, cache
     ttlMs,
     allowStale: true,
     period,
-    fileFormat: 'json'
+    fileFormat: 'json',
+    cacheFirst
   });
 
   if (fetched?.payload) {
-    const archiveStamp = formatDateKey(new Date());
+    const fetchedUpdatedRaw = getPayloadLastUpdated(fetched.payload);
+    const fetchedUpdatedMs = parseTimestampToMs(fetchedUpdatedRaw);
+    const archiveDate = fetchedUpdatedMs ? new Date(fetchedUpdatedMs) : new Date();
+    const archiveStamp = formatDateKey(archiveDate);
+
     if (normalizedPeriod === 'ytd') {
+      let latestPayload = null;
+      if (snapshotPath && fs.existsSync(snapshotPath)) {
+        latestPayload = readJsonFile(snapshotPath);
+      }
+      const latestUpdatedMs = parseTimestampToMs(getPayloadLastUpdated(latestPayload));
+      const shouldWrite = !fetchedUpdatedMs || !latestUpdatedMs || fetchedUpdatedMs > latestUpdatedMs;
+      const cacheLabel = latestUpdatedMs
+        ? formatTimestamp(new Date(latestUpdatedMs))
+        : (latestPayload ? 'missing' : 'none');
+      const apiLabel = fetchedUpdatedMs
+        ? formatTimestamp(new Date(fetchedUpdatedMs))
+        : (fetchedUpdatedRaw || 'missing');
+      console.log(`ℹ️  YTD snapshot compare: cache=${cacheLabel}, api=${apiLabel}, shouldWrite=${shouldWrite}`);
+      if (!shouldWrite) {
+        console.log('ℹ️  YTD approach snapshot already current; skipping write.');
+        return { ...fetched, path: snapshotPath, payload: latestPayload };
+      }
+
+      const payloadToWrite = appendCentralLastUpdated(fetched.payload);
       if (snapshotPath) {
-        writeJsonFile(snapshotPath, fetched.payload);
+        writeJsonFile(snapshotPath, payloadToWrite);
       }
       const archivePath = path.resolve(APPROACH_SNAPSHOT_DIR, `approach_${normalizedPeriod}_${archiveStamp}.json`);
       if (!fs.existsSync(archivePath)) {
-        writeJsonFile(archivePath, fetched.payload);
+        writeJsonFile(archivePath, payloadToWrite);
       }
       pruneApproachSnapshotArchives();
-      return { ...fetched, path: snapshotPath };
+      return { ...fetched, path: snapshotPath, payload: payloadToWrite };
     }
 
+    const payloadToWrite = appendCentralLastUpdated(fetched.payload);
     const archivePath = path.resolve(APPROACH_SNAPSHOT_DIR, `approach_${normalizedPeriod || 'snapshot'}_${archiveStamp}.json`);
     if (!fs.existsSync(archivePath)) {
-      writeJsonFile(archivePath, fetched.payload);
+      writeJsonFile(archivePath, payloadToWrite);
     }
-    return { ...fetched, path: archivePath };
+    return { ...fetched, path: archivePath, payload: payloadToWrite };
   }
 
   if (!useArchiveAsCurrent && snapshotPath && fs.existsSync(snapshotPath)) {
@@ -6575,25 +6748,53 @@ async function getOrCreateApproachSnapshot({ period, snapshotPath, apiKey, cache
   return fetched;
 }
 
-async function refreshYtdApproachSnapshot({ apiKey, cacheDir, ttlMs }) {
+async function refreshYtdApproachSnapshot({ apiKey, cacheDir, ttlMs, cacheFirst = false }) {
   const fetched = await getDataGolfApproachSkill({
     apiKey,
     cacheDir,
     ttlMs,
     allowStale: true,
     period: 'ytd',
-    fileFormat: 'json'
+    fileFormat: 'json',
+    cacheFirst
   });
 
   if (fetched?.payload) {
-    writeJsonFile(APPROACH_SNAPSHOT_YTD_LATEST_PATH, fetched.payload);
-    const archiveStamp = formatDateKey(new Date());
+    const fetchedUpdatedRaw = getPayloadLastUpdated(fetched.payload);
+    const fetchedUpdatedMs = parseTimestampToMs(fetchedUpdatedRaw);
+    const latestPayload = fs.existsSync(APPROACH_SNAPSHOT_YTD_LATEST_PATH)
+      ? readJsonFile(APPROACH_SNAPSHOT_YTD_LATEST_PATH)
+      : null;
+    const latestUpdatedMs = parseTimestampToMs(getPayloadLastUpdated(latestPayload));
+    const shouldWrite = !fetchedUpdatedMs || !latestUpdatedMs || fetchedUpdatedMs > latestUpdatedMs;
+    const cacheLabel = latestUpdatedMs
+      ? formatTimestamp(new Date(latestUpdatedMs))
+      : (latestPayload ? 'missing' : 'none');
+    const apiLabel = fetchedUpdatedMs
+      ? formatTimestamp(new Date(fetchedUpdatedMs))
+      : (fetchedUpdatedRaw || 'missing');
+    console.log(`ℹ️  YTD snapshot compare: cache=${cacheLabel}, api=${apiLabel}, shouldWrite=${shouldWrite}`);
+
+    if (!shouldWrite) {
+      pruneApproachSnapshotArchives();
+      console.log('ℹ️  YTD approach snapshot already current; skipping write.');
+      return {
+        ...fetched,
+        path: APPROACH_SNAPSHOT_YTD_LATEST_PATH,
+        payload: latestPayload
+      };
+    }
+
+    const payloadToWrite = appendCentralLastUpdated(fetched.payload);
+    writeJsonFile(APPROACH_SNAPSHOT_YTD_LATEST_PATH, payloadToWrite);
+    const archiveDate = fetchedUpdatedMs ? new Date(fetchedUpdatedMs) : new Date();
+    const archiveStamp = formatDateKey(archiveDate);
     const archivePath = path.resolve(APPROACH_SNAPSHOT_DIR, `approach_ytd_${archiveStamp}.json`);
     if (!fs.existsSync(archivePath)) {
-      writeJsonFile(archivePath, fetched.payload);
+      writeJsonFile(archivePath, payloadToWrite);
     }
     pruneApproachSnapshotArchives();
-    return { ...fetched, path: APPROACH_SNAPSHOT_YTD_LATEST_PATH, archivePath };
+    return { ...fetched, path: APPROACH_SNAPSHOT_YTD_LATEST_PATH, archivePath, payload: payloadToWrite };
   }
 
   if (fs.existsSync(APPROACH_SNAPSHOT_YTD_LATEST_PATH)) {
@@ -6955,6 +7156,28 @@ function deriveResultsFromHistory(rawHistoryData, eventId, season = null, nameLo
     finishPosition: entry.finishPosition,
     playerName: entry.playerName
   }));
+}
+
+function deriveResultsFromLiveStats(payload) {
+  const liveStats = Array.isArray(payload?.live_stats)
+    ? payload.live_stats
+    : (Array.isArray(payload?.stats) ? payload.stats : []);
+  const results = [];
+
+  liveStats.forEach(row => {
+    const dgId = String(row?.dg_id || row?.dgId || '').trim();
+    if (!dgId) return;
+    const rawPosition = row?.position ?? row?.fin_text ?? row?.finish ?? row?.finishPosition ?? null;
+    const finishPosition = parseFinishPosition(rawPosition);
+    if (!Number.isFinite(finishPosition)) return;
+    results.push({
+      dgId,
+      finishPosition,
+      playerName: row?.player_name || row?.playerName || row?.name || null
+    });
+  });
+
+  return results;
 }
 
 function buildResultsByYear(rawHistoryData, eventId) {
@@ -8500,6 +8723,7 @@ async function runAdaptiveOptimizer() {
   })();
   const IS_POST_TOURNAMENT_RUN = FORCE_RUN_MODE === 'post' || (!FORCE_RUN_MODE && POST_TOURNAMENT_HINT);
   const IS_PRE_TOURNAMENT_RUN = !IS_POST_TOURNAMENT_RUN;
+  const CACHE_FIRST_REFRESH = IS_POST_TOURNAMENT_RUN;
   const SHOULD_FETCH_APPROACH_ARCHIVES = (() => {
     if (!IS_POST_TOURNAMENT_RUN) return false;
     const seasonValue = parseInt(String(effectiveSeason || '').trim(), 10);
@@ -8520,7 +8744,8 @@ async function runAdaptiveOptimizer() {
         apiKey: DATAGOLF_API_KEY,
         cacheDir: null,
         ttlMs: DATAGOLF_RANKINGS_TTL_HOURS * 60 * 60 * 1000,
-        allowStale: false
+        allowStale: false,
+        cacheFirst: CACHE_FIRST_REFRESH
       });
 
       if (rankingsSnapshot?.payload?.last_updated) {
@@ -8551,7 +8776,8 @@ async function runAdaptiveOptimizer() {
         ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
         allowStale: true,
         period: DATAGOLF_APPROACH_PERIOD,
-        fileFormat: 'json'
+        fileFormat: 'json',
+        cacheFirst: CACHE_FIRST_REFRESH
       });
 
       if (approachSkillSnapshot?.payload?.last_updated) {
@@ -8601,7 +8827,8 @@ async function runAdaptiveOptimizer() {
           ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
           season: CURRENT_SEASON,
           eventId: CURRENT_EVENT_ID,
-          isPostTournament: POST_TOURNAMENT_HINT
+          isPostTournament: POST_TOURNAMENT_HINT,
+          cacheFirst: IS_POST_TOURNAMENT_RUN
         });
         if (approachSnapshotL24?.payload?.last_updated) {
           console.log(`✓ Approach snapshot l24 ready (${approachSnapshotL24.source}, updated ${approachSnapshotL24.payload.last_updated})`);
@@ -8621,7 +8848,8 @@ async function runAdaptiveOptimizer() {
           ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
           season: CURRENT_SEASON,
           eventId: CURRENT_EVENT_ID,
-          isPostTournament: POST_TOURNAMENT_HINT
+          isPostTournament: POST_TOURNAMENT_HINT,
+          cacheFirst: IS_POST_TOURNAMENT_RUN
         });
         if (approachSnapshotL12?.payload?.last_updated) {
           console.log(`✓ Approach snapshot l12 ready (${approachSnapshotL12.source}, updated ${approachSnapshotL12.payload.last_updated})`);
@@ -8642,7 +8870,8 @@ async function runAdaptiveOptimizer() {
         approachSnapshotYtd = await refreshYtdApproachSnapshot({
           apiKey: DATAGOLF_API_KEY,
           cacheDir: null,
-          ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000
+          ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
+          cacheFirst: IS_POST_TOURNAMENT_RUN
         });
         if (approachSnapshotYtd?.payload?.last_updated) {
           console.log(`✓ Approach snapshot ytd ready (${approachSnapshotYtd.source}, updated ${approachSnapshotYtd.payload.last_updated})`);
@@ -8699,22 +8928,26 @@ async function runAdaptiveOptimizer() {
       const fieldTtlMs = IS_POST_TOURNAMENT_RUN
         ? DATAGOLF_FIELD_TTL_HOURS * 60 * 60 * 1000
         : 0;
+      const forceFieldUpdates = FORCE_FIELD_UPDATES
+        || ['1', 'true', 'yes'].includes(String(process.env.FORCE_FIELD_UPDATES || '').trim().toLowerCase());
       const fieldCacheSlug = canonicalTournamentSlug;
       fieldUpdatesSnapshot = await getDataGolfFieldUpdates({
         apiKey: DATAGOLF_API_KEY,
         cacheDir: DATAGOLF_CACHE_DIR,
-        ttlMs: fieldTtlMs,
-        allowStale: true,
-        preferCache: true,
+        ttlMs: forceFieldUpdates ? 0 : fieldTtlMs,
+        allowStale: forceFieldUpdates ? false : true,
+        preferCache: forceFieldUpdates ? false : true,
         tour: DATAGOLF_FIELD_TOUR,
         cacheSlug: fieldCacheSlug,
         fileFormat: 'json',
         expectedEventId: CURRENT_EVENT_ID,
-        expectedEventName: canonicalTournamentName
+        expectedEventName: canonicalTournamentName,
+        cacheFirst: CACHE_FIRST_REFRESH
       });
 
       if (fieldUpdatesSnapshot?.payload?.event_name) {
-        console.log(`✓ DataGolf field updates loaded (${fieldUpdatesSnapshot.source}, ${fieldUpdatesSnapshot.payload.event_name})`);
+        const forcedNote = forceFieldUpdates ? ', forced refresh' : '';
+        console.log(`✓ DataGolf field updates loaded (${fieldUpdatesSnapshot.source}${forcedNote}, ${fieldUpdatesSnapshot.payload.event_name})`);
       } else if (fieldUpdatesSnapshot.source === 'missing-key') {
         console.warn('ℹ️  DataGolf field updates skipped (DATAGOLF_API_KEY not set).');
       } else if (fieldUpdatesSnapshot.source === 'cache-stale') {
@@ -8798,7 +9031,8 @@ async function runAdaptiveOptimizer() {
         ttlMs: DATAGOLF_DECOMP_TTL_HOURS * 60 * 60 * 1000,
         allowStale: false,
         tour: DATAGOLF_DECOMP_TOUR,
-        fileFormat: 'json'
+        fileFormat: 'json',
+        cacheFirst: CACHE_FIRST_REFRESH
       });
 
       if (playerDecompositionsSnapshot?.payload?.last_updated) {
@@ -8825,7 +9059,8 @@ async function runAdaptiveOptimizer() {
         ttlMs: DATAGOLF_SKILL_TTL_HOURS * 60 * 60 * 1000,
         allowStale: false,
         display: DATAGOLF_SKILL_DISPLAY_VALUE,
-        fileFormat: 'json'
+        fileFormat: 'json',
+        cacheFirst: CACHE_FIRST_REFRESH
       });
 
       if (skillRatingsValueSnapshot?.payload?.last_updated) {
@@ -8852,7 +9087,8 @@ async function runAdaptiveOptimizer() {
         ttlMs: DATAGOLF_SKILL_TTL_HOURS * 60 * 60 * 1000,
         allowStale: false,
         display: DATAGOLF_SKILL_DISPLAY_RANK,
-        fileFormat: 'json'
+        fileFormat: 'json',
+        cacheFirst: CACHE_FIRST_REFRESH
       });
 
       if (skillRatingsRankSnapshot?.payload?.last_updated) {
@@ -9306,78 +9542,143 @@ async function runAdaptiveOptimizer() {
     return seasonValue === seasonStr;
   }).length;
 
+  const mergeEventYearRows = (rows, sourceLabel) => {
+    if (!Array.isArray(rows) || rows.length === 0) return false;
+    const existingKeys = new Set(
+      historyData.map(row => [
+        String(row['dg_id'] || '').trim(),
+        String(row['event_id'] || '').trim(),
+        String(row['year'] || row['season'] || '').trim(),
+        String(row['round_num'] || row['round'] || '').trim()
+      ].join('|'))
+    );
+
+    rows.forEach(row => {
+      const key = [
+        String(row['dg_id'] || '').trim(),
+        String(row['event_id'] || '').trim(),
+        String(row['year'] || row['season'] || '').trim(),
+        String(row['round_num'] || row['round'] || '').trim()
+      ].join('|');
+      if (!existingKeys.has(key)) {
+        historyData.push(row);
+        existingKeys.add(key);
+      }
+    });
+
+    historyEventCount = historyData.filter(row => String(row['event_id'] || '').trim() === eventIdStr).length;
+    historyEventSeasonCount = historyData.filter(row => {
+      const eventMatch = String(row['event_id'] || '').trim() === eventIdStr;
+      if (!eventMatch) return false;
+      const seasonValue = String(row['season'] || row['year'] || '').trim();
+      return seasonValue === seasonStr;
+    }).length;
+
+    console.log(`✓ Loaded ${rows.length} rounds for event ${eventIdStr} (${seasonStr}) via ${sourceLabel}.`);
+    return true;
+  };
+
+  if (historyEventSeasonCount === 0) {
+    const allEventsCachePath = resolveHistoricalCachePath({
+      cacheDir: DATAGOLF_CACHE_DIR,
+      tour: DATAGOLF_HISTORICAL_TOUR,
+      eventId: 'all',
+      year: effectiveSeason,
+      fileFormat: 'json'
+    });
+    if (allEventsCachePath && fs.existsSync(allEventsCachePath)) {
+      const cachedPayload = readJsonFile(allEventsCachePath);
+      const eventYearRows = extractEventHistoricalRows({
+        payload: cachedPayload,
+        eventId: eventIdStr,
+        season: seasonStr
+      });
+      if (eventYearRows.length > 0) {
+        mergeEventYearRows(eventYearRows, 'all-events cache');
+      }
+    }
+  }
+
   if (historyEventSeasonCount === 0 && !skipHistoricalApiRefresh) {
     try {
-      const fetchEventYearRows = async preferCache => {
+      if (!DATAGOLF_API_KEY) {
+        console.warn('ℹ️  Historical rounds API refresh skipped (missing DATAGOLF_API_KEY).');
+      } else {
         const snapshot = await getDataGolfHistoricalRounds({
           apiKey: DATAGOLF_API_KEY,
-          cacheDir: DATAGOLF_CACHE_DIR,
-          ttlMs: preferCache ? (DATAGOLF_HISTORICAL_TTL_HOURS * 60 * 60 * 1000) : 0,
+          cacheDir: null,
+          ttlMs: 0,
           allowStale: true,
-          preferCache,
+          preferCache: false,
           tour: DATAGOLF_HISTORICAL_TOUR,
-          eventId: CURRENT_EVENT_ID,
+          eventId: 'all',
           year: effectiveSeason,
           fileFormat: 'json'
         });
-
-        return extractHistoricalRowsFromSnapshotPayload(snapshot?.payload)
-          .map(normalizeHistoricalRoundRow)
-          .filter(Boolean)
-          .filter(row => String(row['event_id'] || '').trim() === eventIdStr);
-      };
-
-      let eventYearRows = await fetchEventYearRows(true);
-      if (eventYearRows.length === 0) {
-        eventYearRows = await fetchEventYearRows(false);
-      }
-
-      if (eventYearRows.length > 0) {
-        const existingKeys = new Set(
-          historyData.map(row => [
-            String(row['dg_id'] || '').trim(),
-            String(row['event_id'] || '').trim(),
-            String(row['year'] || row['season'] || '').trim(),
-            String(row['round_num'] || row['round'] || '').trim()
-          ].join('|'))
-        );
-
-        eventYearRows.forEach(row => {
-          const key = [
-            String(row['dg_id'] || '').trim(),
-            String(row['event_id'] || '').trim(),
-            String(row['year'] || row['season'] || '').trim(),
-            String(row['round_num'] || row['round'] || '').trim()
-          ].join('|');
-          if (!existingKeys.has(key)) {
-            historyData.push(row);
-            existingKeys.add(key);
-          }
+        const eventYearRows = extractEventHistoricalRows({
+          payload: snapshot?.payload,
+          eventId: eventIdStr,
+          season: seasonStr
         });
 
-        historyEventCount = historyData.filter(row => String(row['event_id'] || '').trim() === eventIdStr).length;
-        historyEventSeasonCount = historyData.filter(row => {
-          const eventMatch = String(row['event_id'] || '').trim() === eventIdStr;
-          if (!eventMatch) return false;
-          const seasonValue = String(row['season'] || row['year'] || '').trim();
-          return seasonValue === seasonStr;
-        }).length;
-        console.log(`✓ Loaded ${eventYearRows.length} rounds for event ${eventIdStr} (${seasonStr}) via cache/API fallback.`);
-      } else {
-        console.warn(`ℹ️  Historical rounds missing for event ${eventIdStr} (${seasonStr}) after cache/API fallback.`);
+        if (eventYearRows.length > 0) {
+          const allEventsCachePath = buildHistoricalCachePath({
+            cacheDir: DATAGOLF_CACHE_DIR,
+            tour: DATAGOLF_HISTORICAL_TOUR,
+            eventId: 'all',
+            year: effectiveSeason,
+            fileFormat: 'json'
+          });
+          if (allEventsCachePath) {
+            writeJsonFile(allEventsCachePath, snapshot?.payload || {});
+            console.log(`ℹ️  Historical rounds cache updated for event ${eventIdStr} (${seasonStr}) in all-events cache.`);
+          }
+          mergeEventYearRows(eventYearRows, 'API payload');
+        } else {
+          console.warn(`ℹ️  Historical rounds missing for event ${eventIdStr} (${seasonStr}) after API check.`);
+        }
       }
     } catch (error) {
       console.warn(`ℹ️  Historical rounds lookup failed: ${error.message}`);
     }
   } else if (historyEventSeasonCount === 0 && skipHistoricalApiRefresh) {
-    console.warn(`ℹ️  Skipping event-year historical rounds API fetch (results cached for event ${eventIdStr}, season ${seasonStr}).`);
+    console.warn(`ℹ️  Skipping event-year historical rounds API fetch (refresh disabled; event ${eventIdStr}, season ${seasonStr}).`);
+  }
+
+  let liveResultsFallback = null;
+  if (!IS_PRE_TOURNAMENT_RUN && historyEventSeasonCount === 0) {
+    if (!DATAGOLF_API_KEY) {
+      console.warn('ℹ️  Live results fallback skipped (missing DATAGOLF_API_KEY).');
+    } else {
+      try {
+        const liveSnapshot = await getDataGolfLiveTournamentStats({
+          apiKey: DATAGOLF_API_KEY,
+          cacheDir: DATAGOLF_CACHE_DIR,
+          ttlMs: 0,
+          allowStale: true,
+          cacheFirst: CACHE_FIRST_REFRESH
+        });
+        liveResultsFallback = deriveResultsFromLiveStats(liveSnapshot?.payload);
+        if (liveResultsFallback.length > 0) {
+          console.log(`✓ Loaded ${liveResultsFallback.length} live results from DataGolf (source: ${liveSnapshot?.source || 'unknown'}).`);
+        } else {
+          console.warn('ℹ️  Live tournament stats returned no results for fallback.');
+        }
+      } catch (error) {
+        console.warn(`ℹ️  Live tournament stats fallback failed: ${error.message}`);
+      }
+    }
   }
 
   if (!IS_PRE_TOURNAMENT_RUN && historyEventSeasonCount === 0) {
-    console.error('\n❌ Post/results/validation mode requires current-event historical rounds, but none were found.');
-    console.error(`   Event: ${eventIdStr} | Season: ${seasonStr}`);
-    console.error('   Fix: ensure the historical rounds cache/API includes current-event results before running post/results/validation.');
-    process.exit(1);
+    if (liveResultsFallback && liveResultsFallback.length > 0) {
+      console.warn('⚠️  Historical rounds missing; proceeding with live results fallback.');
+    } else {
+      console.error('\n❌ Post/results/validation mode requires current-event historical rounds, but none were found.');
+      console.error(`   Event: ${eventIdStr} | Season: ${seasonStr}`);
+      console.error('   Fix: ensure the historical rounds cache/API includes current-event results before running post/results/validation.');
+      process.exit(1);
+    }
   }
 
   console.log(`ℹ️  History rows for event ${eventIdStr}: ${historyEventCount} (season ${seasonStr}: ${historyEventSeasonCount})`);
@@ -9664,7 +9965,12 @@ async function runAdaptiveOptimizer() {
     return acc;
   }, {});
   let resultsCurrent = deriveResultsFromHistory(historyData, CURRENT_EVENT_ID, effectiveSeason, fieldNameLookup);
-  console.log(`ℹ️  Derived ${resultsCurrent.length} results from historical data.`);
+  if (resultsCurrent.length === 0 && liveResultsFallback && liveResultsFallback.length > 0) {
+    resultsCurrent = liveResultsFallback;
+    console.log(`ℹ️  Derived ${resultsCurrent.length} results from live tournament stats fallback.`);
+  } else {
+    console.log(`ℹ️  Derived ${resultsCurrent.length} results from historical data.`);
+  }
 
   if (resultsCurrent.length === 0) {
     const postEventResultsDir = postEventOutputDir || (tournamentDir ? path.resolve(tournamentDir, 'post_event') : null);
@@ -9737,12 +10043,32 @@ async function runAdaptiveOptimizer() {
       preEventOutputDir ? path.resolve(preEventOutputDir, `${outputBaseName}_pre_event_rankings.csv`.toLowerCase()) : null,
       postEventOutputDir ? path.resolve(postEventOutputDir, `${outputBaseName}_pre_event_rankings.csv`.toLowerCase()) : null
     ];
-    const rankingJsonPath = findFirstExisting(rankingJsonCandidates);
+    let rankingJsonPath = findFirstExisting(rankingJsonCandidates);
+    if (!rankingJsonPath && preEventOutputDir && fs.existsSync(preEventOutputDir)) {
+      const fallbackCandidates = fs.readdirSync(preEventOutputDir)
+        .filter(name => name.toLowerCase().endsWith('_pre_event_rankings.json'))
+        .map(name => path.resolve(preEventOutputDir, name));
+      fallbackCandidates.sort((a, b) => a.localeCompare(b));
+      rankingJsonPath = fallbackCandidates[0] || null;
+      if (rankingJsonPath) {
+        console.log(`ℹ️  Results-only: using fallback pre-event rankings JSON (${path.basename(rankingJsonPath)}).`);
+      }
+    }
     if (!rankingJsonPath) {
       console.error('❌ Unable to locate pre-event rankings JSON for results export.');
       process.exit(1);
     }
-    const rankingCsvPath = findFirstExisting(rankingCsvCandidates);
+    let rankingCsvPath = findFirstExisting(rankingCsvCandidates);
+    if (!rankingCsvPath && preEventOutputDir && fs.existsSync(preEventOutputDir)) {
+      const fallbackCsvCandidates = fs.readdirSync(preEventOutputDir)
+        .filter(name => name.toLowerCase().endsWith('_pre_event_rankings.csv'))
+        .map(name => path.resolve(preEventOutputDir, name));
+      fallbackCsvCandidates.sort((a, b) => a.localeCompare(b));
+      rankingCsvPath = fallbackCsvCandidates[0] || null;
+      if (rankingCsvPath) {
+        console.log(`ℹ️  Results-only: using fallback pre-event rankings CSV (${path.basename(rankingCsvPath)}).`);
+      }
+    }
 
     const rankingPayload = readJsonFile(rankingJsonPath);
     const rankingPlayers = Array.isArray(rankingPayload?.players) ? rankingPayload.players : [];
@@ -9819,7 +10145,8 @@ async function runAdaptiveOptimizer() {
             const refreshed = await refreshYtdApproachSnapshot({
               apiKey: DATAGOLF_API_KEY,
               cacheDir: null,
-              ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000
+              ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
+              cacheFirst: IS_POST_TOURNAMENT_RUN
             });
             if (refreshed?.payload) {
               approachSnapshotYtd = refreshed;
@@ -10247,7 +10574,8 @@ async function runAdaptiveOptimizer() {
       const refreshed = await refreshYtdApproachSnapshot({
         apiKey: DATAGOLF_API_KEY,
         cacheDir: null,
-        ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000
+        ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
+        cacheFirst: IS_POST_TOURNAMENT_RUN
       });
       if (refreshed?.payload) {
         approachSnapshotYtd = refreshed;
@@ -10324,7 +10652,8 @@ async function runAdaptiveOptimizer() {
         const refreshed = await refreshYtdApproachSnapshot({
           apiKey: DATAGOLF_API_KEY,
           cacheDir: null,
-          ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000
+          ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
+          cacheFirst: IS_POST_TOURNAMENT_RUN
         });
         if (refreshed?.payload) {
           approachSnapshotYtd = refreshed;
@@ -10599,11 +10928,7 @@ async function runAdaptiveOptimizer() {
 
   const approachDeltaData = loadApproachDeltaRows(APPROACH_DELTA_PATH);
   let approachDeltaRowsAll = Array.isArray(approachDeltaData.rows) ? approachDeltaData.rows : [];
-  let approachDeltaRows = approachDeltaRowsAll.filter(row => {
-    if (!row) return false;
-    if (row.tournament_field === false) return false;
-    return true;
-  });
+  let approachDeltaRows = approachDeltaRowsAll.filter(row => !!row);
   let approachDeltaPriorPath = null;
   let approachDeltaPriorData = null;
   let approachDeltaPriorRows = null;
@@ -10620,11 +10945,7 @@ async function runAdaptiveOptimizer() {
     if (approachDeltaPriorPath) {
       approachDeltaPriorData = loadApproachDeltaRows(approachDeltaPriorPath);
       const priorRowsAll = Array.isArray(approachDeltaPriorData.rows) ? approachDeltaPriorData.rows : [];
-      const priorRows = priorRowsAll.filter(row => {
-        if (!row) return false;
-        if (row.tournament_field === false) return false;
-        return true;
-      });
+      const priorRows = priorRowsAll.filter(row => !!row);
       if (priorRows.length > 0) {
         approachDeltaPriorRows = priorRows;
       }
@@ -10721,7 +11042,7 @@ async function runAdaptiveOptimizer() {
       if (priorDeltaPath) {
         const priorDeltaData = loadApproachDeltaRows(priorDeltaPath);
         const priorRowsAll = Array.isArray(priorDeltaData?.rows) ? priorDeltaData.rows : [];
-        const filteredRows = priorRowsAll.filter(row => row && row.tournament_field !== false);
+        const filteredRows = priorRowsAll.filter(row => !!row);
         if (filteredRows.length > 0) {
           priorDeltaRows = filteredRows;
           priorDeltaMeta = priorDeltaData?.meta || null;
@@ -11518,7 +11839,13 @@ async function runAdaptiveOptimizer() {
   };
 
   const resolveApproachDeltaRowsForEvent = (eventId, season = CURRENT_SEASON) => {
-    const eventEntry = resolveManifestEntryForEvent(manifestEntries || [], {
+    const seasonValue = season !== null && season !== undefined
+      ? String(season).trim()
+      : String(CURRENT_SEASON);
+    const manifestForSeason = String(CURRENT_SEASON) === seasonValue
+      ? (manifestEntries || [])
+      : loadSeasonManifestEntries(DATA_ROOT_DIR, seasonValue);
+    const eventEntry = resolveManifestEntryForEvent(manifestForSeason || [], {
       eventId,
       tournamentSlug: null,
       tournamentName: null
@@ -11545,8 +11872,8 @@ async function runAdaptiveOptimizer() {
   };
 
   const resolveStep1cApproachRows = ({ eventId, season, roundsCount, allowApproach }) => {
-    if (!allowApproach || roundsCount < STEP1C_APPROACH_ROUNDS_THRESHOLD_EVENT) {
-      return { rows: [], source: 'disabled', path: null, reason: `rounds<${STEP1C_APPROACH_ROUNDS_THRESHOLD_EVENT}` };
+    if (!allowApproach) {
+      return { rows: [], source: 'disabled', path: null, reason: 'approach_gate' };
     }
     if (String(season) === String(CURRENT_SEASON)) {
       const delta = resolveApproachDeltaRowsForEvent(eventId, season);
@@ -11697,61 +12024,92 @@ async function runAdaptiveOptimizer() {
       const eventId = String(group.eventId || '').trim();
       if (!eventId) return;
       const season = String(group.season || '').trim();
+      const isCurrentEvent = eventId === String(CURRENT_EVENT_ID);
       const isPutting = puttingSet.has(eventId);
-      const isSimilar = !isPutting && eventId !== String(CURRENT_EVENT_ID) && similarSet.has(eventId);
-      const scope = isPutting ? 'putting' : (isSimilar ? 'similar' : 'event');
-      const scopeWeight = isPutting
-        ? clamp01(puttingCourseBlend, 0.35)
-        : (isSimilar ? clamp01(similarCourseBlend, 0.3) : 1);
-      const groupAllowsApproach = allowApproachBuckets && !isPutting;
-      const approachInfo = isPutting
-        ? { rows: [], source: 'putting_only', path: null, reason: 'putting_only' }
-        : resolveStep1cApproachRows({
-            eventId,
-            season,
-            roundsCount: group.rounds.length,
+      const isSimilar = similarSet.has(eventId);
+
+      const scopeEntries = [];
+      if (isCurrentEvent) {
+        scopeEntries.push({
+          scope: 'event',
+          scopeWeight: 1,
+          allowApproach: allowApproachBuckets
+        });
+      } else {
+        if (isSimilar) {
+          scopeEntries.push({
+            scope: 'similar',
+            scopeWeight: clamp01(similarCourseBlend, 0.3),
             allowApproach: allowApproachBuckets
           });
-      const fieldDataOverride = buildFieldDataFromHistory(group.rounds, null);
-      const approachRows = filterApproachRowsToField(approachInfo.rows || [], fieldDataOverride);
-      const useApproachBuckets = groupAllowsApproach && approachRows.length > 0;
-      const metricSpecs = isPutting
-        ? puttingSpec.specs
-        : (useApproachBuckets ? baseSpec.specs : baseSpecNoApproach.specs);
-      const metricLabels = isPutting
-        ? puttingSpec.labels
-        : (useApproachBuckets ? baseSpec.labels : baseSpecNoApproach.labels);
-      const groupWeights = isPutting
-        ? removeApproachGroupWeights(templateConfig.groupWeights)
-        : templateConfig.groupWeights;
-
-      const correlations = computeStep1cCorrelationsForRounds({
-        rounds: group.rounds,
-        approachRows,
-        metricSpecs,
-        groupWeights,
-        metricWeights: templateConfig.metricWeights,
-        includeCurrentEventRounds,
-        fieldDataOverride
-      });
-
-      aggregateCorrelationLists(metricAcc, correlations.metric, scopeWeight);
-      aggregateCorrelationLists(top20Acc, correlations.top20, scopeWeight);
-
-      detailLogs.push({
-        eventId,
-        season,
-        scope,
-        rounds: group.rounds.length,
-        scopeWeight,
-        metricLabels,
-        metricSamples: correlations.metric,
-        approach: {
-          source: approachInfo.source,
-          path: approachInfo.path,
-          reason: approachInfo.reason,
-          rowsCount: approachRows.length
         }
+        if (isPutting) {
+          scopeEntries.push({
+            scope: 'putting',
+            scopeWeight: clamp01(puttingCourseBlend, 0.35),
+            allowApproach: false
+          });
+        }
+        if (scopeEntries.length === 0) {
+          scopeEntries.push({
+            scope: 'event',
+            scopeWeight: 1,
+            allowApproach: allowApproachBuckets
+          });
+        }
+      }
+
+      scopeEntries.forEach(scopeEntry => {
+        const isPuttingScope = scopeEntry.scope === 'putting';
+        const approachInfo = isPuttingScope
+          ? { rows: [], source: 'putting_only', path: null, reason: 'putting_only' }
+          : resolveStep1cApproachRows({
+              eventId,
+              season,
+              roundsCount: group.rounds.length,
+              allowApproach: scopeEntry.allowApproach
+            });
+        const fieldDataOverride = buildFieldDataFromHistory(group.rounds, null);
+        const approachRows = filterApproachRowsToField(approachInfo.rows || [], fieldDataOverride);
+        const useApproachBuckets = scopeEntry.allowApproach && approachRows.length > 0;
+        const metricSpecs = isPuttingScope
+          ? puttingSpec.specs
+          : (useApproachBuckets ? baseSpec.specs : baseSpecNoApproach.specs);
+        const metricLabels = isPuttingScope
+          ? puttingSpec.labels
+          : (useApproachBuckets ? baseSpec.labels : baseSpecNoApproach.labels);
+        const groupWeights = isPuttingScope
+          ? removeApproachGroupWeights(templateConfig.groupWeights)
+          : templateConfig.groupWeights;
+
+        const correlations = computeStep1cCorrelationsForRounds({
+          rounds: group.rounds,
+          approachRows,
+          metricSpecs,
+          groupWeights,
+          metricWeights: templateConfig.metricWeights,
+          includeCurrentEventRounds,
+          fieldDataOverride
+        });
+
+        aggregateCorrelationLists(metricAcc, correlations.metric, scopeEntry.scopeWeight);
+        aggregateCorrelationLists(top20Acc, correlations.top20, scopeEntry.scopeWeight);
+
+        detailLogs.push({
+          eventId,
+          season,
+          scope: scopeEntry.scope,
+          rounds: group.rounds.length,
+          scopeWeight: scopeEntry.scopeWeight,
+          metricLabels,
+          metricSamples: correlations.metric,
+          approach: {
+            source: approachInfo.source,
+            path: approachInfo.path,
+            reason: approachInfo.reason,
+            rowsCount: approachRows.length
+          }
+        });
       });
     });
 
@@ -11897,7 +12255,7 @@ async function runAdaptiveOptimizer() {
   console.log('---');
   console.log('STEP 1c: CURRENT-SEASON (EVENT + SIMILAR + PUTTING) METRIC CORRELATIONS');
   console.log('Correlate Step 1c metrics using event + similar + putting rounds with scoped metric sets and event-specific approach data.');
-  console.log(`Contract: exclude SG Total, Greens in Regulation, Fairway Proximity, Rough Proximity, Birdie Chances Created; include SG Approach + Birdies or Better; approach buckets merged FW+Rough per distance and gated at ${STEP1C_APPROACH_ROUNDS_THRESHOLD}+ rounds (event gate ${STEP1C_APPROACH_ROUNDS_THRESHOLD_EVENT}); putting metrics always included.`);
+  console.log(`Contract: exclude SG Total, Greens in Regulation, Fairway Proximity, Rough Proximity, Birdie Chances Created; include SG Approach + Birdies or Better; approach buckets merged FW+Rough per distance and gated at ${STEP1C_APPROACH_ROUNDS_THRESHOLD}+ rounds (global gate; no per-event minimum); putting metrics always included.`);
   const step1cCourseFilterMap = buildStep1cCourseFilterMap(courseContextEntryFinal, CURRENT_EVENT_ID);
   const step1cAllowedEventIds = new Set(Array.from(step1cCourseFilterMap.keys()));
   const step1cRoundsLabel = HAS_CURRENT_RESULTS

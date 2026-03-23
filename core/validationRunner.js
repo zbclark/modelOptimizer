@@ -78,6 +78,46 @@ const writeJsonFile = (filePath, payload) => {
   fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
 };
 
+const getPayloadLastUpdated = payload => {
+  if (!payload || typeof payload !== 'object') return null;
+  return payload.last_updated || payload.lastUpdated || null;
+};
+
+const parseTimestampToMs = value => {
+  if (!value) return null;
+  const parsed = Date.parse(String(value));
+  return Number.isNaN(parsed) ? null : parsed;
+};
+
+const writeApproachSnapshotIfUpdated = ({ payload, logger = console }) => {
+  if (!payload || typeof payload !== 'object') return { wrote: false, payload: null };
+  ensureDirectory(APPROACH_SNAPSHOT_DIR);
+
+  const latestPayload = fs.existsSync(APPROACH_SNAPSHOT_YTD_LATEST_PATH)
+    ? readJsonFile(APPROACH_SNAPSHOT_YTD_LATEST_PATH)
+    : null;
+  const latestUpdatedMs = parseTimestampToMs(getPayloadLastUpdated(latestPayload));
+  const fetchedUpdatedRaw = getPayloadLastUpdated(payload);
+  const fetchedUpdatedMs = parseTimestampToMs(fetchedUpdatedRaw);
+
+  const shouldWrite = !fetchedUpdatedMs || !latestUpdatedMs || fetchedUpdatedMs > latestUpdatedMs;
+  if (!shouldWrite) {
+    return { wrote: false, payload: latestPayload || payload };
+  }
+
+  writeJsonFile(APPROACH_SNAPSHOT_YTD_LATEST_PATH, payload);
+  const archiveDate = fetchedUpdatedMs ? new Date(fetchedUpdatedMs) : new Date();
+  const archiveStamp = formatTimestamp(archiveDate).slice(0, 10);
+  const archivePath = path.resolve(APPROACH_SNAPSHOT_DIR, `approach_ytd_${archiveStamp}.json`);
+  if (!fs.existsSync(archivePath)) {
+    writeJsonFile(archivePath, payload);
+  }
+  if (logger && typeof logger.log === 'function') {
+    logger.log(`ℹ️  YTD approach snapshot updated (${archiveStamp}).`);
+  }
+  return { wrote: true, payload };
+};
+
 const parseApproachSnapshotDateFromFilename = filePath => {
   const baseName = path.basename(filePath || '');
   const match = baseName.match(/(\d{4})[-_](\d{2})[-_](\d{2})/);
@@ -652,6 +692,7 @@ const getMetricAnalysisDir = outputDir => {
 
 const getTemplateCorrelationDir = outputDir => {
   if (!outputDir) return null;
+  if (path.basename(outputDir) === TEMPLATE_CORRELATION_DIR_NAME) return outputDir;
   return resolveValidationSubdir({ validationRoot: outputDir, kind: 'TEMPLATE_CORRELATION_SUMMARIES' });
 };
 
@@ -2402,34 +2443,59 @@ const getTemplateWeightForMetric = (courseType, metricName) => {
   return Number.isFinite(metricWeight) ? metricWeight : 0;
 };
 
+const DEFAULT_DETECTED_TYPE_DOMINANCE_RATIO = 1.12;
+const DEFAULT_DETECTED_TYPE_MIN_SCORE = 0.0001;
+const DEFAULT_BALANCED_GROUP_WEIGHTS = {
+  'Driving Performance': 1 / 9,
+  'Approach - Short (<100)': 1 / 9,
+  'Approach - Mid (100-150)': 1 / 9,
+  'Approach - Long (150-200)': 1 / 9,
+  'Approach - Very Long (>200)': 1 / 9,
+  'Putting': 1 / 9,
+  'Around the Green': 1 / 9,
+  'Scoring': 1 / 9,
+  'Course Management': 1 / 9
+};
+
 const determineDetectedCourseType = metrics => {
   const entries = Array.isArray(metrics) ? metrics : [];
   if (!entries.length) return 'BALANCED';
 
   const sorted = entries
     .slice()
-    .sort((a, b) => Math.abs(b.delta || 0) - Math.abs(a.delta || 0))
+    .sort((a, b) => Math.abs(b.correlation || 0) - Math.abs(a.correlation || 0))
     .slice(0, 15);
 
-  const baselineWeights = WEIGHT_TEMPLATES?.BALANCED?.groupWeights || {};
   let powerScore = 0;
   let technicalScore = 0;
   let balancedScore = 0;
 
+  const drivingCorrelationMap = new Map([
+    ['Driving Distance', 0],
+    ['SG OTT', 0],
+    ['Driving Accuracy', 0]
+  ]);
+
   sorted.forEach(entry => {
     const group = getMetricGroup(entry.metric);
     if (!group) return;
-    const weight = baselineWeights[group] || 0;
-    const strength = Math.abs(entry.delta || 0);
+    const strength = Math.abs(entry.correlation || 0);
     if (strength === 0) return;
     if (group === 'Driving Performance') {
-      powerScore += weight * strength;
+      powerScore += strength;
+      if (drivingCorrelationMap.has(entry.metric)) {
+        drivingCorrelationMap.set(entry.metric, strength);
+      }
     } else if (group.startsWith('Approach') || group === 'Course Management') {
-      technicalScore += weight * strength;
+      technicalScore += strength;
     } else if (group === 'Putting' || group === 'Around the Green' || group === 'Scoring') {
-      balancedScore += weight * strength;
+      balancedScore += strength;
     }
   });
+
+  const drivingScores = Array.from(drivingCorrelationMap.entries())
+    .map(([metric, value]) => ({ metric, value }))
+    .sort((a, b) => b.value - a.value);
 
   if (powerScore === 0 && technicalScore === 0 && balancedScore === 0) return 'BALANCED';
 
@@ -2439,8 +2505,12 @@ const determineDetectedCourseType = metrics => {
     { type: 'BALANCED', score: balancedScore }
   ].sort((a, b) => b.score - a.score);
 
-  if (scores[0].score >= (scores[1].score || 0) * 1.25) {
-    return scores[0].type;
+  const topScore = scores[0].score || 0;
+  const runnerUp = scores[1].score || 0;
+  if (topScore >= DEFAULT_DETECTED_TYPE_MIN_SCORE) {
+    if (runnerUp === 0 || topScore >= runnerUp * DEFAULT_DETECTED_TYPE_DOMINANCE_RATIO) {
+      return scores[0].type;
+    }
   }
   return 'BALANCED';
 };
@@ -2502,8 +2572,19 @@ const writeMetricAnalysis = (outputDir, metricAnalysis, options = {}) => {
   const totalFinishers = metricAnalysis.totalFinishers ?? 0;
   const top10Finishers = metricAnalysis.top10Finishers ?? 0;
 
-  const configWeights = getConfigMetricWeights(options.configCsvPath);
-  const templateType = configType !== 'UNKNOWN' ? configType : (metricAnalysis.courseType || 'BALANCED');
+  let configWeights = getConfigMetricWeights(options.configCsvPath);
+  const templateType = templateName
+    || (configType !== 'UNKNOWN' ? configType : null)
+    || metricAnalysis.courseType
+    || 'BALANCED';
+  let configWeightSource = 'config_csv';
+  const hasFiniteConfigWeights = Object.values(configWeights)
+    .some(value => typeof value === 'number' && Number.isFinite(value));
+  if (!options.configCsvPath || !fs.existsSync(options.configCsvPath) || Object.keys(configWeights).length === 0 || !hasFiniteConfigWeights) {
+    const fallbackTemplate = WEIGHT_TEMPLATES?.[templateType] || null;
+    configWeights = buildConfigWeightsFromTemplate(fallbackTemplate);
+    configWeightSource = 'template_fallback';
+  }
 
   const groupMaxCorrelations = {};
   const metricGroups = getMetricGroupings();
@@ -2536,6 +2617,9 @@ const writeMetricAnalysis = (outputDir, metricAnalysis, options = {}) => {
   const lines = [];
   lines.push(toCsvRow([`${tournamentLabel} - Metric Analysis (${templateName})`]));
   lines.push(toCsvRow([validationLine]));
+  if (configWeightSource === 'template_fallback') {
+    lines.push(toCsvRow([`Config weights unavailable; using ${templateType} template weights as fallback.`]));
+  }
   lines.push(toCsvRow([`Top 10: ${top10Finishers} | Total Finishers: ${totalFinishers}`]));
   lines.push('');
   lines.push(toCsvRow([
@@ -2573,8 +2657,11 @@ const writeMetricAnalysis = (outputDir, metricAnalysis, options = {}) => {
       }
     }
 
-    const configWeight = configWeights[metricName];
     const templateWeight = getTemplateWeightForMetric(templateType, metricName);
+    const rawConfigWeight = configWeights[metricName];
+    const configWeight = (typeof rawConfigWeight === 'number' && Number.isFinite(rawConfigWeight))
+      ? rawConfigWeight
+      : (configWeightSource === 'template_fallback' ? templateWeight : rawConfigWeight);
     const recommendedInfo = recommendedWeightsByMetric[metricName] || { base: 0, groupName: '__UNGROUPED__' };
     const groupTotal = recommendedGroupTotals[recommendedInfo.groupName] || 0;
     const recommendedWeight = groupTotal > 0 ? recommendedInfo.base / groupTotal : 0;
@@ -2797,13 +2884,13 @@ const buildCourseTypeClassificationEntries = ({ metricAnalyses, season, top20Ble
     return 1;
   };
   (metricAnalyses || []).forEach(analysis => {
-    if (!analysis?.tournament || !analysis?.courseType) return;
+    const detectedType = analysis?.detectedCourseType || determineDetectedCourseType(analysis?.metrics || []);
+    if (!analysis?.tournament || !analysis?.courseType || !detectedType) return;
     const baseName = formatTournamentDisplayName(analysis.tournament);
     const displayName = baseName && season ? `${baseName} (${season})` : baseName || analysis.tournament;
     const blendInfo = top20BlendByTournament.get(analysis.tournament) || null;
-    const blendType = blendInfo?.recommendedType || null;
-    const resolvedCourseType = blendType || analysis.courseType;
-    const resolvedSource = blendType ? 'top20_blend' : (analysis.courseTypeSource || analysis.source || 'metric_analysis');
+    const resolvedCourseType = detectedType || analysis.courseType;
+    const resolvedSource = analysis.courseTypeSource || analysis.source || 'metric_analysis';
     const entry = {
       tournament: analysis.tournament,
       displayName,
@@ -4006,14 +4093,41 @@ const buildSeasonCalibrationData = ({ season, dataRootDir, logger = console }) =
     });
     const primarySlug = slugCandidates[0] || tournamentSlug || slugifyTournament(tournamentName) || 'tournament';
 
-    const rankingsJsonPath = preEventDir
-      ? resolveExistingPath(preEventDir, slugCandidates, '_pre_event_rankings.json')
-        || path.resolve(preEventDir, `${primarySlug}_pre_event_rankings.json`)
-      : null;
-    const rankingsCsvPath = preEventDir
-      ? resolveExistingPath(preEventDir, slugCandidates, '_pre_event_rankings.csv')
-        || path.resolve(preEventDir, `${primarySlug}_pre_event_rankings.csv`)
-      : null;
+    const findSuffixedPreEventRanking = suffix => {
+      if (!preEventDir || !fs.existsSync(preEventDir)) return null;
+      const entries = fs.readdirSync(preEventDir, { withFileTypes: true })
+        .filter(entry => entry.isFile())
+        .map(entry => entry.name);
+      const candidates = entries.filter(name => name.endsWith(suffix));
+      if (!candidates.length) return null;
+      const normalizedCandidates = candidates.map(name => ({
+        name,
+        lower: name.toLowerCase()
+      }));
+      const slugMatch = normalizedCandidates.find(entry =>
+        slugCandidates.some(slug => {
+          const slugNorm = String(slug || '').toLowerCase();
+          if (!slugNorm) return false;
+          return entry.lower.startsWith(`${slugNorm}_`)
+            || entry.lower.startsWith(`${slugNorm}-`)
+            || entry.lower.includes(`${slugNorm}_`)
+            || entry.lower.includes(`${slugNorm}-`);
+        })
+      );
+      const selected = slugMatch?.name || candidates[0];
+      return selected ? path.resolve(preEventDir, selected) : null;
+    };
+
+    const resolveRankingsPath = suffix => {
+      if (!preEventDir) return null;
+      const resolved = resolveExistingPath(preEventDir, slugCandidates, suffix)
+        || path.resolve(preEventDir, `${primarySlug}${suffix}`);
+      if (resolved && fs.existsSync(resolved)) return resolved;
+      return findSuffixedPreEventRanking(suffix) || resolved;
+    };
+
+    const rankingsJsonPath = resolveRankingsPath('_pre_event_rankings.json');
+    const rankingsCsvPath = resolveRankingsPath('_pre_event_rankings.csv');
     const resultsJsonPath = postEventDir
       ? resolveResultsPath(postEventDir, slugCandidates, primarySlug, ['_results.json', '_post_event_results.json'])
       : null;
@@ -4576,13 +4690,24 @@ const writeCalibrationReport = (outputDir, calibrationData) => {
       lines.push(toCsvRow(['Top 20', top20.reason || 'unavailable']));
     }
 
+    const describePlatt = (label, entry) => {
+      if (!entry || !entry.available) return `${label}: unavailable (${entry?.reason || 'no_samples'})`;
+      const baseRate = entry.baseRate;
+      const baselineBrier = baseRate * (1 - baseRate);
+      const baselineLogLoss = -(baseRate * Math.log(baseRate || 1e-9) + (1 - baseRate) * Math.log(1 - baseRate || 1e-9));
+      const brierDelta = entry.brier - baselineBrier;
+      const logLossDelta = entry.logLoss - baselineLogLoss;
+      const brierNote = brierDelta <= 0 ? 'better than baseline' : 'worse than baseline';
+      const logLossNote = logLossDelta <= 0 ? 'better than baseline' : 'worse than baseline';
+      return `${label}: ${entry.samples} samples; base rate ${baseRate.toFixed(3)}. LogLoss ${entry.logLoss.toFixed(3)} (${logLossNote}), Brier ${entry.brier.toFixed(3)} (${brierNote}).`;
+    };
+    lines.push(toCsvRow([
+      'Summary',
+      `${describePlatt('Top 10', top10)} ${describePlatt('Top 20', top20)}`
+    ]));
+
     lines.push('');
   }
-
-  lines.push(toCsvRow(['NEXT STEPS']));
-  lines.push(toCsvRow(['1. Review individual 02_Tournament_* sheets for detailed analysis']));
-  lines.push(toCsvRow(['2. Compare Config vs Template vs Recommended weights']));
-  lines.push(toCsvRow(['3. Adjust weights for metrics with high correlation but low current weight']));
 
   fs.writeFileSync(csvPath, lines.join('\n'));
 
@@ -5521,6 +5646,7 @@ const loadTournamentConfig = ({ configCsvPath, courseContextPath, eventId }) => 
         source: 'course_context',
         eventId: eventId || null,
         courseType: entry.courseType || entry.templateKey || null,
+        templateKey: entry.templateKey || null,
         courseName: entry.courseName || entry.course || null,
         courseNum: entry.courseNum || null
       };
@@ -5644,7 +5770,9 @@ const runValidation = async ({
     metricAnalysis: resolveValidationSubdir({ validationRoot: outputDir, kind: 'METRIC_ANALYSIS' }),
     templateCorrelations: resolveValidationSubdir({ validationRoot: outputDir, kind: 'TEMPLATE_CORRELATION_SUMMARIES' }),
     top20Blend: resolveValidationSubdir({ validationRoot: outputDir, kind: 'TOP20_BLEND' }),
-    seasonSummaries: resolveValidationSubdir({ validationRoot: outputDir, kind: 'SEASON_SUMMARIES' })
+    seasonSummaries: scopeSeason
+      ? resolveValidationSubdir({ validationRoot: outputDir, kind: 'SEASON_SUMMARIES' })
+      : null
   };
   if (outputDir) ensureDirectory(outputDir);
   if (validationSubdirs.metricAnalysis) ensureDirectory(validationSubdirs.metricAnalysis);
@@ -5917,14 +6045,17 @@ const runValidation = async ({
     if (!approachEventOnlyMap) {
       const apiSnapshot = await getDataGolfApproachSkill({
         apiKey: DATAGOLF_API_KEY,
-        cacheDir: DATAGOLF_CACHE_DIR,
+        cacheDir: null,
         ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
         allowStale: true,
         period: 'ytd',
         fileFormat: 'json'
       });
-
-      const postRows = apiSnapshot?.payload ? extractApproachRowsFromJson(apiSnapshot.payload) : [];
+      const resolvedSnapshot = apiSnapshot?.payload
+        ? writeApproachSnapshotIfUpdated({ payload: apiSnapshot.payload, logger })
+        : { payload: null };
+      const postPayload = resolvedSnapshot?.payload || apiSnapshot?.payload || null;
+      const postRows = postPayload ? extractApproachRowsFromJson(postPayload) : [];
       const preRows = snapshotPair?.prePath ? loadApproachRowsFromPath(snapshotPair.prePath) : [];
 
       if (preRows.length > 0 && postRows.length > 0) {
@@ -5939,7 +6070,9 @@ const runValidation = async ({
         }
         if (inputSummary.approachEventOnly) {
           inputSummary.approachEventOnly.prePath = snapshotPair?.prePath || null;
-          inputSummary.approachEventOnly.postPath = apiSnapshot?.path || null;
+          inputSummary.approachEventOnly.postPath = resolvedSnapshot?.wrote
+            ? APPROACH_SNAPSHOT_YTD_LATEST_PATH
+            : (apiSnapshot?.path || APPROACH_SNAPSHOT_YTD_LATEST_PATH);
         }
       } else if (apiSnapshot?.source === 'missing-key') {
         approachEventOnlyNotes.push('NOTE: API event-only approach metrics skipped (DATAGOLF_API_KEY missing).');
@@ -6015,11 +6148,13 @@ const runValidation = async ({
       metricAnalysis.eventId = config.eventId || eventId || null;
       metricAnalysis.courseType = courseType || determineDetectedCourseType(metricAnalysis.metrics);
       metricAnalysis.courseTypeSource = courseTypeSource || null;
+      metricAnalysis.detectedCourseType = determineDetectedCourseType(metricAnalysis.metrics);
     }
     metricAnalysisOutputs = writeMetricAnalysis(outputDir, metricAnalysis, {
       season,
       tournamentName: tournamentName || resolvedSlug,
       courseType,
+      templateName: config.templateKey || null,
       configCsvPath,
       resultsJsonPath,
       rankingsCsvPath,
