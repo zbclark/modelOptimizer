@@ -12,6 +12,19 @@ data/2026/pebble-beach
 data/2026/sony-open
 data/2026/wm-phoenix-open
 
+# Wagering outputs
+data/wagering/**
+!data/wagering/
+!data/wagering/betting-card.csv
+!data/wagering/betting-card.json
+!data/wagering/inputs.csv
+!data/wagering/inputs.json
+
+# Odds + contest data
+data/contests/
+data/odds_archive/
+data/odds_live/
+
 # Local validation data exports
 
 # OS files
