@@ -128,7 +128,11 @@ const APPROACH_SNAPSHOT_RETENTION_COUNTS = {
   l12: null
 };
 const COURSE_CONTEXT_PATH = path.resolve(ROOT_DIR, 'utilities', 'course_context.json');
-const DATAGOLF_CACHE_DIR = path.resolve(ROOT_DIR, 'data', 'cache');
+const DATAGOLF_CACHE_ROOT_DIR = path.resolve(ROOT_DIR, 'data', 'cache');
+const DATAGOLF_CACHE_FIELD_DIR = path.resolve(DATAGOLF_CACHE_ROOT_DIR, 'field');
+const DATAGOLF_CACHE_HISTORICAL_DIR = path.resolve(DATAGOLF_CACHE_ROOT_DIR, 'historical_rounds');
+const DATAGOLF_CACHE_OTHER_DIR = path.resolve(DATAGOLF_CACHE_ROOT_DIR, 'other');
+const DATAGOLF_CACHE_WEATHER_DIR = path.resolve(DATAGOLF_CACHE_ROOT_DIR, 'weather');
 const TRACE_PLAYER = String(process.env.TRACE_PLAYER || '').trim();
 let LOGGING_ENABLED = true;
 let LOGGING_INITIALIZED = false;
@@ -293,6 +297,11 @@ const VALIDATION_RANGE_PCT = 0.20;
 const VALIDATION_PRIOR_WEIGHT = 0.25;
 const DELTA_TREND_PRIOR_WEIGHT = 0.15;
 const APPROACH_DELTA_PRIOR_WEIGHT = 0.15;
+const VALIDATION_COURSE_TYPE_MIN_COUNT = (() => {
+  const raw = parseInt(String(process.env.VALIDATION_COURSE_TYPE_MIN_COUNT || '').trim(), 10);
+  if (Number.isNaN(raw)) return 5;
+  return Math.max(1, raw);
+})();
 const APPROACH_DELTA_PRIOR_LABEL = 'approachDeltaPrior';
 const APPROACH_DELTA_ROLLING_DEFAULT = 4;
 const APPROACH_DELTA_MIN_DAYS = (() => {
@@ -711,6 +720,12 @@ function normalizeNameForMatch(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '')
     .trim();
+}
+
+function normalizeCourseTypeKey(value) {
+  const normalized = String(value || '').trim();
+  if (!normalized) return null;
+  return normalized.toUpperCase();
 }
 
 function logSnapshotFreshness({ label, snapshot, ttlHours }) {
@@ -2210,12 +2225,60 @@ function loadValidationOutputs(metricConfig, dirs) {
     null;
   const deltaTrends = parseValidationDeltaTrends(deltaTrendsPath) || [];
 
-  const courseType = determineValidationCourseType(typeSummaries);
-  if (courseType) {
-    console.log(`✓ Validation course type selected from summaries: ${courseType}`);
-  } else {
-    console.log('ℹ️  Validation course type selection unavailable (missing summary CSVs).');
-  }
+  const normalizeCourseTypeLabel = value => String(value || '').trim().toUpperCase();
+  const classificationFileName = `${OUTPUT_NAMES.courseTypeClassification}.json`;
+  const classificationPaths = new Set();
+  const addClassificationPath = candidate => {
+    if (candidate && fs.existsSync(candidate)) {
+      classificationPaths.add(candidate);
+    }
+  };
+  (dataDirs || []).forEach(dir => {
+    if (!dir || !fs.existsSync(dir)) return;
+    addClassificationPath(path.resolve(dir, classificationFileName));
+    addClassificationPath(path.resolve(dir, 'validation_outputs', classificationFileName));
+    try {
+      fs.readdirSync(dir, { withFileTypes: true }).forEach(entry => {
+        if (!entry.isDirectory()) return;
+        if (!/^\d{4}$/.test(entry.name)) return;
+        addClassificationPath(path.resolve(dir, entry.name, 'validation_outputs', classificationFileName));
+      });
+    } catch (error) {
+      console.warn(`⚠️  Unable to scan validation outputs under ${dir}: ${error.message}`);
+    }
+  });
+
+  const courseTypeCounts = {};
+  let courseTypeTotalEntries = 0;
+  const classificationByEventId = {};
+  const classificationBySlug = {};
+  Array.from(classificationPaths).forEach(filePath => {
+    try {
+      const payload = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      const entries = Array.isArray(payload?.entries) ? payload.entries : [];
+      entries.forEach(entry => {
+        const normalizedType = normalizeCourseTypeLabel(entry?.courseType);
+        if (!normalizedType) return;
+        courseTypeCounts[normalizedType] = (courseTypeCounts[normalizedType] || 0) + 1;
+        courseTypeTotalEntries += 1;
+
+        const eventIdKey = entry?.eventId !== undefined && entry?.eventId !== null
+          ? String(entry.eventId).trim()
+          : '';
+        if (eventIdKey && !classificationByEventId[eventIdKey]) {
+          classificationByEventId[eventIdKey] = normalizedType;
+        }
+        const slugKey = normalizeTournamentSlug(entry?.tournament || '');
+        if (slugKey && !classificationBySlug[slugKey]) {
+          classificationBySlug[slugKey] = normalizedType;
+        }
+      });
+    } catch (error) {
+      console.warn(`⚠️  Unable to read ${classificationFileName}: ${filePath} (${error.message})`);
+    }
+  });
+
+  const courseType = null;
 
   if (!weightTemplatesPath) {
     console.log('ℹ️  Validation weight templates CSV not found; skipping validation weight constraints.');
@@ -2227,7 +2290,14 @@ function loadValidationOutputs(metricConfig, dirs) {
     weightTemplates,
     weightTemplatesPath,
     deltaTrends,
-    deltaTrendsPath
+    deltaTrendsPath,
+    courseTypeClassification: {
+      counts: courseTypeCounts,
+      totalEntries: courseTypeTotalEntries,
+      paths: Array.from(classificationPaths),
+      byEventId: classificationByEventId,
+      bySlug: classificationBySlug
+    }
   };
 }
 
@@ -7546,10 +7616,43 @@ function detectPostTournamentFromHistory(historyPath, eventId, season) {
   }
 }
 
+function applyTemplateUpdateComment(content, commentLine) {
+  if (!commentLine || typeof commentLine !== 'string') return content;
+  const normalizedComment = commentLine.trim().startsWith('//')
+    ? commentLine.trim()
+    : `// ${commentLine.trim()}`;
+  if (!normalizedComment) return content;
+  const lines = String(content || '').split('\n');
+  const firstNonEmpty = lines.findIndex(line => line.trim().length > 0);
+  if (firstNonEmpty === -1) {
+    return `${normalizedComment}\n${content || ''}`.trimEnd();
+  }
+  const existing = lines[firstNonEmpty].trim();
+  if (/^\/\/\s*Updated\s+(before|after)\s+/i.test(existing)) {
+    lines[firstNonEmpty] = normalizedComment;
+  } else {
+    lines.splice(firstNonEmpty, 0, normalizedComment);
+  }
+  return lines.join('\n');
+}
+
+function buildTemplateUpdateComment({ tournamentName, isPostRun }) {
+  const label = String(tournamentName || 'Event').trim();
+  const timing = isPostRun ? 'after' : 'before';
+  return `Updated ${timing} ${label}`;
+}
+
 function upsertTemplateInFile(filePath, template, options = {}) {
-  const { replaceByEventId = false, dryRun = false } = options;
+  const {
+    replaceByEventId = false,
+    dryRun = false,
+    baseContent = null,
+    updateComment = null
+  } = options;
   try {
-    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const fileContent = typeof baseContent === 'string'
+      ? baseContent
+      : fs.readFileSync(filePath, 'utf8');
     const marker = 'const WEIGHT_TEMPLATES = {';
     const markerIndex = fileContent.indexOf(marker);
     if (markerIndex === -1) return { updated: false, content: null };
@@ -7731,6 +7834,10 @@ function upsertTemplateInFile(filePath, template, options = {}) {
           updatedContent = removeBlockWithLeadingComma(updatedContent, block);
         });
       }
+    }
+
+    if (updateComment) {
+      updatedContent = applyTemplateUpdateComment(updatedContent, updateComment);
     }
 
     if (!dryRun) {
@@ -7951,7 +8058,7 @@ async function runAdaptiveOptimizer() {
     effectiveSeason,
     tours,
     datagolfHistoricalEventId: DATAGOLF_HISTORICAL_EVENT_ID,
-    datagolfCacheDir: DATAGOLF_CACHE_DIR,
+    datagolfCacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
     step1cUsedRounds,
     historyData,
     allEventRounds,
@@ -8273,7 +8380,7 @@ async function runAdaptiveOptimizer() {
         ? `_seed-${String(OPT_SEED_RAW).toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_\-]/g, '')}`
         : '';
       const kfoldTag = resolveKFoldTag(process.env.EVENT_KFOLD_K);
-      const kfoldTagSuffix = runContext === 'post_event'
+      const kfoldTagSuffix = (runContext === 'post_event' && !OPT_SEED_RAW)
         ? `_${String(kfoldTag.tag || 'LOEO')}`
         : '';
       const logContext = `${runContext}${seedSuffix}${kfoldTagSuffix}${outputTagSuffix}`;
@@ -8933,7 +9040,7 @@ async function runAdaptiveOptimizer() {
       const fieldCacheSlug = canonicalTournamentSlug;
       fieldUpdatesSnapshot = await getDataGolfFieldUpdates({
         apiKey: DATAGOLF_API_KEY,
-        cacheDir: DATAGOLF_CACHE_DIR,
+        cacheDir: DATAGOLF_CACHE_FIELD_DIR,
         ttlMs: forceFieldUpdates ? 0 : fieldTtlMs,
         allowStale: forceFieldUpdates ? false : true,
         preferCache: forceFieldUpdates ? false : true,
@@ -8982,7 +9089,7 @@ async function runAdaptiveOptimizer() {
       const fieldCacheSlug = canonicalTournamentSlug;
       const refreshed = await getDataGolfFieldUpdates({
         apiKey: DATAGOLF_API_KEY,
-        cacheDir: DATAGOLF_CACHE_DIR,
+        cacheDir: DATAGOLF_CACHE_FIELD_DIR,
         ttlMs: 0,
         allowStale: false,
         preferCache: false,
@@ -9111,7 +9218,7 @@ async function runAdaptiveOptimizer() {
     try {
       historicalRoundsSnapshot = await getDataGolfHistoricalRounds({
         apiKey: DATAGOLF_API_KEY,
-        cacheDir: DATAGOLF_CACHE_DIR,
+        cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
         ttlMs: DATAGOLF_HISTORICAL_TTL_HOURS * 60 * 60 * 1000,
         allowStale: true,
         tour: DATAGOLF_HISTORICAL_TOUR,
@@ -9135,10 +9242,31 @@ async function runAdaptiveOptimizer() {
       console.warn(`ℹ️  DataGolf historical rounds fetch failed: ${error.message}`);
     }
   }
-  const applyValidationOutputs = ['1', 'true', 'yes'].includes(
-    String(process.env.APPLY_VALIDATION_OUTPUTS || '').trim().toLowerCase()
-  );
-  let validationCourseType = validationData.courseType;
+  const applyValidationOutputsEnv = String(process.env.APPLY_VALIDATION_OUTPUTS || '').trim().toLowerCase();
+  let applyValidationOutputs = applyValidationOutputsEnv
+    ? ['1', 'true', 'yes', 'on'].includes(applyValidationOutputsEnv)
+    : true;
+  const resolveValidationCourseType = () => {
+    const contextCourseType = normalizeCourseTypeKey(
+      courseContextEntryFinal?.courseType || courseContextEntry?.courseType || sharedConfig?.courseType || null
+    );
+    if (contextCourseType) return contextCourseType;
+
+    const classification = validationData?.courseTypeClassification || {};
+    const eventIdKey = String(CURRENT_EVENT_ID || '').trim();
+    if (eventIdKey && classification.byEventId?.[eventIdKey]) {
+      return normalizeCourseTypeKey(classification.byEventId[eventIdKey]);
+    }
+    const slugKey = normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback || '');
+    if (slugKey && classification.bySlug?.[slugKey]) {
+      return normalizeCourseTypeKey(classification.bySlug[slugKey]);
+    }
+    return validationData.courseType || null;
+  };
+  let validationCourseType = resolveValidationCourseType();
+  if (validationCourseType && validationData.courseType && validationCourseType !== validationData.courseType) {
+    console.log(`ℹ️  Validation course type overridden for event: ${validationData.courseType} → ${validationCourseType}`);
+  }
   let validationTemplateConfig = null;
   let validationMetricConstraints = null;
   let validationAlignmentMap = new Map();
@@ -9150,6 +9278,18 @@ async function runAdaptiveOptimizer() {
   let validationTemplateName = null;
 
   if (validationCourseType) {
+    const normalizedCourseType = String(validationCourseType || '').trim().toUpperCase();
+    const courseTypeCounts = validationData?.courseTypeClassification?.counts || null;
+    if (applyValidationOutputs && normalizedCourseType && courseTypeCounts && Object.keys(courseTypeCounts).length > 0) {
+      const courseTypeCount = courseTypeCounts[normalizedCourseType] || 0;
+      if (courseTypeCount < VALIDATION_COURSE_TYPE_MIN_COUNT) {
+        applyValidationOutputs = false;
+        console.log(`ℹ️  Validation outputs gating: only ${courseTypeCount} ${normalizedCourseType} events in Course_Type_Classification (min ${VALIDATION_COURSE_TYPE_MIN_COUNT}).`);
+        console.log('   Proceeding with validation outputs for reporting only.');
+      }
+    } else if (applyValidationOutputs && normalizedCourseType && (!courseTypeCounts || Object.keys(courseTypeCounts).length === 0)) {
+      console.log('ℹ️  Validation outputs gating skipped (course type counts unavailable).');
+    }
     const validationWeightsForType = validationData.weightTemplates[validationCourseType] || [];
     const validationSummaryForType = validationData.typeSummaries[validationCourseType] || [];
     const fallbackValidationTemplate = templateConfigs[validationCourseType]
@@ -9168,7 +9308,7 @@ async function runAdaptiveOptimizer() {
 
     if (!applyValidationOutputs) {
       console.log('ℹ️  Validation outputs loaded for reporting only (no template/constraint influence).');
-      console.log('   To apply validation templates/constraints, set APPLY_VALIDATION_OUTPUTS=true.');
+      console.log('   Set APPLY_VALIDATION_OUTPUTS=true to apply, or increase validation course-type coverage to clear the gate.');
     } else {
       validationMetricConstraints = buildValidationMetricConstraints(metricConfig, validationWeightsForType, VALIDATION_RANGE_PCT);
       validationAlignmentMap = buildValidationAlignmentMap(metricConfig, validationSummaryForType);
@@ -9317,7 +9457,7 @@ async function runAdaptiveOptimizer() {
         const weatherResult = await computeWeatherWavePenalties({
           fieldUpdatesPayload: fieldUpdatesSnapshot?.payload,
           courseContextEntry: courseContextEntryFinal,
-          cacheDir: DATAGOLF_CACHE_DIR,
+          cacheDir: DATAGOLF_CACHE_WEATHER_DIR,
           apiKey: WEATHER_API_KEY,
           eventId: CURRENT_EVENT_ID
         });
@@ -9440,7 +9580,7 @@ async function runAdaptiveOptimizer() {
   }
   const historyPreferCache = true;
   let skipHistoricalApiRefresh = hasHistoricalResultsInCache({
-    cacheDir: DATAGOLF_CACHE_DIR,
+    cacheDir: DATAGOLF_CACHE_OTHER_DIR,
     tour: DATAGOLF_HISTORICAL_TOUR,
     eventId: CURRENT_EVENT_ID,
     season: effectiveSeason
@@ -9462,7 +9602,7 @@ async function runAdaptiveOptimizer() {
       process.exit(1);
     }
     const hasPriorEventCache = hasHistoricalResultsInCache({
-      cacheDir: DATAGOLF_CACHE_DIR,
+      cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
       tour: DATAGOLF_HISTORICAL_TOUR,
       eventId: previousEventId,
       season: effectiveSeason
@@ -9479,7 +9619,7 @@ async function runAdaptiveOptimizer() {
       try {
         const snapshot = await getDataGolfHistoricalRounds({
           apiKey: DATAGOLF_API_KEY,
-          cacheDir: DATAGOLF_CACHE_DIR,
+          cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
           ttlMs: 0,
           allowStale: true,
           preferCache: false,
@@ -9514,7 +9654,7 @@ async function runAdaptiveOptimizer() {
     tours,
     dataDir: DATA_DIR || DATA_ROOT_DIR,
     datagolfApiKey: DATAGOLF_API_KEY,
-    datagolfCacheDir: DATAGOLF_CACHE_DIR,
+    datagolfCacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
     datagolfHistoricalTtlMs: historyTtlMs,
     getDataGolfHistoricalRounds,
     preferApi: !skipHistoricalApiRefresh,
@@ -9580,7 +9720,7 @@ async function runAdaptiveOptimizer() {
 
   if (historyEventSeasonCount === 0) {
     const allEventsCachePath = resolveHistoricalCachePath({
-      cacheDir: DATAGOLF_CACHE_DIR,
+      cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
       tour: DATAGOLF_HISTORICAL_TOUR,
       eventId: 'all',
       year: effectiveSeason,
@@ -9623,7 +9763,7 @@ async function runAdaptiveOptimizer() {
 
         if (eventYearRows.length > 0) {
           const allEventsCachePath = buildHistoricalCachePath({
-            cacheDir: DATAGOLF_CACHE_DIR,
+            cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
             tour: DATAGOLF_HISTORICAL_TOUR,
             eventId: 'all',
             year: effectiveSeason,
@@ -9653,7 +9793,7 @@ async function runAdaptiveOptimizer() {
       try {
         const liveSnapshot = await getDataGolfLiveTournamentStats({
           apiKey: DATAGOLF_API_KEY,
-          cacheDir: DATAGOLF_CACHE_DIR,
+          cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
           ttlMs: 0,
           allowStale: true,
           cacheFirst: CACHE_FIRST_REFRESH
@@ -10392,6 +10532,35 @@ async function runAdaptiveOptimizer() {
     });
     fs.writeFileSync(resultsCsvPath, resultsCsv);
     console.log(`✅ Post-event results CSV saved to: ${resultsCsvPath}`);
+
+    const resultsJsonPayload = {
+      timestamp: formatTimestamp(new Date()),
+      eventId: CURRENT_EVENT_ID || null,
+      season: effectiveSeason || null,
+      tournament: TOURNAMENT_NAME || tournamentNameFallback || null,
+      mode: 'results_only',
+      sources: {
+        rankingsJson: rankingJsonPath || null,
+        rankingsCsv: rankingCsvPath || null,
+        approachDeltaPrimary: approachDeltaPathForResults || null,
+        approachDeltaFallback: approachDeltaPathFallback || null
+      },
+      rankings: rankingPlayers,
+      results: resultsCurrent,
+      resultsById: Object.fromEntries(resultsById.entries()),
+      actualMetricsById: Object.fromEntries(actualMetricsById.entries()),
+      actualTrendsById: Object.fromEntries(actualTrendsById.entries())
+    };
+
+    const resultsSlug = canonicalTournamentSlug
+      || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback)
+      || outputBaseName;
+    const resultsJsonPath = path.resolve(
+      postEventOutputDir || OUTPUT_DIR,
+      `${resultsSlug}_results.json`
+    );
+    fs.writeFileSync(resultsJsonPath, JSON.stringify(resultsJsonPayload, null, 2));
+    console.log(`✅ Results-only JSON saved to: ${resultsJsonPath}`);
     return;
   }
 
@@ -12184,7 +12353,7 @@ async function runAdaptiveOptimizer() {
       try {
         const eventSnapshot = await getDataGolfHistoricalRounds({
           apiKey: DATAGOLF_API_KEY,
-          cacheDir: DATAGOLF_CACHE_DIR,
+          cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
           ttlMs: 0,
           allowStale: true,
           tour: DATAGOLF_HISTORICAL_TOUR,
@@ -13543,6 +13712,10 @@ async function runAdaptiveOptimizer() {
       if (DRY_RUN && !WRITE_TEMPLATES) {
         console.log('🧪 Dry-run enabled: generating preview outputs without writing templates.');
       }
+      const templateUpdateComment = buildTemplateUpdateComment({
+        tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
+        isPostRun: false
+      });
       const preEventTemplate = {
         name: preEventTemplateName,
         eventId: String(CURRENT_EVENT_ID),
@@ -13556,7 +13729,11 @@ async function runAdaptiveOptimizer() {
       ];
 
       preEventTemplateTargets.forEach(filePath => {
-        const result = upsertTemplateInFile(filePath, preEventTemplate, { replaceByEventId: true, dryRun: DRY_RUN });
+        const result = upsertTemplateInFile(filePath, preEventTemplate, {
+          replaceByEventId: true,
+          dryRun: DRY_RUN,
+          updateComment: templateUpdateComment
+        });
         if (result.updated) {
           if (DRY_RUN && result.content) {
             const dryRunPath = path.resolve(dryRunOutputDir || OUTPUT_DIR, `dryrun_${path.basename(filePath)}`);
@@ -14126,7 +14303,7 @@ async function runAdaptiveOptimizer() {
   // STEP 4a/4b: MULTI-YEAR VALIDATION (BASELINE + OPTIMIZED)
   // ============================================================================
   console.log('---');
-  console.log('STEP 4a/4b: MULTI-YEAR VALIDATION');
+  console.log('STEP 4a/4b: EVENT MULTI-YEAR VALIDATION');
   console.log('Test baseline vs optimized weights across all available years');
   console.log(`Data usage (Step 4): years=${validationYears.length}, approachPolicy=${VALIDATION_APPROACH_MODE}, snapshots=current:${approachDataCurrentSource}/last:${approachSnapshotRows.l12.length ? 'l12' : 'none'}/older:${approachSnapshotRows.l24.length ? 'l24' : 'none'}, history=${formatHistorySourceDetail(historyMeta)}`);
   console.log('---');
@@ -14292,42 +14469,219 @@ async function runAdaptiveOptimizer() {
     };
   };
 
+  const resolveTemplateCourseTypeKey = () => {
+    const raw = courseContextEntryFinal?.courseType
+      || courseContextEntryFinal?.templateKey
+      || validationCourseType
+      || null;
+    return normalizeCourseTypeKey(raw);
+  };
+
+  const resolveEventCourseTypeKey = eventId => {
+    const eventKey = String(eventId || '').trim();
+    if (!eventKey) return null;
+    let entry = null;
+    if (courseContext && typeof courseContext === 'object') {
+      if (courseContext.byEventId && courseContext.byEventId[eventKey]) {
+        entry = courseContext.byEventId[eventKey];
+      } else if (courseContext[eventKey]) {
+        entry = courseContext[eventKey];
+      }
+    }
+    if (!entry) {
+      entry = resolveCourseContextEntry(courseContext, { eventId: eventKey });
+    }
+    const raw = entry?.courseType || entry?.templateKey || null;
+    return normalizeCourseTypeKey(raw);
+  };
+
+  const selectAdaptiveKFoldConfig = ({ eventCount, kOverride = null }) => {
+    if (!eventCount || eventCount < 3) {
+      return { mode: 'unavailable', foldCount: 0, reason: 'not_enough_events' };
+    }
+    const override = typeof kOverride === 'number' && Number.isFinite(kOverride) ? kOverride : null;
+    if (override && override > 1 && override < eventCount) {
+      return { mode: 'k_fold', foldCount: override, reason: 'override' };
+    }
+    if (override && override >= eventCount) {
+      return { mode: 'leave_one_event_out', foldCount: eventCount, reason: 'override_too_large' };
+    }
+    if (eventCount < 6) {
+      return { mode: 'leave_one_event_out', foldCount: eventCount, reason: 'adaptive_small_n' };
+    }
+    const adaptive = Math.max(3, Math.min(5, Math.floor(eventCount / 3)));
+    return { mode: 'k_fold', foldCount: adaptive, reason: 'adaptive_default' };
+  };
+
+  const runCourseSpecificLoeoValidation = ({ label, groupWeights, metricWeights }) => {
+    console.log(`\n🔄 ${label}: course-specific LOEO validation...`);
+
+    const yearEntries = validationYears.filter(year => {
+      const rounds = roundsByYear[year] || [];
+      const results = resultsByYear[year] || [];
+      return rounds.length > 0 && results.length > 0;
+    });
+
+    if (yearEntries.length < 3) {
+      return {
+        status: 'unavailable',
+        reason: 'not_enough_years',
+        yearCount: yearEntries.length
+      };
+    }
+
+    const foldEvaluations = [];
+    const foldSummaries = [];
+    const approachUsageByYear = {};
+
+    yearEntries.forEach(year => {
+      const testRounds = roundsByYear[year] || [];
+      const testResults = resultsByYear[year] || [];
+      const trainingRounds = yearEntries
+        .filter(otherYear => otherYear !== year)
+        .flatMap(otherYear => roundsByYear[otherYear] || []);
+      if (trainingRounds.length < 30 || testRounds.length < 10 || testResults.length === 0) return;
+
+      const approachUsage = resolveApproachUsageForYear(year);
+      approachUsageByYear[year] = approachUsage.meta || null;
+      const approachRows = approachUsage.rows;
+      const useApproach = approachRows.length > 0;
+      const adjustedGroupWeights = useApproach
+        ? groupWeights
+        : removeApproachGroupWeights(groupWeights);
+
+      const fieldDataOverride = buildFieldDataFromHistory(trainingRounds, null);
+      const ranking = runRanking({
+        roundsRawData: trainingRounds,
+        approachRawData: useApproach ? approachRows : [],
+        groupWeights: adjustedGroupWeights,
+        metricWeights,
+        includeCurrentEventRounds: false,
+        fieldDataOverride
+      });
+
+      const evaluation = evaluateRankings(ranking.players, testResults, {
+        includeTopN: true,
+        includeTopNDetails: false,
+        includeAdjusted: true
+      });
+      foldEvaluations.push(evaluation);
+      foldSummaries.push({
+        fold: foldSummaries.length + 1,
+        year,
+        trainingRounds: trainingRounds.length,
+        testRounds: testRounds.length,
+        matchedPlayers: evaluation.matchedPlayers,
+        correlation: evaluation.correlation,
+        rmse: evaluation.rmse,
+        top10: evaluation.top10,
+        top20: evaluation.top20,
+        top20WeightedScore: evaluation.top20WeightedScore
+      });
+    });
+
+    const aggregate = aggregateFoldEvaluations(foldEvaluations);
+    if (!aggregate) {
+      return {
+        status: 'unavailable',
+        reason: 'no_valid_folds',
+        yearCount: yearEntries.length,
+        approachUsage: approachUsageByYear
+      };
+    }
+
+    return {
+      status: 'ok',
+      mode: 'leave_one_year_out',
+      foldCount: yearEntries.length,
+      foldsUsed: foldEvaluations.length,
+      evaluation: aggregate,
+      folds: foldSummaries,
+      years: yearEntries,
+      approachUsage: approachUsageByYear
+    };
+  };
+
   const runEventKFoldValidation = ({ label, groupWeights, metricWeights }) => {
-    console.log(`\n🔄 ${label}: event-based K-fold validation...`);
+    const targetCourseType = resolveTemplateCourseTypeKey();
+    console.log(`\n🔄 ${label}: template K-fold validation (courseType=${targetCourseType || 'n/a'})...`);
     const results = {};
 
     const rawK = parseInt(String(process.env.EVENT_KFOLD_K || '').trim(), 10);
     const kOverride = Number.isNaN(rawK) ? null : rawK;
-    const defaultSeed = OPT_SEED_RAW || `${CURRENT_EVENT_ID}-${CURRENT_SEASON}`;
-    const seedOverride = String(process.env.EVENT_KFOLD_SEED || defaultSeed).trim();
+    const seedOverride = 'template';
 
     validationYears.forEach(year => {
+      if (!targetCourseType) {
+        results[year] = {
+          status: 'unavailable',
+          reason: 'missing_course_type',
+          eventCount: 0
+        };
+        return;
+      }
       const yearRows = historyData.filter(row => {
         const rowYear = parseInt(String(row?.year || row?.season || '').trim(), 10);
         return !Number.isNaN(rowYear) && rowYear === year;
       });
 
-      const events = new Map();
+      const eventBuckets = new Map();
       yearRows.forEach(row => {
         const eventId = String(row?.event_id || '').trim();
         if (!eventId) return;
-        if (!events.has(eventId)) events.set(eventId, []);
-        events.get(eventId).push(row);
+        if (!eventBuckets.has(eventId)) {
+          eventBuckets.set(eventId, {
+            courseType: resolveEventCourseTypeKey(eventId),
+            rows: []
+          });
+        }
+        eventBuckets.get(eventId).rows.push(row);
       });
 
-      const eventEntries = Array.from(events.entries());
+      const filteredEventEntries = [];
+      const missingCourseTypeEvents = [];
+      const otherCourseTypeEvents = [];
+      eventBuckets.forEach((bucket, eventId) => {
+        if (!bucket.courseType) {
+          missingCourseTypeEvents.push(eventId);
+          return;
+        }
+        if (bucket.courseType !== targetCourseType) {
+          otherCourseTypeEvents.push(eventId);
+          return;
+        }
+        filteredEventEntries.push([eventId, bucket.rows]);
+      });
+
+      const eventEntries = filteredEventEntries;
+      const courseTypeStats = {
+        missingCourseType: missingCourseTypeEvents.length,
+        otherCourseType: otherCourseTypeEvents.length
+      };
       if (eventEntries.length < 3) {
         results[year] = {
           status: 'unavailable',
           reason: 'not_enough_events',
-          eventCount: eventEntries.length
+          eventCount: eventEntries.length,
+          courseType: targetCourseType,
+          courseTypeStats
         };
         return;
       }
 
-      const useLeaveOneOut = !kOverride || kOverride <= 1 || kOverride >= eventEntries.length;
-      const foldMode = useLeaveOneOut ? 'leave_one_event_out' : 'k_fold';
-      const foldCount = useLeaveOneOut ? eventEntries.length : kOverride;
+      const foldConfig = selectAdaptiveKFoldConfig({ eventCount: eventEntries.length, kOverride });
+      if (foldConfig.mode === 'unavailable') {
+        results[year] = {
+          status: 'unavailable',
+          reason: foldConfig.reason,
+          eventCount: eventEntries.length,
+          courseType: targetCourseType,
+          courseTypeStats
+        };
+        return;
+      }
+      const foldMode = foldConfig.mode === 'leave_one_event_out' ? 'leave_one_event_out' : 'k_fold';
+      const foldCount = foldConfig.foldCount;
       const rng = createSeededRng(seedOverride || `${CURRENT_EVENT_ID}-${year}`) || Math.random;
       const shuffleEntries = (entries, rngFn) => {
         const output = [...entries];
@@ -14338,7 +14692,7 @@ async function runAdaptiveOptimizer() {
         return output;
       };
 
-      const shuffledEntries = useLeaveOneOut
+      const shuffledEntries = foldMode === 'leave_one_event_out'
         ? eventEntries
         : shuffleEntries(eventEntries, rng);
 
@@ -14347,7 +14701,8 @@ async function runAdaptiveOptimizer() {
         folds[idx % foldCount].push(entry);
       });
 
-      const fieldDataOverride = buildFieldDataFromHistory(yearRows, null);
+      const filteredYearRows = eventEntries.flatMap(([, rows]) => rows);
+      const fieldDataOverride = buildFieldDataFromHistory(filteredYearRows, null);
       const approachUsage = resolveApproachUsageForYear(year);
       const approachRows = approachUsage.rows;
       const useApproach = approachRows.length > 0;
@@ -14360,8 +14715,8 @@ async function runAdaptiveOptimizer() {
       folds.forEach((fold, foldIndex) => {
         if (!fold.length) return;
         const foldEventIds = new Set(fold.map(([eventId]) => String(eventId).trim()));
-        const testRows = yearRows.filter(row => foldEventIds.has(String(row?.event_id || '').trim()));
-        const trainingRows = yearRows.filter(row => !foldEventIds.has(String(row?.event_id || '').trim()));
+        const testRows = filteredYearRows.filter(row => foldEventIds.has(String(row?.event_id || '').trim()));
+        const trainingRows = filteredYearRows.filter(row => !foldEventIds.has(String(row?.event_id || '').trim()));
         if (trainingRows.length < 30 || testRows.length < 10) return;
 
         const ranking = runRanking({
@@ -14405,13 +14760,17 @@ async function runAdaptiveOptimizer() {
             foldsUsed: foldEvaluations.length,
             evaluation: aggregate,
             folds: foldSummaries,
-            approachUsage: approachUsage.meta
+            approachUsage: approachUsage.meta,
+            courseType: targetCourseType,
+            courseTypeStats
           }
         : {
             status: 'unavailable',
             reason: 'no_valid_folds',
             eventCount: eventEntries.length,
-            approachUsage: approachUsage.meta
+            approachUsage: approachUsage.meta,
+            courseType: targetCourseType,
+            courseTypeStats
           };
     });
 
@@ -14419,32 +14778,99 @@ async function runAdaptiveOptimizer() {
   };
 
   const baselineMultiYearResults = runMultiYearValidation({
-    label: 'STEP 4a BASELINE',
+    label: 'STEP 4a BASELINE (Event Multi-Year)',
     groupWeights: bestTemplate.groupWeights,
     metricWeights: bestTemplate.metricWeights
   });
 
   const noApproachMultiYearResults = runMultiYearValidation({
-    label: 'STEP 4a NO-APPROACH BASELINE',
+    label: 'STEP 4a NO-APPROACH BASELINE (Event Multi-Year)',
     groupWeights: bestTemplate.groupWeights,
     metricWeights: bestTemplate.metricWeights,
     approachOverride: 'none'
   });
 
   const optimizedMultiYearResults = runMultiYearValidation({
-    label: 'STEP 4b OPTIMIZED',
+    label: 'STEP 4b OPTIMIZED (Event Multi-Year)',
     groupWeights: bestOptimized.weights,
     metricWeights: bestOptimized.metricWeights || bestTemplate.metricWeights
   });
+  const validationGate = (() => {
+    const standardTemplates = new Set(['POWER', 'BALANCED', 'TECHNICAL']);
+    const rawKey = courseContextEntry?.templateKey || courseContextEntry?.courseType || null;
+    const normalizedKey = rawKey ? String(rawKey).trim().toUpperCase() : null;
+    const standardTemplateKey = normalizedKey && standardTemplates.has(normalizedKey)
+      ? normalizedKey
+      : null;
+    const validationCourseTypeKey = validationCourseType
+      ? String(validationCourseType).trim().toUpperCase()
+      : null;
+    const effectiveTemplateKey = standardTemplateKey
+      || (validationCourseTypeKey && standardTemplates.has(validationCourseTypeKey)
+        ? validationCourseTypeKey
+        : null);
+    const validationTemplateResult = validationTemplateName
+      ? templateResults.find(result => result.name === validationTemplateName)
+      : null;
+    const standardTemplateResult = effectiveTemplateKey
+      ? templateResults.find(result => result.name === effectiveTemplateKey)
+      : null;
+    const validationEval = validationTemplateResult?.evaluationCurrent || validationTemplateResult?.evaluation || null;
+    const standardEval = standardTemplateResult?.evaluationCurrent || standardTemplateResult?.evaluation || null;
+    if (!validationEval || !standardEval || Math.abs(standardEval.correlation) === 0) {
+      return { pct: null, passes: false, reason: 'missing_validation_eval' };
+    }
+    const pct = (validationEval.correlation - standardEval.correlation) / Math.abs(standardEval.correlation);
+    return { pct, passes: pct >= 0.01, reason: null };
+  })();
 
-  const baselineEventKFold = runEventKFoldValidation({
-    label: 'STEP 4a BASELINE',
+  const shouldRunTemplateKFold = validationGate.passes;
+  if (!shouldRunTemplateKFold) {
+    const reason = validationGate.reason
+      ? `reason=${validationGate.reason}`
+      : `improvement=${(validationGate.pct * 100).toFixed(2)}%`;
+    console.log(`ℹ️  Template K-fold skipped (validation recommended vs baseline < 1%; ${reason}).`);
+  }
+
+  const baselineEventKFold = shouldRunTemplateKFold
+    ? runEventKFoldValidation({
+        label: 'STEP 4a BASELINE (Template K-Fold)',
+        groupWeights: bestTemplate.groupWeights,
+        metricWeights: bestTemplate.metricWeights
+      })
+    : {};
+
+  const optimizedEventKFold = shouldRunTemplateKFold
+    ? runEventKFoldValidation({
+        label: 'STEP 4b OPTIMIZED (Template K-Fold)',
+        groupWeights: bestOptimized.weights,
+        metricWeights: bestOptimized.metricWeights || bestTemplate.metricWeights
+      })
+    : {};
+
+  const kfoldUsageSummary = shouldRunTemplateKFold
+    ? (() => {
+        const totals = Object.values(optimizedEventKFold || {})
+          .filter(result => result && result.status === 'ok')
+          .reduce((acc, result) => {
+            acc.used += result.foldsUsed || 0;
+            acc.total += result.foldCount || 0;
+            acc.years += 1;
+            return acc;
+          }, { used: 0, total: 0, years: 0 });
+        if (!totals.years) return null;
+        return totals;
+      })()
+    : null;
+
+  const baselineCourseLoeo = runCourseSpecificLoeoValidation({
+    label: 'STEP 4a BASELINE (Course LOEO)',
     groupWeights: bestTemplate.groupWeights,
     metricWeights: bestTemplate.metricWeights
   });
 
-  const optimizedEventKFold = runEventKFoldValidation({
-    label: 'STEP 4b OPTIMIZED',
+  const optimizedCourseLoeo = runCourseSpecificLoeoValidation({
+    label: 'STEP 4b OPTIMIZED (Course LOEO)',
     groupWeights: bestOptimized.weights,
     metricWeights: bestOptimized.metricWeights || bestTemplate.metricWeights
   });
@@ -14472,7 +14898,7 @@ async function runAdaptiveOptimizer() {
   console.log(`  Top-20: ${bestOptimizedTop20}`);
   console.log(`  Top-20 Weighted Score: ${bestOptimizedTop20Weighted}`);
 
-  console.log('\nMulti-Year Validation (Baseline):');
+  console.log('\nEvent Multi-Year Validation (Baseline):');
   Object.entries(baselineMultiYearResults).forEach(([year, evalResult]) => {
     const top10Text = typeof evalResult.top10 === 'number' ? `${evalResult.top10.toFixed(1)}%` : 'n/a';
     const top20Text = typeof evalResult.top20 === 'number' ? `${evalResult.top20.toFixed(1)}%` : 'n/a';
@@ -14488,7 +14914,7 @@ async function runAdaptiveOptimizer() {
     console.log(`  ${year}: Correlation=${evalResult.correlation.toFixed(4)} | Top-10=${top10Text} | Top-20=${top20Text} | Top-20 Weighted=${top20WeightedText} | Subset RMSE=${subsetRmseText} | Subset Top-20=${subsetTop20Text} | Pct RMSE=${pctRmseText} | Pct Top-20=${pctTop20Text} | Top-10 Overlap=${top10OverlapText} | Top-20 Overlap=${top20OverlapText}`);
   });
 
-  console.log('\nMulti-Year Validation (No-Approach Baseline):');
+  console.log('\nEvent Multi-Year Validation (No-Approach Baseline):');
   Object.entries(noApproachMultiYearResults).forEach(([year, evalResult]) => {
     const top10Text = typeof evalResult.top10 === 'number' ? `${evalResult.top10.toFixed(1)}%` : 'n/a';
     const top20Text = typeof evalResult.top20 === 'number' ? `${evalResult.top20.toFixed(1)}%` : 'n/a';
@@ -14504,7 +14930,7 @@ async function runAdaptiveOptimizer() {
     console.log(`  ${year}: Correlation=${evalResult.correlation.toFixed(4)} | Top-10=${top10Text} | Top-20=${top20Text} | Top-20 Weighted=${top20WeightedText} | Subset RMSE=${subsetRmseText} | Subset Top-20=${subsetTop20Text} | Pct RMSE=${pctRmseText} | Pct Top-20=${pctTop20Text} | Top-10 Overlap=${top10OverlapText} | Top-20 Overlap=${top20OverlapText}`);
   });
 
-  console.log('\nMulti-Year Validation (Optimized):');
+  console.log('\nEvent Multi-Year Validation (Optimized):');
   Object.entries(optimizedMultiYearResults).forEach(([year, evalResult]) => {
     const top10Text = typeof evalResult.top10 === 'number' ? `${evalResult.top10.toFixed(1)}%` : 'n/a';
     const top20Text = typeof evalResult.top20 === 'number' ? `${evalResult.top20.toFixed(1)}%` : 'n/a';
@@ -14520,7 +14946,7 @@ async function runAdaptiveOptimizer() {
     console.log(`  ${year}: Correlation=${evalResult.correlation.toFixed(4)} | Top-10=${top10Text} | Top-20=${top20Text} | Top-20 Weighted=${top20WeightedText} | Subset RMSE=${subsetRmseText} | Subset Top-20=${subsetTop20Text} | Pct RMSE=${pctRmseText} | Pct Top-20=${pctTop20Text} | Top-10 Overlap=${top10OverlapText} | Top-20 Overlap=${top20OverlapText}`);
   });
 
-  console.log('\nEvent K-Fold Validation (Baseline):');
+  console.log('\nTemplate K-Fold Validation (Baseline):');
   Object.entries(baselineEventKFold).forEach(([year, result]) => {
     if (!result || result.status !== 'ok') {
       console.log(`  ${year}: unavailable (${result?.reason || 'n/a'})`);
@@ -14533,7 +14959,7 @@ async function runAdaptiveOptimizer() {
     console.log(`  ${year}: mode=${result.mode || 'n/a'}, folds=${result.foldsUsed}/${result.foldCount || 'n/a'}, Corr=${evaluation.correlation?.toFixed(4) || 'n/a'}, Top-10=${top10Text}, Top-20=${top20Text}, Top-20 Weighted=${top20WeightedText}`);
   });
 
-  console.log('\nEvent K-Fold Validation (Optimized):');
+  console.log('\nTemplate K-Fold Validation (Optimized):');
   Object.entries(optimizedEventKFold).forEach(([year, result]) => {
     if (!result || result.status !== 'ok') {
       console.log(`  ${year}: unavailable (${result?.reason || 'n/a'})`);
@@ -14545,6 +14971,28 @@ async function runAdaptiveOptimizer() {
     const top20WeightedText = typeof evaluation.top20WeightedScore === 'number' ? `${evaluation.top20WeightedScore.toFixed(1)}%` : 'n/a';
     console.log(`  ${year}: mode=${result.mode || 'n/a'}, folds=${result.foldsUsed}/${result.foldCount || 'n/a'}, Corr=${evaluation.correlation?.toFixed(4) || 'n/a'}, Top-10=${top10Text}, Top-20=${top20Text}, Top-20 Weighted=${top20WeightedText}`);
   });
+
+  console.log('\nCourse-Specific LOEO Validation (Baseline):');
+  if (!baselineCourseLoeo || baselineCourseLoeo.status !== 'ok') {
+    console.log(`  unavailable (${baselineCourseLoeo?.reason || 'n/a'})`);
+  } else {
+    const evaluation = baselineCourseLoeo.evaluation || {};
+    const top10Text = typeof evaluation.top10 === 'number' ? `${evaluation.top10.toFixed(1)}%` : 'n/a';
+    const top20Text = typeof evaluation.top20 === 'number' ? `${evaluation.top20.toFixed(1)}%` : 'n/a';
+    const top20WeightedText = typeof evaluation.top20WeightedScore === 'number' ? `${evaluation.top20WeightedScore.toFixed(1)}%` : 'n/a';
+    console.log(`  mode=${baselineCourseLoeo.mode || 'n/a'}, folds=${baselineCourseLoeo.foldsUsed}/${baselineCourseLoeo.foldCount || 'n/a'}, Corr=${evaluation.correlation?.toFixed(4) || 'n/a'}, Top-10=${top10Text}, Top-20=${top20Text}, Top-20 Weighted=${top20WeightedText}`);
+  }
+
+  console.log('\nCourse-Specific LOEO Validation (Optimized):');
+  if (!optimizedCourseLoeo || optimizedCourseLoeo.status !== 'ok') {
+    console.log(`  unavailable (${optimizedCourseLoeo?.reason || 'n/a'})`);
+  } else {
+    const evaluation = optimizedCourseLoeo.evaluation || {};
+    const top10Text = typeof evaluation.top10 === 'number' ? `${evaluation.top10.toFixed(1)}%` : 'n/a';
+    const top20Text = typeof evaluation.top20 === 'number' ? `${evaluation.top20.toFixed(1)}%` : 'n/a';
+    const top20WeightedText = typeof evaluation.top20WeightedScore === 'number' ? `${evaluation.top20WeightedScore.toFixed(1)}%` : 'n/a';
+    console.log(`  mode=${optimizedCourseLoeo.mode || 'n/a'}, folds=${optimizedCourseLoeo.foldsUsed}/${optimizedCourseLoeo.foldCount || 'n/a'}, Corr=${evaluation.correlation?.toFixed(4) || 'n/a'}, Top-10=${top10Text}, Top-20=${top20Text}, Top-20 Weighted=${top20WeightedText}`);
+  }
 
   // Summary output
   console.log('---');
@@ -14572,7 +15020,7 @@ async function runAdaptiveOptimizer() {
     console.log(`   ${metric}: ${(weight * 100).toFixed(1)}%`);
   });
 
-  console.log('\n✓ Step 4a: Multi-Year Validation (Baseline)');
+  console.log('\n✓ Step 4a: Event Multi-Year Validation (Baseline)');
   Object.entries(baselineMultiYearResults).sort().forEach(([year, result]) => {
     const top10Text = typeof result.top10 === 'number' ? `${result.top10.toFixed(1)}%` : 'n/a';
     const top20Text = typeof result.top20 === 'number' ? `${result.top20.toFixed(1)}%` : 'n/a';
@@ -14588,7 +15036,7 @@ async function runAdaptiveOptimizer() {
     console.log(`   ${year}: Correlation=${result.correlation.toFixed(4)}, Top-10=${top10Text}, Top-20=${top20Text}, Top-20 Weighted=${top20WeightedText}, Subset RMSE=${subsetRmseText}, Subset Top-20=${subsetTop20Text}, Pct RMSE=${pctRmseText}, Pct Top-20=${pctTop20Text}, Top-10 Overlap=${top10OverlapText}, Top-20 Overlap=${top20OverlapText}, Players=${result.matchedPlayers}`);
   });
 
-  console.log('\n✓ Step 4b: Multi-Year Validation (Optimized)');
+  console.log('\n✓ Step 4b: Event Multi-Year Validation (Optimized)');
   Object.entries(optimizedMultiYearResults).sort().forEach(([year, result]) => {
     const top10Text = typeof result.top10 === 'number' ? `${result.top10.toFixed(1)}%` : 'n/a';
     const top20Text = typeof result.top20 === 'number' ? `${result.top20.toFixed(1)}%` : 'n/a';
@@ -14734,6 +15182,27 @@ async function runAdaptiveOptimizer() {
 
   const baselineEventKFoldSummary = aggregateEventKFoldSummary(baselineEventKFold);
   const optimizedEventKFoldSummary = aggregateEventKFoldSummary(optimizedEventKFold);
+  if (shouldRunTemplateKFold) {
+    const gatePctText = typeof validationGate?.pct === 'number'
+      ? `${(validationGate.pct * 100).toFixed(2)}%`
+      : 'n/a';
+    const foldUsageText = kfoldUsageSummary
+      ? `${kfoldUsageSummary.used}/${kfoldUsageSummary.total} folds (years=${kfoldUsageSummary.years})`
+      : 'n/a';
+    console.log(`ℹ️  Template K-fold gate: validation improvement ${gatePctText} (min 1%).`);
+    console.log(`ℹ️  Template K-fold folds used: ${foldUsageText}.`);
+  }
+  const summarizeCourseLoeo = result => {
+    if (!result || result.status !== 'ok' || !result.evaluation) return null;
+    return {
+      ...result.evaluation,
+      foldCount: result.foldCount || null,
+      foldsUsed: result.foldsUsed || null,
+      years: result.years || null
+    };
+  };
+  const baselineCourseLoeoSummary = summarizeCourseLoeo(baselineCourseLoeo);
+  const optimizedCourseLoeoSummary = summarizeCourseLoeo(optimizedCourseLoeo);
   const formatApproachUsageTable = results => {
     if (!results || typeof results !== 'object') return [];
     const rows = Object.entries(results)
@@ -14805,6 +15274,42 @@ async function runAdaptiveOptimizer() {
     };
   })();
 
+  const courseLoeoInterpretation = (() => {
+    if (!baselineCourseLoeoSummary || !optimizedCourseLoeoSummary) {
+      return { verdict: 'unavailable', note: 'Missing course-specific LOEO summaries.' };
+    }
+    if (!baselineCourseLoeoSummary.matchedPlayers || !optimizedCourseLoeoSummary.matchedPlayers) {
+      return { verdict: 'unavailable', note: 'Insufficient matched players across LOEO folds.' };
+    }
+    const corrDelta = optimizedCourseLoeoSummary.correlation - baselineCourseLoeoSummary.correlation;
+    const rmseDelta = optimizedCourseLoeoSummary.rmse - baselineCourseLoeoSummary.rmse;
+    const top20WDelta = optimizedCourseLoeoSummary.top20WeightedScore - baselineCourseLoeoSummary.top20WeightedScore;
+    let verdict = 'no_material_change';
+    let interpretation = 'No material change vs baseline across LOEO folds.';
+    if (corrDelta > 0.02 && rmseDelta < 0 && top20WDelta > 0) {
+      verdict = 'strong_improvement';
+      interpretation = 'Strong improvement: higher rank agreement, lower error, better Top-20 weighted score.';
+    } else if (corrDelta > 0.01 && rmseDelta <= 0) {
+      verdict = 'improvement';
+      interpretation = 'Improvement: better correlation with equal or lower error.';
+    } else if (corrDelta > 0.01 && rmseDelta > 0) {
+      verdict = 'mixed';
+      interpretation = 'Mixed: correlation improved but errors increased.';
+    } else if (corrDelta < -0.01) {
+      verdict = 'regression';
+      interpretation = 'Regression: optimized weights underperform baseline across LOEO folds.';
+    }
+    return {
+      verdict,
+      interpretation,
+      deltas: {
+        correlation: corrDelta,
+        rmse: rmseDelta,
+        top20WeightedScore: top20WDelta
+      }
+    };
+  })();
+
   const KFOLD_GATE_CONFIDENCE = 0.65;
   const kfoldOptimizedConfidence = eventKFoldInterpretation?.confidence?.optimizedScore;
   const kfoldGateApplied = eventKFoldInterpretation?.verdict === 'regression'
@@ -14817,24 +15322,36 @@ async function runAdaptiveOptimizer() {
       ? 'Marginal improvement'
       : 'Use template baseline');
 
+  const courseLoeoRegression = courseLoeoInterpretation?.verdict === 'regression';
+  const courseSpecificRecommendation = courseLoeoRegression
+    ? `Use template baseline (${bestTemplate.name})`
+    : currentYearRecommendation;
+  const courseSpecificNote = courseLoeoRegression
+    ? 'Course-specific LOEO regression detected.'
+    : 'Course-specific LOEO did not regress.';
+
   const recommendationNote = kfoldGateApplied
     ? `K-fold gate applied (confidence ${(kfoldOptimizedConfidence * 100).toFixed(0)}% ≥ ${(KFOLD_GATE_CONFIDENCE * 100).toFixed(0)}%)`
-    : 'Current-year improvement used (no K-fold gate triggered)';
+    : 'Template K-fold used for template gate (no regression trigger).';
 
-  const recommendationApproach = kfoldGateApplied
+  const templateRecommendation = kfoldGateApplied
     ? `Use template baseline (${bestTemplate.name})`
     : currentYearRecommendation;
 
   console.log('\n💡 Recommendation:');
-  if (kfoldGateApplied) {
-    console.log(`   ❌ K-fold regression detected; ${recommendationApproach}`);
-    console.log(`   ⚠️  ${recommendationNote}`);
+  if (courseLoeoRegression) {
+    console.log(`   ❌ Course-specific LOEO regression; ${courseSpecificRecommendation}`);
+    console.log(`   ⚠️  ${courseSpecificNote}`);
   } else if (improvement > 0.01) {
-    console.log(`   ✅ ${recommendationApproach} - shows ${(improvement).toFixed(4)} improvement`);
+    console.log(`   ✅ ${courseSpecificRecommendation} - shows ${(improvement).toFixed(4)} improvement`);
   } else if (improvement > 0) {
-    console.log(`   ⚠️  ${recommendationApproach} (${(improvement).toFixed(4)}) - consider baseline`);
+    console.log(`   ⚠️  ${courseSpecificRecommendation} (${(improvement).toFixed(4)}) - consider baseline`);
   } else {
-    console.log(`   ❌ ${recommendationApproach}`);
+    console.log(`   ❌ ${courseSpecificRecommendation}`);
+  }
+  console.log(`   🧭 Template gate: ${templateRecommendation}`);
+  if (recommendationNote) {
+    console.log(`   📝 ${recommendationNote}`);
   }
 
   console.log('\n' + '='.repeat(100) + '\n');
@@ -15105,13 +15622,22 @@ async function runAdaptiveOptimizer() {
     step4b_multiYearOptimized: optimizedMultiYearResults,
     step4a_eventKFold: baselineEventKFold,
     step4b_eventKFold: optimizedEventKFold,
+    step4a_courseLoeo: baselineCourseLoeo,
+    step4b_courseLoeo: optimizedCourseLoeo,
     eventKFoldSummary: {
       baseline: baselineEventKFoldSummary,
       optimized: optimizedEventKFoldSummary,
       interpretation: eventKFoldInterpretation
     },
+    courseLoeoSummary: {
+      baseline: baselineCourseLoeoSummary,
+      optimized: optimizedCourseLoeoSummary,
+      interpretation: courseLoeoInterpretation
+    },
     recommendation: {
-      approach: recommendationApproach,
+      approach: courseSpecificRecommendation,
+      templateApproach: templateRecommendation,
+      courseSpecificNote,
       baselineTemplate: bestTemplate.name,
       optimizedWeights: bestOptimized.weights,
       improvement,
@@ -15134,7 +15660,7 @@ async function runAdaptiveOptimizer() {
   const outputTagRaw = String(process.env.OUTPUT_TAG || '').trim();
   const kfoldTag = resolveKFoldTag(process.env.EVENT_KFOLD_K);
   const outputTagForBase = IS_POST_TOURNAMENT_RUN
-    ? [kfoldTag.tag, outputTagRaw].filter(Boolean).join('_')
+    ? [OPT_SEED_RAW ? null : kfoldTag.tag, outputTagRaw].filter(Boolean).join('_')
     : (outputTagRaw || null);
   const outputBaseName = buildOutputBaseName({
     tournamentSlug: canonicalTournamentSlug || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
@@ -15174,8 +15700,9 @@ async function runAdaptiveOptimizer() {
     ? (validationEval.correlation - standardEval.correlation) / Math.abs(standardEval.correlation)
     : null;
   const validationIsRecommendation = validationTemplateName && bestTemplate.name === validationTemplateName;
+  const templateRecommendationAllowsWrite = templateRecommendation === 'Use optimized weights';
   const shouldUpdateStandardTemplate = typeof validationImprovementPct === 'number'
-    ? validationImprovementPct >= 0.01
+    ? (validationImprovementPct >= 0.01 && templateRecommendationAllowsWrite)
     : false;
 
   const buildHumanSummaryLines = () => {
@@ -15252,21 +15779,36 @@ async function runAdaptiveOptimizer() {
     lines.push(`    - Stress fails (lower is better): ${baselineFailures} → ${optimizedFailures}`);
     lines.push('');
 
+    if (baselineCourseLoeoSummary && optimizedCourseLoeoSummary && baselineCourseLoeoSummary.matchedPlayers && optimizedCourseLoeoSummary.matchedPlayers) {
+      const corrDelta = optimizedCourseLoeoSummary.correlation - baselineCourseLoeoSummary.correlation;
+      const rmseDelta = optimizedCourseLoeoSummary.rmse - baselineCourseLoeoSummary.rmse;
+      const top20WDelta = optimizedCourseLoeoSummary.top20WeightedScore - baselineCourseLoeoSummary.top20WeightedScore;
+      lines.push('  Course‑specific LOEO (same event across years):');
+      lines.push(`    - Δ Corr=${formatNum(corrDelta)}, Δ RMSE=${formatNum(rmseDelta, 2)}, Δ Top‑20W=${formatNum(top20WDelta, 1)}%`);
+      lines.push(`    - Verdict: ${courseLoeoRegression ? 'Regression detected; avoid using optimized weights.' : 'No regression detected.'}`);
+    } else {
+      lines.push('  Course‑specific LOEO: not enough data to interpret.');
+    }
+
     if (baselineEventKFoldSummary && optimizedEventKFoldSummary && baselineEventKFoldSummary.matchedPlayers && optimizedEventKFoldSummary.matchedPlayers) {
       const corrDelta = optimizedEventKFoldSummary.correlation - baselineEventKFoldSummary.correlation;
       const rmseDelta = optimizedEventKFoldSummary.rmse - baselineEventKFoldSummary.rmse;
       const top20WDelta = optimizedEventKFoldSummary.top20WeightedScore - baselineEventKFoldSummary.top20WeightedScore;
-      lines.push('  Event K‑fold (generalization across events):');
+      lines.push('  Course‑type event K‑fold (template generalization):');
       lines.push(`    - Δ Corr=${formatNum(corrDelta)}, Δ RMSE=${formatNum(rmseDelta, 2)}, Δ Top‑20W=${formatNum(top20WDelta, 1)}%`);
-      lines.push(`    - Verdict: ${kfoldGateApplied ? 'Regression detected; avoid using optimized weights.' : 'No regression detected.'}`);
+      lines.push(`    - Verdict: ${kfoldGateApplied ? 'Regression detected; avoid template updates.' : 'No regression detected.'}`);
     } else {
-      lines.push('  Event K‑fold: not enough data to interpret.');
+      lines.push('  Course‑type event K‑fold: not enough data to interpret.');
     }
 
     lines.push('');
-    lines.push(`  Recommendation: ${recommendationApproach}`);
+    lines.push(`  Recommendation (course‑specific): ${courseSpecificRecommendation}`);
+    if (courseSpecificNote) {
+      lines.push(`  Note: ${courseSpecificNote}`);
+    }
+    lines.push(`  Recommendation (template/course‑type): ${templateRecommendation}`);
     if (recommendationNote) {
-      lines.push(`  Note: ${recommendationNote}`);
+      lines.push(`  Template note: ${recommendationNote}`);
     }
 
     if (kfoldGateApplied) {
@@ -15715,7 +16257,7 @@ async function runAdaptiveOptimizer() {
     textLines.push(`  ${player.rank ?? 'n/a'}: ${player.dgId}${name} | refined=${refined}, weighted=${weighted}`);
   });
   textLines.push('');
-  textLines.push('STEP 4a: MULTI-YEAR VALIDATION (Baseline)');
+  textLines.push('STEP 4a: EVENT MULTI-YEAR VALIDATION (Baseline)');
   textLines.push(`Approach mode: ${VALIDATION_APPROACH_MODE}`);
   textLines.push('Functions: runRanking, aggregateYearlyEvaluations (optimizer.js)');
   Object.entries(baselineMultiYearResults).sort().forEach(([year, result]) => {
@@ -15747,7 +16289,7 @@ async function runAdaptiveOptimizer() {
     );
   });
   textLines.push('');
-  textLines.push('STEP 4a: MULTI-YEAR VALIDATION (No-Approach Baseline)');
+  textLines.push('STEP 4a: EVENT MULTI-YEAR VALIDATION (No-Approach Baseline)');
   textLines.push('Approach mode: none (forced)');
   textLines.push('Functions: runRanking, aggregateYearlyEvaluations (optimizer.js)');
   Object.entries(noApproachMultiYearResults).sort().forEach(([year, result]) => {
@@ -15779,7 +16321,7 @@ async function runAdaptiveOptimizer() {
     );
   });
   textLines.push('');
-  textLines.push('STEP 4b: MULTI-YEAR VALIDATION (Optimized)');
+  textLines.push('STEP 4b: EVENT MULTI-YEAR VALIDATION (Optimized)');
   textLines.push(`Approach mode: ${VALIDATION_APPROACH_MODE}`);
   textLines.push('Functions: runRanking, aggregateYearlyEvaluations (optimizer.js)');
   Object.entries(optimizedMultiYearResults).sort().forEach(([year, result]) => {
@@ -15811,7 +16353,7 @@ async function runAdaptiveOptimizer() {
     );
   });
   textLines.push('');
-  textLines.push('APPROACH USAGE SUMMARY (Multi-Year Validation)');
+  textLines.push('APPROACH USAGE SUMMARY (Event Multi-Year Validation)');
   const approachTableLines = formatApproachUsageTable(baselineMultiYearResults);
   if (approachTableLines.length === 0) {
     textLines.push('  No approach usage data available.');
@@ -15819,74 +16361,156 @@ async function runAdaptiveOptimizer() {
     approachTableLines.forEach(line => textLines.push(line));
   }
   textLines.push('');
-    textLines.push('EVENT K-FOLD SETTINGS');
-    textLines.push(`  EVENT_KFOLD_K: ${resolveKFoldTag(process.env.EVENT_KFOLD_K).tag}`);
-    textLines.push(`  EVENT_KFOLD_SEED: ${process.env.EVENT_KFOLD_SEED || (OPT_SEED_RAW || `${CURRENT_EVENT_ID}-${CURRENT_SEASON}`)}`);
+    textLines.push('TEMPLATE K-FOLD SETTINGS (Course-Type)');
+    textLines.push(`  COURSE_TYPE: ${resolveTemplateCourseTypeKey() || 'n/a'}`);
+    textLines.push(`  EVENT_KFOLD_K: ${resolveKFoldTag(process.env.EVENT_KFOLD_K).tag} (adaptive if unset)`);
+    textLines.push('  EVENT_KFOLD_SEED: template (fixed)');
     textLines.push(`  OPT_SEED: ${OPT_SEED_RAW || 'n/a'}`);
+    if (shouldRunTemplateKFold) {
+      const gatePctText = typeof validationGate?.pct === 'number'
+        ? `${(validationGate.pct * 100).toFixed(2)}%`
+        : 'n/a';
+      textLines.push(`  Validation gate (recommended vs baseline): ${gatePctText} (min 1%)`);
+      if (kfoldUsageSummary) {
+        textLines.push(`  Folds used: ${kfoldUsageSummary.used}/${kfoldUsageSummary.total} (years=${kfoldUsageSummary.years})`);
+      }
+    } else {
+      textLines.push('  Validation gate: not met (K-fold skipped)');
+    }
     textLines.push('');
-  textLines.push('STEP 4a: EVENT K-FOLD VALIDATION (Baseline)');
-  Object.entries(baselineEventKFold).sort().forEach(([year, result]) => {
-    if (!result || result.status !== 'ok') {
-      textLines.push(`  ${year}: unavailable (${result?.reason || 'n/a'})`);
-      return;
+  textLines.push('STEP 4a: TEMPLATE K-FOLD VALIDATION (Baseline)');
+  if (!shouldRunTemplateKFold) {
+    if (validationGate?.reason === 'missing_validation_eval') {
+      textLines.push('  skipped (validation recommended vs baseline not available).');
+    } else if (typeof validationGate?.pct === 'number') {
+      textLines.push(`  skipped (validation recommended improvement ${(validationGate.pct * 100).toFixed(2)}% < 1%).`);
+    } else {
+      textLines.push('  skipped (validation recommended improvement < 1% vs baseline).');
     }
-    const approachUsage = result.approachUsage || {};
-    const approachText = approachUsage.period
-      ? `, Approach=${approachUsage.period}/${approachUsage.source || 'n/a'}, Leakage=${approachUsage.leakageFlag || 'n/a'}`
-      : '';
-    const evaluation = result.evaluation || {};
+  } else {
+    Object.entries(baselineEventKFold).sort().forEach(([year, result]) => {
+      if (!result || result.status !== 'ok') {
+        textLines.push(`  ${year}: unavailable (${result?.reason || 'n/a'})`);
+        return;
+      }
+      const approachUsage = result.approachUsage || {};
+      const approachText = approachUsage.period
+        ? `, Approach=${approachUsage.period}/${approachUsage.source || 'n/a'}, Leakage=${approachUsage.leakageFlag || 'n/a'}`
+        : '';
+      const evaluation = result.evaluation || {};
+      const top10Text = typeof evaluation.top10 === 'number' ? `, Top-10=${evaluation.top10.toFixed(1)}%` : '';
+      const top20Text = typeof evaluation.top20 === 'number' ? `, Top-20=${evaluation.top20.toFixed(1)}%` : '';
+      const top20WeightedText = typeof evaluation.top20WeightedScore === 'number' ? `, Top-20 Weighted=${evaluation.top20WeightedScore.toFixed(1)}%` : '';
+      textLines.push(
+        `  ${year}: mode=${result.mode || 'n/a'}, folds=${result.foldsUsed}/${result.foldCount || 'n/a'}, Corr=${evaluation.correlation?.toFixed(4) || 'n/a'}, RMSE=${evaluation.rmse?.toFixed(2) || 'n/a'}${top10Text}${top20Text}${top20WeightedText}, Players=${evaluation.matchedPlayers || 'n/a'}${approachText}`
+      );
+      if (Array.isArray(result.folds) && result.folds.length > 0) {
+        result.folds.forEach(fold => {
+          const foldCorr = typeof fold.correlation === 'number' ? fold.correlation.toFixed(4) : 'n/a';
+          const foldRmse = typeof fold.rmse === 'number' ? fold.rmse.toFixed(2) : 'n/a';
+          const foldTop10 = typeof fold.top10 === 'number' ? `${fold.top10.toFixed(1)}%` : 'n/a';
+          const foldTop20 = typeof fold.top20 === 'number' ? `${fold.top20.toFixed(1)}%` : 'n/a';
+          const foldTop20W = typeof fold.top20WeightedScore === 'number' ? `${fold.top20WeightedScore.toFixed(1)}%` : 'n/a';
+          textLines.push(
+            `    Fold ${fold.fold}: events=${fold.eventCount}, trainRows=${fold.trainingRows}, testRows=${fold.testRows}, players=${fold.matchedPlayers}, Corr=${foldCorr}, RMSE=${foldRmse}, Top-10=${foldTop10}, Top-20=${foldTop20}, Top-20W=${foldTop20W}`
+          );
+        });
+      }
+    });
+  }
+  textLines.push('');
+  textLines.push('STEP 4b: TEMPLATE K-FOLD VALIDATION (Optimized)');
+  if (!shouldRunTemplateKFold) {
+    if (validationGate?.reason === 'missing_validation_eval') {
+      textLines.push('  skipped (validation recommended vs baseline not available).');
+    } else if (typeof validationGate?.pct === 'number') {
+      textLines.push(`  skipped (validation recommended improvement ${(validationGate.pct * 100).toFixed(2)}% < 1%).`);
+    } else {
+      textLines.push('  skipped (validation recommended improvement < 1% vs baseline).');
+    }
+  } else {
+    Object.entries(optimizedEventKFold).sort().forEach(([year, result]) => {
+      if (!result || result.status !== 'ok') {
+        textLines.push(`  ${year}: unavailable (${result?.reason || 'n/a'})`);
+        return;
+      }
+      const approachUsage = result.approachUsage || {};
+      const approachText = approachUsage.period
+        ? `, Approach=${approachUsage.period}/${approachUsage.source || 'n/a'}, Leakage=${approachUsage.leakageFlag || 'n/a'}`
+        : '';
+      const evaluation = result.evaluation || {};
+      const top10Text = typeof evaluation.top10 === 'number' ? `, Top-10=${evaluation.top10.toFixed(1)}%` : '';
+      const top20Text = typeof evaluation.top20 === 'number' ? `, Top-20=${evaluation.top20.toFixed(1)}%` : '';
+      const top20WeightedText = typeof evaluation.top20WeightedScore === 'number' ? `, Top-20 Weighted=${evaluation.top20WeightedScore.toFixed(1)}%` : '';
+      textLines.push(
+        `  ${year}: mode=${result.mode || 'n/a'}, folds=${result.foldsUsed}/${result.foldCount || 'n/a'}, Corr=${evaluation.correlation?.toFixed(4) || 'n/a'}, RMSE=${evaluation.rmse?.toFixed(2) || 'n/a'}${top10Text}${top20Text}${top20WeightedText}, Players=${evaluation.matchedPlayers || 'n/a'}${approachText}`
+      );
+      if (Array.isArray(result.folds) && result.folds.length > 0) {
+        result.folds.forEach(fold => {
+          const foldCorr = typeof fold.correlation === 'number' ? fold.correlation.toFixed(4) : 'n/a';
+          const foldRmse = typeof fold.rmse === 'number' ? fold.rmse.toFixed(2) : 'n/a';
+          const foldTop10 = typeof fold.top10 === 'number' ? `${fold.top10.toFixed(1)}%` : 'n/a';
+          const foldTop20 = typeof fold.top20 === 'number' ? `${fold.top20.toFixed(1)}%` : 'n/a';
+          const foldTop20W = typeof fold.top20WeightedScore === 'number' ? `${fold.top20WeightedScore.toFixed(1)}%` : 'n/a';
+          textLines.push(
+            `    Fold ${fold.fold}: events=${fold.eventCount}, trainRows=${fold.trainingRows}, testRows=${fold.testRows}, players=${fold.matchedPlayers}, Corr=${foldCorr}, RMSE=${foldRmse}, Top-10=${foldTop10}, Top-20=${foldTop20}, Top-20W=${foldTop20W}`
+          );
+        });
+      }
+    });
+  }
+  textLines.push('');
+  textLines.push('STEP 4a: COURSE-SPECIFIC LOEO VALIDATION (Baseline)');
+  if (!baselineCourseLoeo || baselineCourseLoeo.status !== 'ok') {
+    textLines.push(`  unavailable (${baselineCourseLoeo?.reason || 'n/a'})`);
+  } else {
+    const evaluation = baselineCourseLoeo.evaluation || {};
     const top10Text = typeof evaluation.top10 === 'number' ? `, Top-10=${evaluation.top10.toFixed(1)}%` : '';
     const top20Text = typeof evaluation.top20 === 'number' ? `, Top-20=${evaluation.top20.toFixed(1)}%` : '';
     const top20WeightedText = typeof evaluation.top20WeightedScore === 'number' ? `, Top-20 Weighted=${evaluation.top20WeightedScore.toFixed(1)}%` : '';
     textLines.push(
-      `  ${year}: mode=${result.mode || 'n/a'}, folds=${result.foldsUsed}/${result.foldCount || 'n/a'}, Corr=${evaluation.correlation?.toFixed(4) || 'n/a'}, RMSE=${evaluation.rmse?.toFixed(2) || 'n/a'}${top10Text}${top20Text}${top20WeightedText}, Players=${evaluation.matchedPlayers || 'n/a'}${approachText}`
+      `  mode=${baselineCourseLoeo.mode || 'n/a'}, folds=${baselineCourseLoeo.foldsUsed}/${baselineCourseLoeo.foldCount || 'n/a'}, Corr=${evaluation.correlation?.toFixed(4) || 'n/a'}, RMSE=${evaluation.rmse?.toFixed(2) || 'n/a'}${top10Text}${top20Text}${top20WeightedText}, Players=${evaluation.matchedPlayers || 'n/a'}`
     );
-    if (Array.isArray(result.folds) && result.folds.length > 0) {
-      result.folds.forEach(fold => {
+    if (Array.isArray(baselineCourseLoeo.folds) && baselineCourseLoeo.folds.length > 0) {
+      baselineCourseLoeo.folds.forEach(fold => {
         const foldCorr = typeof fold.correlation === 'number' ? fold.correlation.toFixed(4) : 'n/a';
         const foldRmse = typeof fold.rmse === 'number' ? fold.rmse.toFixed(2) : 'n/a';
         const foldTop10 = typeof fold.top10 === 'number' ? `${fold.top10.toFixed(1)}%` : 'n/a';
         const foldTop20 = typeof fold.top20 === 'number' ? `${fold.top20.toFixed(1)}%` : 'n/a';
         const foldTop20W = typeof fold.top20WeightedScore === 'number' ? `${fold.top20WeightedScore.toFixed(1)}%` : 'n/a';
         textLines.push(
-          `    Fold ${fold.fold}: events=${fold.eventCount}, trainRows=${fold.trainingRows}, testRows=${fold.testRows}, players=${fold.matchedPlayers}, Corr=${foldCorr}, RMSE=${foldRmse}, Top-10=${foldTop10}, Top-20=${foldTop20}, Top-20W=${foldTop20W}`
+          `    Fold ${fold.fold}: year=${fold.year}, trainRounds=${fold.trainingRounds}, testRounds=${fold.testRounds}, players=${fold.matchedPlayers}, Corr=${foldCorr}, RMSE=${foldRmse}, Top-10=${foldTop10}, Top-20=${foldTop20}, Top-20W=${foldTop20W}`
         );
       });
     }
-  });
+  }
   textLines.push('');
-  textLines.push('STEP 4b: EVENT K-FOLD VALIDATION (Optimized)');
-  Object.entries(optimizedEventKFold).sort().forEach(([year, result]) => {
-    if (!result || result.status !== 'ok') {
-      textLines.push(`  ${year}: unavailable (${result?.reason || 'n/a'})`);
-      return;
-    }
-    const approachUsage = result.approachUsage || {};
-    const approachText = approachUsage.period
-      ? `, Approach=${approachUsage.period}/${approachUsage.source || 'n/a'}, Leakage=${approachUsage.leakageFlag || 'n/a'}`
-      : '';
-    const evaluation = result.evaluation || {};
+  textLines.push('STEP 4b: COURSE-SPECIFIC LOEO VALIDATION (Optimized)');
+  if (!optimizedCourseLoeo || optimizedCourseLoeo.status !== 'ok') {
+    textLines.push(`  unavailable (${optimizedCourseLoeo?.reason || 'n/a'})`);
+  } else {
+    const evaluation = optimizedCourseLoeo.evaluation || {};
     const top10Text = typeof evaluation.top10 === 'number' ? `, Top-10=${evaluation.top10.toFixed(1)}%` : '';
     const top20Text = typeof evaluation.top20 === 'number' ? `, Top-20=${evaluation.top20.toFixed(1)}%` : '';
     const top20WeightedText = typeof evaluation.top20WeightedScore === 'number' ? `, Top-20 Weighted=${evaluation.top20WeightedScore.toFixed(1)}%` : '';
     textLines.push(
-      `  ${year}: mode=${result.mode || 'n/a'}, folds=${result.foldsUsed}/${result.foldCount || 'n/a'}, Corr=${evaluation.correlation?.toFixed(4) || 'n/a'}, RMSE=${evaluation.rmse?.toFixed(2) || 'n/a'}${top10Text}${top20Text}${top20WeightedText}, Players=${evaluation.matchedPlayers || 'n/a'}${approachText}`
+      `  mode=${optimizedCourseLoeo.mode || 'n/a'}, folds=${optimizedCourseLoeo.foldsUsed}/${optimizedCourseLoeo.foldCount || 'n/a'}, Corr=${evaluation.correlation?.toFixed(4) || 'n/a'}, RMSE=${evaluation.rmse?.toFixed(2) || 'n/a'}${top10Text}${top20Text}${top20WeightedText}, Players=${evaluation.matchedPlayers || 'n/a'}`
     );
-    if (Array.isArray(result.folds) && result.folds.length > 0) {
-      result.folds.forEach(fold => {
+    if (Array.isArray(optimizedCourseLoeo.folds) && optimizedCourseLoeo.folds.length > 0) {
+      optimizedCourseLoeo.folds.forEach(fold => {
         const foldCorr = typeof fold.correlation === 'number' ? fold.correlation.toFixed(4) : 'n/a';
         const foldRmse = typeof fold.rmse === 'number' ? fold.rmse.toFixed(2) : 'n/a';
         const foldTop10 = typeof fold.top10 === 'number' ? `${fold.top10.toFixed(1)}%` : 'n/a';
         const foldTop20 = typeof fold.top20 === 'number' ? `${fold.top20.toFixed(1)}%` : 'n/a';
         const foldTop20W = typeof fold.top20WeightedScore === 'number' ? `${fold.top20WeightedScore.toFixed(1)}%` : 'n/a';
         textLines.push(
-          `    Fold ${fold.fold}: events=${fold.eventCount}, trainRows=${fold.trainingRows}, testRows=${fold.testRows}, players=${fold.matchedPlayers}, Corr=${foldCorr}, RMSE=${foldRmse}, Top-10=${foldTop10}, Top-20=${foldTop20}, Top-20W=${foldTop20W}`
+          `    Fold ${fold.fold}: year=${fold.year}, trainRounds=${fold.trainingRounds}, testRounds=${fold.testRounds}, players=${fold.matchedPlayers}, Corr=${foldCorr}, RMSE=${foldRmse}, Top-10=${foldTop10}, Top-20=${foldTop20}, Top-20W=${foldTop20W}`
         );
       });
     }
-  });
+  }
   textLines.push('');
-  textLines.push('EVENT K-FOLD INTERPRETATION');
+  textLines.push('TEMPLATE K-FOLD INTERPRETATION');
   if (!baselineEventKFoldSummary || !optimizedEventKFoldSummary || baselineEventKFoldSummary.matchedPlayers === 0 || optimizedEventKFoldSummary.matchedPlayers === 0) {
     textLines.push('  Insufficient event K-fold data to interpret (check folds used / matched players).');
   } else {
@@ -15929,15 +16553,13 @@ async function runAdaptiveOptimizer() {
   }
   textLines.push('');
   textLines.push('RECOMMENDATION:');
-  if (kfoldGateApplied) {
-    textLines.push(`K-fold regression detected; ${recommendationApproach}`);
-    textLines.push(`Note: ${recommendationNote}`);
-  } else if (improvement > 0.01) {
-    textLines.push(`${recommendationApproach} (improvement: ${(improvement).toFixed(4)})`);
-  } else if (improvement > 0) {
-    textLines.push(`${recommendationApproach} (${(improvement).toFixed(4)}), consider baseline`);
-  } else {
-    textLines.push(`${recommendationApproach}`);
+  textLines.push(`Course-specific: ${courseSpecificRecommendation}`);
+  if (courseSpecificNote) {
+    textLines.push(`Course-specific note: ${courseSpecificNote}`);
+  }
+  textLines.push(`Template/course-type: ${templateRecommendation}`);
+  if (recommendationNote) {
+    textLines.push(`Template note: ${recommendationNote}`);
   }
   textLines.push('');
   textLines.push('STANDARD TEMPLATE SELECTION:');
@@ -15966,9 +16588,9 @@ async function runAdaptiveOptimizer() {
     });
   } else {
     if (validationIsRecommendation && typeof validationImprovementPct === 'number' && validationImprovementPct < 0.01) {
-      textLines.push('Standard templates: no updates (validation improvement < 1%)');
+      textLines.push('Standard templates: not written (validation improvement < 1%)');
     } else {
-      textLines.push('Standard templates: no updates');
+      textLines.push('Standard templates: not written');
     }
   }
   textLines.push('');
@@ -16017,7 +16639,7 @@ async function runAdaptiveOptimizer() {
     metricWeights: bestOptimized.metricWeights || bestTemplate.metricWeights
   };
   const optimizedBeatsBaseline = compareEvaluations(bestOptimized, baselineEvaluation) > 0;
-  const recommendationAllowsWrite = recommendationApproach === 'Use optimized weights';
+  const recommendationAllowsWrite = courseSpecificRecommendation === 'Use optimized weights';
   const shouldWriteEventTemplate = optimizedBeatsBaseline
     && recommendationAllowsWrite
     && templatesAreDifferent(
@@ -16035,7 +16657,7 @@ async function runAdaptiveOptimizer() {
     console.log(`ℹ️  Event template not written (${reason}).`);
   }
 
-  const allowStandardTemplateUpdates = (WRITE_TEMPLATES || DRY_RUN);
+  const allowStandardTemplateUpdates = (WRITE_TEMPLATES || DRY_RUN) && templateRecommendationAllowsWrite;
   const validationTemplatesToWrite = (allowStandardTemplateUpdates && validationTypeToUpdate && shouldUpdateStandardTemplate)
     ? [buildValidationTemplateForType({
         type: validationTypeToUpdate,
@@ -16048,20 +16670,46 @@ async function runAdaptiveOptimizer() {
       .filter(Boolean)
     : [];
 
+  const templateUpdateComment = buildTemplateUpdateComment({
+    tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
+    isPostRun: true
+  });
+  const dryRunTemplateContents = new Map();
+  const applyTemplateUpdate = ({ filePath, template, replaceByEventId }) => {
+    if (DRY_RUN) {
+      const baseContent = dryRunTemplateContents.get(filePath) || fs.readFileSync(filePath, 'utf8');
+      const result = upsertTemplateInFile(filePath, template, {
+        replaceByEventId,
+        dryRun: true,
+        baseContent,
+        updateComment: templateUpdateComment
+      });
+      if (result.updated && result.content) {
+        dryRunTemplateContents.set(filePath, result.content);
+      }
+      return result;
+    }
+    return upsertTemplateInFile(filePath, template, {
+      replaceByEventId,
+      dryRun: false,
+      updateComment: templateUpdateComment
+    });
+  };
+
   const writeBackTargets = [
     path.resolve(ROOT_DIR, 'utilities', 'weightTemplates.js')
   ];
 
   writeBackTargets.forEach(filePath => {
     if (shouldAttemptEventWrite) {
-      const result = upsertTemplateInFile(filePath, optimizedTemplate, { replaceByEventId: true, dryRun: DRY_RUN });
+      const result = applyTemplateUpdate({
+        filePath,
+        template: optimizedTemplate,
+        replaceByEventId: true
+      });
       if (result.updated) {
         if (DRY_RUN && result.content) {
-          const dryRunPath = path.resolve(dryRunOutputDir || OUTPUT_DIR, `dryrun_${path.basename(filePath)}`);
-          fs.writeFileSync(dryRunPath, result.content, 'utf8');
-          console.log(`🧪 Dry-run template output saved to: ${dryRunPath}`);
           eventTemplateAction = 'dryRun';
-          eventTemplateTargets.push(dryRunPath);
         } else {
           console.log(`✅ Template written to: ${filePath}`);
           eventTemplateAction = 'write';
@@ -16080,16 +16728,17 @@ async function runAdaptiveOptimizer() {
           console.log(`ℹ️  Validation template matches existing ${validationTemplate.name}; skipping update.`);
           return;
         }
-        const validationResult = upsertTemplateInFile(filePath, validationTemplate, { replaceByEventId: false, dryRun: DRY_RUN });
+        const validationResult = applyTemplateUpdate({
+          filePath,
+          template: validationTemplate,
+          replaceByEventId: false
+        });
         if (validationResult.updated) {
           if (DRY_RUN && validationResult.content) {
-            const dryRunPath = path.resolve(dryRunOutputDir || OUTPUT_DIR, `dryrun_${validationTemplate.name}_${path.basename(filePath)}`);
-            fs.writeFileSync(dryRunPath, validationResult.content, 'utf8');
-            console.log(`🧪 Dry-run validation template saved to: ${dryRunPath}`);
             validationTemplateActions.push({
               name: validationTemplate.name,
               action: 'dryRun',
-              target: dryRunPath
+              target: null
             });
           } else {
             console.log(`✅ Validation template written to: ${filePath} (${validationTemplate.name})`);
@@ -16105,6 +16754,22 @@ async function runAdaptiveOptimizer() {
       });
     }
   });
+
+  if (DRY_RUN && dryRunTemplateContents.size > 0) {
+    dryRunTemplateContents.forEach((content, filePath) => {
+      const dryRunPath = path.resolve(dryRunOutputDir || OUTPUT_DIR, `dryrun_${path.basename(filePath)}`);
+      fs.writeFileSync(dryRunPath, content, 'utf8');
+      console.log(`🧪 Dry-run template output saved to: ${dryRunPath}`);
+      if (eventTemplateAction === 'dryRun' && !eventTemplateTargets.includes(dryRunPath)) {
+        eventTemplateTargets.push(dryRunPath);
+      }
+      validationTemplateActions.forEach(entry => {
+        if (entry.action === 'dryRun' && !entry.target) {
+          entry.target = dryRunPath;
+        }
+      });
+    });
+  }
 
   console.log('\n🧾 Template write summary:');
   if (eventTemplateAction) {
@@ -16122,7 +16787,13 @@ async function runAdaptiveOptimizer() {
       console.log(`     - ${entry.target}`);
     });
   } else {
-    console.log('   Standard templates: no updates');
+    if (validationIsRecommendation && typeof validationImprovementPct === 'number' && validationImprovementPct < 0.01) {
+      console.log('   Standard templates: not written (validation improvement < 1%)');
+    } else if (!templateRecommendationAllowsWrite) {
+      console.log('   Standard templates: not written (template recommendation gate)');
+    } else {
+      console.log('   Standard templates: not written');
+    }
   }
 
   console.log(`✅ JSON results also saved to: ${outputPath}`);

@@ -9,7 +9,7 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
-const CACHE_DIR = path.resolve(DATA_DIR, 'cache');
+const CACHE_DIR = path.resolve(DATA_DIR, 'wagering', 'fantasy', 'cache', 'datagolf');
 
 const ensureDir = dirPath => {
   if (!dirPath) return;
@@ -550,7 +550,7 @@ const main = async () => {
     process.exit(1);
   }
 
-  const outputDir = path.resolve(DATA_DIR, 'fantasy', site, tour, slate);
+  const outputDir = path.resolve(DATA_DIR, 'wagering', 'fantasy', site, tour, slate);
   ensureDir(outputDir);
   const outputBase = eventId ? `${eventId}_top_lineups` : 'top_lineups';
   const outputJson = path.resolve(outputDir, `${outputBase}.json`);

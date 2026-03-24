@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-16T22:06:08-05:00",
+  "updatedAt": "2026-03-23T20:45:56-05:00",
   "sourceDir": "apps-scripts/modelOptimizer/data",
   "defaultTours": [
     "pga"
@@ -764,7 +764,7 @@
     "20": {
       "sourcePath": null,
       "eventId": "20",
-      "templateKey": "POWER",
+      "templateKey": "MEMORIAL_PARK_GOLF_COURSE",
       "courseNum": "897",
       "courseNums": [
         "897"
@@ -773,41 +773,50 @@
       "courseType": "POWER",
       "pastPerformance": true,
       "similarCourseIds": [
-        "14",
-        "26",
-        "54"
+        "33",
+        "480",
+        "21",
+        "541"
       ],
       "puttingCourseIds": [
-        "3",
-        "2"
+        "11",
+        "12",
+        "475"
       ],
       "similarCourseCourseNums": {
-        "14": [
-          "14"
+        "33": [
+          "241"
         ],
-        "26": [
-          "528"
+        "480": [
+          "872"
         ],
-        "54": [
-          "746"
+        "21": [
+          "21"
+        ],
+        "541": [
+          "977"
         ]
       },
       "puttingCourseCourseNums": {
-        "2": [
-          "202"
+        "11": [
+          "11"
         ],
-        "3": [
-          "510"
+        "12": [
+          "12"
+        ],
+        "475": [
+          "665"
         ]
       },
-      "similarCoursesWeight": 0.7,
-      "puttingCoursesWeight": 0.8,
+      "similarCoursesWeight": 0.15,
+      "puttingCoursesWeight": 0.20,
       "shotDistribution": {
-        "under100": 0.053,
-        "from100to150": 0.24,
-        "from150to200": 0.381,
-        "over200": 0.326
-      }
+        "under100": 0.058,
+        "from100to150": 0.272,
+        "from150to200": 0.365,
+        "over200": 0.305
+      },
+      "pastPerformanceWeight": 0.3
     },
     "21": {
       "sourcePath": null,
@@ -1951,7 +1960,8 @@
         "from100to150": 0.24,
         "from150to200": 0.381,
         "over200": 0.326
-      }
+      },
+      "pastPerformanceWeight": 0.3
     },
     "928": {
       "sourcePath": null,

@@ -29,6 +29,12 @@ const parseArgs = () => {
   return result;
 };
 
+const toNumber = value => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 const readCsv = filePath => {
   if (!filePath || !fs.existsSync(filePath)) return [];
   const raw = fs.readFileSync(filePath, 'utf8');
@@ -87,6 +93,7 @@ const writeCsv = (filePath, rows, headers) => {
 };
 
 const resolveWageringInputsDir = () => path.resolve(DATA_DIR, 'wagering');
+
 
 const collectOddsEvalFiles = ({ market, oddsSource }) => {
   const wageringDir = resolveWageringInputsDir();
@@ -156,6 +163,7 @@ const readJson = filePath => {
 };
 
 const oddsMetaCache = new Map();
+const matchupOpponentCache = new Map();
 const resolveOddsMeta = ({ oddsSourcePath, dgId, playerName, isHistorical }) => {
   if (!oddsSourcePath) {
     return { odds_generated_at: '', graded_at: '' };
@@ -206,6 +214,53 @@ const resolveOddsMeta = ({ oddsSourcePath, dgId, playerName, isHistorical }) => 
   };
   oddsMetaCache.set(oddsSourcePath, meta);
   return meta;
+};
+
+const resolveMatchupLabel = ({ market, dgId, playerName, oddsSourcePath }) => {
+  if (!oddsSourcePath) return playerName;
+  const normalizedMarket = normalizeMarketType(market || '');
+  const matchupMarkets = new Set([
+    'tournament_matchups',
+    'round_matchups',
+    '3_balls',
+    '3balls',
+    '3-ball',
+    '3ball',
+    'matchups'
+  ]);
+  if (!matchupMarkets.has(normalizedMarket)) return playerName;
+  if (!matchupOpponentCache.has(oddsSourcePath)) {
+    const payload = readJson(oddsSourcePath);
+    const map = new Map();
+    const entries = payload?.match_list;
+    if (Array.isArray(entries)) {
+      entries.forEach(entry => {
+        const p1Id = entry?.p1_dg_id ? String(entry.p1_dg_id) : null;
+        const p2Id = entry?.p2_dg_id ? String(entry.p2_dg_id) : null;
+        const p3Id = entry?.p3_dg_id ? String(entry.p3_dg_id) : null;
+        const p1Name = String(entry?.p1_player_name || '').trim();
+        const p2Name = String(entry?.p2_player_name || '').trim();
+        const p3Name = String(entry?.p3_player_name || '').trim();
+        if (p1Id && p2Id) {
+          map.set(p1Id, p2Name);
+          map.set(p2Id, p1Name);
+        }
+        if (p3Id) {
+          const othersForP1 = [p2Name, p3Name].filter(Boolean).join(' / ');
+          const othersForP2 = [p1Name, p3Name].filter(Boolean).join(' / ');
+          const othersForP3 = [p1Name, p2Name].filter(Boolean).join(' / ');
+          if (p1Id) map.set(p1Id, othersForP1);
+          if (p2Id) map.set(p2Id, othersForP2);
+          map.set(p3Id, othersForP3);
+        }
+      });
+    }
+    matchupOpponentCache.set(oddsSourcePath, map);
+  }
+  const opponentMap = matchupOpponentCache.get(oddsSourcePath);
+  const opponent = opponentMap?.get(String(dgId || '').trim());
+  if (!opponent) return playerName;
+  return `${playerName} over ${opponent}`;
 };
 
 const collectOddsEvalFilesAll = () => {
@@ -361,6 +416,7 @@ const mergeRow = (existing, incoming, allowedKeys = null) => {
   return merged;
 };
 
+
 const main = () => {
   const args = parseArgs();
   const season = args.season;
@@ -369,6 +425,22 @@ const main = () => {
   const oddsSourceKey = String(oddsSource || 'historical').trim().toLowerCase();
   const isHistorical = oddsSourceKey === 'historical';
   const stake = args.stake ? Number(args.stake) : 10;
+  const stakeMode = String(args.stakeMode || args.stake_mode || 'edge_scaled').trim().toLowerCase();
+  const maxStakePct = toNumber(args.maxStakePct || args.max_stake_pct);
+  const maxOddsArg = toNumber(args.maxOdds || args.max_odds);
+  const resolvedMaxOdds = Number.isFinite(maxOddsArg)
+    ? maxOddsArg
+    : (oddsSourceKey === 'live' ? 101 : null);
+  const liveTopNArg = toNumber(args.liveTopN || args.live_top_n);
+  const liveTopN = Number.isFinite(liveTopNArg) ? liveTopNArg : 7;
+  const matchupTopNArg = toNumber(args.matchupTopN || args.matchup_top_n);
+  const matchupTopN = Number.isFinite(matchupTopNArg) ? matchupTopNArg : 3;
+  const matchupMinEdgeArg = toNumber(args.matchupMinEdge || args.matchup_min_edge);
+  const matchupMinEdge = Number.isFinite(matchupMinEdgeArg) ? matchupMinEdgeArg : 0.02;
+  const totalStakeArg = toNumber(args.totalStake || args.total_stake || args.eventStake || args.event_stake);
+  const resolvedTotalStake = Number.isFinite(totalStakeArg)
+    ? totalStakeArg
+    : (oddsSourceKey === 'live' ? 100 : null);
   const eventId = args.eventId || args.event_id || null;
   const reset = String(args.reset || 'false').toLowerCase() === 'true';
   const updateExisting = String(args.updateExisting || args.update_existing || 'true').toLowerCase() !== 'false';
@@ -379,9 +451,11 @@ const main = () => {
   }
 
   const isAllMarkets = String(market || '').trim().toLowerCase() === 'all';
-  const oddsEvalFiles = isAllMarkets
+  const oddsEvalFiles = (oddsSourceKey === 'live' && eventId)
     ? collectOddsEvalFilesAllMarkets({ oddsSource: oddsSourceKey, eventId })
-    : collectOddsEvalFiles({ market, oddsSource: oddsSourceKey });
+    : (isAllMarkets
+      ? collectOddsEvalFilesAllMarkets({ oddsSource: oddsSourceKey, eventId })
+      : collectOddsEvalFiles({ market, oddsSource: oddsSourceKey }));
 
   if (!oddsEvalFiles.length) {
     console.error('❌ Could not find any odds_eval CSV files under data/wagering/*/inputs.');
@@ -423,6 +497,13 @@ const main = () => {
       isHistorical
     });
 
+    const displayName = resolveMatchupLabel({
+      market: marketValue,
+      dgId: row.player_id,
+      playerName,
+      oddsSourcePath: row.odds_source_path
+    });
+
     betRows.push({
       season: String(row.season || season),
       book: bookValue,
@@ -431,11 +512,11 @@ const main = () => {
       event: row.event_id || eventId || '',
       odds_generated_at: oddsMeta.odds_generated_at || row.run_timestamp || '',
       odds_graded_at: oddsMeta.graded_at || '',
-      player: playerName,
+      player: displayName,
       dg_id: String(row.player_id || '').trim(),
       market: marketValue,
       odds: oddsDecimal,
-      stake: Number.isFinite(stake) ? stake : '',
+      stake: Number.isFinite(stake) ? Math.round(stake) : '',
       'settled stake': '',
       'total return': '',
       net: '',
@@ -459,13 +540,23 @@ const main = () => {
   const normalizedExisting = existingRows
     .map(normalizeExistingRow);
 
+  const filteredExisting = (oddsSourceKey === 'live' && eventId)
+    ? normalizedExisting.filter(row => !(
+      String(row.odd_source || '').toLowerCase() === 'live'
+      && String(row.event || '') === String(eventId)
+    ))
+    : normalizedExisting;
+
+
+  // Keep existing rows for running list behavior; only add new bets when they don't already exist.
+
   const existingEventKeys = new Set(
-    normalizedExisting
+    filteredExisting
       .filter(row => row.tournament_slug || row.event)
       .map(row => `${row.odd_source || ''}||${row.tournament_slug || ''}||${row.event || ''}`)
   );
 
-  const rowList = [...normalizedExisting];
+  const rowList = [...filteredExisting];
   const rowIndex = new Map();
   rowList.forEach((row, idx) => {
     if (!row.dg_id) return;
@@ -488,9 +579,184 @@ const main = () => {
     'net',
     'roi'
   ]);
+  const dedupeByPlayer = rows => {
+    const byId = new Map();
+    rows.forEach(row => {
+      const dgId = String(row.dg_id || '').trim();
+      if (!dgId) return;
+      const current = byId.get(dgId);
+      if (!current) {
+        byId.set(dgId, row);
+        return;
+      }
+      const oddsValue = Number(row.odds);
+      const currentOdds = Number(current.odds);
+      if (Number.isFinite(oddsValue) && (!Number.isFinite(currentOdds) || oddsValue > currentOdds)) {
+        byId.set(dgId, row);
+      }
+    });
+    return Array.from(byId.values());
+  };
+
   const liveRows = oddsSourceKey === 'live'
-    ? [...betRows].sort((a, b) => Number(b.edge) - Number(a.edge)).slice(0, 10)
+    ? (() => {
+      const matchupMarkets = new Set([
+        'tournament_matchups',
+        'round_matchups',
+        '3_balls',
+        '3balls',
+        '3-ball',
+        '3ball',
+        'matchups'
+      ]);
+      const capped = [...betRows]
+        .filter(row => (
+          Number.isFinite(resolvedMaxOdds)
+            ? Number(row.odds) <= resolvedMaxOdds
+            : true
+        ));
+
+      const matchupRows = capped.filter(row => matchupMarkets.has(normalizeMarketType(row.market)));
+      const nonMatchupRows = capped.filter(row => !matchupMarkets.has(normalizeMarketType(row.market)));
+
+      const matchupDeduped = dedupeByPlayer(matchupRows);
+      const nonMatchupDeduped = dedupeByPlayer(nonMatchupRows);
+
+      const selectedBase = nonMatchupDeduped
+        .sort((a, b) => Number(b.edge) - Number(a.edge))
+        .slice(0, liveTopN);
+      const selectedMatchups = matchupDeduped
+        .filter(row => Number(row.edge) >= matchupMinEdge)
+        .sort((a, b) => Number(b.edge) - Number(a.edge))
+        .slice(0, matchupTopN);
+
+      const combined = [...selectedBase];
+      const existingKeys = new Set(
+        combined.map(row => buildBetKey({
+          event: row.event,
+          market: row.market,
+          book: row.book,
+          dgId: row.dg_id
+        }))
+      );
+      selectedMatchups.forEach(row => {
+        const key = buildBetKey({
+          event: row.event,
+          market: row.market,
+          book: row.book,
+          dgId: row.dg_id
+        });
+        if (!existingKeys.has(key)) {
+          combined.push(row);
+          existingKeys.add(key);
+        }
+      });
+      return combined;
+    })()
     : betRows;
+
+  const resolveWeightedStakes = (rows, options = {}) => {
+    const totalStake = Number.isFinite(options.totalStake) ? options.totalStake : rows.length * (Number.isFinite(stake) ? stake : 0);
+    if (!rows.length || !Number.isFinite(totalStake) || totalStake <= 0) return null;
+    const capPct = Number.isFinite(options.maxStakePct) ? options.maxStakePct : 0.2;
+    const capValue = Number.isFinite(capPct) ? totalStake * capPct : null;
+
+    const weights = rows.map((row, index) => {
+      const modelProb = toNumber(row.p_model);
+      const edgeValue = toNumber(row.edge);
+      const weight = Number.isFinite(modelProb) && modelProb > 0
+        ? modelProb
+        : (Number.isFinite(edgeValue) && edgeValue > 0 ? edgeValue : 0);
+      return { index, weight };
+    });
+
+    let remaining = weights.filter(entry => entry.weight > 0);
+    if (!remaining.length) return null;
+    let remainingStake = totalStake;
+    const allocations = new Map();
+
+    while (remaining.length && remainingStake > 0) {
+      const totalWeight = remaining.reduce((sum, entry) => sum + entry.weight, 0);
+      if (totalWeight <= 0) break;
+
+      const capped = [];
+      const uncapped = [];
+      const provisional = [];
+
+      remaining.forEach(entry => {
+        const portion = remainingStake * (entry.weight / totalWeight);
+        if (Number.isFinite(capValue) && capValue !== null && portion > capValue) {
+          allocations.set(entry.index, capValue);
+          capped.push(entry);
+        } else {
+          provisional.push({ index: entry.index, portion });
+          uncapped.push(entry);
+        }
+      });
+
+      if (Number.isFinite(capValue) && capValue !== null && capped.length) {
+        remainingStake = remainingStake - (capValue * capped.length);
+        remaining = uncapped;
+        if (remainingStake <= 0) break;
+        continue;
+      }
+
+      provisional.forEach(entry => allocations.set(entry.index, entry.portion));
+      break;
+    }
+
+    if (!allocations.size) return null;
+    if (Number.isFinite(totalStake)) {
+      const roundedEntries = Array.from(allocations.entries()).map(([index, value]) => {
+        const floored = Math.floor(value);
+        return {
+          index,
+          value,
+          floored,
+          frac: value - floored
+        };
+      });
+      let sum = roundedEntries.reduce((acc, entry) => acc + entry.floored, 0);
+      let diff = Math.round(totalStake - sum);
+      if (diff !== 0) {
+        const sorted = [...roundedEntries].sort((a, b) => b.frac - a.frac);
+        if (diff > 0) {
+          for (let i = 0; i < sorted.length && diff > 0; i += 1) {
+            sorted[i].floored += 1;
+            diff -= 1;
+          }
+        } else {
+          const reverse = [...roundedEntries].sort((a, b) => a.frac - b.frac);
+          for (let i = 0; i < reverse.length && diff < 0; i += 1) {
+            if (reverse[i].floored > 0) {
+              reverse[i].floored -= 1;
+              diff += 1;
+            }
+          }
+        }
+      }
+      allocations.clear();
+      roundedEntries.forEach(entry => {
+        allocations.set(entry.index, entry.floored);
+      });
+    }
+    return { allocations, totalStake };
+  };
+
+  if (oddsSourceKey === 'live' && stakeMode !== 'flat') {
+    const weighted = resolveWeightedStakes(liveRows, {
+      totalStake: resolvedTotalStake,
+      maxStakePct: Number.isFinite(maxStakePct) ? maxStakePct : 0.2
+    });
+    if (weighted) {
+      liveRows.forEach((row, index) => {
+        const stakeValue = weighted.allocations.get(index);
+        if (Number.isFinite(stakeValue)) {
+          row.stake = Math.round(stakeValue);
+        }
+      });
+    }
+  }
 
   const emptyRowIndexes = rowList
     .map((row, idx) => (!row.player ? idx : null))
@@ -578,6 +844,44 @@ const main = () => {
     'edge'
   ]);
 
+  const outputJson = path.resolve(outputDir, 'betting-card.json');
+  const headerKeys = [
+    'season',
+    'book',
+    'odd_source',
+    'tournament_slug',
+    'event',
+    'odds_generated_at',
+    'odds_graded_at',
+    'player',
+    'dg_id',
+    'market',
+    'odds',
+    'stake',
+    'settled stake',
+    'total return',
+    'net',
+    'roi',
+    '',
+    'p_model',
+    'p_implied',
+    'edge'
+  ];
+  const jsonPayload = {
+    source: 'data/wagering/betting-card.csv',
+    updated_at: new Date().toISOString(),
+    headers: headerKeys.map(header => header || 'empty'),
+    rows: rowList.map(row => {
+      const out = {};
+      headerKeys.forEach(header => {
+        const key = header || 'empty';
+        out[key] = row[header] ?? '';
+      });
+      return out;
+    })
+  };
+  fs.writeFileSync(outputJson, `${JSON.stringify(jsonPayload, null, 2)}\n`);
+
   const inputsPayload = {
     season: String(season),
     market: String(market),
@@ -612,6 +916,7 @@ const main = () => {
   writeCsv(inputsCsv, inputRowsForCsv, ['season', 'market', 'odds_source', 'odds_eval_path', 'generated_at']);
 
   console.log(`✓ Betting card saved to ${outputCsv}`);
+  console.log(`✓ Betting card JSON saved to ${outputJson}`);
   console.log(`✓ Inputs saved to ${inputsJson} and ${inputsCsv}`);
 };
 

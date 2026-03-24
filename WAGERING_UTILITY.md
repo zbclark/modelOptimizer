@@ -1,7 +1,7 @@
 # WAGERING_UTILITY
 
 > **Project status (2026‑03‑18):** Paper bet validation is implemented and writing outputs to `data/wagering/validation/`. Current mode is **top 10 model‑probability bets per event** with $100 total stake split by Kelly fraction across **outrights + matchups + 3‑balls**. Outputs include `paper_bet_validation_2026.json/.csv/.md` plus `paper_bet_validation_2026_bets.csv`. DraftKings contest API fetch scaffolding exists in `utilities/draftkingsContestClient.js` and `scripts/fetch_dk_contest_results.js`, and it needs a valid contest key (prior attempt returned `CON‑109 Invalid contest key`).
-> **Next steps:** Obtain valid DraftKings contest IDs or contest results CSVs, fetch/cache contests to `data/contests/draftkings/`, add DK lineup comparison metrics (cash rate, ROI, percentile vs field, vs optimal) once payout data is available, and run DK lineup evaluation across all 2026 events in the manifest (eventId < 475).
+> **Next steps:** Obtain valid DraftKings contest IDs or contest results CSVs, fetch/cache contests to `data/wagering/contests/draftkings/`, add DK lineup comparison metrics (cash rate, ROI, percentile vs field, vs optimal) once payout data is available, and run DK lineup evaluation across all 2026 events in the manifest (eventId < 475).
 > **Note:** This document describes a *technical evaluation* workflow for comparing model probabilities vs market odds. It is **not** wagering advice.
 
 ## Goal
@@ -69,7 +69,7 @@ If you want **all coding done in Codespaces**, but **all runs done locally**, us
 
 This keeps your repo clean and versioned, while ensuring all execution happens on your personal computer.
 
-> **Review note (2026‑03‑18):** Run results (Valspar 2026 + DK slates) should be reviewed on a different device. Please open the latest summary markdown under `data/odds_eval/2026/` and the DK lineup outputs under `data/fantasy/draftkings/pga/`.
+> **Review note (2026‑03‑18):** Run results (Valspar 2026 + DK slates) should be reviewed on a different device. Please open the latest summary markdown under `data/odds_eval/2026/` and the DK lineup outputs under `data/wagering/fantasy/draftkings/pga/`.
 
 ---
 

@@ -20,10 +20,11 @@ data/wagering/**
 !data/wagering/inputs.csv
 !data/wagering/inputs.json
 
-# Odds + contest data
-data/contests/
-data/odds_archive/
-data/odds_live/
+# Odds + contest data (now under data/wagering)
+data/wagering/contests/
+data/wagering/fantasy/
+data/wagering/odds_archive/
+data/wagering/odds_live/
 
 # Local validation data exports
 

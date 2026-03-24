@@ -7,8 +7,8 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
-const ODDS_ARCHIVE_DIR = path.resolve(DATA_DIR, 'odds_archive');
-const DFS_ARCHIVE_DIR = path.resolve(DATA_DIR, 'odds_archive', 'draftkings');
+const ODDS_ARCHIVE_DIR = path.resolve(DATA_DIR, 'wagering', 'odds_archive');
+const DFS_ARCHIVE_DIR = path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'draftkings');
 
 const parseArgs = () => {
   const args = process.argv.slice(2);

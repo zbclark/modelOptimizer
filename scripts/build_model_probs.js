@@ -63,6 +63,32 @@ const resolvePreEventResultsPath = ({ season, tournamentSlug }) => {
   return preferred || files[0];
 };
 
+const resolveMatchupsPath = ({ tour, year, eventId, book }) => {
+  const safeTour = String(tour || 'pga').trim().toLowerCase() || 'pga';
+  const safeYear = String(year || '').trim();
+  const safeEventId = String(eventId || '').trim();
+  const safeBook = String(book || 'draftkings').trim().toLowerCase() || 'draftkings';
+  return path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'matchups', safeTour, safeYear, safeEventId, `${safeBook}.json`);
+};
+
+const resolveLiveMatchupsPath = ({ tour, market }) => {
+  const safeTour = String(tour || 'pga').trim().toLowerCase() || 'pga';
+  const safeMarket = String(market || 'tournament_matchups').trim().toLowerCase() || 'tournament_matchups';
+  return path.resolve(DATA_DIR, 'wagering', 'odds_live', 'matchups', safeTour, safeMarket, 'latest.json');
+};
+
+const resolveAnyMatchupsPath = ({ tour, year, eventId }) => {
+  const safeTour = String(tour || 'pga').trim().toLowerCase() || 'pga';
+  const safeYear = String(year || '').trim();
+  const safeEventId = String(eventId || '').trim();
+  const dir = path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'matchups', safeTour, safeYear, safeEventId);
+  if (!fs.existsSync(dir)) return null;
+  const files = fs.readdirSync(dir)
+    .filter(file => file.endsWith('.json'))
+    .map(file => path.resolve(dir, file));
+  return files[0] || null;
+};
+
 const scoreForPlayer = player => {
   const candidates = [
     player?.refinedWeightedScore,
@@ -111,6 +137,79 @@ const formatScore = value => {
   return value.toFixed(6);
 };
 
+const extractOddsEntries = payload => {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.data)) return payload.data;
+  if (Array.isArray(payload.odds)) return payload.odds;
+  if (Array.isArray(payload.players)) return payload.players;
+  if (Array.isArray(payload.results)) return payload.results;
+  if (Array.isArray(payload.match_list)) return payload.match_list;
+  return [];
+};
+
+const normalizeId = value => String(value || '').trim();
+
+const normalizeBetType = entry => String(entry?.bet_type || entry?.betType || entry?.market || entry?.type || '').trim().toLowerCase();
+
+const collectNumeric = value => (Number.isFinite(Number(value)) ? Number(value) : null);
+
+const extractPlayerFromEntry = (entry, prefix) => {
+  if (!entry) return null;
+  const direct = entry[prefix];
+  const base = typeof direct === 'object' && direct !== null ? direct : {};
+  const id = normalizeId(
+    entry[`${prefix}_dg_id`]
+    || entry[`${prefix}_dgId`]
+    || entry[`${prefix}_id`]
+    || entry[`${prefix}_player_id`]
+    || entry[`${prefix}_playerId`]
+    || base.dg_id
+    || base.dgId
+    || base.player_id
+    || base.playerId
+    || base.id
+  );
+  if (!id) return null;
+
+  const name = entry[`${prefix}_name`]
+    || entry[`${prefix}_player_name`]
+    || entry[`${prefix}_playerName`]
+    || base.player_name
+    || base.playerName
+    || base.name
+    || '';
+
+  const odds = collectNumeric(
+    entry[`${prefix}_odds`]
+    || entry[`${prefix}_odds_decimal`]
+    || entry[`${prefix}_oddsDecimal`]
+    || entry[`${prefix}_price`]
+    || base.odds
+    || base.odds_decimal
+    || base.oddsDecimal
+    || base.price
+  );
+
+  return { id, name, odds };
+};
+
+const extractMatchupEntries = payload => {
+  const entries = extractOddsEntries(payload);
+  if (!entries.length) return [];
+  return entries.map(entry => {
+    const p1 = extractPlayerFromEntry(entry, 'p1');
+    const p2 = extractPlayerFromEntry(entry, 'p2');
+    const p3 = extractPlayerFromEntry(entry, 'p3');
+    const players = [p1, p2, p3].filter(Boolean);
+    return {
+      betType: normalizeBetType(entry),
+      players,
+      raw: entry
+    };
+  }).filter(entry => entry.players.length >= 2);
+};
+
 const buildTopNProbabilities = (scores, topN) => {
   const avg = mean(scores);
   const sd = stdDev(scores) || 1;
@@ -119,16 +218,23 @@ const buildTopNProbabilities = (scores, topN) => {
   const targetRate = Math.min(Math.max(topN / fieldSize, 0), 1);
   const threshold = percentile(zScores, 1 - targetRate);
 
-  let low = 0.1;
-  let high = 20;
+  const averageProbability = scale => (
+    zScores.reduce((sum, z) => sum + logistic(scale * (z - threshold)), 0) / zScores.length
+  );
+
+  const minScale = 0.1;
+  const maxScale = 20;
+  let low = minScale;
+  let high = maxScale;
   let scale = 1;
+
   for (let i = 0; i < 30; i += 1) {
     scale = (low + high) / 2;
-    const avgProb = zScores.reduce((sum, z) => sum + logistic(scale * (z - threshold)), 0) / zScores.length;
+    const avgProb = averageProbability(scale);
     if (avgProb > targetRate) {
-      high = scale;
-    } else {
       low = scale;
+    } else {
+      high = scale;
     }
   }
 
@@ -158,6 +264,11 @@ const main = () => {
   const eventId = args.eventId || args.event;
   const tournamentSlug = args.tournamentSlug || args.slug;
   const tournamentName = args.tournamentName || args.name;
+  const tour = args.tour || 'pga';
+  const year = args.year || season;
+  const book = args.book || null;
+  const oddsSource = args.oddsSource || args.odds_source || 'live';
+  const oddsSourceKey = String(oddsSource || 'live').trim().toLowerCase();
   const market = String(args.market || 'win').trim().toLowerCase();
 
   if (!season) {
@@ -191,35 +302,114 @@ const main = () => {
   const winProbs = buildSoftmax(scores);
   let marketProbs = winProbs;
   let topN = null;
+  const isMatchupMarket = ['tournament_matchups', 'round_matchups', '3_balls', '3balls', '3-ball', '3ball'].includes(market);
 
-  if (market === 'top_5' || market === 'top5') {
-    topN = 5;
-    marketProbs = buildTopNProbabilities(scores, topN);
-  } else if (market === 'top_10' || market === 'top10') {
-    topN = 10;
-    marketProbs = buildTopNProbabilities(scores, topN);
-  } else if (market === 'top_20' || market === 'top20') {
-    topN = 20;
-    marketProbs = buildTopNProbabilities(scores, topN);
+  if (!isMatchupMarket) {
+    if (market === 'top_5' || market === 'top5') {
+      topN = 5;
+      marketProbs = buildTopNProbabilities(scores, topN);
+    } else if (market === 'top_10' || market === 'top10') {
+      topN = 10;
+      marketProbs = buildTopNProbabilities(scores, topN);
+    } else if (market === 'top_20' || market === 'top20') {
+      topN = 20;
+      marketProbs = buildTopNProbabilities(scores, topN);
+    }
   }
 
   const marketSlug = market.replace(/[^a-z0-9]+/g, '_');
-  const marketType = topN ? `top_${topN}` : 'outright_win';
   const runTimestamp = resultsPayload?.timestamp || new Date().toISOString();
-  const rows = players.map((player, index) => ({
-    run_timestamp: runTimestamp,
-    event_id: resolvedEventId,
-    season: String(season),
-    market_type: marketType,
-    player_id: player.dgId || player.playerId || '',
-    player_name: player.name || '',
-    opponent_ids: '',
-    p_model: marketProbs[index],
-    p_win: winProbs[index],
-    p_top_n: topN ? marketProbs[index] : '',
-    score: scores[index],
-    summary: `${player.name || 'Unknown'} | market=${marketType} | p_model=${formatProb(marketProbs[index])} | p_win=${formatProb(winProbs[index])} | score=${formatScore(scores[index])}`
-  }));
+  let rows = [];
+
+  if (isMatchupMarket) {
+    const scoreById = new Map();
+    players.forEach(player => {
+      const playerId = normalizeId(player.dgId || player.playerId);
+      if (!playerId) return;
+      const score = scoreForPlayer(player);
+      if (!Number.isFinite(score)) return;
+      scoreById.set(playerId, score);
+    });
+
+    if (!scoreById.size) {
+      console.error('❌ Could not build matchup model scores from pre_event results.');
+      process.exit(1);
+    }
+
+    let oddsPath = null;
+    if (oddsSourceKey === 'live') {
+      oddsPath = resolveLiveMatchupsPath({ tour, market });
+    } else {
+      oddsPath = resolveMatchupsPath({ tour, year, eventId: resolvedEventId, book });
+      if (!oddsPath || !fs.existsSync(oddsPath)) {
+        oddsPath = resolveAnyMatchupsPath({ tour, year, eventId: resolvedEventId });
+      }
+    }
+
+    if (!oddsPath || !fs.existsSync(oddsPath)) {
+      console.warn('⚠️  No matchup odds payload found for model_probs. Skipping.');
+      process.exit(0);
+    }
+
+    const oddsPayload = readJson(oddsPath);
+    const matchupEntries = extractMatchupEntries(oddsPayload);
+    if (!matchupEntries.length) {
+      console.warn('⚠️  Matchup odds payload has no entries. Skipping.');
+      process.exit(0);
+    }
+
+    rows = matchupEntries.flatMap(entry => {
+      const playerIds = entry.players.map(player => player.id);
+      const scoresForMatch = playerIds.map(id => scoreById.get(id));
+      if (scoresForMatch.some(score => !Number.isFinite(score))) return [];
+
+      let probs = [];
+      if (entry.players.length === 2) {
+        const diff = scoresForMatch[0] - scoresForMatch[1];
+        const p1 = logistic(diff);
+        probs = [p1, 1 - p1];
+      } else if (entry.players.length === 3) {
+        probs = buildSoftmax(scoresForMatch);
+      } else {
+        return [];
+      }
+
+      return entry.players.map((player, index) => {
+        const opponents = playerIds.filter(id => id !== player.id);
+        const pModel = probs[index];
+        return {
+          run_timestamp: runTimestamp,
+          event_id: resolvedEventId,
+          season: String(season),
+          market_type: market,
+          player_id: player.id,
+          player_name: player.name || '',
+          opponent_ids: opponents.join(','),
+          p_model: pModel,
+          p_win: pModel,
+          p_top_n: '',
+          score: scoreById.get(player.id),
+          summary: `${player.name || 'Unknown'} | market=${market} | opponents=${opponents.join(',')} | p_model=${formatProb(pModel)} | score=${formatScore(scoreById.get(player.id))}`
+        };
+      });
+    });
+  } else {
+    const marketType = topN ? `top_${topN}` : 'outright_win';
+    rows = players.map((player, index) => ({
+      run_timestamp: runTimestamp,
+      event_id: resolvedEventId,
+      season: String(season),
+      market_type: marketType,
+      player_id: player.dgId || player.playerId || '',
+      player_name: player.name || '',
+      opponent_ids: '',
+      p_model: marketProbs[index],
+      p_win: winProbs[index],
+      p_top_n: topN ? marketProbs[index] : '',
+      score: scores[index],
+      summary: `${player.name || 'Unknown'} | market=${marketType} | p_model=${formatProb(marketProbs[index])} | p_win=${formatProb(winProbs[index])} | score=${formatScore(scores[index])}`
+    }));
+  }
 
   const outputDir = path.resolve(DATA_DIR, 'wagering', resolvedSlug, 'inputs');
   const outputPath = path.resolve(outputDir, `${resolvedSlug}_${marketSlug}_model_probs.csv`);

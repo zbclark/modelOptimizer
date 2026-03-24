@@ -8,8 +8,8 @@ const { getDataGolfLiveMatchups } = require('../utilities/dataGolfClient');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
-const CACHE_DIR = path.resolve(DATA_DIR, 'cache');
-const ODDS_LIVE_DIR = path.resolve(DATA_DIR, 'odds_live');
+const CACHE_DIR = path.resolve(DATA_DIR, 'wagering', 'odds_live', 'cache', 'datagolf');
+const ODDS_LIVE_DIR = path.resolve(DATA_DIR, 'wagering', 'odds_live');
 
 const ensureDir = dirPath => {
   if (!dirPath) return;

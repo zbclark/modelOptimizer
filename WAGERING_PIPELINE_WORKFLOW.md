@@ -53,7 +53,7 @@ The desired output structure below is the **target** layout. To fully support it
 **Default behavior (requested):**
 
 - If `--market` is omitted or set to `all`, the pipeline iterates **all supported markets**.
-- If `--year` is omitted for historical, the pipeline uses **all available years** found under `data/odds_archive/outrights/{tour}/`.
+- If `--year` is omitted for historical, the pipeline uses **all available years** found under `data/wagering/odds_archive/outrights/{tour}/`.
 - `--oddsFormat` (default: `decimal`)
 - Current season is included automatically when `--oddsSource historical` (useful for post-tournament updates).
 
@@ -79,10 +79,10 @@ The desired output structure below is the **target** layout. To fully support it
 
 **Output data:**
 
-- Historical outrights: `data/odds_archive/outrights/{tour}/{year}/{market}/{eventId}/{book}.json`
-- Historical matchups: `data/odds_archive/matchups/{tour}/{year}/{eventId}/{book}.json`
-- Live outrights: `data/odds_live/outrights/{tour}/{market}/latest.json`
-- Live matchups / 3-balls: `data/odds_live/matchups/{tour}/{market}/latest.json`
+- Historical outrights: `data/wagering/odds_archive/outrights/{tour}/{year}/{market}/{eventId}/{book}.json`
+- Historical matchups: `data/wagering/odds_archive/matchups/{tour}/{year}/{eventId}/{book}.json`
+- Live outrights: `data/wagering/odds_live/outrights/{tour}/{market}/latest.json`
+- Live matchups / 3-balls: `data/wagering/odds_live/matchups/{tour}/{market}/latest.json`
 
 ---
 
@@ -232,7 +232,7 @@ The desired output structure below is the **target** layout. To fully support it
 
 **Output data:**
 
-- DraftKings lineup outputs under `data/fantasy/draftkings/pga/`
+- DraftKings lineup outputs under `data/wagering/fantasy/draftkings/pga/`
 
 ---
 
@@ -259,7 +259,7 @@ The desired output structure below is the **target** layout. To fully support it
 
 ### D) Historical odds cache (reduce weekly API calls)
 
-Use the historical cache runner to pre-fetch and store odds snapshots by year/event/book/market under `data/odds_archive/`. Weekly runs can then use `--skipOddsFetch` to avoid re-calling the API.
+Use the historical cache runner to pre-fetch and store odds snapshots by year/event/book/market under `data/wagering/odds_archive/`. Weekly runs can then use `--skipOddsFetch` to avoid re-calling the API.
 
 **Script:**
 
@@ -295,7 +295,7 @@ Use this after results post to refresh any missing historical odds cache entries
 
 - Matchups and 3-balls require model CSVs with `opponent_ids`.
 - If you want DFS backtesting, use `scripts/fetch_historical_dfs_points.js` to build a DFS archive for join and validation.
-- DFS points payload already includes salaries/ownership; cached under `data/odds_archive/draftkings/{eventId}.json` via `scripts/fetch_historical_dfs_points.js`.
+- DFS points payload already includes salaries/ownership; cached under `data/wagering/odds_archive/draftkings/{eventId}.json` via `scripts/fetch_historical_dfs_points.js`.
 
 ---
 
@@ -373,7 +373,7 @@ data/
     "odds_source": "historical",
     "generated_at": "2026-03-18T15:40:00.000Z",
     "outputs": [
-      { "label": "Odds archive", "path": "data/odds_archive/...", "exists": true },
+      { "label": "Odds archive", "path": "data/wagering/odds_archive/...", "exists": true },
       { "label": "Model probabilities", "path": "data/wagering/the-valspar/inputs/...", "exists": true },
       { "label": "Odds join", "path": "data/wagering/the-valspar/inputs/...", "exists": true },
       { "label": "Odds evaluation", "path": "data/wagering/the-valspar/inputs/...", "exists": true },

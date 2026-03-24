@@ -38,7 +38,7 @@ const DEFAULT_OUTPUT_DIR_NAME = 'validation_outputs';
 const METRIC_ANALYSIS_DIR_NAME = 'metric_analysis';
 const TEMPLATE_CORRELATION_DIR_NAME = 'template_correlation_summaries';
 const ROOT_DIR = path.resolve(__dirname, '..');
-const DATAGOLF_CACHE_DIR = path.resolve(ROOT_DIR, 'data', 'cache');
+const DATAGOLF_CACHE_DIR = path.resolve(ROOT_DIR, 'data', 'cache', 'historical_rounds');
 const METRIC_ANALYSIS_VERSION = 3;
 const EVENT_ONLY_LOW_DATA_THRESHOLD = 0;
 const DATAGOLF_API_KEY = String(process.env.DATAGOLF_API_KEY || '').trim();
@@ -3539,11 +3539,31 @@ const buildNestedMetricWeights = (flatMetricWeights = {}) => {
   return nested;
 };
 
+const applyTemplateUpdateComment = (content, commentLine) => {
+  if (!commentLine || typeof commentLine !== 'string') return content;
+  const normalizedComment = commentLine.trim().startsWith('//')
+    ? commentLine.trim()
+    : `// ${commentLine.trim()}`;
+  if (!normalizedComment) return content;
+  const lines = String(content || '').split('\n');
+  const firstNonEmpty = lines.findIndex(line => line.trim().length > 0);
+  if (firstNonEmpty === -1) {
+    return `${normalizedComment}\n${content || ''}`.trimEnd();
+  }
+  const existing = lines[firstNonEmpty].trim();
+  if (/^\/\/\s*Updated\s+(before|after)\s+/i.test(existing)) {
+    lines[firstNonEmpty] = normalizedComment;
+  } else {
+    lines.splice(firstNonEmpty, 0, normalizedComment);
+  }
+  return lines.join('\n');
+};
+
 const formatWeightTemplatesFile = (templates = {}) => {
   return `const WEIGHT_TEMPLATES = ${JSON.stringify(templates, null, 2)};\n\nmodule.exports = { WEIGHT_TEMPLATES };\n`;
 };
 
-const updateBaselineTemplatesFile = ({ blendedTemplatesByType, logger = console, dryRun = false, outputDir = null }) => {
+const updateBaselineTemplatesFile = ({ blendedTemplatesByType, logger = console, dryRun = false, outputDir = null, updateComment = null }) => {
   if (!blendedTemplatesByType || Object.keys(blendedTemplatesByType).length === 0) return null;
   const templatePath = path.resolve(__dirname, '..', 'utilities', 'weightTemplates.js');
   let existingTemplates = {};
@@ -3570,7 +3590,10 @@ const updateBaselineTemplatesFile = ({ blendedTemplatesByType, logger = console,
     };
   });
 
-  const payload = formatWeightTemplatesFile(updated);
+  let payload = formatWeightTemplatesFile(updated);
+  if (updateComment) {
+    payload = applyTemplateUpdateComment(payload, updateComment);
+  }
   if (dryRun) {
     const baseName = path.basename(templatePath, path.extname(templatePath));
     const dryRunName = `dryrun_${baseName}${path.extname(templatePath) || '.js'}`;
@@ -6473,12 +6496,16 @@ const runValidation = async ({
   const shouldWriteTemplates = !!writeTemplates;
   const shouldDryRunTemplates = !!dryRun && !shouldWriteTemplates;
   const dryRunTemplateDir = dryRunDir || (postEventDir ? path.resolve(postEventDir, 'dryrun') : null);
+  const templateUpdateComment = tournamentName
+    ? `Updated after ${tournamentName}`
+    : (season ? `Updated after season ${season}` : null);
   if (shouldWriteTemplates || shouldDryRunTemplates) {
     const updatedPath = updateBaselineTemplatesFile({
       blendedTemplatesByType: blendedByType,
       logger,
       dryRun: shouldDryRunTemplates,
-      outputDir: dryRunTemplateDir
+      outputDir: dryRunTemplateDir,
+      updateComment: templateUpdateComment
     });
     if (updatedPath) {
       const label = shouldWriteTemplates ? '✓ Updated baseline templates' : '🧪 Dry-run template output saved';

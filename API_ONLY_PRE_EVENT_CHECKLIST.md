@@ -73,4 +73,4 @@ Use this checklist when **no CSV inputs are available** (no config sheet, histor
 - If **similar/putting lists are unknown**, start with a conservative default and revise after first validation pass.
 
 - `tmux kill-session -t valspar_post_seeds`
-- `tmux new-session -d -s {} 'for s in a b c d e; do echo "Seed $s"; OPT_SEED="$s" node core/optimizer.js --event {} --season 2026 --name "{}" --post --log; done; read'`
+- `tmux new-session -d -s {} 'for s in a b c d e; do echo "Seed $s"; OPT_SEED="$s" node core/optimizer.js --event {} --season 2026 --name "{}" --post --log; done'`

@@ -1,49 +1,49 @@
 "BALANCED - Aggregated Metric Analysis"
-"Tournaments: American Express (2026), Arnold Palmer Invitational (2026), Farmers (2026), Genesis Invitational (2026), Pebble Beach (2026), Sony Open (2026), Wm Phoenix Open (2026), Valspar (2026)"
+"Tournaments: American Express (2026), Arnold Palmer Invitational (2026), Farmers (2026), Genesis Invitational (2026), Pebble Beach (2026), Sony Open (2026), The Valspar (2026), Valspar (2026), Wm Phoenix Open (2026)"
 
 "Metric","Avg Delta (Top 10 vs Field)","Avg Correlation","Tournament Count"
-"Driving Distance","10.597","0.3872",8
-"Driving Accuracy","0.042","0.2862",8
-"SG OTT","0.386","0.3110",8
-"Approach <100 GIR","0.078","0.1689",8
-"Approach <100 SG","0.055","0.0718",8
-"Approach <100 Prox","-1.026","-0.0273",8
-"Approach <150 FW GIR","0.116","0.0986",8
-"Approach <150 FW SG","0.083","0.1410",8
-"Approach <150 FW Prox","0.188","0.0127",8
-"Approach <150 Rough GIR","-0.037","0.1373",8
-"Approach <150 Rough SG","0.048","0.1208",8
-"Approach <150 Rough Prox","4.833","0.0095",8
-"Approach <200 FW GIR","0.090","0.1560",8
-"Approach <200 FW SG","0.089","0.1427",8
-"Approach <200 FW Prox","-3.566","0.0031",8
-"Approach >150 Rough GIR","0.071","0.1388",8
-"Approach >150 Rough SG","0.076","0.1530",8
-"Approach >150 Rough Prox","1.513","-0.0041",8
-"Approach >200 FW GIR","0.129","0.1176",8
-"Approach >200 FW SG","0.054","0.1050",8
-"Approach >200 FW Prox","2.436","0.1011",8
-"SG Putting","0.710","0.4726",8
-"SG Around Green","0.304","0.2522",8
-"SG T2G","1.435","0.5918",8
-"Scoring Average","-0.094","0.1726",8
-"Birdie Chances Created","0.254","0.1954",8
-"Birdies or Better","0.210","0.1758",8
-"Greens in Regulation","0.068","0.5489",8
-"Scoring: Approach <100 SG","0.073","0.0881",8
-"Scoring: Approach <150 FW SG","0.087","0.0785",8
-"Scoring: Approach <150 Rough SG","0.217","0.0761",8
-"Scoring: Approach >150 Rough SG","0.133","0.1010",8
-"Scoring: Approach <200 FW SG","0.127","0.0787",8
-"Scoring: Approach >200 FW SG","0.182","0.1280",8
-"Scrambling","0.014","0.1270",8
-"Great Shots","0.156","0.0872",8
-"Poor Shot Avoidance","-0.005","0.0830",8
-"Course Management: Approach <100 Prox","1.115","0.0113",8
-"Course Management: Approach <150 FW Prox","1.764","-0.0123",8
-"Course Management: Approach <150 Rough Prox","1.754","0.0644",8
-"Course Management: Approach >150 Rough Prox","5.281","0.0763",8
-"Course Management: Approach <200 FW Prox","1.627","0.0065",8
-"Course Management: Approach >200 FW Prox","3.456","0.0135",8
+"Driving Distance","9.670","0.3552",9
+"Driving Accuracy","0.038","0.2665",9
+"SG OTT","0.391","0.2983",9
+"Approach <100 GIR","0.070","0.1410",9
+"Approach <100 SG","0.044","0.0642",9
+"Approach <100 Prox","-0.588","-0.0088",9
+"Approach <150 FW GIR","0.116","0.1172",9
+"Approach <150 FW SG","0.078","0.1492",9
+"Approach <150 FW Prox","0.333","0.0247",9
+"Approach <150 Rough GIR","-0.028","0.1343",9
+"Approach <150 Rough SG","0.045","0.1169",9
+"Approach <150 Rough Prox","4.260","0.0167",9
+"Approach <200 FW GIR","0.090","0.1704",9
+"Approach <200 FW SG","0.082","0.1463",9
+"Approach <200 FW Prox","-3.130","0.0101",9
+"Approach >150 Rough GIR","0.065","0.1330",9
+"Approach >150 Rough SG","0.068","0.1382",9
+"Approach >150 Rough Prox","1.320","-0.0063",9
+"Approach >200 FW GIR","0.130","0.1472",9
+"Approach >200 FW SG","0.057","0.1216",9
+"Approach >200 FW Prox","1.581","0.0702",9
+"SG Putting","0.729","0.4879",9
+"SG Around Green","0.334","0.2642",9
+"SG T2G","1.488","0.6005",9
+"Scoring Average","-0.025","0.1555",9
+"Birdie Chances Created","0.242","0.1802",9
+"Birdies or Better","0.198","0.1650",9
+"Greens in Regulation","0.070","0.5423",9
+"Scoring: Approach <100 SG","0.060","0.0790",9
+"Scoring: Approach <150 FW SG","0.026","0.0672",9
+"Scoring: Approach <150 Rough SG","0.241","0.0814",9
+"Scoring: Approach >150 Rough SG","0.134","0.0805",9
+"Scoring: Approach <200 FW SG","0.150","0.0738",9
+"Scoring: Approach >200 FW SG","0.148","0.1105",9
+"Scrambling","0.014","0.1135",9
+"Great Shots","0.153","0.0823",9
+"Poor Shot Avoidance","-0.026","0.0887",9
+"Course Management: Approach <100 Prox","1.133","0.0233",9
+"Course Management: Approach <150 FW Prox","1.856","0.0076",9
+"Course Management: Approach <150 Rough Prox","1.861","0.0606",9
+"Course Management: Approach >150 Rough Prox","4.483","0.0799",9
+"Course Management: Approach <200 FW Prox","1.309","0.0239",9
+"Course Management: Approach >200 FW Prox","3.477","0.0303",9
 
 "Note: Metrics show average delta and correlation across all tournaments of this type"

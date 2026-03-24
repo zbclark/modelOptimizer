@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-23T09:19:23-05:00",
+  "generatedAt": "2026-03-23T16:11:53-05:00",
   "entries": [
     {
       "tournament": "american-express",
@@ -106,6 +106,19 @@
       "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/the-players_top20_template_blend.json"
     },
     {
+      "tournament": "the-valspar",
+      "displayName": "The Valspar (2026)",
+      "eventId": "475",
+      "courseType": "BALANCED",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.027144923988702746,
+        "TECHNICAL": 0.03815710474408829,
+        "BALANCED": 0.03780181185549124
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/the-valspar_top20_template_blend.json"
+    },
+    {
       "tournament": "wm-phoenix-open",
       "displayName": "Wm Phoenix Open (2026)",
       "eventId": "3",
@@ -117,15 +130,6 @@
         "BALANCED": 0.025931453827825465
       },
       "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/wm-phoenix-open_top20_template_blend.json"
-    },
-    {
-      "tournament": "valspar",
-      "displayName": "Valspar (2026)",
-      "eventId": "475",
-      "courseType": "BALANCED",
-      "source": "course_context",
-      "alignmentScores": null,
-      "blendSource": null
     }
   ]
 }

@@ -3,7 +3,7 @@ const path = require('path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
-const ODDS_ARCHIVE_DIR = path.resolve(DATA_DIR, 'odds_archive');
+const ODDS_ARCHIVE_DIR = path.resolve(DATA_DIR, 'wagering', 'odds_archive');
 
 const DEFAULT_MARKETS = ['win', 'top_5', 'top_10', 'top_20', 'make_cut', 'mc'];
 const DEFAULT_BOOKS_OUTRIGHTS = ['bet365', 'caesars', 'sportsbook', 'draftkings'];

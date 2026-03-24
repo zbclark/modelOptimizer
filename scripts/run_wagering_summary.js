@@ -269,7 +269,7 @@ const main = () => {
   const edgeSummaryCsvPath = edgeSummaryPath
     ? edgeSummaryPath.replace(/_edge_summary\.json$/i, '_edge_summary.csv')
     : null;
-  const dkOutputDir = path.resolve(DATA_DIR, 'fantasy', dkSite, tour, dkSlate);
+  const dkOutputDir = path.resolve(DATA_DIR, 'wagering', 'fantasy', dkSite, tour, dkSlate);
   const dkLineupsJson = path.resolve(dkOutputDir, 'top_lineups.json');
   const dkLineupsCsv = path.resolve(dkOutputDir, 'top_lineups.csv');
 

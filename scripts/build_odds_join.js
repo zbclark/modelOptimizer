@@ -161,7 +161,7 @@ const resolveOutrightsPath = ({ tour, year, market, book, eventId }) => {
   const safeMarket = String(market || 'win').trim().toLowerCase() || 'win';
   const safeBook = String(book || 'draftkings').trim().toLowerCase() || 'draftkings';
   const safeEventId = String(eventId || '').trim();
-  return path.resolve(DATA_DIR, 'odds_archive', 'outrights', safeTour, safeYear, safeMarket, safeEventId, `${safeBook}.json`);
+  return path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'outrights', safeTour, safeYear, safeMarket, safeEventId, `${safeBook}.json`);
 };
 
 const resolveMatchupsPath = ({ tour, year, book, eventId }) => {
@@ -169,19 +169,19 @@ const resolveMatchupsPath = ({ tour, year, book, eventId }) => {
   const safeYear = String(year || '').trim();
   const safeBook = String(book || 'draftkings').trim().toLowerCase() || 'draftkings';
   const safeEventId = String(eventId || '').trim();
-  return path.resolve(DATA_DIR, 'odds_archive', 'matchups', safeTour, safeYear, safeEventId, `${safeBook}.json`);
+  return path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'matchups', safeTour, safeYear, safeEventId, `${safeBook}.json`);
 };
 
 const resolveLiveOutrightsPath = ({ tour, market }) => {
   const safeTour = String(tour || 'pga').trim().toLowerCase() || 'pga';
   const safeMarket = String(market || 'win').trim().toLowerCase() || 'win';
-  return path.resolve(DATA_DIR, 'odds_live', 'outrights', safeTour, safeMarket, 'latest.json');
+  return path.resolve(DATA_DIR, 'wagering', 'odds_live', 'outrights', safeTour, safeMarket, 'latest.json');
 };
 
 const resolveLiveMatchupsPath = ({ tour, market }) => {
   const safeTour = String(tour || 'pga').trim().toLowerCase() || 'pga';
   const safeMarket = String(market || 'tournament_matchups').trim().toLowerCase() || 'tournament_matchups';
-  return path.resolve(DATA_DIR, 'odds_live', 'matchups', safeTour, safeMarket, 'latest.json');
+  return path.resolve(DATA_DIR, 'wagering', 'odds_live', 'matchups', safeTour, safeMarket, 'latest.json');
 };
 
 const impliedProbabilityFromDecimal = oddsDecimal => {
@@ -277,8 +277,9 @@ const normalizeBetType = entry => String(entry?.bet_type || entry?.betType || en
 
 const collectNumeric = value => (Number.isFinite(Number(value)) ? Number(value) : null);
 
-const extractPlayerFromEntry = (entry, prefix) => {
+const extractPlayerFromEntry = (entry, prefix, options = {}) => {
   if (!entry) return null;
+  const { book } = options;
   const direct = entry[prefix];
   const base = typeof direct === 'object' && direct !== null ? direct : {};
   const id = normalizeId(
@@ -295,7 +296,7 @@ const extractPlayerFromEntry = (entry, prefix) => {
   );
   if (!id) return null;
 
-  const odds = collectNumeric(
+  let odds = collectNumeric(
     entry[`${prefix}_odds`]
     || entry[`${prefix}_odds_decimal`]
     || entry[`${prefix}_oddsDecimal`]
@@ -305,6 +306,19 @@ const extractPlayerFromEntry = (entry, prefix) => {
     || base.oddsDecimal
     || base.price
   );
+
+  if (odds === null || odds === undefined) {
+    const oddsPayload = entry.odds && typeof entry.odds === 'object' ? entry.odds : null;
+    if (oddsPayload) {
+      const bookKey = String(book || '').trim().toLowerCase();
+      if (bookKey && oddsPayload[bookKey]) {
+        const bookOdds = oddsPayload[bookKey];
+        if (bookOdds && typeof bookOdds === 'object') {
+          odds = collectNumeric(bookOdds[prefix]);
+        }
+      }
+    }
+  }
 
   const name = entry[`${prefix}_name`]
     || entry[`${prefix}_player_name`]
@@ -327,13 +341,13 @@ const extractPlayerFromEntry = (entry, prefix) => {
   return { id, odds, outcome, name };
 };
 
-const extractMatchupEntries = payload => {
+const extractMatchupEntries = (payload, options = {}) => {
   const entries = extractOddsEntries(payload);
   if (!entries.length) return [];
   return entries.map(entry => {
-    const p1 = extractPlayerFromEntry(entry, 'p1');
-    const p2 = extractPlayerFromEntry(entry, 'p2');
-    const p3 = extractPlayerFromEntry(entry, 'p3');
+    const p1 = extractPlayerFromEntry(entry, 'p1', options);
+    const p2 = extractPlayerFromEntry(entry, 'p2', options);
+    const p3 = extractPlayerFromEntry(entry, 'p3', options);
     const players = [p1, p2, p3].filter(Boolean);
     const oddsById = new Map();
     const outcomeById = new Map();
@@ -438,10 +452,10 @@ const main = () => {
   const marketType = String(market || '').trim().toLowerCase();
 
   if (isMatchupMarket) {
-    const matchupEntries = extractMatchupEntries(oddsPayload);
+    const matchupEntries = extractMatchupEntries(oddsPayload, { book });
     if (!matchupEntries.length) {
-      console.error('❌ Odds payload has no matchup entries.');
-      process.exit(1);
+      console.warn('⚠️  Odds payload has no matchup entries. Skipping join.');
+      process.exit(0);
     }
 
     const runTimestamp = modelRows[0]?.run_timestamp || new Date().toISOString();
@@ -496,8 +510,8 @@ const main = () => {
   } else {
     const oddsEntries = extractOddsEntries(oddsPayload);
     if (!oddsEntries.length) {
-      console.error('❌ Odds payload has no entries.');
-      process.exit(1);
+      console.warn('⚠️  Odds payload has no entries. Skipping join.');
+      process.exit(0);
     }
 
     const oddsById = new Map();

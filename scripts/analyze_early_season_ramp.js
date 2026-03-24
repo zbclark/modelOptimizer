@@ -103,7 +103,7 @@ const tourFilter = OVERRIDE_TOURS
 const datagolfApiKey = process.env.DATAGOLF_API_KEY || '';
 const datagolfCacheDir = process.env.DATAGOLF_CACHE_DIR
   ? path.resolve(process.env.DATAGOLF_CACHE_DIR)
-  : path.resolve(ROOT_DIR, 'data', 'cache');
+  : path.resolve(ROOT_DIR, 'data', 'cache', 'historical_rounds');
 const debugApi = OVERRIDE_DEBUG_API || String(process.env.DATAGOLF_DEBUG || '').trim().toLowerCase() === 'true';
 
 const listCsvFiles = dir => {
