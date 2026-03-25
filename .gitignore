@@ -13,10 +13,6 @@ data/2026/
 # API cache (field, historical rounds, odds, weather, rankings)
 data/cache/
 
-# Approach snapshots and deltas (regenerated each run)
-data/approach_snapshot/
-data/approach_deltas/
-
 # DraftKings / fantasy DFS files
 data/fantasy/
 
