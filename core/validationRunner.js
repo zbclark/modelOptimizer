@@ -5936,6 +5936,17 @@ const runValidation = async ({
     // snapshot pair.
     const applyEventOnlyRows = ({ label, beforeRows, afterRows, sourceNote }) => {
       const eventOnly = buildEventOnlyApproachRowsFromSnapshots({ beforeRows, afterRows });
+      if (!eventOnly || !Array.isArray(eventOnly.rows)) {
+        // Defensive guard: ensure the utility returns the expected shape so we don't
+        // crash with "Cannot read properties of undefined" if its contract changes.
+        const typeDescription =
+          eventOnly === null ? 'null' : typeof eventOnly;
+        throw new Error(
+          `buildEventOnlyApproachRowsFromSnapshots(...) contract violation: ` +
+          `expected an object with a 'rows' array (and 'playersWithShots' count), ` +
+          `but received value of type ${typeDescription}.`
+        );
+      }
       if (eventOnly.rows.length > 0) {
         approachEventOnlyMap = new Map();
         eventOnly.rows.forEach(row => {
