@@ -38,6 +38,7 @@ data/odds_live/
 
 # Logs
 *.log
+logs/
 
 # Archive folders
 data/2025/**/[Aa][Rr][Cc][Hh][Ii][Vv][Ee]/

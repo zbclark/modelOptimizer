@@ -72,5 +72,66 @@ Use this checklist when **no CSV inputs are available** (no config sheet, histor
 - If **approach skills are unavailable**, consider disabling approach to avoid partial blends.
 - If **similar/putting lists are unknown**, start with a conservative default and revise after first validation pass.
 
-- `tmux kill-session -t valspar_post_seeds`
-- `tmux new-session -d -s {} 'for s in a b c d e; do echo "Seed $s"; OPT_SEED="$s" node core/optimizer.js --event {} --season 2026 --name "{}" --post --log; done; read'`
+---
+
+## Running in the Background (Can I Close My Computer?)
+
+Optimizer runs — especially multi-seed post-event runs — can take several minutes. If you want to close your terminal or step away **without killing the process**, use one of the following approaches.
+
+### Option A: `nohup` (simplest — survives terminal close)
+
+```bash
+nohup node core/optimizer.js --event <EVENT_ID> --season <SEASON> --name "<TOURNAMENT_NAME>" --post --log \
+  > logs/optimizer_run.log 2>&1 &
+echo "Running as PID $!"
+```
+
+> `--post` forces post-event mode (use `--pre` for pre-event); `--log` enables verbose file logging in the run output directory.
+
+- Output is written to `logs/optimizer_run.log` (create the `logs/` folder first if it doesn't exist).
+- The process keeps running after you close your terminal.
+- To follow along: `tail -f logs/optimizer_run.log`
+- **Closing your computer (suspend/shutdown) will still stop the process.** Use a remote machine or tmux if you need the run to persist across a sleep/shutdown.
+
+### Option B: `tmux` (survives terminal close; persists while the machine stays on)
+
+**Start a named tmux session and run seeds inside it:**
+
+```bash
+# Create a detached session named after the event
+tmux new-session -d -s <SESSION_NAME> \
+  'for s in a b c d e; do
+     echo "=== Seed $s ===";
+     OPT_SEED="$s" node core/optimizer.js \
+       --event <EVENT_ID> --season <SEASON> --name "<TOURNAMENT_NAME>" --post --log;
+   done; echo "All seeds complete."; read'
+```
+
+Replace `<SESSION_NAME>`, `<EVENT_ID>`, `<SEASON>`, and `<TOURNAMENT_NAME>` with your values (e.g., `valspar_post_seeds`, `480`, `2026`, `"The Valspar Championship"`).
+
+**Attach / detach:**
+
+```bash
+tmux attach -t <SESSION_NAME>   # re-attach to watch progress
+# Press Ctrl+B then D to detach again (leaves run going)
+```
+
+**Kill the session when done:**
+
+```bash
+tmux kill-session -t <SESSION_NAME>
+```
+
+### Option C: Use `scripts/run_background.sh` helper
+
+A convenience wrapper is available at `scripts/run_background.sh`:
+
+```bash
+bash scripts/run_background.sh \
+  --event <EVENT_ID> \
+  --season <SEASON> \
+  --name "<TOURNAMENT_NAME>" \
+  [--post] [--seeds a,b,c,d,e]
+```
+
+This wraps the run with `nohup`, writes output to `logs/`, and prints the PID for monitoring.
