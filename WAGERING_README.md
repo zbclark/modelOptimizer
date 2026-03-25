@@ -228,6 +228,7 @@ Matchups:
 
 **`betting-card.csv` columns** (exact):
 
+> Note: The raw `betting-card.csv` includes one intentionally blank header (column 248). This unnamed column is reserved as a positional placeholder for future use and for compatibility with existing ingestion code. If you do not need this column, you may safely drop it when loading the file.
 ```text
 season,
 book,
