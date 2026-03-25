@@ -3444,9 +3444,11 @@ const buildNestedMetricWeights = (flatMetricWeights = {}) => {
 const applyTemplateUpdateComment = (content, commentLine) => {
   if (!commentLine || typeof commentLine !== 'string') return content;
   const sanitizedComment = commentLine.replace(/[\r\n]+/g, ' ');
-  const normalizedComment = sanitizedComment.trim().startsWith('//')
-    ? sanitizedComment.trim()
-    : `// ${sanitizedComment.trim()}`;
+  const trimmed = sanitizedComment.trim();
+  if (trimmed.length === 0) return content;
+  const normalizedComment = trimmed.startsWith('//')
+    ? trimmed
+    : `// ${trimmed}`;
   if (!normalizedComment) return content;
   const lines = String(content || '').split('\n');
   const firstNonEmpty = lines.findIndex(line => line.trim().length > 0);
