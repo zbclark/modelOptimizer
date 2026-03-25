@@ -1,0 +1,135 @@
+{
+  "generatedAt": "2026-03-23T16:11:53-05:00",
+  "entries": [
+    {
+      "tournament": "american-express",
+      "displayName": "American Express (2026)",
+      "eventId": "2",
+      "courseType": "BALANCED",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.01690936148326989,
+        "TECHNICAL": 0.024540067455917584,
+        "BALANCED": 0.02424290585378565
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/american-express_top20_template_blend.json"
+    },
+    {
+      "tournament": "arnold-palmer-invitational",
+      "displayName": "Arnold Palmer Invitational (2026)",
+      "eventId": "9",
+      "courseType": "BALANCED",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.017899965889311385,
+        "TECHNICAL": 0.02545140517989736,
+        "BALANCED": 0.02604341383130807
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/arnold-palmer-invitational_top20_template_blend.json"
+    },
+    {
+      "tournament": "cognizant-classic",
+      "displayName": "Cognizant Classic (2026)",
+      "eventId": "10",
+      "courseType": "TECHNICAL",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.01898903607154036,
+        "TECHNICAL": 0.02593480519427418,
+        "BALANCED": 0.027015908315575703
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/cognizant-classic_top20_template_blend.json"
+    },
+    {
+      "tournament": "farmers",
+      "displayName": "Farmers (2026)",
+      "eventId": "4",
+      "courseType": "BALANCED",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.020750786661726934,
+        "TECHNICAL": 0.028357505401782123,
+        "BALANCED": 0.026827792724300286
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/farmers_top20_template_blend.json"
+    },
+    {
+      "tournament": "genesis-invitational",
+      "displayName": "Genesis Invitational (2026)",
+      "eventId": "7",
+      "courseType": "BALANCED",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.017931444166056788,
+        "TECHNICAL": 0.02418634236192342,
+        "BALANCED": 0.02344126778258315
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/genesis-invitational_top20_template_blend.json"
+    },
+    {
+      "tournament": "pebble-beach",
+      "displayName": "Pebble Beach (2026)",
+      "eventId": "5",
+      "courseType": "BALANCED",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.016936563832203936,
+        "TECHNICAL": 0.022061451646736674,
+        "BALANCED": 0.02114965619303546
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/pebble-beach_top20_template_blend.json"
+    },
+    {
+      "tournament": "sony-open",
+      "displayName": "Sony Open (2026)",
+      "eventId": "6",
+      "courseType": "BALANCED",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.019335722137658586,
+        "TECHNICAL": 0.0272506415596495,
+        "BALANCED": 0.026959791923215726
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/sony-open_top20_template_blend.json"
+    },
+    {
+      "tournament": "the-players",
+      "displayName": "The Players (2026)",
+      "eventId": "11",
+      "courseType": "TECHNICAL",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.0258090703192452,
+        "TECHNICAL": 0.03620139830641895,
+        "BALANCED": 0.03584982813977157
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/the-players_top20_template_blend.json"
+    },
+    {
+      "tournament": "the-valspar",
+      "displayName": "The Valspar (2026)",
+      "eventId": "475",
+      "courseType": "BALANCED",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.027144923988702746,
+        "TECHNICAL": 0.03815710474408829,
+        "BALANCED": 0.03780181185549124
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/the-valspar_top20_template_blend.json"
+    },
+    {
+      "tournament": "wm-phoenix-open",
+      "displayName": "Wm Phoenix Open (2026)",
+      "eventId": "3",
+      "courseType": "BALANCED",
+      "source": "course_context",
+      "alignmentScores": {
+        "POWER": 0.019577686813226164,
+        "TECHNICAL": 0.02703143889792421,
+        "BALANCED": 0.025931453827825465
+      },
+      "blendSource": "/workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/wm-phoenix-open_top20_template_blend.json"
+    }
+  ]
+}

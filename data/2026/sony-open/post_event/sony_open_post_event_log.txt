@@ -1,0 +1,58 @@
+Logging to /workspaces/modelOptimizer/data/2026/sony-open/post_event/sony_open_post_event_log.txt
+ℹ️  Skipping course history regression (post-tournament mode).
+ℹ️  Skipping early-season ramp summary (post-tournament mode).
+
+🔄 Loading configuration...
+✓ Configuration loaded
+✓ Applied course context overrides (eventId)
+ℹ️  Current-event rounds policy: default
+   Defaults: metrics=include, baseline=include, optimization=include, historical=exclude
+🔄 Building metric config...
+✓ Metric config built
+
+--- LOADING ALL AVAILABLE TEMPLATES ---
+✓ Loaded POWER template
+✓ Loaded TECHNICAL template
+✓ Loaded BALANCED template
+✓ Loaded TPC_LOUISIANA template
+✓ Loaded PEBBLE_BEACH_GOLF_LINKS template
+✓ Loaded WAIALAE_COUNTRY_CLUB template
+✓ Loaded THE_RIVIERA_COUNTRY_CLUB template
+✓ Loaded PETE_DYE_STADIUM_COURSE template
+✓ Loaded TORREY_PINES_GOLF_COURSE template
+✓ Loaded WM_PHOENIX_OPEN_STADIUM_COURSE template
+✓ Loaded PGA_NATIONAL_RESORT_CHAMPION_COURSE template
+✓ Loaded BAY_HILL_CLUB_AND_LODGE template
+✓ Loaded event-specific weights (eventId: 10) from template: PGA_NATIONAL_RESORT_CHAMPION_COURSE
+✓ Validation course type selected from summaries: TECHNICAL
+✓ DataGolf rankings loaded (api, updated 2026-03-02 12:35:19 UTC)
+ℹ️  Loaded L12 approach snapshot from archive (approach_l12_2026-02-23.json).
+✓ Approach snapshot l24 ready (snapshot, updated 2026-02-23 14:52:29 UTC)
+ℹ️  Skipping L12 approach snapshot refresh (not end-of-season post-tournament run; cached snapshot found).
+ℹ️  Skipping YTD approach snapshot refresh (post-tournament run; cached snapshot found).
+ℹ️  Using event-aligned YTD snapshot for post-tournament run: approach_ytd_2026-02-25.json.
+ℹ️  DataGolf field updates unavailable (no cache + API failed).
+✓ DataGolf player decompositions loaded (api, updated 2026-03-03 18:32:36 UTC)
+✓ DataGolf skill ratings loaded (api, display value, updated 2026-03-02 17:50:57 UTC)
+✓ DataGolf skill ratings loaded (api, display rank, updated 2026-03-02 17:50:57 UTC)
+✓ DataGolf historical rounds loaded (cache, pga 2026)
+✓ Loaded validation template: VALIDATION_TECHNICAL
+ℹ️  Validation template is included in Step 1d template testing.
+ℹ️  Validation outputs loaded for reporting only (no template/constraint influence).
+   To apply validation templates/constraints, set APPLY_VALIDATION_OUTPUTS=true.
+
+🔄 Loading data...
+✓ Field updates sourced from Tournament Field CSV (120 players).
+✓ Loaded field (CSV): 120 players
+ℹ️  Weather penalties unavailable (missing-date-start).
+✓ Loaded history (robust merged-source): 77028 rounds
+ℹ️  History source: refreshPolicy=force-refresh, api(cache=0, stale=5, api=0, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+ℹ️  History rows for event 10: 2106 (season 2026: 379)
+✓ Loaded approach: 311 rows (source: CSV Sony Open (2026) - Approach Skill (1).csv)
+✓ Using approach CSV as primary for current season (311 rows, field overlap 93/120)
+ℹ️  Approach usage summary:
+   - Current-season rankings (baseline/optimization): csv_primary
+   - Step 1b (event-only correlations): latest_snapshot_fallback
+   - Step 1c (event+similar+putting correlations): latest snapshot (csv_primary)
+ℹ️  Derived 123 results from historical data.
+❌ Unable to locate pre-event rankings JSON for results export.

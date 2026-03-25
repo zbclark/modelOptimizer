@@ -1,0 +1,2157 @@
+{
+  "generatedAt": "2026-03-03T21:23:51.239Z",
+  "playerCount": 80,
+  "reportCount": 50,
+  "players": [
+    {
+      "rank": 1,
+      "dgId": "18417",
+      "name": "Scheffler, Scottie",
+      "totalContribution": 1.2770442842960523,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 1.7657623406654759,
+          "weight": 0.224783172097574,
+          "contribution": 0.3969136601052228,
+          "share": 0.3014318017966589
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 1.8001351123846048,
+          "weight": 0.11802776666754901,
+          "contribution": 0.21246592701459224,
+          "share": 0.16135495861600668
+        },
+        {
+          "group": "Driving Performance",
+          "score": 1.0691094636473886,
+          "weight": 0.16979565632636318,
+          "contribution": 0.18153014306473444,
+          "share": 0.1378611108771163
+        },
+        {
+          "group": "Course Management",
+          "score": 0.882305875555606,
+          "weight": 0.15841862826681186,
+          "contribution": 0.13977368651726751,
+          "share": 0.10614961994377306
+        },
+        {
+          "group": "Putting",
+          "score": 1.6605843909078233,
+          "weight": 0.08367500269909206,
+          "contribution": 0.13894940339128226,
+          "share": 0.10552362700669338
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "dgId": "13562",
+      "name": "Matsuyama, Hideki",
+      "totalContribution": 0.7517901943031803,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 1.2342560828441675,
+          "weight": 0.224783172097574,
+          "contribution": 0.2774399974824381,
+          "share": 0.33611270323424985
+        },
+        {
+          "group": "Course Management",
+          "score": 1.415865141973221,
+          "weight": 0.15841862826681186,
+          "contribution": 0.22429941360219252,
+          "share": 0.27173400707827705
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.7996819618684688,
+          "weight": 0.11802776666754901,
+          "contribution": 0.09438467600365946,
+          "share": 0.11434504355301882
+        },
+        {
+          "group": "Around the Green",
+          "score": 1.9112775658538945,
+          "weight": 0.03240866058375689,
+          "contribution": 0.06194194591310792,
+          "share": 0.0750413605585556
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": 1.4738994440542896,
+          "weight": 0.03732010926550233,
+          "contribution": 0.05500608829846923,
+          "share": 0.06663871539831107
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "dgId": "14609",
+      "name": "Kim, Si Woo",
+      "totalContribution": 0.7241658879554793,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 1.8213855129842542,
+          "weight": 0.224783172097574,
+          "contribution": 0.40941681322116774,
+          "share": 0.36914390154049415
+        },
+        {
+          "group": "Driving Performance",
+          "score": 1.4739044463159805,
+          "weight": 0.16979565632636318,
+          "contribution": 0.2502625728245668,
+          "share": 0.22564511167771026
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 1.0182484813302615,
+          "weight": 0.11802776666754901,
+          "contribution": 0.12018159416403423,
+          "share": 0.10835974764695899
+        },
+        {
+          "group": "Putting",
+          "score": -1.2504773950859167,
+          "weight": 0.08367500269909206,
+          "contribution": -0.10463369940896769,
+          "share": 0.09434124536447991
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": -0.5186788350107324,
+          "weight": 0.114942076480289,
+          "contribution": -0.0596180223225108,
+          "share": 0.05375360427704601
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "dgId": "18841",
+      "name": "Hovland, Viktor",
+      "totalContribution": 0.5662783795861553,
+      "topGroups": [
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 1.4853982733720568,
+          "weight": 0.11802776666754901,
+          "contribution": 0.1753182408179373,
+          "share": 0.2576835461412243
+        },
+        {
+          "group": "Scoring",
+          "score": 0.5834114668994105,
+          "weight": 0.224783172097574,
+          "contribution": 0.13114108016774828,
+          "share": 0.1927517548930283
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 1.016709548000204,
+          "weight": 0.114942076480289,
+          "contribution": 0.11686270662447949,
+          "share": 0.17176533664816704
+        },
+        {
+          "group": "Course Management",
+          "score": 0.4718572499335105,
+          "weight": 0.15841862826681186,
+          "contribution": 0.07475097827221694,
+          "share": 0.10986932716666702
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 1.1168013687494542,
+          "weight": 0.060628927613061656,
+          "contribution": 0.06771046934407884,
+          "share": 0.09952115518651584
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "dgId": "15466",
+      "name": "Cantlay, Patrick",
+      "totalContribution": 0.6419733653485664,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.7957070714499571,
+          "weight": 0.224783172097574,
+          "contribution": 0.17886155958099234,
+          "share": 0.23601833785335308
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 1.28029450387735,
+          "weight": 0.11802776666754901,
+          "contribution": 0.1511103009693813,
+          "share": 0.19939892143880986
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 1.0867695974481377,
+          "weight": 0.114942076480289,
+          "contribution": 0.12491555418633672,
+          "share": 0.16483341384339997
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.5316757651584586,
+          "weight": 0.16979565632636318,
+          "contribution": 0.09027623549790181,
+          "share": 0.11912479741195849
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 1.3744309066906553,
+          "weight": 0.060628927613061656,
+          "contribution": 0.08333027195090244,
+          "share": 0.10995919036372949
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "dgId": "21891",
+      "name": "Kitayama, Kurt",
+      "totalContribution": 0.43911541179341596,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.8950982700518246,
+          "weight": 0.224783172097574,
+          "contribution": 0.20120302848130006,
+          "share": 0.3877122789324419
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.890530444325715,
+          "weight": 0.16979565632636318,
+          "contribution": 0.1512082012728926,
+          "share": 0.29137372708203163
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": 1.4088096822105214,
+          "weight": 0.03732010926550233,
+          "contribution": 0.05257693127439428,
+          "share": 0.10131418993807219
+        },
+        {
+          "group": "Course Management",
+          "score": 0.2506981443940068,
+          "weight": 0.15841862826681186,
+          "contribution": 0.03971525614393368,
+          "share": 0.07653012275300469
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -0.4898926961617618,
+          "weight": 0.060628927613061656,
+          "contribution": -0.029701668813759064,
+          "share": 0.05723423643670176
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "dgId": "10091",
+      "name": "McIlroy, Rory",
+      "totalContribution": 0.5850063150713666,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 1.2116814650133627,
+          "weight": 0.224783172097574,
+          "contribution": 0.27236560327753934,
+          "share": 0.36512732396025943
+        },
+        {
+          "group": "Driving Performance",
+          "score": 1.050960214593955,
+          "weight": 0.16979565632636318,
+          "contribution": 0.17844847940987607,
+          "share": 0.2392240979317473
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.6209890763224738,
+          "weight": 0.114942076480289,
+          "contribution": 0.0713777739040818,
+          "share": 0.09568747030542175
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": 1.3770840146704941,
+          "weight": 0.03732010926550233,
+          "contribution": 0.05139292589527946,
+          "share": 0.0688962235936595
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -0.8016293513787681,
+          "weight": 0.060628927613061656,
+          "contribution": -0.0486019279172489,
+          "share": 0.06515467322667587
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "dgId": "23323",
+      "name": "MacIntyre, Robert",
+      "totalContribution": 0.5435034811108813,
+      "topGroups": [
+        {
+          "group": "Putting",
+          "score": 1.8015079959319886,
+          "weight": 0.08367500269909206,
+          "contribution": 0.15074118642204506,
+          "share": 0.22980066215304754
+        },
+        {
+          "group": "Scoring",
+          "score": 0.596532218664517,
+          "weight": 0.224783172097574,
+          "contribution": 0.1340904043698138,
+          "share": 0.2044170172993061
+        },
+        {
+          "group": "Course Management",
+          "score": 0.8147398646440165,
+          "weight": 0.15841862826681186,
+          "contribution": 0.12906997175119306,
+          "share": 0.19676351020255498
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.5594516154690482,
+          "weight": 0.16979565632636318,
+          "contribution": 0.0949924542314112,
+          "share": 0.1448133015273186
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.4898214666778238,
+          "weight": 0.114942076480289,
+          "contribution": 0.05630109648456975,
+          "share": 0.08582942432118625
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "dgId": "12294",
+      "name": "Fleetwood, Tommy",
+      "totalContribution": 0.585511886039531,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.8363896953340034,
+          "weight": 0.224783172097574,
+          "contribution": 0.18800632882690077,
+          "share": 0.3210973736137057
+        },
+        {
+          "group": "Putting",
+          "score": 1.1292250179620256,
+          "weight": 0.08367500269909206,
+          "contribution": 0.09448790642585476,
+          "share": 0.16137658120825132
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 1.0877686737691876,
+          "weight": 0.060628927613061656,
+          "contribution": 0.06595024818170815,
+          "share": 0.11263690755759569
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.5226329715428637,
+          "weight": 0.114942076480289,
+          "contribution": 0.06007251898620054,
+          "share": 0.10259829120214432
+        },
+        {
+          "group": "Around the Green",
+          "score": 1.84627432303848,
+          "weight": 0.03240866058375689,
+          "contribution": 0.059835277879859615,
+          "share": 0.10219310539465261
+        }
+      ]
+    },
+    {
+      "rank": 10,
+      "dgId": "13900",
+      "name": "Lowry, Shane",
+      "totalContribution": 0.5860850370083825,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.7127161045328457,
+          "weight": 0.224783172097574,
+          "contribution": 0.1602065867819192,
+          "share": 0.24254040682685155
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 1.325044110398586,
+          "weight": 0.11802776666754901,
+          "contribution": 0.15639199708633436,
+          "share": 0.23676541245721255
+        },
+        {
+          "group": "Course Management",
+          "score": 0.7063679689653106,
+          "weight": 0.15841862826681186,
+          "contribution": 0.11190184469509844,
+          "share": 0.1694107557136185
+        },
+        {
+          "group": "Putting",
+          "score": 0.9425281469706736,
+          "weight": 0.08367500269909206,
+          "contribution": 0.07886604524174134,
+          "share": 0.119397105212628
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.45076583617852234,
+          "weight": 0.114942076480289,
+          "contribution": 0.051811961216733135,
+          "share": 0.07843931017087091
+        }
+      ]
+    },
+    {
+      "rank": 11,
+      "dgId": "29767",
+      "name": "Gerard, Ryan",
+      "totalContribution": 0.381732923572642,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 1.2910752319789838,
+          "weight": 0.224783172097574,
+          "contribution": 0.2902119860608472,
+          "share": 0.5395645137740787
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.5434647417020131,
+          "weight": 0.16979565632636318,
+          "contribution": 0.09227795250753075,
+          "share": 0.17156392901826656
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": 1.7107545722052973,
+          "weight": 0.03732010926550233,
+          "contribution": 0.0638455475611594,
+          "share": 0.11870216766048419
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -0.7159275353010367,
+          "weight": 0.060628927613061656,
+          "contribution": -0.043405918713964195,
+          "share": 0.08070064143011263
+        },
+        {
+          "group": "Course Management",
+          "score": -0.1479127215034734,
+          "weight": 0.15841862826681186,
+          "contribution": -0.02343213044379122,
+          "share": 0.043565209835765284
+        }
+      ]
+    },
+    {
+      "rank": 12,
+      "dgId": "14578",
+      "name": "Henley, Russell",
+      "totalContribution": 0.5151228496113048,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.7980824263494639,
+          "weight": 0.224783172097574,
+          "contribution": 0.17939549939016097,
+          "share": 0.2596487022405818
+        },
+        {
+          "group": "Course Management",
+          "score": 0.7759696064292131,
+          "weight": 0.15841862826681186,
+          "contribution": 0.1229280406272538,
+          "share": 0.17792032869468144
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.7314305591995016,
+          "weight": 0.114942076480289,
+          "contribution": 0.08407214727552965,
+          "share": 0.12168211582161671
+        },
+        {
+          "group": "Driving Performance",
+          "score": -0.44738517373211933,
+          "weight": 0.16979565632636318,
+          "contribution": -0.07596405920452921,
+          "share": 0.10994684624994835
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.5542400025296376,
+          "weight": 0.11802776666754901,
+          "contribution": 0.06541570969638984,
+          "share": 0.09467965576925627
+        }
+      ]
+    },
+    {
+      "rank": 13,
+      "dgId": "28309",
+      "name": "Coody, Pierceson",
+      "totalContribution": 0.29870527342691605,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.7442072732942229,
+          "weight": 0.224783172097574,
+          "contribution": 0.1672852715891616,
+          "share": 0.2817833341941213
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -1.102371733759639,
+          "weight": 0.11802776666754901,
+          "contribution": -0.13011047377308413,
+          "share": 0.21916432190992607
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.6701844926726025,
+          "weight": 0.16979565632636318,
+          "contribution": 0.11379441579309528,
+          "share": 0.19168077135684958
+        },
+        {
+          "group": "Putting",
+          "score": 0.8794914385159068,
+          "weight": 0.08367500269909206,
+          "contribution": 0.07359144849164687,
+          "share": 0.12396096516541588
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 0.9164671706845382,
+          "weight": 0.060628927613061656,
+          "contribution": 0.05556442175118029,
+          "share": 0.09359537677691383
+        }
+      ]
+    },
+    {
+      "rank": 14,
+      "dgId": "22085",
+      "name": "Morikawa, Collin",
+      "totalContribution": 0.4792386747772752,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": 1.1167846819259668,
+          "weight": 0.16979565632636318,
+          "contribution": 0.18962518804284828,
+          "share": 0.28784537909932234
+        },
+        {
+          "group": "Scoring",
+          "score": 0.5406634253794663,
+          "weight": 0.224783172097574,
+          "contribution": 0.12153203979393644,
+          "share": 0.18448201121517058
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.995212378490534,
+          "weight": 0.114942076480289,
+          "contribution": 0.11439177732258927,
+          "share": 0.17364330577130743
+        },
+        {
+          "group": "Putting",
+          "score": 0.6799988361213194,
+          "weight": 0.08367500269909206,
+          "contribution": 0.05689890444783086,
+          "share": 0.08637083970838912
+        },
+        {
+          "group": "Around the Green",
+          "score": -1.4331745008024872,
+          "weight": 0.03240866058375689,
+          "contribution": -0.046447265953803024,
+          "share": 0.07050556423748114
+        }
+      ]
+    },
+    {
+      "rank": 15,
+      "dgId": "17536",
+      "name": "Spaun, J.J.",
+      "totalContribution": 0.309733297828132,
+      "topGroups": [
+        {
+          "group": "Putting",
+          "score": -1.706335829454114,
+          "weight": 0.08367500269909206,
+          "contribution": -0.14277765513513047,
+          "share": 0.22181899545873932
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 1.0036147499385408,
+          "weight": 0.11802776666754901,
+          "contribution": 0.11845440752985664,
+          "share": 0.18403046093637554
+        },
+        {
+          "group": "Scoring",
+          "score": 0.39316060887043347,
+          "weight": 0.224783172097574,
+          "contribution": 0.08837588880570962,
+          "share": 0.1373005521004128
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.45294536026498416,
+          "weight": 0.16979565632636318,
+          "contribution": 0.076908154726174,
+          "share": 0.11948431011700844
+        },
+        {
+          "group": "Around the Green",
+          "score": 2.0436962962017953,
+          "weight": 0.03240866058375689,
+          "contribution": 0.06623345959988507,
+          "share": 0.1029001313987021
+        }
+      ]
+    },
+    {
+      "rank": 16,
+      "dgId": "19895",
+      "name": "Schauffele, Xander",
+      "totalContribution": 0.4005845480269645,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.6731985874247152,
+          "weight": 0.224783172097574,
+          "contribution": 0.15132371393293348,
+          "share": 0.24775004140217027
+        },
+        {
+          "group": "Course Management",
+          "score": 0.7267115434946257,
+          "weight": 0.15841862826681186,
+          "contribution": 0.1151246458660762,
+          "share": 0.18848424373440603
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 1.6842413532400886,
+          "weight": 0.060628927613061656,
+          "contribution": 0.10211374708851834,
+          "share": 0.16718255461350567
+        },
+        {
+          "group": "Driving Performance",
+          "score": -0.3696433953109772,
+          "weight": 0.16979565632636318,
+          "contribution": -0.06276384291353268,
+          "share": 0.10275814858257222
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.4766858127945731,
+          "weight": 0.11802776666754901,
+          "contribution": 0.05626216188624882,
+          "share": 0.09211347365470743
+        }
+      ]
+    },
+    {
+      "rank": 17,
+      "dgId": "14577",
+      "name": "English, Harris",
+      "totalContribution": 0.17045900446254048,
+      "topGroups": [
+        {
+          "group": "Putting",
+          "score": 2.0759375571304273,
+          "weight": 0.08367500269909206,
+          "contribution": 0.17370408069603507,
+          "share": 0.35494220074249594
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.7449582661640477,
+          "weight": 0.11802776666754901,
+          "contribution": 0.08792576041587209,
+          "share": 0.1796651107959805
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": -0.6252115010589111,
+          "weight": 0.114942076480289,
+          "contribution": -0.07186310817106964,
+          "share": 0.1468431234558655
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.27733156890795796,
+          "weight": 0.16979565632636318,
+          "contribution": 0.047089695762746735,
+          "share": 0.09622180537929886
+        },
+        {
+          "group": "Course Management",
+          "score": -0.24549835209369503,
+          "weight": 0.15841862826681186,
+          "contribution": -0.03889151218044597,
+          "share": 0.07946985970748223
+        }
+      ]
+    },
+    {
+      "rank": 18,
+      "dgId": "17606",
+      "name": "Berger, Daniel",
+      "totalContribution": 0.23539805849684803,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.771843073754518,
+          "weight": 0.224783172097574,
+          "contribution": 0.17349733448008234,
+          "share": 0.3152329564281187
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 1.1743268925806079,
+          "weight": 0.11802776666754901,
+          "contribution": 0.13860318046893189,
+          "share": 0.2518326317836162
+        },
+        {
+          "group": "Course Management",
+          "score": -0.4405898078927005,
+          "weight": 0.15841862826681186,
+          "contribution": -0.06979763299469978,
+          "share": 0.12681759213499574
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 1.0734842217804197,
+          "weight": 0.060628927613061656,
+          "contribution": 0.06508419717608889,
+          "share": 0.11825359711750759
+        },
+        {
+          "group": "Around the Green",
+          "score": -0.9069270433886144,
+          "weight": 0.03240866058375689,
+          "contribution": -0.029392290723411763,
+          "share": 0.053403810085621436
+        }
+      ]
+    },
+    {
+      "rank": 19,
+      "dgId": "17576",
+      "name": "Conners, Corey",
+      "totalContribution": 0.3467161721420028,
+      "topGroups": [
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.9232533690015192,
+          "weight": 0.11802776666754901,
+          "contribution": 0.10896953321153983,
+          "share": 0.23830804624616606
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.6397196148423187,
+          "weight": 0.16979565632636318,
+          "contribution": 0.10862161186699976,
+          "share": 0.23754716883923313
+        },
+        {
+          "group": "Scoring",
+          "score": 0.4474485068258036,
+          "weight": 0.224783172097574,
+          "contribution": 0.10057889471462714,
+          "share": 0.21995836071456482
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.5902510660466902,
+          "weight": 0.114942076480289,
+          "contribution": 0.06784468317611077,
+          "share": 0.14837114025718254
+        },
+        {
+          "group": "Around the Green",
+          "score": -0.8480613842487806,
+          "weight": 0.03240866058375689,
+          "contribution": -0.02748453355630976,
+          "share": 0.0601065756708018
+        }
+      ]
+    },
+    {
+      "rank": 20,
+      "dgId": "26649",
+      "name": "Thorbjornsen, Michael",
+      "totalContribution": 0.2907294755243775,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": 1.314814008015803,
+          "weight": 0.16979565632636318,
+          "contribution": 0.2232497074381394,
+          "share": 0.35217076693280003
+        },
+        {
+          "group": "Scoring",
+          "score": 0.5858141158313293,
+          "weight": 0.224783172097574,
+          "contribution": 0.13168115521610183,
+          "share": 0.20772369180327627
+        },
+        {
+          "group": "Putting",
+          "score": -0.8670499593684111,
+          "weight": 0.08367500269909206,
+          "contribution": -0.07255040769039946,
+          "share": 0.114446433147936
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.4724868572556038,
+          "weight": 0.11802776666754901,
+          "contribution": -0.05576656854164794,
+          "share": 0.08797035139660647
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 0.7899963001614216,
+          "weight": 0.060628927613061656,
+          "contribution": 0.04789662849707336,
+          "share": 0.07555572002701796
+        }
+      ]
+    },
+    {
+      "rank": 21,
+      "dgId": "29433",
+      "name": "Bridgeman, Jacob",
+      "totalContribution": 0.2802348498405174,
+      "topGroups": [
+        {
+          "group": "Putting",
+          "score": 1.7769414168863666,
+          "weight": 0.08367500269909206,
+          "contribution": 0.1486855778540952,
+          "share": 0.31364542721794714
+        },
+        {
+          "group": "Scoring",
+          "score": 0.6278476088040885,
+          "weight": 0.224783172097574,
+          "contribution": 0.14112957710085974,
+          "share": 0.2977063891584976
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.4890354931034022,
+          "weight": 0.11802776666754901,
+          "contribution": -0.05771976707215813,
+          "share": 0.12175720916276356
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.370184588139556,
+          "weight": 0.114942076480289,
+          "contribution": 0.04254978524176113,
+          "share": 0.08975682620193348
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 0.5331813570778874,
+          "weight": 0.060628927613061656,
+          "contribution": 0.03232621390290921,
+          "share": 0.06819066997786462
+        }
+      ]
+    },
+    {
+      "rank": 22,
+      "dgId": "23816",
+      "name": "Valimaki, Sami",
+      "totalContribution": 0.04697230334571596,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": -1.038578660473906,
+          "weight": 0.16979565632636318,
+          "contribution": -0.17634614530172196,
+          "share": 0.41816514009125055
+        },
+        {
+          "group": "Course Management",
+          "score": 0.42517009040883524,
+          "weight": 0.15841862826681186,
+          "contribution": 0.06735486250264405,
+          "share": 0.15971687652176905
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.33458283489143037,
+          "weight": 0.114942076480289,
+          "contribution": 0.0384576457970827,
+          "share": 0.09119363972941771
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.31497763748921276,
+          "weight": 0.11802776666754901,
+          "contribution": 0.03717610710307264,
+          "share": 0.0881547595395719
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": 0.6533404240633336,
+          "weight": 0.03732010926550233,
+          "contribution": 0.024382736013613238,
+          "share": 0.05781816326915199
+        }
+      ]
+    },
+    {
+      "rank": 23,
+      "dgId": "24968",
+      "name": "Griffin, Ben",
+      "totalContribution": 0.21011794596359837,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.318164399828035,
+          "weight": 0.224783172097574,
+          "contribution": 0.07151800304186653,
+          "share": 0.19274241634161118
+        },
+        {
+          "group": "Course Management",
+          "score": -0.39770140370513013,
+          "weight": 0.15841862826681186,
+          "contribution": -0.06300331083475229,
+          "share": 0.16979515438515577
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.29889935585194033,
+          "weight": 0.16979565632636318,
+          "contribution": 0.05075181230240739,
+          "share": 0.13677712632937367
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 0.7807189457582238,
+          "weight": 0.060628927613061656,
+          "contribution": 0.047334152448521155,
+          "share": 0.12756646620948564
+        },
+        {
+          "group": "Putting",
+          "score": 0.48701240369515625,
+          "weight": 0.08367500269909206,
+          "contribution": 0.04075076419368351,
+          "share": 0.10982410616051197
+        }
+      ]
+    },
+    {
+      "rank": 24,
+      "dgId": "27774",
+      "name": "Gotterup, Chris",
+      "totalContribution": 0.09828836917528934,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": 1.0033628526031857,
+          "weight": 0.16979565632636318,
+          "contribution": 0.1703666540912499,
+          "share": 0.27503850162532956
+        },
+        {
+          "group": "Scoring",
+          "score": 0.6908395649526983,
+          "weight": 0.224783172097574,
+          "contribution": 0.15528910882057553,
+          "share": 0.2506974386306121
+        },
+        {
+          "group": "Putting",
+          "score": -1.806724950318769,
+          "weight": 0.08367500269909206,
+          "contribution": -0.15117771509443997,
+          "share": 0.2440600389818379
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -0.721128041781153,
+          "weight": 0.060628927613061656,
+          "contribution": -0.04372121984489843,
+          "share": 0.07058317168647205
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": -1.0444239314976478,
+          "weight": 0.03732010926550233,
+          "contribution": -0.03897801524299774,
+          "share": 0.06292578184356067
+        }
+      ]
+    },
+    {
+      "rank": 25,
+      "dgId": "18554",
+      "name": "Rai, Aaron",
+      "totalContribution": 0.2307902983560047,
+      "topGroups": [
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 1.1068796398621679,
+          "weight": 0.11802776666754901,
+          "contribution": 0.13064253186271263,
+          "share": 0.3066668425364451
+        },
+        {
+          "group": "Scoring",
+          "score": 0.378416172122927,
+          "weight": 0.224783172097574,
+          "contribution": 0.08506158754281308,
+          "share": 0.19967133291862602
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.6336999224474309,
+          "weight": 0.114942076480289,
+          "contribution": 0.07283878495150581,
+          "share": 0.17097984765591343
+        },
+        {
+          "group": "Putting",
+          "score": -0.5997413248301386,
+          "weight": 0.08367500269909206,
+          "contribution": -0.0501833569739189,
+          "share": 0.117799092008132
+        },
+        {
+          "group": "Driving Performance",
+          "score": -0.24266371325817998,
+          "weight": 0.16979565632636318,
+          "contribution": -0.04120324445926507,
+          "share": 0.09671941212727299
+        }
+      ]
+    },
+    {
+      "rank": 26,
+      "dgId": "11889",
+      "name": "Fox, Ryan",
+      "totalContribution": 0.1419072391835845,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": -0.6347230207356188,
+          "weight": 0.16979565632636318,
+          "contribution": -0.10777321189125622,
+          "share": 0.2722272612551911
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.8133492686901774,
+          "weight": 0.114942076480289,
+          "contribution": 0.09348805384697349,
+          "share": 0.2361439954533286
+        },
+        {
+          "group": "Scoring",
+          "score": 0.31659407386944877,
+          "weight": 0.224783172097574,
+          "contribution": 0.07116502019166836,
+          "share": 0.17975764296136762
+        },
+        {
+          "group": "Putting",
+          "score": 0.7039681397002324,
+          "weight": 0.08367500269909206,
+          "contribution": 0.05890453598949177,
+          "share": 0.14878855539822838
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.2034032840091649,
+          "weight": 0.11802776666754901,
+          "contribution": 0.024007235344446917,
+          "share": 0.06064052294109865
+        }
+      ]
+    },
+    {
+      "rank": 27,
+      "dgId": "18634",
+      "name": "McNealy, Maverick",
+      "totalContribution": 0.1038762567159549,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": 0.3748167764318117,
+          "weight": 0.16979565632636318,
+          "contribution": 0.0636422605563712,
+          "share": 0.2523373315670718
+        },
+        {
+          "group": "Scoring",
+          "score": 0.1903020736912654,
+          "weight": 0.224783172097574,
+          "contribution": 0.04277670378106892,
+          "share": 0.1696067862924049
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.3596524817857033,
+          "weight": 0.11802776666754901,
+          "contribution": 0.04244897920160791,
+          "share": 0.1683073801250692
+        },
+        {
+          "group": "Course Management",
+          "score": -0.19498311333539586,
+          "weight": 0.15841862826681186,
+          "contribution": -0.030888957349785723,
+          "share": 0.12247266210209623
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": -0.6032699377178817,
+          "weight": 0.03732010926550233,
+          "contribution": -0.022514099992224132,
+          "share": 0.08926690951902919
+        }
+      ]
+    },
+    {
+      "rank": 28,
+      "dgId": "19396",
+      "name": "Knapp, Jake",
+      "totalContribution": 0.15943923849642125,
+      "topGroups": [
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -1.3541070967116877,
+          "weight": 0.11802776666754901,
+          "contribution": -0.1598222364535593,
+          "share": 0.30630815433735314
+        },
+        {
+          "group": "Putting",
+          "score": 1.8244947008045107,
+          "weight": 0.08367500269909206,
+          "contribution": 0.1526645990142966,
+          "share": 0.29259014636745734
+        },
+        {
+          "group": "Scoring",
+          "score": 0.3422288204395429,
+          "weight": 0.224783172097574,
+          "contribution": 0.07692727984161152,
+          "share": 0.1474353858971564
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.3364312015141129,
+          "weight": 0.16979565632636318,
+          "contribution": 0.057124556669755744,
+          "share": 0.10948237184715442
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.32423734315727437,
+          "weight": 0.114942076480289,
+          "contribution": 0.03726851349494914,
+          "share": 0.07142716706289952
+        }
+      ]
+    },
+    {
+      "rank": 29,
+      "dgId": "21554",
+      "name": "Poston, J.T.",
+      "totalContribution": 0.08332701435034442,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.38991278712909694,
+          "weight": 0.224783172097574,
+          "contribution": 0.08764583313228454,
+          "share": 0.20556977162997855
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.46576648721087754,
+          "weight": 0.16979565632636318,
+          "contribution": 0.0790851263907956,
+          "share": 0.18549097875476012
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -1.2126323657532563,
+          "weight": 0.060628927613061656,
+          "contribution": -0.07352059992450988,
+          "share": 0.17243960604230232
+        },
+        {
+          "group": "Course Management",
+          "score": -0.3808269440425347,
+          "weight": 0.15841862826681186,
+          "contribution": -0.06033008208226026,
+          "share": 0.1415017776983146
+        },
+        {
+          "group": "Putting",
+          "score": 0.682099641118771,
+          "weight": 0.08367500269909206,
+          "contribution": 0.05707468931166289,
+          "share": 0.13386638506752585
+        }
+      ]
+    },
+    {
+      "rank": 30,
+      "dgId": "10419",
+      "name": "Noren, Alex",
+      "totalContribution": 0.07952121850102646,
+      "topGroups": [
+        {
+          "group": "Putting",
+          "score": 1.2803049487103333,
+          "weight": 0.08367500269909206,
+          "contribution": 0.10712952003899806,
+          "share": 0.2081475057927292
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -1.6375971014664743,
+          "weight": 0.060628927613061656,
+          "contribution": -0.09928575612417045,
+          "share": 0.19290744969704196
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": -0.7250091309112175,
+          "weight": 0.114942076480289,
+          "contribution": -0.08333405497410502,
+          "share": 0.16191406144767384
+        },
+        {
+          "group": "Scoring",
+          "score": 0.3464051728302977,
+          "weight": 0.224783172097574,
+          "contribution": 0.07786605357980268,
+          "share": 0.1512899976837283
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.5831020052386227,
+          "weight": 0.11802776666754901,
+          "contribution": 0.0688222274176841,
+          "share": 0.1337182783501333
+        }
+      ]
+    },
+    {
+      "rank": 31,
+      "dgId": "12808",
+      "name": "Grillo, Emiliano",
+      "totalContribution": -0.04813753399886382,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": -0.7799825105985532,
+          "weight": 0.16979565632636318,
+          "contribution": -0.13243764231016586,
+          "share": 0.3610268586526072
+        },
+        {
+          "group": "Course Management",
+          "score": 0.474172635821602,
+          "weight": 0.15841862826681186,
+          "contribution": 0.07511777852851673,
+          "share": 0.204772111146462
+        },
+        {
+          "group": "Scoring",
+          "score": -0.24775187240632365,
+          "weight": 0.224783172097574,
+          "contribution": -0.05569045177260685,
+          "share": 0.1518129476612214
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": 0.8742988788598611,
+          "weight": 0.03732010926550233,
+          "contribution": 0.032628929689756205,
+          "share": 0.08894691706683493
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 0.3417029855801839,
+          "weight": 0.060628927613061656,
+          "contribution": 0.020717085577908023,
+          "share": 0.05647506400871083
+        }
+      ]
+    },
+    {
+      "rank": 32,
+      "dgId": "26096",
+      "name": "Bhatia, Akshay",
+      "totalContribution": 0.05108348108345201,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": -0.9315363630749443,
+          "weight": 0.16979565632636318,
+          "contribution": -0.1581708281601835,
+          "share": 0.3145394509423377
+        },
+        {
+          "group": "Course Management",
+          "score": 0.43772356690172765,
+          "weight": 0.15841862826681186,
+          "contribution": 0.06934356702862775,
+          "share": 0.13789703040233775
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.4372191767058884,
+          "weight": 0.114942076480289,
+          "contribution": 0.05025488004757721,
+          "share": 0.09993715377989736
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.4233714189397163,
+          "weight": 0.11802776666754901,
+          "contribution": 0.04996958304832597,
+          "share": 0.09936981046796185
+        },
+        {
+          "group": "Putting",
+          "score": 0.5969863718212135,
+          "weight": 0.08367500269909206,
+          "contribution": 0.04995283627346122,
+          "share": 0.09933650773172227
+        }
+      ]
+    },
+    {
+      "rank": 33,
+      "dgId": "17646",
+      "name": "Fitzpatrick, Matt",
+      "totalContribution": 0.11135026830167902,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.3821403577106012,
+          "weight": 0.224783172097574,
+          "contribution": 0.08589872179269056,
+          "share": 0.1845461251807426
+        },
+        {
+          "group": "Putting",
+          "score": -0.9509058061176711,
+          "weight": 0.08367500269909206,
+          "contribution": -0.07956704589347843,
+          "share": 0.17094305602309043
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": 1.8808529672831484,
+          "weight": 0.03732010926550233,
+          "contribution": 0.07019363825135139,
+          "share": 0.15080508395560266
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 1.0124652751495995,
+          "weight": 0.060628927613061656,
+          "contribution": 0.06138468387778362,
+          "share": 0.13187979190691212
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.4716792972450628,
+          "weight": 0.11802776666754901,
+          "contribution": -0.05567125403715376,
+          "share": 0.11960497201931293
+        }
+      ]
+    },
+    {
+      "rank": 34,
+      "dgId": "23504",
+      "name": "Hoey, Rico",
+      "totalContribution": -0.08576903429811922,
+      "topGroups": [
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.9515458592978061,
+          "weight": 0.11802776666754901,
+          "contribution": 0.11230883265467388,
+          "share": 0.28662778225302055
+        },
+        {
+          "group": "Putting",
+          "score": -0.8519864420509418,
+          "weight": 0.08367500269909206,
+          "contribution": -0.07128996783820239,
+          "share": 0.18194192651955002
+        },
+        {
+          "group": "Scoring",
+          "score": -0.22959098289340993,
+          "weight": 0.224783172097574,
+          "contribution": -0.051608189419780535,
+          "share": 0.13171128690268594
+        },
+        {
+          "group": "Course Management",
+          "score": -0.2694506011429414,
+          "weight": 0.15841862826681186,
+          "contribution": -0.042685994618732626,
+          "share": 0.1089406031710056
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -0.6051729165265074,
+          "weight": 0.060628927613061656,
+          "contribution": -0.03669098494947102,
+          "share": 0.09364050356646787
+        }
+      ]
+    },
+    {
+      "rank": 35,
+      "dgId": "6093",
+      "name": "Rose, Justin",
+      "totalContribution": 0.09818736592562521,
+      "topGroups": [
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.9392431571990859,
+          "weight": 0.11802776666754901,
+          "contribution": 0.11085677220198577,
+          "share": 0.24233023301796858
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.6503380339181771,
+          "weight": 0.114942076480289,
+          "contribution": 0.07475120403266389,
+          "share": 0.16340433093797646
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 1.084358094159203,
+          "weight": 0.060628927613061656,
+          "contribution": 0.06574346839741582,
+          "share": 0.14371363787434763
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": -1.7148366472582062,
+          "weight": 0.03732010926550233,
+          "contribution": -0.06399789104816393,
+          "share": 0.13989784784733544
+        },
+        {
+          "group": "Putting",
+          "score": -0.5583585766205853,
+          "weight": 0.08367500269909206,
+          "contribution": -0.04672065540578867,
+          "share": 0.10213022701588433
+        }
+      ]
+    },
+    {
+      "rank": 36,
+      "dgId": "17365",
+      "name": "Mitchell, Keith",
+      "totalContribution": 0.10390715606376105,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": 1.0512447195352073,
+          "weight": 0.16979565632636318,
+          "contribution": 0.1784967871131041,
+          "share": 0.38517966398780124
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.613468714720616,
+          "weight": 0.11802776666754901,
+          "contribution": -0.07240634231888605,
+          "share": 0.1562462330893505
+        },
+        {
+          "group": "Putting",
+          "score": 0.5042913497558728,
+          "weight": 0.08367500269909206,
+          "contribution": 0.042196580051951434,
+          "share": 0.09105634218248512
+        },
+        {
+          "group": "Around the Green",
+          "score": -1.2428861339491977,
+          "weight": 0.03240866058375689,
+          "contribution": -0.04028027485941735,
+          "share": 0.08692113167199762
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -0.6636814866289923,
+          "weight": 0.060628927613061656,
+          "contribution": -0.04023829681095832,
+          "share": 0.08683054690091116
+        }
+      ]
+    },
+    {
+      "rank": 37,
+      "dgId": "17511",
+      "name": "Straka, Sepp",
+      "totalContribution": 0.07125247949513629,
+      "topGroups": [
+        {
+          "group": "Putting",
+          "score": -1.4763842546618804,
+          "weight": 0.08367500269909206,
+          "contribution": -0.12353645649372987,
+          "share": 0.2957676546615079
+        },
+        {
+          "group": "Scoring",
+          "score": 0.2846714446767823,
+          "weight": 0.224783172097574,
+          "contribution": 0.06398935034004617,
+          "share": 0.15320157798398254
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.5328552782373401,
+          "weight": 0.11802776666754901,
+          "contribution": 0.06289171844736868,
+          "share": 0.15057365728920874
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.5176271711675647,
+          "weight": 0.114942076480289,
+          "contribution": 0.05949714189661787,
+          "share": 0.1424464535998632
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": 1.121815631697227,
+          "weight": 0.03732010926550233,
+          "contribution": 0.04186628195068903,
+          "share": 0.10023512389301213
+        }
+      ]
+    },
+    {
+      "rank": 38,
+      "dgId": "23014",
+      "name": "Theegala, Sahith",
+      "totalContribution": -0.025785107255289087,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": -0.9714414190353691,
+          "weight": 0.16979565632636318,
+          "contribution": -0.16494653332772408,
+          "share": 0.27883079718891574
+        },
+        {
+          "group": "Putting",
+          "score": 1.3341014308801908,
+          "weight": 0.08367500269909206,
+          "contribution": 0.11163094082976255,
+          "share": 0.18870444618965335
+        },
+        {
+          "group": "Course Management",
+          "score": 0.6716294490051208,
+          "weight": 0.15841862826681186,
+          "contribution": 0.1063986160149859,
+          "share": 0.17985956009340034
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": -0.5783489148728087,
+          "weight": 0.114942076480289,
+          "contribution": -0.06647662520560253,
+          "share": 0.11237417377956771
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.48968679542168947,
+          "weight": 0.11802776666754901,
+          "contribution": -0.057796638830210974,
+          "share": 0.09770125236793255
+        }
+      ]
+    },
+    {
+      "rank": 39,
+      "dgId": "15556",
+      "name": "Hughes, Mackenzie",
+      "totalContribution": -0.11580937229979467,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": -0.7473256829222876,
+          "weight": 0.16979565632636318,
+          "contribution": -0.1268926548213374,
+          "share": 0.25728705548340247
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.7466343374352995,
+          "weight": 0.11802776666754901,
+          "contribution": -0.08812358336479358,
+          "share": 0.1786790363437281
+        },
+        {
+          "group": "Around the Green",
+          "score": 1.970499425433132,
+          "weight": 0.03240866058375689,
+          "contribution": 0.06386124705935034,
+          "share": 0.12948481721445926
+        },
+        {
+          "group": "Scoring",
+          "score": 0.24640886742406065,
+          "weight": 0.224783172097574,
+          "contribution": 0.055388566852550926,
+          "share": 0.11230564364031342
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": -1.231869604059037,
+          "weight": 0.03732010926550233,
+          "contribution": -0.04597350822433435,
+          "share": 0.09321570722856365
+        }
+      ]
+    },
+    {
+      "rank": 40,
+      "dgId": "25569",
+      "name": "Stevens, Sam",
+      "totalContribution": 0.07080817643085748,
+      "topGroups": [
+        {
+          "group": "Putting",
+          "score": 1.6423770578235097,
+          "weight": 0.08367500269909206,
+          "contribution": 0.13742590474630906,
+          "share": 0.2760542676690736
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": -1.0014125295730885,
+          "weight": 0.114942076480289,
+          "contribution": -0.1151044355625096,
+          "share": 0.23121601944937578
+        },
+        {
+          "group": "Scoring",
+          "score": 0.38684894602854314,
+          "weight": 0.224783172097574,
+          "contribution": 0.08695713321089914,
+          "share": 0.17467512963767884
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.5012729334753909,
+          "weight": 0.11802776666754901,
+          "contribution": -0.059164124828991256,
+          "share": 0.1188459277899532
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.18733043909621533,
+          "weight": 0.16979565632636318,
+          "contribution": 0.03180789485624769,
+          "share": 0.0638941045128697
+        }
+      ]
+    },
+    {
+      "rank": 41,
+      "dgId": "17780",
+      "name": "Pendrith, Taylor",
+      "totalContribution": 0.0723149755137366,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.5060955223520615,
+          "weight": 0.224783172097574,
+          "contribution": 0.11376175689867504,
+          "share": 0.27416266157523655
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.4060367984058787,
+          "weight": 0.16979565632636318,
+          "contribution": 0.06894328467798139,
+          "share": 0.16615139340622073
+        },
+        {
+          "group": "Course Management",
+          "score": -0.4107978639667108,
+          "weight": 0.15841862826681186,
+          "contribution": -0.0650780341045427,
+          "share": 0.15683624731707393
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -0.8410949937611589,
+          "weight": 0.060628927613061656,
+          "contribution": -0.05099468749245385,
+          "share": 0.12289577473369176
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.3632425085881096,
+          "weight": 0.11802776666754901,
+          "contribution": 0.04287270204737256,
+          "share": 0.1033220163143125
+        }
+      ]
+    },
+    {
+      "rank": 42,
+      "dgId": "12965",
+      "name": "Fowler, Rickie",
+      "totalContribution": -0.1331064003244774,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": -0.5778281935360946,
+          "weight": 0.224783172097574,
+          "contribution": -0.12988605427045424,
+          "share": 0.2596141286798473
+        },
+        {
+          "group": "Putting",
+          "score": 1.3173708391080452,
+          "weight": 0.08367500269909206,
+          "contribution": 0.11023100851807086,
+          "share": 0.2203279435244923
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.8882398927522142,
+          "weight": 0.11802776666754901,
+          "contribution": -0.10483697080656709,
+          "share": 0.2095464288468474
+        },
+        {
+          "group": "Around the Green",
+          "score": -1.8475744151426732,
+          "weight": 0.03240866058375689,
+          "contribution": -0.05987741212359204,
+          "share": 0.1196819956028687
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.42652672846073564,
+          "weight": 0.114942076480289,
+          "contribution": 0.04902586784362133,
+          "share": 0.09799210573055607
+        }
+      ]
+    },
+    {
+      "rank": 43,
+      "dgId": "16394",
+      "name": "Jaeger, Stephan",
+      "totalContribution": 0.014132737623838173,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": -1.0300699750843685,
+          "weight": 0.16979565632636318,
+          "contribution": -0.1749014074815309,
+          "share": 0.35633079845135135
+        },
+        {
+          "group": "Around the Green",
+          "score": 2.1008841476918496,
+          "weight": 0.03240866058375689,
+          "contribution": 0.06808684126834054,
+          "share": 0.13871494153493386
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": 0.5136378019001248,
+          "weight": 0.11802776666754901,
+          "contribution": 0.06062352263430069,
+          "share": 0.12350974492583798
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 0.9961973783606617,
+          "weight": 0.060628927613061656,
+          "contribution": 0.06039837874095035,
+          "share": 0.12305105391563304
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": -0.4047668931132123,
+          "weight": 0.114942076480289,
+          "contribution": -0.04652474718490781,
+          "share": 0.0947859742860907
+        }
+      ]
+    },
+    {
+      "rank": 44,
+      "dgId": "16283",
+      "name": "Rodgers, Patrick",
+      "totalContribution": -0.02051881779531943,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": 0.417614168467951,
+          "weight": 0.224783172097574,
+          "contribution": 0.0938726375011167,
+          "share": 0.2500850197313616
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": -0.6123702900736682,
+          "weight": 0.114942076480289,
+          "contribution": -0.07038711271590432,
+          "share": 0.18751750180856594
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -1.0719122145365587,
+          "weight": 0.060628927613061656,
+          "contribution": -0.06498888806269364,
+          "share": 0.17313615326174944
+        },
+        {
+          "group": "Putting",
+          "score": 0.7747357445759914,
+          "weight": 0.08367500269909206,
+          "contribution": 0.06482601551847918,
+          "share": 0.1727022463798523
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": -1.073806497699985,
+          "weight": 0.03732010926550233,
+          "contribution": -0.040074575824169824,
+          "share": 0.10676221902888619
+        }
+      ]
+    },
+    {
+      "rank": 45,
+      "dgId": "26651",
+      "name": "Young, Cameron",
+      "totalContribution": -0.07598923002396175,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": -0.5197493295907374,
+          "weight": 0.224783172097574,
+          "contribution": -0.11683090300099344,
+          "share": 0.24844811828289248
+        },
+        {
+          "group": "Course Management",
+          "score": 0.7200197867719333,
+          "weight": 0.15841862826681186,
+          "contribution": 0.11406454694537205,
+          "share": 0.24256529157467321
+        },
+        {
+          "group": "Driving Performance",
+          "score": -0.48783620440713177,
+          "weight": 0.16979565632636318,
+          "contribution": -0.08283246850707081,
+          "share": 0.17614835120407912
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": -1.7773245499129695,
+          "weight": 0.03732010926550233,
+          "contribution": -0.06632994640301178,
+          "share": 0.1410547205091213
+        },
+        {
+          "group": "Putting",
+          "score": 0.4306700206527886,
+          "weight": 0.08367500269909206,
+          "contribution": 0.03603631514054012,
+          "share": 0.07663344591661994
+        }
+      ]
+    },
+    {
+      "rank": 46,
+      "dgId": "27194",
+      "name": "Hall, Harry",
+      "totalContribution": -0.030631811240190012,
+      "topGroups": [
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.969846077330385,
+          "weight": 0.11802776666754901,
+          "contribution": -0.11446876651858837,
+          "share": 0.33492090247539963
+        },
+        {
+          "group": "Driving Performance",
+          "score": 0.3040906223460688,
+          "weight": 0.16979565632636318,
+          "contribution": 0.05163326680394299,
+          "share": 0.15107230418982012
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": -1.17096789291007,
+          "weight": 0.03732010926550233,
+          "contribution": -0.043700649709798846,
+          "share": 0.1278624858527709
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 0.5073971579626926,
+          "weight": 0.060628927613061656,
+          "contribution": 0.0307629455611933,
+          "share": 0.09000842590964182
+        },
+        {
+          "group": "Course Management",
+          "score": 0.19172539978670808,
+          "weight": 0.15841862826681186,
+          "contribution": 0.030372874838116397,
+          "share": 0.08886712909501306
+        }
+      ]
+    },
+    {
+      "rank": 47,
+      "dgId": "23950",
+      "name": "Aberg, Ludvig",
+      "totalContribution": -0.08655070738811772,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": -0.28359701518086033,
+          "weight": 0.224783172097574,
+          "contribution": -0.06374783666975764,
+          "share": 0.2162940852187189
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -0.8711051373918968,
+          "weight": 0.060628927613061656,
+          "contribution": -0.052814170318299436,
+          "share": 0.17919655399069437
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": -0.38684648655679316,
+          "weight": 0.114942076480289,
+          "contribution": -0.044464938443942004,
+          "share": 0.1508679147005734
+        },
+        {
+          "group": "Approach - Very Long (>200)",
+          "score": 0.9854509155520336,
+          "weight": 0.03732010926550233,
+          "contribution": 0.036777135844191206,
+          "share": 0.12478348081979135
+        },
+        {
+          "group": "Driving Performance",
+          "score": -0.17439909237378257,
+          "weight": 0.16979565632636318,
+          "contribution": -0.02961220835232845,
+          "share": 0.10047314311312988
+        }
+      ]
+    },
+    {
+      "rank": 48,
+      "dgId": "12423",
+      "name": "Kirk, Chris",
+      "totalContribution": -0.16667332489382886,
+      "topGroups": [
+        {
+          "group": "Putting",
+          "score": -2.500073082878806,
+          "weight": 0.08367500269909206,
+          "contribution": -0.2091936219578115,
+          "share": 0.32113390877708975
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 1.1238604221257942,
+          "weight": 0.114942076480289,
+          "contribution": 0.1291788505931529,
+          "share": 0.19830293502292806
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.6377204382857605,
+          "weight": 0.11802776666754901,
+          "contribution": -0.07526871908911884,
+          "share": 0.11554529121642229
+        },
+        {
+          "group": "Driving Performance",
+          "score": -0.33290064834839156,
+          "weight": 0.16979565632636318,
+          "contribution": -0.056525084077786975,
+          "share": 0.0867718672489649
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 0.8402564646742818,
+          "weight": 0.060628927613061656,
+          "contribution": 0.050943848373144134,
+          "share": 0.07820409151630098
+        }
+      ]
+    },
+    {
+      "rank": 49,
+      "dgId": "18474",
+      "name": "Smalley, Alex",
+      "totalContribution": -0.23639430375060352,
+      "topGroups": [
+        {
+          "group": "Driving Performance",
+          "score": -0.7332510296405615,
+          "weight": 0.16979565632636318,
+          "contribution": -0.12450283982980073,
+          "share": 0.25766951917769376
+        },
+        {
+          "group": "Putting",
+          "score": -0.8193832526870211,
+          "weight": 0.08367500269909206,
+          "contribution": -0.06856189588017732,
+          "share": 0.1418948416719393
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": -1.0189014532222402,
+          "weight": 0.060628927613061656,
+          "contribution": -0.06177490245225453,
+          "share": 0.12784856501169847
+        },
+        {
+          "group": "Around the Green",
+          "score": 1.6832016112163326,
+          "weight": 0.03240866058375689,
+          "contribution": 0.05455030971194284,
+          "share": 0.11289663829102627
+        },
+        {
+          "group": "Approach - Long (150-200)",
+          "score": -0.41345150995078517,
+          "weight": 0.11802776666754901,
+          "contribution": -0.04879875834481709,
+          "share": 0.10099329956141143
+        }
+      ]
+    },
+    {
+      "rank": 50,
+      "dgId": "7399",
+      "name": "Glover, Lucas",
+      "totalContribution": -0.044286813749873574,
+      "topGroups": [
+        {
+          "group": "Scoring",
+          "score": -0.56153435887103,
+          "weight": 0.224783172097574,
+          "contribution": -0.1262234744288076,
+          "share": 0.2385705501081533
+        },
+        {
+          "group": "Approach - Mid (100-150)",
+          "score": 0.9734204534587264,
+          "weight": 0.114942076480289,
+          "contribution": 0.11188696820893053,
+          "share": 0.2114736238748786
+        },
+        {
+          "group": "Around the Green",
+          "score": -2.9216542227890168,
+          "weight": 0.03240866058375689,
+          "contribution": -0.09468690004946928,
+          "share": 0.17896437992267847
+        },
+        {
+          "group": "Approach - Short (<100)",
+          "score": 0.962006718161995,
+          "weight": 0.060628927613061656,
+          "contribution": 0.0583254356787226,
+          "share": 0.11023885484168582
+        },
+        {
+          "group": "Putting",
+          "score": 0.5193717195426161,
+          "weight": 0.08367500269909206,
+          "contribution": 0.043458430034560486,
+          "share": 0.08213925030268024
+        }
+      ]
+    }
+  ]
+}

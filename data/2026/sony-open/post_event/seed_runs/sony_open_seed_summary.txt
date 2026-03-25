@@ -1,0 +1,20 @@
+====================================================================================================
+MODEL OPTIMIZER SEED SUMMARY
+====================================================================================================
+Base: sony_open
+Directory: /workspaces/modelOptimizer/data/2026/sony-open/post_event/seed_runs
+Seeds analyzed: 2
+
+Top seed ranking (sorted by correlation, then Top-20, then Top-20 Weighted):
+
+1. seed=e | corr=0.6928 | top20=75.0% | top20W=83.7% | rmse=26.42 | mae=20.89 | players=120 | rec=baseline | baseline=WAIALAE_COUNTRY_CLUB | file=sony_open_seed-e_kfold5_post_event_results.json
+2. seed=e | corr=0.6928 | top20=75.0% | top20W=83.7% | rmse=26.42 | mae=20.89 | players=120 | rec=optimized | baseline=WAIALAE_COUNTRY_CLUB | file=sony_open_seed-e_post_event_results.json
+
+Best seed:
+seed=e | file=sony_open_seed-e_kfold5_post_event_results.json
+Recommendation for best seed: Use template baseline (WAIALAE_COUNTRY_CLUB) | baseline=WAIALAE_COUNTRY_CLUB
+Note: Baseline template recommended over optimized weights.
+
+Recommendation rollup (from results.json):
+- baseline: Use template baseline (WAIALAE_COUNTRY_CLUB) | baseline=WAIALAE_COUNTRY_CLUB | seeds=e | count=1
+- optimized: Use optimized weights | baseline=WAIALAE_COUNTRY_CLUB | seeds=e | count=1

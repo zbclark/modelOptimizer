@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-02-27T18:24:22.458Z",
+  "base": "standard",
+  "comparisons": {
+    "original": {
+      "overlapTop20": 16,
+      "overlapTop50": 46,
+      "avgAbsRankDiff": 3.5772357723577235
+    }
+  }
+}

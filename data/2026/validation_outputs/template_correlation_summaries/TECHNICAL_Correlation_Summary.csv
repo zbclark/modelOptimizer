@@ -1,0 +1,49 @@
+"TECHNICAL - Aggregated Metric Analysis"
+"Tournaments: Cognizant Classic (2026), The Players (2026)"
+
+"Metric","Avg Delta (Top 10 vs Field)","Avg Correlation","Tournament Count"
+"Driving Distance","3.989","0.2948",2
+"Driving Accuracy","0.046","0.3167",2
+"SG OTT","0.659","0.3865",2
+"Approach <100 GIR","0.070","0.0868",2
+"Approach <100 SG","-0.013","0.0573",2
+"Approach <100 Prox","1.243","0.1140",2
+"Approach <150 FW GIR","0.095","0.2254",2
+"Approach <150 FW SG","0.045","0.2308",2
+"Approach <150 FW Prox","0.282","-0.0055",2
+"Approach <150 Rough GIR","0.065","0.1194",2
+"Approach <150 Rough SG","0.092","0.1381",2
+"Approach <150 Rough Prox","-0.859","0.0492",2
+"Approach <200 FW GIR","0.080","0.3579",2
+"Approach <200 FW SG","0.038","0.3314",2
+"Approach <200 FW Prox","0.765","-0.0175",2
+"Approach >150 Rough GIR","0.088","0.2795",2
+"Approach >150 Rough SG","0.079","0.2409",2
+"Approach >150 Rough Prox","-0.341","-0.0674",2
+"Approach >200 FW GIR","0.124","0.3506",2
+"Approach >200 FW SG","0.077","0.2989",2
+"Approach >200 FW Prox","0.627","-0.0526",2
+"SG Putting","0.872","0.4072",2
+"SG Around Green","0.364","0.3226",2
+"SG T2G","2.167","0.7298",2
+"Scoring Average","-0.282","0.1108",2
+"Birdie Chances Created","0.175","0.1702",2
+"Birdies or Better","0.140","0.0692",2
+"Greens in Regulation","0.089","0.6743",2
+"Scoring: Approach <100 SG","0.083","0.0026",2
+"Scoring: Approach <150 FW SG","0.030","0.0791",2
+"Scoring: Approach <150 Rough SG","-0.182","0.0198",2
+"Scoring: Approach >150 Rough SG","0.429","0.0841",2
+"Scoring: Approach <200 FW SG","0.008","0.0701",2
+"Scoring: Approach >200 FW SG","0.199","0.0720",2
+"Scrambling","0.010","0.0272",2
+"Great Shots","0.079","0.0756",2
+"Poor Shot Avoidance","-0.005","0.0397",2
+"Course Management: Approach <100 Prox","0.950","0.1161",2
+"Course Management: Approach <150 FW Prox","1.995","0.1487",2
+"Course Management: Approach <150 Rough Prox","4.273","0.1148",2
+"Course Management: Approach >150 Rough Prox","-2.599","-0.0125",2
+"Course Management: Approach <200 FW Prox","3.509","0.1013",2
+"Course Management: Approach >200 FW Prox","2.679","0.1201",2
+
+"Note: Metrics show average delta and correlation across all tournaments of this type"

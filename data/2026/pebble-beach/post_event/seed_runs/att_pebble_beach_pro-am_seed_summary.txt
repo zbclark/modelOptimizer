@@ -1,0 +1,18 @@
+====================================================================================================
+MODEL OPTIMIZER SEED SUMMARY
+====================================================================================================
+Base: att_pebble_beach_pro-am
+Directory: /workspaces/modelOptimizer/data/2026/pebble-beach/post_event/seed_runs
+Seeds analyzed: 1
+
+Top seed ranking (sorted by correlation, then Top-20, then Top-20 Weighted):
+
+1. seed=a | corr=0.8011 | top20=75.0% | top20W=74.1% | rmse=14.77 | mae=10.66 | players=80 | rec=baseline | baseline=PEBBLE_BEACH_GOLF_LINKS | file=att_pebble_beach_pro-am_seed-a_post_event_results.json
+
+Best seed:
+seed=a | file=att_pebble_beach_pro-am_seed-a_post_event_results.json
+Recommendation for best seed: Use template baseline (PEBBLE_BEACH_GOLF_LINKS) | baseline=PEBBLE_BEACH_GOLF_LINKS
+Note: Baseline template recommended over optimized weights.
+
+Recommendation rollup (from results.json):
+- baseline: Use template baseline (PEBBLE_BEACH_GOLF_LINKS) | baseline=PEBBLE_BEACH_GOLF_LINKS | seeds=a | count=1

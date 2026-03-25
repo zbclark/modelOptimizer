@@ -1,0 +1,166 @@
+Logging to /workspaces/modelOptimizer/data/2026/the-players/post_event/the-players_seed-d_loeo_post_event_log.txt
+
+=== POST-EVENT RUN SUMMARY ===
+Event: 11 (The PLAYERS)
+CourseNum: 11
+CourseNameKey: TPC_SAWGRASS
+Season: 2026
+Run Mode: post_event
+Timestamp: 2026-03-16T16:26:48-05:00
+
+🔄 Course context / configuration
+- Config source: course_context.json
+- Config file: /workspaces/modelOptimizer/utilities/course_context.json
+- Applied overrides: eventId=11, courseNum=11
+- Course type: TECHNICAL
+- Template key: TPC_SAWGRASS
+
+🔄 Course history regression
+- Inputs skipped
+
+🔄 Player ramp summary
+
+🔄 Templates
+
+- Selected template: TPC_SAWGRASS (eventId=11)
+	File: /workspaces/modelOptimizer/utilities/weightTemplates.js
+- Validation template loaded: VALIDATION_TECHNICAL (reporting only)
+	Files:
+	- /workspaces/modelOptimizer/data/2026/validation_outputs/Weight_Templates.csv
+	- /workspaces/modelOptimizer/data/2026/validation_outputs/Weight_Templates.json
+
+🔄 Data sources (used this run)
+
+DataGolf
+- Field updates: used (cache-current)
+- Player decompositions: used (api; no cache file)
+- Skill ratings (value): used (api; no cache file)
+- Skill ratings (rank): used (api; no cache file)
+
+Approach snapshots
+- YTD snapshot used: /workspaces/modelOptimizer/data/approach_snapshot/approach_ytd_2026-03-16.json (event-aligned) (last updated 2026-03-16T10:15:47-05:00)
+
+Approach snapshots
+- YTD: /workspaces/modelOptimizer/data/approach_snapshot/approach_ytd_2026-03-16.json
+- L12: /workspaces/modelOptimizer/data/approach_snapshot/approach_l12_2026-02-23.json
+- L24: /workspaces/modelOptimizer/data/approach_snapshot/approach_l24_2026-02-23.json
+
+Field
+- Field loaded: 123 players
+
+Weather (Meteoblue)
+- Forecast used: yes (source=cache:weather_wave_penalties.json)
+- Location: Ponte Vedra Beach FL (lat=30.2397, lon=-81.3856)
+- Penalty cache: /workspaces/modelOptimizer/data/2026/the-players/pre_event/weather_wave_penalties.json
+- Wave adjustments (negative=boost, positive=penalty): R1_AM=0.09781980015273031, R1_PM=-0.05, R2_AM=-0.04992299019062193, R2_PM=0
+- Baseline advantage (Late/Early vs Early/Late): -0.10
+- Weather-only advantage (Late/Early vs Early/Late): -0.10
+- Total implied advantage (Late/Early vs Early/Late): -0.20
+
+Historical Rounds
+- Years used: 2022–2026 (eventId=11, courseNum=11)
+- Cache files:
+	- /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2022_json.json
+	- /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2023_json.json
+	- /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2024_json.json
+	- /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2025_json.json
+	- /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2026_json.json
+
+--- STEP 1a: HISTORICAL METRIC CORRELATIONS ---
+- Event: 11 | CourseNum: 11
+- Years evaluated: 2022–2026
+- Rounds used (all players): 2112
+- Source files (rounds by year):
+	- 2022: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2022_json.json (all players=423)
+	- 2023: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2023_json.json (all players=437)
+	- 2024: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2024_json.json (all players=431)
+	- 2025: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2025_json.json (all players=431)
+	- 2026: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2026_json.json (all players=390)
+
+--- STEP 1b: CURRENT-SEASON EVENT-ONLY CORRELATIONS ---
+- Event: 11 | CourseNum: 11
+- Rounds used: 388
+- Event-only approach snapshots: pre=/workspaces/modelOptimizer/data/approach_snapshot/approach_ytd_2026-03-09.json, post=/workspaces/modelOptimizer/data/approach_snapshot/approach_ytd_2026-03-16.json
+- Event-only approach rows: 247 (field overlap 100.0%)
+
+--- STEP 1c: EVENT + SIMILAR + PUTTING CORRELATIONS ---
+- Event: 11 | CourseNum: 11
+- Years used: 2022, 2023, 2024, 2025, 2026
+- Events included (event + similar + putting) with rounds by year (actual rows used):
+	- Event 10 / Course 734 | 2022: 434, 2023: 446, 2024: 0, 2025: 0, 2026: 0 | Total: 880 | Source: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2022_json.json … 2026
+	- Event 10 / Course 928 | 2022: 0, 2023: 0, 2024: 423, 2025: 424, 2026: 379 | Total: 1226 | Source: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2022_json.json … 2026
+	- Event 11 / Course 11 | 2022: 423, 2023: 437, 2024: 431, 2025: 431, 2026: 390 | Total: 2112 | Source: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2022_json.json … 2026
+	- Event 12 / Course 12 | 2022: 403, 2023: 428, 2024: 276, 2025: 288, 2026: 0 | Total: 1395 | Source: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2022_json.json … 2026
+	- Event 13 / Course 752 | 2022: 476, 2023: 458, 2024: 442, 2025: 455, 2026: 0 | Total: 1831 | Source: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2022_json.json … 2026
+	- Event 18 / Course 714 | 2022: 0, 2023: 460, 2024: 0, 2025: 464, 2026: 0 | Total: 924 | Source: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2022_json.json … 2026
+	- Event 475 / Course 665 | 2022: 432, 2023: 432, 2024: 453, 2025: 460, 2026: 0 | Total: 1777 | Source: /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2022_json.json … 2026
+- History source files:
+	- /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2022_json.json
+	- /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2023_json.json
+	- /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2024_json.json
+	- /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2025_json.json
+	- /workspaces/modelOptimizer/data/cache/datagolf_historical_rounds_pga_all_2026_json.json
+- Approach source: snapshot_ytd (247 rows)
+- Rounds used: multi-season event+similar+putting (see events/courseNums above)
+- Metrics included: 24 (Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better, Approach <100 GIR, Approach <100 SG, Approach <100 Prox, Approach <150 FW GIR, Approach <150 FW SG, Approach <150 FW Prox, Approach <200 FW GIR, Approach <200 FW SG, Approach <200 FW Prox, Approach >200 FW GIR, Approach >200 FW SG, Approach >200 FW Prox)
+- Metrics excluded: Birdie Chances Created, SG Total, Greens in Regulation, Fairway Proximity, Rough Proximity
+
+--- STEP 1d: CURRENT-SEASON TEMPLATE BASELINE ---
+- Years evaluated: 2022, 2023, 2024, 2025, 2026
+- Rounds by year (actual rows used):
+	- 2022: 161 rounds
+	- 2023: 244 rounds
+	- 2024: 269 rounds
+	- 2025: 307 rounds
+	- 2026: 388 rounds
+- Approach usage: current season (2026) only
+- Approach source: snapshot_ytd (247 rows)
+
+--- STEP 2/3: OPTIMIZATION SETTINGS ---
+- Objective weights: corr=0.30, top20=0.50, align=0.20
+
+--- APPROACH DELTA PRIOR ---
+- Label: approachDeltaPrior
+- Weight: 0.15
+- Mode: previous_event
+- Rows used: 246/246
+- Files:
+	- /workspaces/modelOptimizer/data/approach_deltas/2026/approach_deltas_arnold-palmer-invitational_2026_03_09.json
+- Previous snapshot: /workspaces/modelOptimizer/data/approach_snapshot/approach_ytd_2026-03-09.json
+- Current snapshot: /workspaces/modelOptimizer/data/approach_snapshot/approach_ytd_2026-03-16.json
+
+--- VALIDATION RUNNER INPUTS ---
+- Output dir: /workspaces/modelOptimizer/data/2026/validation_outputs
+- Inputs dir: /workspaces/modelOptimizer/data/2026/the-players/inputs
+- Rankings JSON: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_pre_event_rankings.json
+- Rankings CSV: /workspaces/modelOptimizer/data/2026/the-players/pre_event/the-players_pre_event_rankings.csv
+- Results JSON: /workspaces/modelOptimizer/data/2026/the-players/post_event/the-players_results.json
+- Results CSV: /workspaces/modelOptimizer/data/2026/the-players/post_event/the-players_results.csv
+- Course context: /workspaces/modelOptimizer/utilities/course_context.json
+- Top-20 blend: /workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/the-players_top20_template_blend.json
+
+✅ Outputs
+- Results JSON: /workspaces/modelOptimizer/data/2026/the-players/post_event/seed_runs/the-players_seed-d_loeo_post_event_results.json
+- Results TXT: /workspaces/modelOptimizer/data/2026/the-players/post_event/seed_runs/the-players_seed-d_loeo_post_event_results.txt
+- Completed: 2026-03-16T16:26:48-05:00
+
+HUMAN READABLE SUMMARY
+  • Correlation ≈ “ranking agreement” (higher is better).
+  • RMSE/MAE ≈ “how far off the predicted finish positions are” (lower is better).
+  • Top-20% = how often the model’s Top‑20 includes actual Top‑20 finishers.
+
+  Current‑year baseline vs optimized:
+    - Correlation: 0.2890 → 0.8117 (0.5227)
+    - Top‑20 weighted: 36.5% → 81.6%
+    - Verdict: Optimized improved current‑year fit.
+
+  Multi‑year validation (stability across years):
+    - Avg Top‑20 weighted: 82.8% → 79.0%
+    - Stress fails (lower is better): 0 → 0
+
+  Event K‑fold (generalization across events):
+    - Δ Corr=0.0609, Δ RMSE=-34.93, Δ Top‑20W=1.3%
+    - Verdict: No regression detected.
+
+  Recommendation: Use optimized weights
+  Note: Current-year improvement used (no K-fold gate triggered)

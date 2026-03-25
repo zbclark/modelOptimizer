@@ -1,0 +1,290 @@
+[
+  {
+    "eventId": "6",
+    "tournamentSlug": "sony-open",
+    "tournamentName": "Sony Open in Hawaii",
+    "date": "2026-01-15"
+  },
+  {
+    "eventId": "2",
+    "tournamentSlug": "american-express",
+    "tournamentName": "The American Express",
+    "date": "2026-01-22"
+  },
+  {
+    "eventId": "4",
+    "tournamentSlug": "farmers",
+    "tournamentName": "Farmers Insurance Open",
+    "date": "2026-01-29"
+  },
+  {
+    "eventId": "3",
+    "tournamentSlug": "wm-phoenix-open",
+    "tournamentName": "WM Phoenix Open",
+    "date": "2026-02-05"
+  },
+  {
+    "eventId": "5",
+    "tournamentSlug": "pebble-beach",
+    "tournamentName": "AT&T Pebble Beach Pro-Am",
+    "date": "2026-02-12"
+  },
+  {
+    "eventId": "7",
+    "tournamentSlug": "genesis-invitational",
+    "tournamentName": "The Genesis Invitational",
+    "date": "2026-02-19"
+  },
+  {
+    "eventId": "10",
+    "tournamentSlug": "cognizant-classic",
+    "tournamentName": "Cognizant Classic",
+    "date": "2026-02-26"
+  },
+  {
+    "eventId": "9",
+    "tournamentSlug": "arnold-palmer-invitational",
+    "tournamentName": "Arnold Palmer Invitational presented by Mastercard",
+    "date": "2026-03-05"
+  },
+  {
+    "eventId": "483",
+    "tournamentSlug": "puerto-rico-open",
+    "tournamentName": "Puerto Rico Open",
+    "date": "2026-03-05"
+  },
+  {
+    "eventId": "11",
+    "tournamentSlug": "the-players",
+    "tournamentName": "The PLAYERS",
+    "date": "2026-03-11"
+  },
+  {
+    "eventId": "475",
+    "tournamentSlug": "the-valspar",
+    "tournamentName": "The Valspar Championship",
+    "date": "2026-03-19"
+  },
+  {
+    "eventId": "20",
+    "tournamentSlug": "texas-childrens-open",
+    "tournamentName": "Texas Children's Open",
+    "date": "2026-03-26"
+  },
+  {
+    "eventId": "41",
+    "tournamentSlug": "valero-texas-open",
+    "tournamentName": "Valero Texas Open",
+    "date": "2026-04-02"
+  },
+  {
+    "eventId": "14",
+    "tournamentSlug": "masters-tournament",
+    "tournamentName": "Masters Tournament",
+    "date": "2026-04-09"
+  },
+  {
+    "eventId": "12",
+    "tournamentSlug": "rbc-heritage",
+    "tournamentName": "RBC Heritage",
+    "date": "2026-04-16"
+  },
+  {
+    "eventId": "18",
+    "tournamentSlug": "zurich-classic",
+    "tournamentName": "Zurich Classic",
+    "date": "2026-04-23"
+  },
+  {
+    "eventId": "556",
+    "tournamentSlug": "cadillac-championship",
+    "tournamentName": "Cadillac Championship",
+    "date": "2026-04-30"
+  },
+  {
+    "eventId": "480",
+    "tournamentSlug": "truist-championship",
+    "tournamentName": "Truist Championship",
+    "date": "2026-05-07"
+  },
+  {
+    "eventId": "553",
+    "tournamentSlug": "oneflight-myrtle-beach-classic",
+    "tournamentName": "ONEflight Myrtle Beach Classic",
+    "date": "2026-05-07"
+  },
+  {
+    "eventId": "33",
+    "tournamentSlug": "pga-championship",
+    "tournamentName": "PGA Championship",
+    "date": "2026-05-14"
+  },
+  {
+    "eventId": "19",
+    "tournamentSlug": "the-cj-cup-byron-nelson",
+    "tournamentName": "THE CJ CUP Byron Nelson",
+    "date": "2026-05-21"
+  },
+  {
+    "eventId": "21",
+    "tournamentSlug": "charles-schwab-challenge",
+    "tournamentName": "Charles Schwab Challenge",
+    "date": "2026-05-28"
+  },
+  {
+    "eventId": "23",
+    "tournamentSlug": "the-memorial-tournament",
+    "tournamentName": "The Memorial Tournament",
+    "date": "2026-06-04"
+  },
+  {
+    "eventId": "32",
+    "tournamentSlug": "rbc-canadian-open",
+    "tournamentName": "RBC Canadian Open",
+    "date": "2026-06-11"
+  },
+  {
+    "eventId": "26",
+    "tournamentSlug": "us-open",
+    "tournamentName": "U.S. Open",
+    "date": "2026-06-18"
+  },
+  {
+    "eventId": "34",
+    "tournamentSlug": "travelers-championship",
+    "tournamentName": "Travelers Championship",
+    "date": "2026-06-25"
+  },
+  {
+    "eventId": "30",
+    "tournamentSlug": "john-deere-classic",
+    "tournamentName": "John Deere Classic",
+    "date": "2026-07-02"
+  },
+  {
+    "eventId": "541",
+    "tournamentSlug": "genesis-scottish-open",
+    "tournamentName": "Genesis Scottish Open",
+    "date": "2026-07-09"
+  },
+  {
+    "eventId": "518",
+    "tournamentSlug": "isco-championship",
+    "tournamentName": "ISCO Championship",
+    "date": "2026-07-09"
+  },
+  {
+    "eventId": "100",
+    "tournamentSlug": "the-open-championship",
+    "tournamentName": "The Open Championship",
+    "date": "2026-07-16"
+  },
+  {
+    "eventId": "522",
+    "tournamentSlug": "corales-puntacana-championship",
+    "tournamentName": "Corales Puntacana Championship",
+    "date": "2026-07-16"
+  },
+  {
+    "eventId": "525",
+    "tournamentSlug": "3m-open",
+    "tournamentName": "3M Open",
+    "date": "2026-07-23"
+  },
+  {
+    "eventId": "524",
+    "tournamentSlug": "rocket-classic",
+    "tournamentName": "Rocket Classic",
+    "date": "2026-07-30"
+  },
+  {
+    "eventId": "13",
+    "tournamentSlug": "wyndham-championship",
+    "tournamentName": "Wyndham Championship",
+    "date": "2026-08-06"
+  },
+  {
+    "eventId": "27",
+    "tournamentSlug": "fedex-st-jude-championship",
+    "tournamentName": "FedEx St. Jude Championship",
+    "date": "2026-08-13"
+  },
+  {
+    "eventId": "28",
+    "tournamentSlug": "bmw-championship",
+    "tournamentName": "BMW Championship",
+    "date": "2026-08-20"
+  },
+  {
+    "eventId": "60",
+    "tournamentSlug": "tour-championship",
+    "tournamentName": "TOUR Championship",
+    "date": "2026-08-27"
+  },
+  {
+    "eventId": "557",
+    "tournamentSlug": "biltmore-championship-asheville",
+    "tournamentName": "Biltmore Championship Asheville",
+    "date": "2026-09-17"
+  },
+  {
+    "eventId": "500",
+    "tournamentSlug": "presidents-cup",
+    "tournamentName": "Presidents Cup",
+    "date": "2026-09-24"
+  },
+  {
+    "eventId": "554",
+    "tournamentSlug": "bank-of-utah-championship",
+    "tournamentName": "Bank of Utah Championship",
+    "date": "2026-10-01"
+  },
+  {
+    "eventId": "527",
+    "tournamentSlug": "baycurrent-classic",
+    "tournamentName": "Baycurrent Classic",
+    "date": "2026-10-08"
+  },
+  {
+    "eventId": "528",
+    "tournamentSlug": "butterfield-bermuda-championship",
+    "tournamentName": "Butterfield Bermuda Championship",
+    "date": "2026-10-22"
+  },
+  {
+    "eventId": "540",
+    "tournamentSlug": "vidantaworld-mexico-open",
+    "tournamentName": "VidantaWorld Mexico Open",
+    "date": "2026-10-29"
+  },
+  {
+    "eventId": "457",
+    "tournamentSlug": "world-wide-technology-championship",
+    "tournamentName": "World Wide Technology Championship",
+    "date": "2026-11-05"
+  },
+  {
+    "eventId": "558",
+    "tournamentSlug": "good-good-championship",
+    "tournamentName": "Good Good Championship",
+    "date": "2026-11-12"
+  },
+  {
+    "eventId": "493",
+    "tournamentSlug": "the-rsm-classic",
+    "tournamentName": "The RSM Classic",
+    "date": "2026-11-19"
+  },
+  {
+    "eventId": "478",
+    "tournamentSlug": "hero-world-challenge",
+    "tournamentName": "Hero World Challenge",
+    "date": "2026-12-03"
+  },
+  {
+    "eventId": "551",
+    "tournamentSlug": "grant-thornton-invitational",
+    "tournamentName": "Grant Thornton Invitational",
+    "date": "2026-12-11"
+  }
+]

@@ -1,0 +1,10 @@
+Logging to /workspaces/modelOptimizer/data/2026/cognizant-classic/pre_event/cognizant_classic_run_log.txt
+🔄 Generating course history regression inputs...
+ℹ️  Course history regression generation skipped (exit 1).
+✓ Loaded player ramp summary (348 players, maxEvents=6)
+✓ Updated course_context past performance weights (2 entries, source=json).
+
+🔄 Loading configuration...
+
+❌ Configuration unavailable: course_context.json entry missing and Configuration Sheet not found.
+   Fix: add a course_context entry for this event or provide a Configuration Sheet CSV in the inputs folder.

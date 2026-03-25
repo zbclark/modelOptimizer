@@ -1,0 +1,44 @@
+,,,,,,,,,,,,,,,,
+,Tours,,,Tournament Field:,Last Update - Success: 1/13/2026 9:25 PM,,,,,,,,,,,
+,FALSE,sam,,Approach Skill:,Last Update - Success: 1/13/2026 9:25 PM,,,,,,,,,,,
+,TRUE,pga,,Historical Data:,Last Update - Success: 2/5/2026 3:54 PM,,,,,,,,,,,
+,FALSE,champ,,ALL Tournaments:,Last Update - Success: 1/12/2026 11:42 AM,,,,,,,,,,,
+,FALSE,liv,,PGA Tournaments:,Last Update - Success: 1/12/2026 11:45 AM,,,,,,,,,,,
+,TRUE,kft,,Similar Course Dropdowns:,Last Update - Success: 1/12/2026 11:45 AM,,,,,,,,,,,
+,FALSE,can,,,,..._id,,,,,,,,,,
+,FALSE,asa,,Tournament,Sony Open in Hawaii,6,,,,,,,,,,
+,FALSE,jpn,,✅ Course,"Waialae Country Club (Course ID: 6) · 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004",6,,,,,,,,,,
+,FALSE,afr,,,,,,,,,,,,,,
+,FALSE,pgt,,Approach Data Time Period,YTD,,,,,,,,,,,
+,FALSE,atgt,,Time Period,last 3 months,,,,,,,,,,,
+,FALSE,mgt,,,,,,,,,,,,,,
+,FALSE,pgti,,Metrics Groups,Metrics,Weight 1,Weight 2,Weight 3,Weight 4,Weight 5,Weight 6,Weight 7,Weight 8,Weight 9,Course Setup - Shot Distribution,Group Weight
+,FALSE,anz,,Driving Performance,"(Driving Distance, Driving Accuracy, SG OTT)",0.44392139373,0.10452536855,0.45155323772,,,,,,,,0.1422154771
+,FALSE,alp,,Approach - Short (<100),"(GIR, SG, Proximity)",0.12704935483,0.34394531705,-0.52900532812,,,,,,,0.083,0.1422336757
+,FALSE,ngl,,Approach - Mid (100 - 150),"(FW & Rough - GIR, SG, Proximity)",0.06100931775,0.16473649445,-0.30326462959,0.06366492685,0.15126210442,-0.25606252693,,,,0.298,0.1585070053
+,FALSE,kor,,Approach -  Long (150 - 200),"(FW & Rough - GIR, SG, Proximity)",0.05887504512,0.15107854596,-0.29321927092,0.05369094549,0.14281065317,-0.30032553934,,,,0.448,0.1471382852
+,FALSE,atvt,,Approach - Very Long (>200),"(GIR, SG, Proximity)",0.08980228692,0.26240944520,-0.64778826788,,,,,,,0.056,0.02942765705
+,FALSE,bet,,Putting,(SG),1.00000000000,,,,,,,,,,0.1401520336
+,FALSE,chn,,Around the Green,(SG),1.00000000000,,,,,,,,,,0.07847375213
+,FALSE,ept,,Scoring,"(SG T2G, Scoring Average, Birdie Chances Created, ALL SG [<100 FW, <150 FW, <150 Rough, >150 Rough, <200 FW, >200 FW])",0.19476745045,-0.09468975966,0.09881839144,0.05737076279,0.10299088742,0.10299088742,0.30966387628,0.01935399227,0.01935399227,,0.1079014092
+,FALSE,adt,,Course Management,"(Scrambling, Great Shots, Poor Shot Avoidance, Proximity [<100, < 150 FW, <150 Rough, >150 Rough, <200 FW, >200 FW])",0.11502369101,0.09022106665,-0.07429961681,-0.06756815471,-0.12129704882,-0.12129704882,-0.36470522061,-0.02279407629,-0.02279407629,,0.05395070459
+,FALSE,mex,,,,,,,,,,,,,,1
+,FALSE,cpt,,,,,,,,,,,,,,
+,FALSE,tpt,,Past Performance,Yes,0.14,,,,,,,,,,Template: WAIALAE_COUNTRY_CLUB
+,FALSE,euro,,,,,,,,,,,,,,
+,FALSE,cha,,Include Majors: ,No,,,,,,,,,,,
+,FALSE,other,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+,Template,,,Similar Iron/Scoring Courses:,,Event ID,Weight,,,,,,,,,
+,FALSE,Power,,,"Harbour Town Golf Links (ID: 12) [2025, 2024, 2023, 2022]",12,0.3,,,,,,,,,
+,TRUE,Technical,,,"Colonial Country Club (ID: 21) [2025, 2024, 2023, 2022]",21,,,,,,,,,,
+,FALSE,Balanced,,,"Sea Island Golf Club (Seaside Course) (ID: 776) [2025, 2024, 2022]","493, 549",,,,,,,,,,
+,,,,,"Sedgefield Country Club (ID: 752) [2025, 2024, 2023, 2022]",13,,,,,,,,,,
+,,,,,"Waialae Country Club (ID: 6) [2025, 2024, 2023, 2022]",6,,,,,,,,,,
+,,,,,,,,,,,,,,,,
+,,,,Similar Putting Courses:,,Event ID,Weight,,,,,,,,,
+,,,,,"Sea Island Golf Club (Seaside Course) (ID: 776) [2025, 2024, 2022]","493, 549",0.25,,,,,,,,,
+,,,,,"Harbour Town Golf Links (ID: 12) [2025, 2024, 2023, 2022]",12,,,,,,,,,,
+,,,,,"Sedgefield Country Club (ID: 752) [2025, 2024, 2023, 2022]",13,,,,,,,,,,
+,,,,,"TPC Southwind (ID: 513) [2025, 2024, 2023, 2022]","27, 533",,,,,,,,,,
+,,,,,"Waialae Country Club (ID: 6) [2025, 2024, 2023, 2022]",6,,,,,,,,,,
