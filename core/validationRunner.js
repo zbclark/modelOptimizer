@@ -5921,6 +5921,19 @@ const runValidation = async ({
     const preApproachPath = resolveApproachCsvForEntry(dataRootDir, season, currentEntry);
     const postApproachPath = resolveApproachCsvForEntry(dataRootDir, season, nextEntry);
 
+    // NOTE: This call replaces the legacy in-file `computeEventOnlyApproachRows` logic.
+    // It is responsible for:
+    //   - Computing per-player "event-only" approach deltas between `beforeRows` and `afterRows`.
+    //   - Applying the low-sample / low-data shot-count rules (including any low-data indicators)
+    //     that downstream consumers expect to be consistent with the historical behavior.
+    //   - Returning both the filtered event-only rows and a `playersWithShots` count that
+    //     reflects the shot-based eligibility used in validation outputs.
+    //
+    // If `buildEventOnlyApproachRowsFromSnapshots` is modified (for example, changing the
+    // minimum shot thresholds, how low-data flags are set, or which rows are included),
+    // the change must preserve these semantics or be accompanied by an updated regression
+    // fixture test that compares event-only outputs for a representative before/after
+    // snapshot pair.
     const applyEventOnlyRows = ({ label, beforeRows, afterRows, sourceNote }) => {
       const eventOnly = buildEventOnlyApproachRowsFromSnapshots({ beforeRows, afterRows });
       if (eventOnly.rows.length > 0) {
