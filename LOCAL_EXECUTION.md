@@ -8,7 +8,7 @@ This project runs cleanly on macOS using **Node.js LTS**. I recommend keeping th
 
 ### Required software
 
-- **Node.js LTS (v20.x)**
+- **Node.js LTS** (see this repo’s `.nvmrc` or `package.json` `engines` field for the supported version)
 - **Git**
 - **VS Code** (optional)
 
