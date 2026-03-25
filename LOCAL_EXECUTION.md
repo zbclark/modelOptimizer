@@ -25,7 +25,7 @@ npm install
 ### Keeping local code in sync with GitHub
 
 ```text
-git pull origin optimizer-refactoring
+git pull
 ```
 
 ### Running locally (example)
