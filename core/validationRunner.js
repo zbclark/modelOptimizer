@@ -5936,15 +5936,28 @@ const runValidation = async ({
     // snapshot pair.
     const applyEventOnlyRows = ({ label, beforeRows, afterRows, sourceNote }) => {
       const eventOnly = buildEventOnlyApproachRowsFromSnapshots({ beforeRows, afterRows });
-      if (!eventOnly || !Array.isArray(eventOnly.rows)) {
+      if (
+        !eventOnly ||
+        !Array.isArray(eventOnly.rows) ||
+        typeof eventOnly.playersWithShots !== 'number' ||
+        !Number.isFinite(eventOnly.playersWithShots)
+      ) {
         // Defensive guard: ensure the utility returns the expected shape so we don't
         // crash with "Cannot read properties of undefined" if its contract changes.
         const typeDescription =
-          eventOnly === null ? 'null' : typeof eventOnly;
+          eventOnly === null
+            ? 'null'
+            : `object with rows: ${
+                Array.isArray(eventOnly.rows) ? 'array' : typeof eventOnly.rows
+              }, playersWithShots: ${
+                eventOnly.playersWithShots === undefined
+                  ? 'undefined'
+                  : typeof eventOnly.playersWithShots
+              }`;
         throw new Error(
           `buildEventOnlyApproachRowsFromSnapshots(...) contract violation: ` +
-          `expected an object with a 'rows' array (and 'playersWithShots' count), ` +
-          `but received value of type ${typeDescription}.`
+          `expected an object with a 'rows' array (and numeric finite 'playersWithShots' count), ` +
+          `but received ${typeDescription}.`
         );
       }
       if (eventOnly.rows.length > 0) {
