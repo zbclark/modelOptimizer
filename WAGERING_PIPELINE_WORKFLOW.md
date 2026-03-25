@@ -232,8 +232,8 @@ The desired output structure below is the **target** layout. To fully support it
 
 **Output data:**
 
-- DraftKings lineup outputs under `data/wagering/fantasy/draftkings/pga/`
-
+- DraftKings DFS lineup files (optimizer outputs) under `data/wagering/fantasy/draftkings/pga/` (this is the root used by the lineup optimizer).
+- Downstream contest-level analytics (e.g., per-entry/contest results) are expected under `data/wagering/contests/draftkings/` as described in `WAGERING_README.md`; those artifacts are not produced directly by this workflow but should remain path-consistent with this optimizer output.
 ---
 
 ## Typical usage patterns
