@@ -39,7 +39,10 @@ const DEFAULT_OUTPUT_DIR_NAME = 'validation_outputs';
 const METRIC_ANALYSIS_DIR_NAME = 'metric_analysis';
 const TEMPLATE_CORRELATION_DIR_NAME = 'template_correlation_summaries';
 const ROOT_DIR = path.resolve(__dirname, '..');
-const DATAGOLF_CACHE_DIR = path.resolve(ROOT_DIR, 'data', 'cache', 'historical_rounds');
+const HISTORICAL_ROUNDS_CACHE_DIR = path.resolve(ROOT_DIR, 'data', 'cache', 'historical_rounds');
+// NOTE: DATAGOLF_CACHE_DIR is specifically the historical rounds cache directory.
+// It is kept as a backwards-compatible alias; prefer HISTORICAL_ROUNDS_CACHE_DIR in new code.
+const DATAGOLF_CACHE_DIR = HISTORICAL_ROUNDS_CACHE_DIR;
 const METRIC_ANALYSIS_VERSION = 3;
 const DATAGOLF_API_KEY = String(process.env.DATAGOLF_API_KEY || '').trim();
 const DATAGOLF_APPROACH_TTL_HOURS = (() => {
