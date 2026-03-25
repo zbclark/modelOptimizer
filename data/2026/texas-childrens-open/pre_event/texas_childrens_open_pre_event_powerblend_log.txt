@@ -1,6 +1,6 @@
-Logging to /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas_childrens_open_pre_event_log.txt
+Logging to /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas_childrens_open_pre_event_powerblend_log.txt
 Command: /usr/local/share/nvm/versions/node/v24.11.1/bin/node /workspaces/modelOptimizer/core/optimizer.js --event 20 --name Texas Children's Open --season 2026 --pre --apiYears 2021-2026 --writeTemplates
-Env: OPT_TESTS=10000, EVENT_KFOLD_SEED=template, VALIDATION_APPROACH_MODE=current_only, APPROACH_DELTA_ROLLING_EVENTS=4, DATAGOLF_APPROACH_PERIOD=l24
+Env: OUTPUT_TAG=powerBlend, OPT_TESTS=10000, EVENT_KFOLD_SEED=template, VALIDATION_APPROACH_MODE=current_only, APPROACH_DELTA_ROLLING_EVENTS=4, DATAGOLF_APPROACH_PERIOD=l24
 🔄 Generating course history regression inputs...
 ✓ Course history regression inputs generated.
 ✓ Loaded player ramp summary (584 players, maxEvents=6)
@@ -19,7 +19,6 @@ Env: OPT_TESTS=10000, EVENT_KFOLD_SEED=template, VALIDATION_APPROACH_MODE=curren
 ✓ Loaded POWER template
 ✓ Loaded TECHNICAL template
 ✓ Loaded BALANCED template
-✓ Loaded TPC_SAWGRASS template
 ✓ Loaded TPC_LOUISIANA template
 ✓ Loaded PEBBLE_BEACH_GOLF_LINKS template
 ✓ Loaded WAIALAE_COUNTRY_CLUB template
@@ -28,9 +27,10 @@ Env: OPT_TESTS=10000, EVENT_KFOLD_SEED=template, VALIDATION_APPROACH_MODE=curren
 ✓ Loaded TORREY_PINES_GOLF_COURSE template
 ✓ Loaded WM_PHOENIX_OPEN_STADIUM_COURSE template
 ✓ Loaded PGA_NATIONAL_RESORT_CHAMPION_COURSE template
+✓ Loaded TPC_SAWGRASS template
 ✓ Loaded INNISBROOK_COPPERHEAD template
 ✓ Loaded MEMORIAL_PARK_GOLF_COURSE template
-✓ Loaded event-specific weights (eventId: 20) from template: MEMORIAL_PARK_GOLF_COURSE
+✓ Loaded event-specific weights (eventId: 20) from template: POWER
 ✓ DataGolf rankings loaded (api, updated 2026-03-23 12:46:56 UTC)
 ℹ️  Loaded L12 approach snapshot from archive (approach_l12_2026-02-23.json).
 ✓ Approach snapshot l24 ready (snapshot, updated 2026-02-23 14:52:29 UTC)
@@ -84,7 +84,7 @@ Analyze past-year metrics vs finish position
 ✓ Years available for evaluation: 2021, 2022, 2024, 2025 (event_history)
 ✓ Validation years (last 5 from latest available (2025)): 2021, 2022, 2024, 2025
 ✓ Total historical rounds for event 20 (all players): 1685
-✓ Total historical rounds for event 20 (current field only): 728
+✓ Total historical rounds for event 20 (current field only): 712
 
 ---
 STEP 1b: CURRENT-SEASON (EVENT ONLY) METRIC CORRELATIONS
@@ -104,16 +104,16 @@ Training metrics excluded: Birdie Chances Created, SG Total, Greens in Regulatio
 Derived metrics: Birdies or Better = birdies + eagles (from historical rounds when available); Approach <150 FW/<200 FW metrics blended with rough buckets (FW+Rough per distance)
 ℹ️  Step 1c approach gate: passed
 ℹ️  Step 1c metric scope detail:
-  - EVENT event 20 (season 2021): rounds=394, weight=1.00, approach=snapshot_missing, rows=0 (snapshot_missing)
-    Metrics (12): Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better
-    Samples: Driving Distance:132, Driving Accuracy:132, SG T2G:132, SG Approach:132, SG Around Green:132, SG OTT:132, SG Putting:132, Scrambling:132, Great Shots:132, Poor Shots:132, Scoring Average:132, Birdies or Better:132
+  - EVENT event 20 (season 2021): rounds=394, weight=1.00, approach=snapshot_l24, rows=89
+    Metrics (24): Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better, Approach <100 GIR, Approach <100 SG, Approach <100 Prox, Approach <150 FW GIR, Approach <150 FW SG, Approach <150 FW Prox, Approach <200 FW GIR, Approach <200 FW SG, Approach <200 FW Prox, Approach >200 FW GIR, Approach >200 FW SG, Approach >200 FW Prox
+    Samples: Driving Distance:132, Driving Accuracy:132, SG T2G:132, SG Approach:132, SG Around Green:132, SG OTT:132, SG Putting:132, Scrambling:132, Great Shots:132, Poor Shots:132, Scoring Average:132, Birdies or Better:132, Approach <100 GIR:132, Approach <100 SG:132, Approach <100 Prox:132, Approach <150 FW GIR:132, Approach <150 FW SG:132, Approach <150 FW Prox:132, Approach <200 FW GIR:132, Approach <200 FW SG:132, Approach <200 FW Prox:132, Approach >200 FW GIR:132, Approach >200 FW SG:132, Approach >200 FW Prox:132
   - EVENT event 20 (season 2022): rounds=395, weight=1.00, approach=snapshot_l24, rows=104
     Metrics (24): Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better, Approach <100 GIR, Approach <100 SG, Approach <100 Prox, Approach <150 FW GIR, Approach <150 FW SG, Approach <150 FW Prox, Approach <200 FW GIR, Approach <200 FW SG, Approach <200 FW Prox, Approach >200 FW GIR, Approach >200 FW SG, Approach >200 FW Prox
     Samples: Driving Distance:132, Driving Accuracy:132, SG T2G:132, SG Approach:132, SG Around Green:132, SG OTT:132, SG Putting:132, Scrambling:132, Great Shots:132, Poor Shots:132, Scoring Average:132, Birdies or Better:132, Approach <100 GIR:132, Approach <100 SG:132, Approach <100 Prox:132, Approach <150 FW GIR:132, Approach <150 FW SG:132, Approach <150 FW Prox:132, Approach <200 FW GIR:132, Approach <200 FW SG:132, Approach <200 FW Prox:132, Approach >200 FW GIR:132, Approach >200 FW SG:132, Approach >200 FW Prox:132
   - EVENT event 20 (season 2024): rounds=453, weight=1.00, approach=snapshot_l24, rows=135
     Metrics (24): Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better, Approach <100 GIR, Approach <100 SG, Approach <100 Prox, Approach <150 FW GIR, Approach <150 FW SG, Approach <150 FW Prox, Approach <200 FW GIR, Approach <200 FW SG, Approach <200 FW Prox, Approach >200 FW GIR, Approach >200 FW SG, Approach >200 FW Prox
     Samples: Driving Distance:144, Driving Accuracy:144, SG T2G:144, SG Approach:144, SG Around Green:144, SG OTT:144, SG Putting:144, Scrambling:144, Great Shots:144, Poor Shots:144, Scoring Average:144, Birdies or Better:144, Approach <100 GIR:144, Approach <100 SG:144, Approach <100 Prox:144, Approach <150 FW GIR:144, Approach <150 FW SG:144, Approach <150 FW Prox:144, Approach <200 FW GIR:144, Approach <200 FW SG:144, Approach <200 FW Prox:144, Approach >200 FW GIR:144, Approach >200 FW SG:144, Approach >200 FW Prox:144
-  - EVENT event 20 (season 2025): rounds=443, weight=1.00, approach=snapshot_l12, rows=149
+  - EVENT event 20 (season 2025): rounds=443, weight=1.00, approach=delta_prior_season:approach_deltas_texas-childrens-open_2026_03_18.json, rows=149
     Metrics (24): Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better, Approach <100 GIR, Approach <100 SG, Approach <100 Prox, Approach <150 FW GIR, Approach <150 FW SG, Approach <150 FW Prox, Approach <200 FW GIR, Approach <200 FW SG, Approach <200 FW Prox, Approach >200 FW GIR, Approach >200 FW SG, Approach >200 FW Prox
     Samples: Driving Distance:153, Driving Accuracy:153, SG T2G:153, SG Approach:153, SG Around Green:153, SG OTT:153, SG Putting:153, Scrambling:153, Great Shots:153, Poor Shots:153, Scoring Average:153, Birdies or Better:153, Approach <100 GIR:153, Approach <100 SG:153, Approach <100 Prox:153, Approach <150 FW GIR:153, Approach <150 FW SG:153, Approach <150 FW Prox:153, Approach <200 FW GIR:153, Approach <200 FW SG:153, Approach <200 FW Prox:153, Approach >200 FW GIR:153, Approach >200 FW SG:153, Approach >200 FW Prox:153
   - PUTTING event 11 (season 2021): rounds=449, weight=0.20, approach=putting_only, rows=0 (putting_only)
@@ -122,15 +122,15 @@ Derived metrics: Birdies or Better = birdies + eagles (from historical rounds wh
   - PUTTING event 12 (season 2021): rounds=397, weight=0.20, approach=putting_only, rows=0 (putting_only)
     Metrics (1): SG Putting
     Samples: SG Putting:134
-  - SIMILAR event 21 (season 2021): rounds=390, weight=0.15, approach=snapshot_missing, rows=0 (snapshot_missing)
-    Metrics (12): Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better
-    Samples: Driving Distance:121, Driving Accuracy:121, SG T2G:121, SG Approach:121, SG Around Green:121, SG OTT:121, SG Putting:121, Scrambling:121, Great Shots:121, Poor Shots:121, Scoring Average:121, Birdies or Better:121
+  - SIMILAR event 21 (season 2021): rounds=390, weight=0.15, approach=snapshot_l24, rows=75
+    Metrics (24): Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better, Approach <100 GIR, Approach <100 SG, Approach <100 Prox, Approach <150 FW GIR, Approach <150 FW SG, Approach <150 FW Prox, Approach <200 FW GIR, Approach <200 FW SG, Approach <200 FW Prox, Approach >200 FW GIR, Approach >200 FW SG, Approach >200 FW Prox
+    Samples: Driving Distance:121, Driving Accuracy:121, SG T2G:121, SG Approach:121, SG Around Green:121, SG OTT:121, SG Putting:121, Scrambling:121, Great Shots:121, Poor Shots:121, Scoring Average:121, Birdies or Better:121, Approach <100 GIR:121, Approach <100 SG:121, Approach <100 Prox:121, Approach <150 FW GIR:121, Approach <150 FW SG:121, Approach <150 FW Prox:121, Approach <200 FW GIR:121, Approach <200 FW SG:121, Approach <200 FW Prox:121, Approach >200 FW GIR:121, Approach >200 FW SG:121, Approach >200 FW Prox:121
   - PUTTING event 475 (season 2021): rounds=450, weight=0.20, approach=putting_only, rows=0 (putting_only)
     Metrics (1): SG Putting
     Samples: SG Putting:156
-  - SIMILAR event 480 (season 2021): rounds=463, weight=0.15, approach=snapshot_missing, rows=0 (snapshot_missing)
-    Metrics (12): Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better
-    Samples: Driving Distance:155, Driving Accuracy:155, SG T2G:155, SG Approach:155, SG Around Green:155, SG OTT:155, SG Putting:155, Scrambling:155, Great Shots:155, Poor Shots:155, Scoring Average:155, Birdies or Better:155
+  - SIMILAR event 480 (season 2021): rounds=463, weight=0.15, approach=snapshot_l24, rows=100
+    Metrics (24): Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better, Approach <100 GIR, Approach <100 SG, Approach <100 Prox, Approach <150 FW GIR, Approach <150 FW SG, Approach <150 FW Prox, Approach <200 FW GIR, Approach <200 FW SG, Approach <200 FW Prox, Approach >200 FW GIR, Approach >200 FW SG, Approach >200 FW Prox
+    Samples: Driving Distance:155, Driving Accuracy:155, SG T2G:155, SG Approach:155, SG Around Green:155, SG OTT:155, SG Putting:155, Scrambling:155, Great Shots:155, Poor Shots:155, Scoring Average:155, Birdies or Better:155, Approach <100 GIR:155, Approach <100 SG:155, Approach <100 Prox:155, Approach <150 FW GIR:155, Approach <150 FW SG:155, Approach <150 FW Prox:155, Approach <200 FW GIR:155, Approach <200 FW SG:155, Approach <200 FW Prox:155, Approach >200 FW GIR:155, Approach >200 FW SG:155, Approach >200 FW Prox:155
   - PUTTING event 11 (season 2022): rounds=423, weight=0.20, approach=putting_only, rows=0 (putting_only)
     Metrics (1): SG Putting
     Samples: SG Putting:143
@@ -207,11 +207,9 @@ Derived metrics: Birdies or Better = birdies + eagles (from historical rounds wh
     Metrics (1): SG Putting
     Samples: SG Putting:135
 ✓ Computed 24 historical metric correlations (no current results).
-🗄️  Backed up previous JSON results to: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/archive/texas-childrens-open_pre_event_results.json.2026-03-24T10-34-35-05-00.bak
-🗄️  Backed up previous text results to: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/archive/texas-childrens-open_pre_event_results.txt.2026-03-24T10-34-35-05-00.bak
 ✅ Pre-event training output saved (rankings generated).
-✅ JSON results saved to: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_pre_event_results.json
-✅ Text results saved to: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_pre_event_results.txt
+✅ JSON results saved to: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_powerblend_pre_event_results.json
+✅ Text results saved to: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_powerblend_pre_event_results.txt
 
 ✅ Pre-event template written to: /workspaces/modelOptimizer/utilities/weightTemplates.js
 ℹ️  Pre-event run: delta player scores not written (rankings must use snapshot-only data).

@@ -13,6 +13,7 @@ const { formatTimestamp } = require('../utilities/timeUtils');
 const { getSharedConfig, loadConfigCells, getCell } = require('../utilities/configParser');
 const { WEIGHT_TEMPLATES } = require('../utilities/weightTemplates');
 const { METRIC_DEFS, loadApproachCsv, extractApproachRowsFromJson } = require('../utilities/approachDelta');
+const { buildEventOnlyApproachRowsFromSnapshots } = require('../utilities/approachEventDelta');
 const resultsCsvUtils = require('../utilities/tournamentResultsCsv');
 const {
   resolveValidationRoot,
@@ -40,7 +41,6 @@ const TEMPLATE_CORRELATION_DIR_NAME = 'template_correlation_summaries';
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATAGOLF_CACHE_DIR = path.resolve(ROOT_DIR, 'data', 'cache', 'historical_rounds');
 const METRIC_ANALYSIS_VERSION = 3;
-const EVENT_ONLY_LOW_DATA_THRESHOLD = 0;
 const DATAGOLF_API_KEY = String(process.env.DATAGOLF_API_KEY || '').trim();
 const DATAGOLF_APPROACH_TTL_HOURS = (() => {
   const raw = parseFloat(String(process.env.DATAGOLF_APPROACH_TTL_HOURS || '').trim());
@@ -412,108 +412,7 @@ const parseApproachNumber = (value, isPercent = false) => {
   if (isPercent) return parsed > 1 ? parsed / 100 : parsed;
   return parsed;
 };
-
-const buildApproachIndex = rows => {
-  const index = new Map();
-  (rows || []).forEach(row => {
-    const dgId = row?.dg_id !== undefined && row?.dg_id !== null
-      ? String(row.dg_id).split('.')[0].trim()
-      : '';
-    if (!dgId) return;
-    const metrics = {};
-    (METRIC_DEFS || []).forEach(def => {
-      metrics[def.key] = parseApproachNumber(row?.[def.key], def.isPercent);
-    });
-    index.set(dgId, { dgId, metrics });
-  });
-  return index;
-};
-
-const resolveShotCountKey = metricKey => {
-  const suffixes = ['gir_rate', 'good_shot_rate', 'poor_shot_avoid_rate', 'proximity_per_shot', 'sg_per_shot'];
-  const suffixMatch = suffixes.find(suffix => metricKey.endsWith(`_${suffix}`));
-  if (!suffixMatch) return null;
-  return metricKey.replace(new RegExp(`_${suffixMatch}$`), '_shot_count');
-};
-
-const computeEventOnlyApproachRows = ({ beforeRows, afterRows }) => {
-  const beforeIndex = buildApproachIndex(beforeRows || []);
-  const afterIndex = buildApproachIndex(afterRows || []);
-  const allIds = new Set([...beforeIndex.keys(), ...afterIndex.keys()]);
-  const rows = [];
-  let playersWithShots = 0;
-
-  allIds.forEach(dgId => {
-    const before = beforeIndex.get(dgId);
-    const after = afterIndex.get(dgId);
-    if (!before && !after) return;
-
-    const row = { dg_id: dgId };
-    let hasShots = false;
-
-    (METRIC_DEFS || []).forEach(def => {
-      const key = def.key;
-      const beforeValue = before?.metrics?.[key] ?? null;
-      const afterValue = after?.metrics?.[key] ?? null;
-
-      if (key.endsWith('_shot_count')) {
-        const deltaShots = (afterValue ?? 0) - (beforeValue ?? 0);
-        if (deltaShots > 0) {
-          row[key] = deltaShots;
-          hasShots = true;
-        } else {
-          row[key] = null;
-        }
-        return;
-      }
-
-      if (key.endsWith('_low_data_indicator')) {
-        const bucket = key.replace('_low_data_indicator', '');
-        const shotKey = `${bucket}_shot_count`;
-        const beforeShots = before?.metrics?.[shotKey] ?? null;
-        const afterShots = after?.metrics?.[shotKey] ?? null;
-        const deltaShots = (afterShots ?? 0) - (beforeShots ?? 0);
-        const flag = (beforeValue === 1 || afterValue === 1 || (deltaShots > 0 && deltaShots < EVENT_ONLY_LOW_DATA_THRESHOLD)) ? 1 : 0;
-        row[key] = flag;
-        return;
-      }
-
-      const shotCountKey = resolveShotCountKey(key);
-      if (!shotCountKey) {
-        row[key] = afterValue ?? beforeValue ?? null;
-        return;
-      }
-
-      const beforeShots = before?.metrics?.[shotCountKey] ?? null;
-      const afterShots = after?.metrics?.[shotCountKey] ?? null;
-      const deltaShots = (afterShots ?? 0) - (beforeShots ?? 0);
-      const hasAfterShots = typeof afterShots === 'number' && Number.isFinite(afterShots) && afterShots > 0;
-      const hasBeforeShots = typeof beforeShots === 'number' && Number.isFinite(beforeShots) && beforeShots > 0;
-      if (!hasAfterShots || afterValue === null) {
-        row[key] = null;
-        return;
-      }
-
-      if (!hasBeforeShots || beforeValue === null || deltaShots <= 0) {
-        row[key] = afterValue;
-        hasShots = true;
-        return;
-      }
-
-      const eventValue = ((afterValue * afterShots) - (beforeValue * beforeShots)) / deltaShots;
-      row[key] = Number.isFinite(eventValue) ? eventValue : null;
-      if (deltaShots > 0) hasShots = true;
-    });
-
-    if (hasShots) {
-      playersWithShots += 1;
-      rows.push(row);
-    }
-  });
-
-  return { rows, playersWithShots };
-};
-
+ 
 const resolveApproachCsvForEntry = (dataRootDir, season, entry) => {
   if (!entry) return null;
   const tournamentDir = resolveTournamentDir(dataRootDir, season, entry.tournamentName, entry.tournamentSlug);
@@ -6019,7 +5918,7 @@ const runValidation = async ({
     const postApproachPath = resolveApproachCsvForEntry(dataRootDir, season, nextEntry);
 
     const applyEventOnlyRows = ({ label, beforeRows, afterRows, sourceNote }) => {
-      const eventOnly = computeEventOnlyApproachRows({ beforeRows, afterRows });
+      const eventOnly = buildEventOnlyApproachRowsFromSnapshots({ beforeRows, afterRows });
       if (eventOnly.rows.length > 0) {
         approachEventOnlyMap = new Map();
         eventOnly.rows.forEach(row => {

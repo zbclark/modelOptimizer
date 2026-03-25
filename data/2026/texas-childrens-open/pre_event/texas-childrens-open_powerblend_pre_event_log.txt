@@ -1,4 +1,4 @@
-Logging to /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_pre_event_log.txt
+Logging to /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_powerblend_pre_event_log.txt
 
 === PRE-EVENT RUN SUMMARY ===
 Event: 20 (Texas Children's Open)
@@ -6,19 +6,19 @@ CourseNum: 897
 CourseNameKey: MEMORIAL_PARK_GOLF_COURSE
 Season: 2026
 Run Mode: pre_event
-Timestamp: 2026-03-24T10:34:35-05:00
+Timestamp: 2026-03-24T16:33:09-05:00
 
 🔄 Course context / configuration
 - Config source: course_context.json
 - Config file: /workspaces/modelOptimizer/utilities/course_context.json
 - Applied overrides: eventId=20, courseNum=897
 - Course type: POWER
-- Template key: MEMORIAL_PARK_GOLF_COURSE
+- Template key: POWER
 
 🔄 Course history regression
 - Inputs generated
 - Regression snapshot: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/course_history_regression/course_history_regression.json
-- Completed date: 2026-03-24T10:34:20-05:00
+- Completed date: 2026-03-24T16:32:52-05:00
 
 🔄 Player ramp summary
 - File: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/analysis/early_season_ramp_sg_total.json
@@ -27,7 +27,7 @@ Timestamp: 2026-03-24T10:34:35-05:00
 
 🔄 Templates
 
-- Selected template: MEMORIAL_PARK_GOLF_COURSE (eventId=20)
+- Selected template: POWER (eventId=20)
 	File: /workspaces/modelOptimizer/utilities/weightTemplates.js
 - Validation template loaded: VALIDATION_POWER (reporting only)
 	Files:
@@ -37,7 +37,7 @@ Timestamp: 2026-03-24T10:34:35-05:00
 🔄 Data sources (used this run)
 
 DataGolf
-- Field updates: used (cache file): /workspaces/modelOptimizer/data/cache/field/datagolf_texas-childrens-open_field_updates_pga.json (last updated 2026-03-23T20:41:07-05:00)
+- Field updates: used (cache file): /workspaces/modelOptimizer/data/cache/field/datagolf_texas-childrens-open_field_updates_pga.json (last updated 2026-03-24T12:04:29-05:00)
 
 Approach snapshots
 - YTD snapshot used: /workspaces/modelOptimizer/data/approach_snapshot/approach_ytd_2026-03-23.json (event-aligned) (last updated 2026-03-23T09:54:38-05:00)
@@ -48,7 +48,7 @@ Approach snapshots
 - L24: /workspaces/modelOptimizer/data/approach_snapshot/approach_l24_2026-02-23.json
 
 Field
-- Field updates cache: /workspaces/modelOptimizer/data/cache/field/datagolf_texas-childrens-open_field_updates_pga.json (last updated 2026-03-23T20:41:07-05:00)
+- Field updates cache: /workspaces/modelOptimizer/data/cache/field/datagolf_texas-childrens-open_field_updates_pga.json (last updated 2026-03-24T12:04:29-05:00)
 - Field loaded: 135 players
 
 Weather (Meteoblue)
@@ -106,10 +106,10 @@ Historical Rounds
 --- STEP 1d: CURRENT-SEASON TEMPLATE BASELINE ---
 - Years evaluated: 2021, 2022, 2024, 2025
 - Rounds by year (actual rows used):
-	- 2021: 132 rounds
-	- 2022: 147 rounds
-	- 2024: 198 rounds
-	- 2025: 251 rounds
+	- 2021: 130 rounds
+	- 2022: 143 rounds
+	- 2024: 190 rounds
+	- 2025: 249 rounds
 - Status: skipped (no current-season results to evaluate templates)
 - Approach usage: current season (2026) only
 - Approach source: snapshot_ytd (254 rows)
@@ -129,9 +129,9 @@ Historical Rounds
 	- /workspaces/modelOptimizer/data/approach_deltas/2026/approach_deltas_the-valspar_2026_03_23.json
 
 ✅ Outputs
-- Results JSON: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_pre_event_results.json
-- Results TXT: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_pre_event_results.txt
-- Pre-event rankings JSON: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_pre_event_rankings.json
-- Pre-event rankings CSV: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_pre_event_rankings.csv
-- Signal contribution report: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_signal_contributions.json
-- Completed: 2026-03-24T10:34:35-05:00
+- Results JSON: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_powerblend_pre_event_results.json
+- Results TXT: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_powerblend_pre_event_results.txt
+- Pre-event rankings JSON: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_powerblend_pre_event_rankings.json
+- Pre-event rankings CSV: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_powerblend_pre_event_rankings.csv
+- Signal contribution report: /workspaces/modelOptimizer/data/2026/texas-childrens-open/pre_event/texas-childrens-open_powerblend_signal_contributions.json
+- Completed: 2026-03-24T16:33:09-05:00

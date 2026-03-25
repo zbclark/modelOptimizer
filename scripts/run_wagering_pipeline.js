@@ -358,7 +358,7 @@ const main = () => {
       });
     }
 
-    if (!skipMonthly) {
+    if (!skipMonthly && !options.deferWeekly) {
       const monthlyArgs = [
         '--season', String(season),
         '--market', String(marketValue),
@@ -504,11 +504,29 @@ const main = () => {
         runForOddsSource('historical', { yearTag: yearValue, yearValue });
       });
     } else {
-      runForOddsSource(sourceKey || 'historical');
+      runForOddsSource(sourceKey || 'historical', { deferWeekly: sourceKey === 'live' });
     }
 
     args.market = priorMarket;
   });
+    if (!skipMonthly && sourceKey === 'live') {
+      const monthlyArgs = [
+        '--season', String(season),
+        '--market', 'all',
+        '--oddsSource', String(sourceKey)
+      ];
+      const resolvedMonthlyEventId = resolvedEventId || eventId;
+      if (resolvedMonthlyEventId) {
+        monthlyArgs.push('--eventId', String(resolvedMonthlyEventId));
+      }
+      if (tournamentSlug) {
+        monthlyArgs.push('--tournamentSlug', String(tournamentSlug));
+      }
+      if (stake !== undefined && stake !== null && stake !== '') {
+        monthlyArgs.push('--stake', String(stake));
+      }
+      runNodeScript(path.resolve(__dirname, 'run_weekly_simulation.js'), monthlyArgs, `run_weekly_simulation (${sourceKey})`);
+    }
   };
 
   if (normalizedOddsSource === 'both') {

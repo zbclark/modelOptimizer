@@ -273,6 +273,28 @@ const listYtdArchives = () => {
   return entries.sort((a, b) => a.date.localeCompare(b.date));
 };
 
+const listPeriodArchives = (period) => {
+  const normalized = String(period || '').trim().toLowerCase();
+  if (!normalized) return [];
+  const pattern = new RegExp(`^approach_${normalized}_\\d{4}-\\d{2}-\\d{2}\\.json$`, 'i');
+  const entries = [];
+  const collect = baseDir => {
+    if (!baseDir || !fs.existsSync(baseDir)) return;
+    fs.readdirSync(baseDir)
+      .filter(name => pattern.test(name))
+      .forEach(name => {
+        entries.push({
+          name,
+          path: path.resolve(baseDir, name),
+          date: name.match(/\d{4}-\d{2}-\d{2}/)?.[0] || ''
+        });
+      });
+  };
+  collect(APPROACH_SNAPSHOT_DIR);
+  collect(APPROACH_SNAPSHOT_ARCHIVE_DIR);
+  return entries.sort((a, b) => a.date.localeCompare(b.date));
+};
+
 const resolveSnapshotPath = (fileName) => {
   if (!fileName) return null;
   const direct = path.resolve(APPROACH_SNAPSHOT_DIR, fileName);
@@ -287,10 +309,14 @@ const resolveSnapshotSelector = (selector) => {
   if (!normalized) return null;
 
   if (normalized === 'l24') {
-    return resolveSnapshotPath('approach_l24.json');
+    const archives = listPeriodArchives('l24');
+    if (archives.length > 0) return archives[archives.length - 1].path;
+    return null;
   }
   if (normalized === 'l12') {
-    return resolveSnapshotPath('approach_l12.json');
+    const archives = listPeriodArchives('l12');
+    if (archives.length > 0) return archives[archives.length - 1].path;
+    return null;
   }
   if (normalized === 'ytd_latest' || normalized === 'latest') {
     return resolveSnapshotPath('approach_ytd_latest.json');

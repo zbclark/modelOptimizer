@@ -33,6 +33,14 @@ const { buildMetricGroupsFromConfig } = require('../utilities/metricConfigBuilde
 const { WEIGHT_TEMPLATES } = require('../utilities/weightTemplates');
 const { getDeltaPlayerScoresForEvent } = require('../utilities/deltaPlayerScores');
 const { METRIC_DEFS, loadApproachCsv, computeApproachDeltas, extractApproachRowsFromJson } = require('../utilities/approachDelta');
+const {
+  buildEventOnlyApproachRowsFromDeltaRows,
+  buildApproachMetricValuesFromRow
+} = require('../utilities/approachEventDelta');
+const {
+  applyShotDistributionToMetricWeights,
+  applyShotDistributionToApproachGroupWeights
+} = require('../utilities/shotDistribution');
 const { blendTemplateWeights } = require('../utilities/top20TemplateBlend');
 const { resolveKFoldTag } = require('../utilities/kfoldTag');
 const { writeCleanRunSummaryLog } = require('../utilities/runSummaryLog');
@@ -2304,6 +2312,11 @@ function loadValidationOutputs(metricConfig, dirs) {
 function findApproachDeltaFile(dirs, tournamentName, fallbackName, season = null) {
   const normalized = normalizeTemplateKey(tournamentName || fallbackName);
   const normalizedSlug = normalizeTournamentSlug(tournamentName || fallbackName);
+  const normalizeSlugLoose = value => String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '');
+  const normalizedSlugLoose = normalizeSlugLoose(tournamentName || fallbackName);
   const candidates = [];
   const seasonPattern = season ? new RegExp(`(^|[_-])${String(season)}([_-]|$)`, 'i') : null;
   const stripDateSuffix = (value) => String(value || '')
@@ -2352,6 +2365,20 @@ function findApproachDeltaFile(dirs, tournamentName, fallbackName, season = null
     if (slugMatches.length > 0) {
       const seasonMatches = seasonPattern ? slugMatches.filter(match => seasonPattern.test(match.file)) : [];
       const rankedMatches = seasonMatches.length > 0 ? seasonMatches : slugMatches;
+      rankedMatches.sort((a, b) => resolveApproachDeltaTimestamp(b.path) - resolveApproachDeltaTimestamp(a.path));
+      return rankedMatches[0].path;
+    }
+  }
+
+  if (normalizedSlugLoose) {
+    const looseMatches = candidates.filter(candidate => {
+      const baseName = candidate.file.replace(/\.json$/i, '').replace(/^approach_deltas?_?/i, '');
+      const normalizedFileSlugLoose = normalizeSlugLoose(stripDateSuffix(baseName));
+      return normalizedFileSlugLoose && normalizedFileSlugLoose === normalizedSlugLoose;
+    });
+    if (looseMatches.length > 0) {
+      const seasonMatches = seasonPattern ? looseMatches.filter(match => seasonPattern.test(match.file)) : [];
+      const rankedMatches = seasonMatches.length > 0 ? seasonMatches : looseMatches;
       rankedMatches.sort((a, b) => resolveApproachDeltaTimestamp(b.path) - resolveApproachDeltaTimestamp(a.path));
       return rankedMatches[0].path;
     }
@@ -2897,7 +2924,25 @@ const HISTORICAL_METRICS = [
   { key: 'greatShots', label: 'Great Shots', lowerBetter: false },
   { key: 'poorShots', label: 'Poor Shots', lowerBetter: true },
   { key: 'fairwayProx', label: 'Fairway Proximity', lowerBetter: true },
-  { key: 'roughProx', label: 'Rough Proximity', lowerBetter: true }
+  { key: 'roughProx', label: 'Rough Proximity', lowerBetter: true },
+  { key: 'approach100GIR', label: 'Approach <100 GIR', lowerBetter: false, percentage: true },
+  { key: 'approach100SG', label: 'Approach <100 SG', lowerBetter: false },
+  { key: 'approach100Prox', label: 'Approach <100 Prox', lowerBetter: true },
+  { key: 'approach150fwGIR', label: 'Approach <150 FW GIR', lowerBetter: false, percentage: true },
+  { key: 'approach150fwSG', label: 'Approach <150 FW SG', lowerBetter: false },
+  { key: 'approach150fwProx', label: 'Approach <150 FW Prox', lowerBetter: true },
+  { key: 'approach150roughGIR', label: 'Approach <150 Rough GIR', lowerBetter: false, percentage: true },
+  { key: 'approach150roughSG', label: 'Approach <150 Rough SG', lowerBetter: false },
+  { key: 'approach150roughProx', label: 'Approach <150 Rough Prox', lowerBetter: true },
+  { key: 'approachOver150roughGIR', label: 'Approach >150 Rough GIR', lowerBetter: false, percentage: true },
+  { key: 'approachOver150roughSG', label: 'Approach >150 Rough SG', lowerBetter: false },
+  { key: 'approachOver150roughProx', label: 'Approach >150 Rough Prox', lowerBetter: true },
+  { key: 'approach200fwGIR', label: 'Approach <200 FW GIR', lowerBetter: false, percentage: true },
+  { key: 'approach200fwSG', label: 'Approach <200 FW SG', lowerBetter: false },
+  { key: 'approach200fwProx', label: 'Approach <200 FW Prox', lowerBetter: true },
+  { key: 'approach200plusGIR', label: 'Approach >200 FW GIR', lowerBetter: false, percentage: true },
+  { key: 'approach200plusSG', label: 'Approach >200 FW SG', lowerBetter: false },
+  { key: 'approach200plusProx', label: 'Approach >200 FW Prox', lowerBetter: true }
 ];
 
 const GENERATED_METRIC_LABELS = [
@@ -4030,7 +4075,7 @@ function deriveBirdiesOrBetterFromRow(row) {
   return null;
 }
 
-function buildHistoricalMetricSamples(rawHistoryData, eventId) {
+function buildHistoricalMetricSamples(rawHistoryData, eventId, approachMetricsByYear = null) {
   const samples = [];
   const cutSamples = [];
   const maxFinishByYear = new Map();
@@ -4076,6 +4121,23 @@ function buildHistoricalMetricSamples(rawHistoryData, eventId) {
       fairwayProx: row.prox_fw ? cleanMetricValue(row.prox_fw) : null,
       roughProx: row.prox_rgh ? cleanMetricValue(row.prox_rgh) : null
     };
+
+    if (approachMetricsByYear) {
+      const approachYearMap = approachMetricsByYear instanceof Map
+        ? approachMetricsByYear.get(year)
+        : approachMetricsByYear[year];
+      if (approachYearMap) {
+        const dgId = normalizeDgIdValue(row?.dg_id ?? row?.dgId);
+        const approachMetrics = approachYearMap instanceof Map
+          ? approachYearMap.get(dgId)
+          : approachYearMap[dgId];
+        if (approachMetrics) {
+          Object.entries(approachMetrics).forEach(([key, value]) => {
+            metrics[key] = value;
+          });
+        }
+      }
+    }
 
     if (typeof finishPosition === 'number' && !Number.isNaN(finishPosition)) {
       samples.push({ year, finishPosition, metrics });
@@ -5415,63 +5477,48 @@ function blendAlignmentMaps(maps, weights) {
   return combined;
 }
 
-function applyShotDistributionToMetricWeights(metricWeights = {}, courseSetupWeights = {}) {
-  const normalized = { ...metricWeights };
-  const under100 = typeof courseSetupWeights.under100 === 'number' ? courseSetupWeights.under100 : 0;
-  const from100to150 = typeof courseSetupWeights.from100to150 === 'number' ? courseSetupWeights.from100to150 : 0;
-  const from150to200 = typeof courseSetupWeights.from150to200 === 'number' ? courseSetupWeights.from150to200 : 0;
-  const over200 = typeof courseSetupWeights.over200 === 'number' ? courseSetupWeights.over200 : 0;
-  const total = under100 + from100to150 + from150to200 + over200;
-  if (total <= 0) return normalized;
+function computeShotDistributionGate({
+  cvReliability,
+  deltaCoverage,
+  cvMin,
+  cvFull,
+  coverageMin,
+  coverageFull
+}) {
+  const safeCvMin = typeof cvMin === 'number' ? cvMin : 0.35;
+  const safeCvFull = typeof cvFull === 'number' ? cvFull : 0.55;
+  const safeCoverageMin = typeof coverageMin === 'number' ? coverageMin : 0.3;
+  const safeCoverageFull = typeof coverageFull === 'number' ? coverageFull : 0.7;
+  const coverageRatio = typeof deltaCoverage?.coverageRatio === 'number'
+    ? deltaCoverage.coverageRatio
+    : 0;
 
-  const distribution = [under100, from100to150, from150to200, over200].map(value => value / total);
-
-  const applyToGroup = (groupName, metricNames) => {
-    const weights = metricNames.map(name => {
-      const key = `${groupName}::${name}`;
-      const value = normalized[key];
-      return typeof value === 'number' ? value : 0;
-    });
-    const signs = weights.map(value => (Math.sign(value) || 1));
-    const totalAbs = weights.reduce((sum, value) => sum + Math.abs(value), 0);
-    if (totalAbs <= 0) return;
-
-    const [distUnder100, dist100to150, dist150to200, distOver200] = distribution;
-
-    const adjusted = [
-      distUnder100 * totalAbs * signs[0],
-      (dist100to150 * totalAbs / 2) * signs[1],
-      (dist100to150 * totalAbs / 2) * signs[2],
-      dist150to200 * totalAbs * signs[3],
-      (distOver200 * totalAbs / 2) * signs[4],
-      (distOver200 * totalAbs / 2) * signs[5]
-    ];
-
-    metricNames.forEach((name, index) => {
-      const key = `${groupName}::${name}`;
-      normalized[key] = adjusted[index];
-    });
+  const scoreValue = (value, min, full) => {
+    if (typeof value !== 'number' || Number.isNaN(value)) return 0;
+    if (full <= min) return value >= full ? 1 : 0;
+    return clamp01((value - min) / (full - min));
   };
 
-  applyToGroup('Scoring', [
-    'Scoring: Approach <100 SG',
-    'Scoring: Approach <150 FW SG',
-    'Scoring: Approach <150 Rough SG',
-    'Scoring: Approach <200 FW SG',
-    'Scoring: Approach >200 FW SG',
-    'Scoring: Approach >150 Rough SG'
-  ]);
+  const cvScore = scoreValue(cvReliability, safeCvMin, safeCvFull);
+  const coverageScore = scoreValue(coverageRatio, safeCoverageMin, safeCoverageFull);
+  const trustScore = clamp01((cvScore + coverageScore) / 2);
+  const gateFactor = clamp01(1 - trustScore);
 
-  applyToGroup('Course Management', [
-    'Course Management: Approach <100 Prox',
-    'Course Management: Approach <150 FW Prox',
-    'Course Management: Approach <150 Rough Prox',
-    'Course Management: Approach <200 FW Prox',
-    'Course Management: Approach >200 FW Prox',
-    'Course Management: Approach >150 Rough Prox'
-  ]);
-
-  return normalized;
+  return {
+    factor: gateFactor,
+    trustScore,
+    cvReliability: typeof cvReliability === 'number' ? cvReliability : 0,
+    cvScore,
+    coverageRatio,
+    coverageScore,
+    thresholds: {
+      cvMin: safeCvMin,
+      cvFull: safeCvFull,
+      coverageMin: safeCoverageMin,
+      coverageFull: safeCoverageFull
+    },
+    deltaCoverage: deltaCoverage || null
+  };
 }
 
 function buildTop20CompositeScore(evaluation) {
@@ -6663,11 +6710,12 @@ function pruneApproachSnapshotArchives() {
   ensureDirectory(APPROACH_SNAPSHOT_ARCHIVE_DIR);
 
   const byPeriod = archives.reduce((acc, entry) => {
-    if (!acc[entry.period]) acc[entry.period] = [];
-    acc[entry.period].push(entry);
-    return acc;
+      const lower = name.toLowerCase();
+      if (lower === 'approach_ytd_latest.json') return;
+      const match = name.match(/^approach_([a-z0-9]+)_(\d{4}-\d{2}-\d{2})\.json$/i);
   }, {});
 
+      if (!['ytd', 'l12', 'l24'].includes(period)) return;
   let removed = 0;
   Object.entries(byPeriod).forEach(([period, entries]) => {
     const retentionCount = APPROACH_SNAPSHOT_RETENTION_COUNTS[period];
@@ -8910,6 +8958,9 @@ async function runAdaptiveOptimizer() {
   let approachSnapshotL24 = loadApproachSnapshotFromDisk(APPROACH_SNAPSHOT_L24_PATH);
   let approachSnapshotL12 = loadApproachSnapshotFromDisk(APPROACH_SNAPSHOT_L12_PATH);
   let approachSnapshotYtd = loadApproachSnapshotFromDisk(APPROACH_SNAPSHOT_YTD_LATEST_PATH);
+  let approachSnapshotYtdLatest = approachSnapshotYtd?.payload
+    ? { ...approachSnapshotYtd, source: 'snapshot_latest', path: APPROACH_SNAPSHOT_YTD_LATEST_PATH }
+    : null;
   let approachYtdUpdatedThisRun = false;
   let fieldUpdatesUpdatedThisRun = false;
 
@@ -8985,6 +9036,10 @@ async function runAdaptiveOptimizer() {
         }
         if (approachSnapshotYtd?.payload && approachSnapshotYtd?.source === 'api') {
           approachYtdUpdatedThisRun = true;
+        }
+        approachSnapshotYtdLatest = loadApproachSnapshotFromDisk(APPROACH_SNAPSHOT_YTD_LATEST_PATH);
+        if (approachSnapshotYtdLatest?.payload) {
+          approachSnapshotYtdLatest = { ...approachSnapshotYtdLatest, source: 'snapshot_latest', path: APPROACH_SNAPSHOT_YTD_LATEST_PATH };
         }
       } catch (error) {
         console.warn(`ℹ️  Approach snapshot ytd fetch failed: ${error.message}`);
@@ -9843,7 +9898,8 @@ async function runAdaptiveOptimizer() {
   const approachSnapshotRows = {
     l24: extractApproachRowsFromJson(approachSnapshotL24?.payload),
     l12: extractApproachRowsFromJson(approachSnapshotL12?.payload),
-    ytd: extractApproachRowsFromJson(approachSnapshotYtd?.payload)
+    ytd: extractApproachRowsFromJson(approachSnapshotYtd?.payload),
+    ytd_latest: extractApproachRowsFromJson(approachSnapshotYtdLatest?.payload)
   };
   const approachSkillPeriod = String(approachSkillSnapshot?.payload?.time_period || '').trim().toLowerCase();
 
@@ -9929,6 +9985,17 @@ async function runAdaptiveOptimizer() {
       if (approachSnapshotRows.l12.length > 0) {
         approachSnapshotL12 = latestL12;
         console.log(`ℹ️  Loaded L12 approach snapshot from archive for validation (${path.basename(latestL12.path)}).`);
+      }
+    }
+  }
+
+  if (approachSnapshotRows.l24.length === 0) {
+    const latestL24 = resolveLatestApproachSnapshotArchive('l24');
+    if (latestL24?.payload) {
+      approachSnapshotRows.l24 = extractApproachRowsFromJson(latestL24.payload);
+      if (approachSnapshotRows.l24.length > 0) {
+        approachSnapshotL24 = latestL24;
+        console.log(`ℹ️  Loaded L24 approach snapshot from archive for validation (${path.basename(latestL24.path)}).`);
       }
     }
   }
@@ -10046,6 +10113,12 @@ async function runAdaptiveOptimizer() {
 
     const diff = effectiveSeason - yearValue;
     if (diff === 0) {
+      if (IS_PRE_TOURNAMENT_RUN && approachSnapshotRows.ytd_latest.length > 0) {
+        meta.period = 'ytd_latest';
+        meta.source = 'snapshot_ytd_latest';
+        meta.leakageFlag = 'as_of_date';
+        return { rows: approachSnapshotRows.ytd_latest, meta };
+      }
       if (approachDataCurrent.length > 0) {
         meta.period = 'ytd';
         meta.source = approachDataCurrentSource;
@@ -10067,7 +10140,7 @@ async function runAdaptiveOptimizer() {
       return { rows: [], meta };
     }
 
-    if (diff >= 2 && diff <= 4) {
+    if (diff >= 2) {
       if (approachSnapshotRows.l24.length > 0) {
         meta.period = 'l24';
         meta.source = 'snapshot_l24';
@@ -11830,7 +11903,12 @@ async function runAdaptiveOptimizer() {
   console.log(`✓ Total historical rounds for event ${CURRENT_EVENT_ID} (all players): ${allEventRounds.length}`);
   console.log(`✓ Total historical rounds for event ${CURRENT_EVENT_ID} (current field only): ${historicalDataForField.length}\n`);
 
-  const historicalMetricSamples = buildHistoricalMetricSamples(allEventRounds, CURRENT_EVENT_ID);
+  const approachMetricsByYear = buildApproachMetricsByYear(allEventRounds, CURRENT_EVENT_ID);
+  const historicalMetricSamples = buildHistoricalMetricSamples(
+    allEventRounds,
+    CURRENT_EVENT_ID,
+    approachMetricsByYear
+  );
   const historicalMetricCorrelations = computeHistoricalMetricCorrelations(historicalMetricSamples);
 
   console.log('---');
@@ -11885,6 +11963,9 @@ async function runAdaptiveOptimizer() {
   let tunedTop20GroupWeights = null;
   let currentGeneratedCorrelationMap = new Map();
   let currentGeneratedTop20AlignmentMap = new Map();
+  let approachDeltaCoverageSummary = null;
+  let shotDistributionGate = null;
+  let step1cDetailLogs = [];
   const HISTORICAL_METRIC_LABELS = GENERATED_METRIC_LABELS.slice(0, 17);
   const HISTORICAL_CORE_TOP20_BLEND = 0.65;
   const HISTORICAL_CORE_METRIC_LABELS = [
@@ -11986,28 +12067,7 @@ async function runAdaptiveOptimizer() {
     return { labels, specs };
   };
 
-  const buildApproachRowsFromDeltaRows = rows => {
-    if (!Array.isArray(rows)) return [];
-    const mapped = rows.map(row => {
-      const dgId = normalizeDgIdValue(row?.dg_id ?? row?.dgId);
-      if (!dgId) return null;
-      const output = {
-        dg_id: dgId,
-        player_name: row?.player_name || row?.playerName || null
-      };
-      METRIC_DEFS.forEach(def => {
-        const currKey = `curr_${def.key}`;
-        const value = row?.[currKey];
-        if (typeof value === 'number' && Number.isFinite(value)) {
-          output[def.key] = value;
-        }
-      });
-      return output;
-    }).filter(Boolean);
-    return mapped;
-  };
-
-  const resolveApproachDeltaRowsForEvent = (eventId, season = CURRENT_SEASON) => {
+  function resolveApproachDeltaRowsForEvent(eventId, season = CURRENT_SEASON) {
     const seasonValue = season !== null && season !== undefined
       ? String(season).trim()
       : String(CURRENT_SEASON);
@@ -12029,8 +12089,121 @@ async function runAdaptiveOptimizer() {
     if (!deltaPath) return { rows: [], path: null };
     const deltaData = loadApproachDeltaRows(deltaPath);
     const deltaRows = Array.isArray(deltaData?.rows) ? deltaData.rows : [];
-    return { rows: buildApproachRowsFromDeltaRows(deltaRows), path: deltaPath };
-  };
+    return { rows: buildEventOnlyApproachRowsFromDeltaRows(deltaRows), path: deltaPath };
+  }
+
+  function computeApproachDeltaCoverageStats({ eventId, seasons, eventIds, similarCourseIds, puttingCourseIds, detailLogs }) {
+    const eventKey = String(eventId || '').trim();
+    const similarIds = normalizeIdList(similarCourseIds).filter(id => id && id !== eventKey);
+    const puttingIds = normalizeIdList(puttingCourseIds).filter(id => id && id !== eventKey);
+    const similarSet = new Set(similarIds.map(id => String(id)));
+    const puttingSet = new Set(puttingIds.map(id => String(id)));
+    const baseIds = normalizeIdList(eventIds && eventIds.length ? eventIds : [eventKey, ...similarIds]);
+    const targetIds = baseIds
+      .map(id => String(id))
+      .filter(Boolean)
+      .filter(id => !(puttingSet.has(id) && !similarSet.has(id) && id !== eventKey));
+
+    const seasonList = Array.isArray(seasons) && seasons.length
+      ? seasons
+      : [CURRENT_SEASON].filter(Boolean);
+    const normalizedSeasons = Array.from(new Set(
+      seasonList
+        .map(value => parseInt(String(value || '').trim(), 10))
+        .filter(value => !Number.isNaN(value))
+    ));
+
+    const entries = [];
+    const detailEntries = Array.isArray(detailLogs) ? detailLogs : [];
+    if (detailEntries.length > 0) {
+      const seen = new Set();
+      detailEntries.forEach(entry => {
+        const scope = String(entry?.scope || '').toLowerCase();
+        if (!scope || scope === 'putting') return;
+        const entryEventId = String(entry?.eventId || '').trim();
+        const entrySeasonRaw = entry?.season ?? entry?.year ?? null;
+        const entrySeason = parseInt(String(entrySeasonRaw || '').trim(), 10);
+        if (!entryEventId || Number.isNaN(entrySeason)) return;
+        if (!targetIds.includes(entryEventId)) return;
+        const key = `${entryEventId}|${entrySeason}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        const category = entryEventId === eventKey
+          ? 'event'
+          : (puttingSet.has(entryEventId) ? 'similar_putting' : 'similar');
+        const delta = resolveApproachDeltaRowsForEvent(entryEventId, entrySeason);
+        const rowsCount = Array.isArray(delta.rows) ? delta.rows.length : 0;
+        entries.push({
+          eventId: entryEventId,
+          season: entrySeason,
+          category,
+          hasDelta: rowsCount > 0,
+          rows: rowsCount,
+          path: delta.path || null
+        });
+      });
+    } else {
+      normalizedSeasons.forEach(season => {
+        targetIds.forEach(targetId => {
+          const category = targetId === eventKey
+            ? 'event'
+            : (puttingSet.has(targetId) ? 'similar_putting' : 'similar');
+          const delta = resolveApproachDeltaRowsForEvent(targetId, season);
+          const rowsCount = Array.isArray(delta.rows) ? delta.rows.length : 0;
+          entries.push({
+            eventId: targetId,
+            season,
+            category,
+            hasDelta: rowsCount > 0,
+            rows: rowsCount,
+            path: delta.path || null
+          });
+        });
+      });
+    }
+
+    const totalEvents = entries.length;
+    const availableEvents = entries.filter(entry => entry.hasDelta).length;
+    const coverageRatio = totalEvents > 0 ? availableEvents / totalEvents : 0;
+    const excludedPuttingOnly = puttingIds
+      .filter(id => !targetIds.includes(String(id)))
+      .map(id => ({ eventId: String(id), category: 'putting_only' }));
+    const missingEvents = entries
+      .filter(entry => !entry.hasDelta)
+      .map(entry => ({ eventId: entry.eventId, season: entry.season, category: entry.category }));
+
+    return {
+      totalEvents,
+      availableEvents,
+      coverageRatio,
+      seasons: normalizedSeasons,
+      entries,
+      missingEvents,
+      excludedPuttingOnly
+    };
+  }
+
+  function buildApproachMetricsByYear(rounds, eventId) {
+    const years = Array.from(new Set(
+      (rounds || [])
+        .map(row => parseInt(String(row?.year || row?.season || '').trim(), 10))
+        .filter(year => !Number.isNaN(year))
+    ));
+    const byYear = new Map();
+    years.forEach(year => {
+      const delta = resolveApproachDeltaRowsForEvent(eventId, year);
+      if (!delta.rows || delta.rows.length === 0) return;
+      const byId = new Map();
+      (delta.rows || []).forEach(row => {
+        const dgId = normalizeDgIdValue(row?.dg_id ?? row?.dgId);
+        if (!dgId) return;
+        const metrics = buildApproachMetricValuesFromRow(row);
+        if (metrics) byId.set(dgId, metrics);
+      });
+      if (byId.size > 0) byYear.set(year, byId);
+    });
+    return byYear;
+  }
 
   const resolveApproachRowsForYear = year => {
     const usage = resolveApproachUsageForYear(year);
@@ -12044,16 +12217,12 @@ async function runAdaptiveOptimizer() {
     if (!allowApproach) {
       return { rows: [], source: 'disabled', path: null, reason: 'approach_gate' };
     }
-    if (String(season) === String(CURRENT_SEASON)) {
-      const delta = resolveApproachDeltaRowsForEvent(eventId, season);
-      if (delta.rows.length > 0) {
-        return { rows: delta.rows, source: 'delta_current_season', path: delta.path, reason: null };
-      }
-      return { rows: [], source: 'delta_missing', path: null, reason: 'delta_missing' };
-    }
-    const historicalDelta = resolveApproachDeltaRowsForEvent(eventId, season);
-    if (historicalDelta.rows.length > 0) {
-      return { rows: historicalDelta.rows, source: 'delta_prior_season', path: historicalDelta.path, reason: null };
+    const delta = resolveApproachDeltaRowsForEvent(eventId, season);
+    if (delta.rows.length > 0) {
+      const deltaSource = String(season) === String(CURRENT_SEASON)
+        ? 'delta_current_season'
+        : 'delta_prior_season';
+      return { rows: delta.rows, source: deltaSource, path: delta.path, reason: null };
     }
     const snapshotUsage = resolveApproachRowsForYear(season);
     if (snapshotUsage.rows.length > 0) {
@@ -12504,6 +12673,8 @@ async function runAdaptiveOptimizer() {
       console.log(`ℹ️  Step 1c approach gate: ${approachGateReason}`);
       logStep1cMetricUsage(aggregated.detailLogs);
 
+      step1cDetailLogs = Array.isArray(aggregated.detailLogs) ? aggregated.detailLogs : [];
+
       currentGeneratedMetricCorrelations = aggregated.metricCorrelations;
       currentGeneratedTop20Correlations = aggregated.top20Correlations;
       const trainingResults = buildResultsFromRows(trainingRounds);
@@ -12769,6 +12940,8 @@ async function runAdaptiveOptimizer() {
         console.log(`ℹ️  Step 1c approach gate: ${approachGateReason}`);
         logStep1cMetricUsage(aggregated.detailLogs);
 
+        step1cDetailLogs = Array.isArray(aggregated.detailLogs) ? aggregated.detailLogs : [];
+
         currentGeneratedMetricCorrelations = aggregated.metricCorrelations;
         currentGeneratedTop20Correlations = aggregated.top20Correlations;
 
@@ -13003,7 +13176,17 @@ async function runAdaptiveOptimizer() {
 
   if (!HAS_CURRENT_RESULTS) {
     const fallbackTemplate = templateConfigs[CURRENT_EVENT_ID] || Object.values(templateConfigs)[0];
-    const priorTemplate = templateConfigs.TECHNICAL || fallbackTemplate;
+    const preferredTemplateKey = courseContextEntryFinal?.templateKey
+      ? String(courseContextEntryFinal.templateKey).trim()
+      : (courseContextEntryFinal?.courseType
+        ? String(courseContextEntryFinal.courseType).trim()
+        : null);
+    const preferredTemplate = preferredTemplateKey
+      ? (templateConfigs[preferredTemplateKey]
+        || templateConfigs[normalizeTemplateKey(preferredTemplateKey)]
+        || templateConfigs[String(preferredTemplateKey).toUpperCase()])
+      : null;
+    const priorTemplate = preferredTemplate || templateConfigs.BALANCED || fallbackTemplate;
     const fallbackGroupWeights = fallbackTemplate?.groupWeights || {};
     const fallbackMetricWeights = fallbackTemplate?.metricWeights || {};
     const priorGroupWeights = priorTemplate?.groupWeights || fallbackGroupWeights;
@@ -13040,6 +13223,44 @@ async function runAdaptiveOptimizer() {
       : clamp01((approachCapCorr - GROUP_SIGNAL_CORR_MIN) / Math.max(0.001, GROUP_SIGNAL_CORR_FULL - GROUP_SIGNAL_CORR_MIN));
     const approachCapValue = approachCapMin + ((approachCapMax - approachCapMin) * approachCapNormalized);
     blendedGroupWeights = applyApproachGroupCap(blendedGroupWeights, approachCapValue);
+    const step1cSeasonValues = Array.from(new Set(
+      (step1cUsedRounds || [])
+        .map(row => row?.year ?? row?.season)
+        .map(value => parseInt(String(value || '').trim(), 10))
+        .filter(value => !Number.isNaN(value))
+    ));
+    const step1cEventIdsForCoverage = step1cAllowedEventIds && step1cAllowedEventIds.size > 0
+      ? Array.from(step1cAllowedEventIds.values())
+      : null;
+    approachDeltaCoverageSummary = computeApproachDeltaCoverageStats({
+      eventId: CURRENT_EVENT_ID,
+      seasons: step1cSeasonValues.length ? step1cSeasonValues : [CURRENT_SEASON],
+      eventIds: step1cEventIdsForCoverage,
+      similarCourseIds: sharedConfig.similarCourseIds,
+      puttingCourseIds: sharedConfig.puttingCourseIds,
+      detailLogs: step1cDetailLogs
+    });
+    shotDistributionGate = computeShotDistributionGate({
+      cvReliability,
+      deltaCoverage: approachDeltaCoverageSummary,
+      cvMin: getEnvNumberValue('MODEL_SHOT_DIST_CV_GATE_MIN', 0.35),
+      cvFull: getEnvNumberValue('MODEL_SHOT_DIST_CV_GATE_FULL', 0.55),
+      coverageMin: getEnvNumberValue('MODEL_SHOT_DIST_COVERAGE_GATE_MIN', 0.3),
+      coverageFull: getEnvNumberValue('MODEL_SHOT_DIST_COVERAGE_GATE_FULL', 0.7)
+    });
+    const shotAdjustedGroupWeights = applyShotDistributionToApproachGroupWeights(
+      blendedGroupWeights,
+      sharedConfig.courseSetupWeights,
+      { normalizeWeights }
+    );
+    if (shotDistributionGate.factor > 0) {
+      blendedGroupWeights = blendGroupWeights(
+        blendedGroupWeights,
+        shotAdjustedGroupWeights,
+        1 - shotDistributionGate.factor,
+        shotDistributionGate.factor
+      );
+    }
     if (groupSignalSummary) {
       groupSignalSummary.approachCap = approachCapValue;
       groupSignalSummary.approachCapMin = approachCapMin;
@@ -13388,6 +13609,8 @@ async function runAdaptiveOptimizer() {
       currentGeneratedTop20CvKFoldSummary,
       cvReliability,
       cvReliabilityKFold,
+      approachDeltaCoverage: approachDeltaCoverageSummary,
+      shotDistributionGate,
       groupSignalSummary,
       approachDeltaPrior: {
         label: APPROACH_DELTA_PRIOR_LABEL,
@@ -13417,7 +13640,11 @@ async function runAdaptiveOptimizer() {
       blendedMetricWeights: blendedMetricWeightsWithInversions,
       blendedMetricWeightsAdjusted: adjustedMetricWeights,
       blendSettings: {
-        priorTemplate: priorTemplate === templateConfigs.TECHNICAL ? 'TECHNICAL' : (priorTemplate === fallbackTemplate ? 'FALLBACK' : 'CUSTOM'),
+        priorTemplate: priorTemplate === templateConfigs.BALANCED
+          ? 'BALANCED'
+          : (priorTemplate === fallbackTemplate
+            ? 'FALLBACK'
+            : (preferredTemplateKey || 'CUSTOM')),
         priorShare,
         modelShare
       }
@@ -13447,6 +13674,23 @@ async function runAdaptiveOptimizer() {
     textLines.push(`  CV reliability (event-based): ${(cvReliability * 100).toFixed(1)}%`);
     if (typeof cvReliabilityKFold === 'number') {
       textLines.push(`  CV reliability (event-grouped K-fold): ${(cvReliabilityKFold * 100).toFixed(1)}%`);
+    }
+    if (shotDistributionGate) {
+      const coverage = shotDistributionGate.deltaCoverage;
+      const coverageRatio = typeof coverage?.coverageRatio === 'number' ? coverage.coverageRatio : 0;
+      const coverageSummary = coverage
+        ? `${coverage.availableEvents || 0}/${coverage.totalEvents || 0}`
+        : 'n/a';
+      textLines.push(`  Approach delta coverage (event+similar, excluding putting-only): ${(coverageRatio * 100).toFixed(1)}% (${coverageSummary})`);
+      textLines.push(`  Shot-distribution gate: ${(shotDistributionGate.factor * 100).toFixed(1)}% (cvScore=${(shotDistributionGate.cvScore * 100).toFixed(1)}%, coverage=${(coverageRatio * 100).toFixed(1)}%, coverageScore=${(shotDistributionGate.coverageScore * 100).toFixed(1)}%)`);
+      const coverageThresholdMet = shotDistributionGate.coverageScore >= 1;
+      const coverageThresholdLabel = coverageThresholdMet ? 'YES' : 'NO';
+      const coverageThresholdPct = coverageThresholdMet ? '100%' : '0%';
+      const gateImpactLabel = shotDistributionGate.factor >= 0.5
+        ? 'shot distribution is the dominant blend'
+        : 'data-driven blend remains dominant';
+      textLines.push(`  Coverage threshold met: ${coverageThresholdLabel} (coverageScore=${coverageThresholdPct}); gate impact: ${gateImpactLabel}.`);
+      textLines.push(`  Interpretation: ${Math.round(shotDistributionGate.factor * 100)}% of approach-group weighting is aligned to course-context shot distribution (remaining ${Math.round((1 - shotDistributionGate.factor) * 100)}% stays with the data-driven blend).`);
     }
     if (preEventMetricDiagnostics.flagged.length === 0) {
       textLines.push('  Metric stability: no low-variance or low-count metrics flagged.');

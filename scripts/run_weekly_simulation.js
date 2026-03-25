@@ -1,5 +1,11 @@
 const fs = require('fs');
 const path = require('path');
+const {
+  normalizePercentile,
+  normalizeSelectionMode,
+  applyEdgeZPercentile,
+  rankCandidates
+} = require('../utilities/wageringSelectionUtils');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
@@ -33,6 +39,69 @@ const toNumber = value => {
   if (value === null || value === undefined || value === '') return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+};
+
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+const EDGE_SHRINK_BUCKETS = {
+  top_5: [
+    { maxOdds: 2, shrink: 0.6 },
+    { maxOdds: 3, shrink: 0.45 },
+    { maxOdds: 5, shrink: 0.4 },
+    { maxOdds: 10, shrink: 0.3 },
+    { maxOdds: 20, shrink: 0.25 },
+    { maxOdds: 50, shrink: 0.18 },
+    { maxOdds: 100, shrink: 0.12 },
+    { maxOdds: Infinity, shrink: 0.08 }
+  ],
+  top_10: [
+    { maxOdds: 2, shrink: 0.7 },
+    { maxOdds: 3, shrink: 0.55 },
+    { maxOdds: 5, shrink: 0.5 },
+    { maxOdds: 10, shrink: 0.4 },
+    { maxOdds: 20, shrink: 0.28 },
+    { maxOdds: 50, shrink: 0.2 },
+    { maxOdds: 100, shrink: 0.12 },
+    { maxOdds: Infinity, shrink: 0.08 }
+  ],
+  top_20: [
+    { maxOdds: 2, shrink: 0.75 },
+    { maxOdds: 3, shrink: 0.6 },
+    { maxOdds: 5, shrink: 0.5 },
+    { maxOdds: 10, shrink: 0.4 },
+    { maxOdds: 20, shrink: 0.3 },
+    { maxOdds: 50, shrink: 0.2 },
+    { maxOdds: 100, shrink: 0.12 },
+    { maxOdds: Infinity, shrink: 0.08 }
+  ],
+  win: [
+    { maxOdds: 5, shrink: 0.35 },
+    { maxOdds: 10, shrink: 0.3 },
+    { maxOdds: 20, shrink: 0.25 },
+    { maxOdds: 50, shrink: 0.18 },
+    { maxOdds: 100, shrink: 0.14 },
+    { maxOdds: Infinity, shrink: 0.1 }
+  ],
+  make_cut: [
+    { maxOdds: 2, shrink: 0.7 },
+    { maxOdds: 3, shrink: 0.55 },
+    { maxOdds: 5, shrink: 0.35 },
+    { maxOdds: Infinity, shrink: 0.2 }
+  ],
+  mc: [
+    { maxOdds: 2, shrink: 0.7 },
+    { maxOdds: 3, shrink: 0.55 },
+    { maxOdds: 5, shrink: 0.35 },
+    { maxOdds: Infinity, shrink: 0.2 }
+  ]
+};
+
+const resolveEdgeShrink = ({ market, odds, defaultShrink }) => {
+  const normalizedMarket = normalizeMarketType(market);
+  const schedule = EDGE_SHRINK_BUCKETS[normalizedMarket];
+  if (!schedule || !Number.isFinite(odds)) return defaultShrink;
+  const match = schedule.find(bucket => odds <= bucket.maxOdds);
+  return Number.isFinite(match?.shrink) ? match.shrink : defaultShrink;
 };
 
 const readCsv = filePath => {
@@ -100,6 +169,7 @@ const collectOddsEvalFiles = ({ market, oddsSource }) => {
   if (!fs.existsSync(wageringDir)) return [];
   const marketSlug = String(market || 'win').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
   const oddsSourceKey = String(oddsSource || 'historical').trim().toLowerCase();
+  const filePattern = new RegExp(`_${marketSlug}_${oddsSourceKey}_[^/]+_odds_eval\\.csv$`, 'i');
   const entries = fs.readdirSync(wageringDir)
     .map(name => path.resolve(wageringDir, name))
     .filter(entry => fs.existsSync(entry) && fs.statSync(entry).isDirectory());
@@ -108,10 +178,10 @@ const collectOddsEvalFiles = ({ market, oddsSource }) => {
   entries.forEach(dir => {
     const inputsDir = path.resolve(dir, 'inputs');
     if (!fs.existsSync(inputsDir) || !fs.statSync(inputsDir).isDirectory()) return;
-    fs.readdirSync(inputsDir)
-      .filter(file => file.endsWith('_odds_eval.csv'))
-      .filter(file => file.includes(`_${marketSlug}_${oddsSourceKey}`))
-      .forEach(file => files.push(path.resolve(inputsDir, file)));
+      const evalPattern = new RegExp(`_${marketSlug}_${oddsSourceKey}_[^_]+_odds_eval\\.csv$`, 'i');
+      fs.readdirSync(inputsDir)
+        .filter(file => evalPattern.test(file))
+        .forEach(file => files.push(path.resolve(inputsDir, file)));
   });
   return files;
 };
@@ -214,6 +284,24 @@ const resolveOddsMeta = ({ oddsSourcePath, dgId, playerName, isHistorical }) => 
   };
   oddsMetaCache.set(oddsSourcePath, meta);
   return meta;
+};
+
+const isOddsSourceMatch = (marketValue, oddsSourcePath) => {
+  if (!oddsSourcePath || !marketValue) return true;
+  const normalizedMarket = normalizeMarketType(marketValue);
+  const normalizedPath = String(oddsSourcePath).toLowerCase();
+  const tokens = new Set([
+    normalizedMarket
+  ]);
+  if (['3ball', '3balls', '3-ball', '3_balls'].includes(normalizedMarket)) {
+    tokens.add('3_balls');
+  }
+  if (['matchups'].includes(normalizedMarket)) {
+    tokens.add('tournament_matchups');
+    tokens.add('round_matchups');
+    tokens.add('3_balls');
+  }
+  return Array.from(tokens).some(token => normalizedPath.includes(`/${token}/`));
 };
 
 const resolveMatchupLabel = ({ market, dgId, playerName, oddsSourcePath }) => {
@@ -420,12 +508,19 @@ const mergeRow = (existing, incoming, allowedKeys = null) => {
 const main = () => {
   const args = parseArgs();
   const season = args.season;
-  const market = args.market || 'win';
+  const market = args.market || 'all';
   const oddsSource = args.oddsSource || args.odds_source || 'historical';
   const oddsSourceKey = String(oddsSource || 'historical').trim().toLowerCase();
   const isHistorical = oddsSourceKey === 'historical';
   const stake = args.stake ? Number(args.stake) : 10;
   const stakeMode = String(args.stakeMode || args.stake_mode || 'edge_scaled').trim().toLowerCase();
+  const edgeShrinkArg = toNumber(args.edgeShrink || args.edge_shrink);
+  const edgeShrink = Number.isFinite(edgeShrinkArg)
+    ? clamp(edgeShrinkArg, 0, 1)
+    : (oddsSourceKey === 'live' ? 0.5 : 1);
+  const edgeShrinkMode = String(args.edgeShrinkMode || args.edge_shrink_mode || (oddsSourceKey === 'live' ? 'bucket' : 'flat'))
+    .trim()
+    .toLowerCase();
   const maxStakePct = toNumber(args.maxStakePct || args.max_stake_pct);
   const maxOddsArg = toNumber(args.maxOdds || args.max_odds);
   const resolvedMaxOdds = Number.isFinite(maxOddsArg)
@@ -435,8 +530,49 @@ const main = () => {
   const liveTopN = Number.isFinite(liveTopNArg) ? liveTopNArg : 7;
   const matchupTopNArg = toNumber(args.matchupTopN || args.matchup_top_n);
   const matchupTopN = Number.isFinite(matchupTopNArg) ? matchupTopNArg : 3;
+  const edgeFloorArg = toNumber(args.edgeFloor || args.edge_floor);
+  const edgeFloor = Number.isFinite(edgeFloorArg) ? edgeFloorArg : 0;
   const matchupMinEdgeArg = toNumber(args.matchupMinEdge || args.matchup_min_edge);
-  const matchupMinEdge = Number.isFinite(matchupMinEdgeArg) ? matchupMinEdgeArg : 0.02;
+  const matchupMinEdge = Number.isFinite(matchupMinEdgeArg) ? matchupMinEdgeArg : 0.05;
+  const matchupEdgeFloorArg = toNumber(args.matchupEdgeFloor || args.matchup_edge_floor);
+  const matchupEdgeFloor = Number.isFinite(matchupEdgeFloorArg) ? matchupEdgeFloorArg : edgeFloor;
+  const matchupMinModelArg = toNumber(args.matchupMinModel || args.matchup_min_model);
+  const matchupMinModel = Number.isFinite(matchupMinModelArg) ? matchupMinModelArg : 0.56;
+  const selectionModeRaw = args.selectionMode || args.selection_mode || (oddsSourceKey === 'live' ? 'probability' : 'edge');
+  const selectionMode = normalizeSelectionMode(selectionModeRaw);
+  const edgeZPercentileArg = toNumber(args.edgeZPercentile || args.edge_z_percentile);
+  const edgeZPercentile = normalizePercentile(Number.isFinite(edgeZPercentileArg) ? edgeZPercentileArg : 0.2);
+  const edgeZScope = String(args.edgeZScope || args.edge_z_scope || 'market').trim().toLowerCase();
+  const edgeZRelaxArg = String(args.edgeZRelaxToFill || args.edge_z_relax_to_fill || 'true').trim().toLowerCase();
+  const edgeZRelaxToFill = edgeZRelaxArg !== 'false';
+  const edgeTieDeltaArg = toNumber(args.edgeTieDelta || args.edge_tie_delta);
+  const edgeTieDelta = Number.isFinite(edgeTieDeltaArg) ? edgeTieDeltaArg : 0.01;
+  const pModelTieDeltaArg = toNumber(args.pModelTieDelta || args.p_model_tie_delta);
+  const pModelTieDelta = Number.isFinite(pModelTieDeltaArg) ? pModelTieDeltaArg : 0.02;
+  const allowNegativeEdge = selectionMode === 'probability'
+    || edgeFloor < 0
+    || matchupEdgeFloor < 0
+    || String(args.allowNegativeEdge || args.allow_negative_edge || 'false').toLowerCase() === 'true';
+  const tournamentMatchupMinModelArg = toNumber(args.tournamentMatchupMinModel || args.tournament_matchup_min_model);
+  const tournamentMatchupMinModel = Number.isFinite(tournamentMatchupMinModelArg) ? tournamentMatchupMinModelArg : 0.52;
+  const matchupMinModel3BallsArg = toNumber(args.matchupMinModel3Balls || args.matchup_min_model_3_balls || args.matchup_min_model_3balls);
+  const matchupMinModel3Balls = Number.isFinite(matchupMinModel3BallsArg) ? matchupMinModel3BallsArg : 0.80;
+  const outrightMinModelArg = toNumber(args.outrightMinModel || args.outright_min_model);
+  const outrightMinModel = Number.isFinite(outrightMinModelArg) ? outrightMinModelArg : 0.015;
+  const outrightMaxOddsArg = toNumber(args.outrightMaxOdds || args.outright_max_odds);
+  const outrightMaxOdds = Number.isFinite(outrightMaxOddsArg) ? outrightMaxOddsArg : 25;
+  const top5MinModelArg = toNumber(args.top5MinModel || args.top5_min_model);
+  const top5MinModel = Number.isFinite(top5MinModelArg) ? top5MinModelArg : 0.50;
+  const top5MaxOddsArg = toNumber(args.top5MaxOdds || args.top5_max_odds);
+  const top5MaxOdds = Number.isFinite(top5MaxOddsArg) ? top5MaxOddsArg : 6;
+  const top10MinModelArg = toNumber(args.top10MinModel || args.top10_min_model);
+  const top10MinModel = Number.isFinite(top10MinModelArg) ? top10MinModelArg : 0.20;
+  const top10MaxOddsArg = toNumber(args.top10MaxOdds || args.top10_max_odds);
+  const top10MaxOdds = Number.isFinite(top10MaxOddsArg) ? top10MaxOddsArg : 10;
+  const top20MinModelArg = toNumber(args.top20MinModel || args.top20_min_model);
+  const top20MinModel = Number.isFinite(top20MinModelArg) ? top20MinModelArg : 0.25;
+  const top20MaxOddsArg = toNumber(args.top20MaxOdds || args.top20_max_odds);
+  const top20MaxOdds = Number.isFinite(top20MaxOddsArg) ? top20MaxOddsArg : 20;
   const totalStakeArg = toNumber(args.totalStake || args.total_stake || args.eventStake || args.event_stake);
   const resolvedTotalStake = Number.isFinite(totalStakeArg)
     ? totalStakeArg
@@ -467,6 +603,7 @@ const main = () => {
     const rows = readCsv(filePath);
     rows.forEach(row => {
       if (String(row.season || '').trim() !== String(season)) return;
+      if (eventId && String(row.event_id || '').trim() !== String(eventId)) return;
       inputRows.push({ ...row, _filePath: filePath });
     });
   });
@@ -484,11 +621,20 @@ const main = () => {
     const edge = Number(row.edge);
     if (!Number.isFinite(pModel) || !Number.isFinite(pImplied)) return;
     if (!Number.isFinite(oddsDecimal) || oddsDecimal <= 0) return;
-    if (!Number.isFinite(edge) || edge <= 0) return;
+    if (!Number.isFinite(edge)) return;
+    if (!allowNegativeEdge && edge <= 0) return;
     const marketValue = normalizeMarketType(row.market_type || market);
     const bookValue = String(row.book || '').trim();
     const playerName = String(row.player_name || '').trim();
     if (!playerName) return;
+
+    const shrinkFactor = edgeShrinkMode === 'bucket'
+      ? resolveEdgeShrink({ market: marketValue, odds: oddsDecimal, defaultShrink: edgeShrink })
+      : edgeShrink;
+    const adjustedModel = pImplied + shrinkFactor * (pModel - pImplied);
+    const adjustedEdge = adjustedModel - pImplied;
+    if (!Number.isFinite(adjustedModel) || !Number.isFinite(adjustedEdge)) return;
+    if (!allowNegativeEdge && adjustedEdge <= 0) return;
 
     const oddsMeta = resolveOddsMeta({
       oddsSourcePath: row.odds_source_path,
@@ -496,6 +642,8 @@ const main = () => {
       playerName: playerName,
       isHistorical
     });
+
+    if (!isOddsSourceMatch(marketValue, row.odds_source_path)) return;
 
     const displayName = resolveMatchupLabel({
       market: marketValue,
@@ -522,9 +670,10 @@ const main = () => {
       net: '',
       roi: '',
       '': '',
-      p_model: pModel,
+      p_model: adjustedModel,
       p_implied: pImplied,
-      edge
+      edge: adjustedEdge,
+      edge_z: toNumber(row.edge_z)
     });
   });
 
@@ -616,18 +765,94 @@ const main = () => {
             : true
         ));
 
-      const matchupRows = capped.filter(row => matchupMarkets.has(normalizeMarketType(row.market)));
-      const nonMatchupRows = capped.filter(row => !matchupMarkets.has(normalizeMarketType(row.market)));
+      const isThreeBallMarket = value => {
+        const normalized = normalizeMarketType(value || '');
+        return ['3_balls', '3balls', '3-ball', '3ball'].includes(normalized);
+      };
+      const isTournamentMatchupMarket = value => normalizeMarketType(value || '') === 'tournament_matchups';
+      const isOutrightMarket = value => {
+        const normalized = normalizeMarketType(value || '');
+        return ['win', 'outright_win'].includes(normalized);
+      };
+      const isTop5Market = value => {
+        const normalized = normalizeMarketType(value || '');
+        return normalized === 'top_5';
+      };
+      const isTop10Market = value => {
+        const normalized = normalizeMarketType(value || '');
+        return normalized === 'top_10';
+      };
+      const isTop20Market = value => {
+        const normalized = normalizeMarketType(value || '');
+        return normalized === 'top_20';
+      };
+      const matchupRows = capped
+        .filter(row => matchupMarkets.has(normalizeMarketType(row.market)));
+      matchupRows.forEach(row => {
+        row.isMatchup = true;
+      });
+      const nonMatchupRows = capped
+        .filter(row => !matchupMarkets.has(normalizeMarketType(row.market)))
+        .filter(row => {
+          const oddsValue = Number(row.odds);
+          const modelValue = Number(row.p_model);
+          if (isOutrightMarket(row.market)) {
+            if (Number.isFinite(outrightMaxOdds) && Number.isFinite(oddsValue) && oddsValue > outrightMaxOdds) return false;
+            if (Number.isFinite(modelValue) && modelValue < outrightMinModel) return false;
+            return true;
+          }
+          if (isTop5Market(row.market)) {
+            if (Number.isFinite(top5MaxOdds) && Number.isFinite(oddsValue) && oddsValue > top5MaxOdds) return false;
+            if (Number.isFinite(modelValue) && modelValue < top5MinModel) return false;
+            return true;
+          }
+          if (isTop10Market(row.market)) {
+            if (Number.isFinite(top10MaxOdds) && Number.isFinite(oddsValue) && oddsValue > top10MaxOdds) return false;
+            if (Number.isFinite(modelValue) && modelValue < top10MinModel) return false;
+            return true;
+          }
+          if (isTop20Market(row.market)) {
+            if (Number.isFinite(top20MaxOdds) && Number.isFinite(oddsValue) && oddsValue > top20MaxOdds) return false;
+            if (Number.isFinite(modelValue) && modelValue < top20MinModel) return false;
+            return true;
+          }
+          return true;
+        });
+      nonMatchupRows.forEach(row => {
+        row.isMatchup = false;
+      });
 
-      const matchupDeduped = dedupeByPlayer(matchupRows);
-      const nonMatchupDeduped = dedupeByPlayer(nonMatchupRows);
+      const applyEdgeFloor = (rows, floorValue) => {
+        if (!Number.isFinite(floorValue)) return rows;
+        return rows.filter(row => Number(row.edge) >= floorValue);
+      };
+      const applyEdgeZFilter = rows => applyEdgeZPercentile(rows, edgeZPercentile, {
+        scope: edgeZScope,
+        getKey: row => normalizeMarketType(row.market)
+      });
 
-      const selectedBase = nonMatchupDeduped
-        .sort((a, b) => Number(b.edge) - Number(a.edge))
+      let matchupBase = matchupRows
+        .filter(row => {
+          const minModel = isThreeBallMarket(row.market)
+            ? matchupMinModel3Balls
+            : (isTournamentMatchupMarket(row.market) ? tournamentMatchupMinModel : matchupMinModel);
+          return Number(row.p_model) >= minModel;
+        });
+      matchupBase = applyEdgeFloor(matchupBase, matchupEdgeFloor);
+      matchupBase = dedupeByPlayer(matchupBase);
+
+      let matchupCandidates = applyEdgeZFilter(matchupBase);
+      matchupCandidates = dedupeByPlayer(matchupCandidates);
+
+      let nonMatchupBase = applyEdgeFloor(nonMatchupRows, edgeFloor);
+      nonMatchupBase = dedupeByPlayer(nonMatchupBase);
+
+      let nonMatchupCandidates = applyEdgeZFilter(nonMatchupBase);
+      nonMatchupCandidates = dedupeByPlayer(nonMatchupCandidates);
+
+      const selectedBase = rankCandidates(nonMatchupCandidates, { mode: selectionMode })
         .slice(0, liveTopN);
-      const selectedMatchups = matchupDeduped
-        .filter(row => Number(row.edge) >= matchupMinEdge)
-        .sort((a, b) => Number(b.edge) - Number(a.edge))
+      const selectedMatchups = rankCandidates(matchupCandidates, { mode: selectionMode })
         .slice(0, matchupTopN);
 
       const combined = [...selectedBase];
@@ -651,6 +876,64 @@ const main = () => {
           existingKeys.add(key);
         }
       });
+      const desiredTotal = liveTopN + matchupTopN;
+      if (combined.length < desiredTotal) {
+        let extraNeeded = desiredTotal - combined.length;
+        const remainingCandidates = [...nonMatchupCandidates, ...matchupCandidates]
+          .filter(row => !existingKeys.has(buildBetKey({
+            event: row.event,
+            market: row.market,
+            book: row.book,
+            dgId: row.dg_id
+          })));
+        const extras = rankCandidates(remainingCandidates, {
+          mode: selectionMode,
+          preferMatchup: true,
+          edgeTieDelta,
+          pModelTieDelta
+        }).slice(0, extraNeeded);
+        extras.forEach(row => {
+          const key = buildBetKey({
+            event: row.event,
+            market: row.market,
+            book: row.book,
+            dgId: row.dg_id
+          });
+          if (!existingKeys.has(key)) {
+            combined.push(row);
+            existingKeys.add(key);
+            extraNeeded -= 1;
+          }
+        });
+
+        if (extraNeeded > 0 && edgeZRelaxToFill) {
+          const relaxedPool = [...nonMatchupBase, ...matchupBase]
+            .filter(row => !existingKeys.has(buildBetKey({
+              event: row.event,
+              market: row.market,
+              book: row.book,
+              dgId: row.dg_id
+            })));
+          const relaxedExtras = rankCandidates(relaxedPool, {
+            mode: selectionMode,
+            preferMatchup: true,
+            edgeTieDelta,
+            pModelTieDelta
+          }).slice(0, extraNeeded);
+          relaxedExtras.forEach(row => {
+            const key = buildBetKey({
+              event: row.event,
+              market: row.market,
+              book: row.book,
+              dgId: row.dg_id
+            });
+            if (!existingKeys.has(key)) {
+              combined.push(row);
+              existingKeys.add(key);
+            }
+          });
+        }
+      }
       return combined;
     })()
     : betRows;
@@ -744,9 +1027,17 @@ const main = () => {
   };
 
   if (oddsSourceKey === 'live' && stakeMode !== 'flat') {
+    let resolvedMaxStakePct = Number.isFinite(maxStakePct) ? maxStakePct : null;
+    if (!Number.isFinite(resolvedMaxStakePct)) {
+      const betCount = liveRows.length || 0;
+      if (betCount > 0) {
+        const scaledCap = 2 / betCount;
+        resolvedMaxStakePct = clamp(scaledCap, 0.2, 0.5);
+      }
+    }
     const weighted = resolveWeightedStakes(liveRows, {
       totalStake: resolvedTotalStake,
-      maxStakePct: Number.isFinite(maxStakePct) ? maxStakePct : 0.2
+      maxStakePct: Number.isFinite(resolvedMaxStakePct) ? resolvedMaxStakePct : 0.2
     });
     if (weighted) {
       liveRows.forEach((row, index) => {

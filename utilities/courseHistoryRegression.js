@@ -32,13 +32,13 @@ const COURSE_HISTORY_REGRESSION = {
     "pValue": 0.004823910022484723
   },
   "meta": {
-    "generatedAt": "2026-03-24T10:34:20-05:00",
+    "generatedAt": "2026-03-24T16:32:52-05:00",
     "eventId": "20",
     "season": 2026,
     "mode": "pre_event",
     "courseNum": "897",
     "courseNameKey": "MEMORIAL_PARK_GOLF_COURSE",
-    "templateKey": "MEMORIAL_PARK_GOLF_COURSE",
+    "templateKey": "POWER",
     "tours": [
       "pga"
     ],

@@ -127,6 +127,190 @@ const percentile = (values, p) => {
 
 const logistic = value => 1 / (1 + Math.exp(-value));
 
+const normalizeName = value => String(value || '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '')
+  .trim();
+
+const parseSeasonList = value => {
+  if (!value) return null;
+  const raw = String(value).trim();
+  if (!raw) return null;
+  return raw.split(',').map(entry => entry.trim()).filter(Boolean);
+};
+
+const parseBool = value => {
+  if (value === undefined || value === null) return null;
+  if (typeof value === 'boolean') return value;
+  const raw = String(value).trim().toLowerCase();
+  if (['true', '1', 'yes', 'y'].includes(raw)) return true;
+  if (['false', '0', 'no', 'n'].includes(raw)) return false;
+  return null;
+};
+
+const listSeasonDirectories = () => {
+  if (!fs.existsSync(DATA_DIR)) return [];
+  return fs.readdirSync(DATA_DIR)
+    .filter(entry => /^\d{4}$/.test(entry));
+};
+
+const loadCalibrationReports = ({ seasons }) => {
+  const seasonDirs = seasons && seasons.length ? seasons : listSeasonDirectories();
+  return seasonDirs.map(season => {
+    const reportPath = path.resolve(DATA_DIR, String(season), 'validation_outputs', 'Calibration_Report.json');
+    const report = readJson(reportPath);
+    if (!report) return null;
+    return { season: String(season), report };
+  }).filter(Boolean);
+};
+
+const resolveEventCalibration = ({ report, tournamentName, tournamentSlug }) => {
+  if (!report?.tournaments?.length) return null;
+  const targets = [tournamentName, tournamentSlug]
+    .filter(Boolean)
+    .map(normalizeName);
+  if (!targets.length) return null;
+  return report.tournaments.find(entry => {
+    const normalized = normalizeName(entry?.name || entry?.tournamentName || '');
+    return targets.some(target => target && normalized === target);
+  }) || null;
+};
+
+const buildWeightedBuckets = ({ reports, weightCurrentSeason, currentSeason }) => {
+  const buckets = Array.from({ length: 10 }, (_, index) => ({
+    bucket: index,
+    minPct: index / 10,
+    maxPct: (index + 1) / 10,
+    count: 0,
+    top5: 0,
+    top10: 0,
+    top20: 0
+  }));
+
+  reports.forEach(({ season, report }) => {
+    const weight = season === String(currentSeason) ? weightCurrentSeason : 1;
+    const sourceBuckets = report?.calibrationBuckets?.buckets || [];
+    sourceBuckets.forEach(bucket => {
+      const idx = Number(bucket.bucket);
+      if (!Number.isFinite(idx) || !buckets[idx]) return;
+      buckets[idx].count += Number(bucket.count || 0) * weight;
+      buckets[idx].top5 += Number(bucket.top5 || 0) * weight;
+      buckets[idx].top10 += Number(bucket.top10 || 0) * weight;
+      buckets[idx].top20 += Number(bucket.top20 || 0) * weight;
+      if (Number.isFinite(bucket.minPct)) buckets[idx].minPct = bucket.minPct;
+      if (Number.isFinite(bucket.maxPct)) buckets[idx].maxPct = bucket.maxPct;
+    });
+  });
+
+  return buckets;
+};
+
+const fitLogisticFromBuckets = ({ buckets, topKey }) => {
+  const data = buckets.map(bucket => {
+    const midpoint = (bucket.minPct + bucket.maxPct) / 2;
+    const trials = Number(bucket.count || 0);
+    const successes = Number(bucket[topKey] || 0);
+    return { x: midpoint, n: trials, k: successes };
+  }).filter(entry => entry.n > 0 && Number.isFinite(entry.x));
+
+  if (!data.length) return null;
+
+  let a = -1;
+  let b = -1;
+  for (let iter = 0; iter < 25; iter += 1) {
+    let gradA = 0;
+    let gradB = 0;
+    let h11 = 0;
+    let h12 = 0;
+    let h22 = 0;
+
+    data.forEach(({ x, n, k }) => {
+      const z = a * x + b;
+      const p = logistic(z);
+      const diff = k - n * p;
+      gradA += diff * x;
+      gradB += diff;
+      const w = n * p * (1 - p);
+      h11 -= w * x * x;
+      h12 -= w * x;
+      h22 -= w;
+    });
+
+    const det = h11 * h22 - h12 * h12;
+    if (!Number.isFinite(det) || Math.abs(det) < 1e-12) break;
+    const stepA = (gradA * h22 - gradB * h12) / det;
+    const stepB = (gradB * h11 - gradA * h12) / det;
+    if (!Number.isFinite(stepA) || !Number.isFinite(stepB)) break;
+    a -= stepA;
+    b -= stepB;
+    if (Math.abs(stepA) + Math.abs(stepB) < 1e-6) break;
+  }
+
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  return { a, b };
+};
+
+const buildEmpiricalCalibration = ({ reports, currentSeason, weightCurrentSeason, tournamentName, tournamentSlug }) => {
+  const currentReport = reports.find(entry => entry.season === String(currentSeason))?.report || null;
+  const eventOverride = currentReport
+    ? resolveEventCalibration({ report: currentReport, tournamentName, tournamentSlug })
+    : null;
+
+  const baseBuckets = buildWeightedBuckets({
+    reports,
+    weightCurrentSeason,
+    currentSeason
+  });
+
+  const top5Fit = fitLogisticFromBuckets({ buckets: baseBuckets, topKey: 'top5' });
+  const top10Fit = fitLogisticFromBuckets({ buckets: baseBuckets, topKey: 'top10' });
+  const top20Fit = fitLogisticFromBuckets({ buckets: baseBuckets, topKey: 'top20' });
+
+  let overrideBuckets = null;
+  if (eventOverride?.calibrationBuckets?.buckets?.length) {
+    overrideBuckets = eventOverride.calibrationBuckets.buckets.map(bucket => ({
+      ...bucket,
+      minPct: bucket.minPct,
+      maxPct: bucket.maxPct,
+      count: Number(bucket.count || 0),
+      top5: Number(bucket.top5 || 0),
+      top10: Number(bucket.top10 || 0),
+      top20: Number(bucket.top20 || 0)
+    }));
+  }
+
+  const eventTop5Fit = overrideBuckets ? fitLogisticFromBuckets({ buckets: overrideBuckets, topKey: 'top5' }) : null;
+  const eventTop10Fit = overrideBuckets ? fitLogisticFromBuckets({ buckets: overrideBuckets, topKey: 'top10' }) : null;
+  const eventTop20Fit = overrideBuckets ? fitLogisticFromBuckets({ buckets: overrideBuckets, topKey: 'top20' }) : null;
+
+  return {
+    buckets: baseBuckets,
+    fits: {
+      top5: eventTop5Fit || top5Fit,
+      top10: eventTop10Fit || top10Fit,
+      top20: eventTop20Fit || top20Fit
+    }
+  };
+};
+
+const percentileForRank = (rank, fieldSize) => {
+  if (!Number.isFinite(rank) || fieldSize <= 1) return 0;
+  return Math.min(1, Math.max(0, (rank - 1) / (fieldSize - 1)));
+};
+
+const probabilityFromFit = (percentile, fit) => {
+  if (!fit) return null;
+  return logistic(fit.a * percentile + fit.b);
+};
+
+const probabilityFromBuckets = (percentile, buckets, topKey) => {
+  if (!buckets?.length) return null;
+  const bucket = buckets.find(entry => percentile >= entry.minPct && percentile <= entry.maxPct)
+    || buckets[buckets.length - 1];
+  if (!bucket || !bucket.count) return null;
+  return Number(bucket[topKey] || 0) / Number(bucket.count || 1);
+};
+
 const formatProb = value => {
   if (!Number.isFinite(value)) return '';
   return value.toFixed(6);
@@ -270,6 +454,11 @@ const main = () => {
   const oddsSource = args.oddsSource || args.odds_source || 'live';
   const oddsSourceKey = String(oddsSource || 'live').trim().toLowerCase();
   const market = String(args.market || 'win').trim().toLowerCase();
+  const calibrationWeightCurrent = Number(args.calibrationWeightCurrent || args.calibration_weight_current || 2);
+  const calibrationSeasons = parseSeasonList(args.calibrationSeasons || args.calibration_seasons);
+  const calibrationOverrideEvent = parseBool(
+    args.calibrationOverrideEvent !== undefined ? args.calibrationOverrideEvent : args.calibration_override_event
+  );
 
   if (!season) {
     console.error('❌ Missing --season.');
@@ -304,16 +493,60 @@ const main = () => {
   let topN = null;
   const isMatchupMarket = ['tournament_matchups', 'round_matchups', '3_balls', '3balls', '3-ball', '3ball'].includes(market);
 
+  const calibrationReports = loadCalibrationReports({ seasons: calibrationSeasons });
+  const empiricalCalibration = calibrationReports.length
+    ? buildEmpiricalCalibration({
+      reports: calibrationReports,
+      currentSeason: season,
+      weightCurrentSeason: Number.isFinite(calibrationWeightCurrent) ? calibrationWeightCurrent : 2,
+      tournamentName: calibrationOverrideEvent === false ? null : (tournamentName || manifestEntry?.tournamentName),
+      tournamentSlug: calibrationOverrideEvent === false ? null : resolvedSlug
+    })
+    : null;
+
   if (!isMatchupMarket) {
     if (market === 'top_5' || market === 'top5') {
       topN = 5;
-      marketProbs = buildTopNProbabilities(scores, topN);
+      if (empiricalCalibration?.fits?.top5) {
+        const fallbackProbs = buildTopNProbabilities(scores, topN);
+        marketProbs = players.map((player, index) => {
+          const rank = Number(player.rank || player.modelRank || player.predictedRank || index + 1);
+          const percentile = percentileForRank(rank, players.length);
+          return probabilityFromFit(percentile, empiricalCalibration.fits.top5)
+            ?? probabilityFromBuckets(percentile, empiricalCalibration.buckets, 'top5')
+            ?? fallbackProbs[index];
+        });
+      } else {
+        marketProbs = buildTopNProbabilities(scores, topN);
+      }
     } else if (market === 'top_10' || market === 'top10') {
       topN = 10;
-      marketProbs = buildTopNProbabilities(scores, topN);
+      if (empiricalCalibration?.fits?.top10) {
+        const fallbackProbs = buildTopNProbabilities(scores, topN);
+        marketProbs = players.map((player, index) => {
+          const rank = Number(player.rank || player.modelRank || player.predictedRank || index + 1);
+          const percentile = percentileForRank(rank, players.length);
+          return probabilityFromFit(percentile, empiricalCalibration.fits.top10)
+            ?? probabilityFromBuckets(percentile, empiricalCalibration.buckets, 'top10')
+            ?? fallbackProbs[index];
+        });
+      } else {
+        marketProbs = buildTopNProbabilities(scores, topN);
+      }
     } else if (market === 'top_20' || market === 'top20') {
       topN = 20;
-      marketProbs = buildTopNProbabilities(scores, topN);
+      if (empiricalCalibration?.fits?.top20) {
+        const fallbackProbs = buildTopNProbabilities(scores, topN);
+        marketProbs = players.map((player, index) => {
+          const rank = Number(player.rank || player.modelRank || player.predictedRank || index + 1);
+          const percentile = percentileForRank(rank, players.length);
+          return probabilityFromFit(percentile, empiricalCalibration.fits.top20)
+            ?? probabilityFromBuckets(percentile, empiricalCalibration.buckets, 'top20')
+            ?? fallbackProbs[index];
+        });
+      } else {
+        marketProbs = buildTopNProbabilities(scores, topN);
+      }
     }
   }
 
