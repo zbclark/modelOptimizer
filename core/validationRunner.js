@@ -5944,16 +5944,19 @@ const runValidation = async ({
       ) {
         // Defensive guard: ensure the utility returns the expected shape so we don't
         // crash with "Cannot read properties of undefined" if its contract changes.
+        // Use `== null` to safely cover both null and undefined before accessing properties.
         const typeDescription =
-          eventOnly === null
-            ? 'null'
-            : `object with rows: ${
-                Array.isArray(eventOnly.rows) ? 'array' : typeof eventOnly.rows
-              }, playersWithShots: ${
-                eventOnly.playersWithShots === undefined
-                  ? 'undefined'
-                  : typeof eventOnly.playersWithShots
-              }`;
+          eventOnly == null
+            ? String(eventOnly)
+            : typeof eventOnly !== 'object'
+              ? `non-object (${typeof eventOnly}): ${String(eventOnly)}`
+              : `object with rows: ${
+                  Array.isArray(eventOnly.rows) ? 'array' : typeof eventOnly.rows
+                }, playersWithShots: ${
+                  eventOnly.playersWithShots === undefined
+                    ? 'undefined'
+                    : typeof eventOnly.playersWithShots
+                }`;
         throw new Error(
           `buildEventOnlyApproachRowsFromSnapshots(...) contract violation: ` +
           `expected an object with a 'rows' array (and numeric finite 'playersWithShots' count), ` +
@@ -6436,9 +6439,10 @@ const runValidation = async ({
   const shouldWriteTemplates = !!writeTemplates;
   const shouldDryRunTemplates = !!dryRun && !shouldWriteTemplates;
   const dryRunTemplateDir = dryRunDir || (postEventDir ? path.resolve(postEventDir, 'dryrun') : null);
-  const templateUpdateComment = tournamentName
-    ? `Updated after ${tournamentName}`
-    : (season ? `Updated after season ${season}` : null);
+  const templateUpdateComment =
+    tournamentName ? `Updated after ${tournamentName}` :
+    season         ? `Updated after season ${season}` :
+    null;
   if (shouldWriteTemplates || shouldDryRunTemplates) {
     const updatedPath = updateBaselineTemplatesFile({
       blendedTemplatesByType: blendedByType,
