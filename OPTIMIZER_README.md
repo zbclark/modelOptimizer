@@ -396,9 +396,9 @@ node core/optimizer.js --event 7 --season 2026 --tournament "Genesis Invitationa
 - `--forceFieldUpdates`
 - `--log` / `--verbose`
 
-### Post-event seed runs (primary: tmux + `run_background.sh`)
+### Post-event seed runs (primary: `run_background.sh`)
 
-For seeded post-event runs, use `scripts/run_background.sh` as the **primary** entry point. It launches the optimizer in the background (nohup) and is safe to run inside a `tmux` session for long seed sweeps.
+For seeded post-event runs, use `scripts/run_background.sh` as the **primary** entry point. It launches the optimizer in the background (nohup) and can optionally launch a dedicated `tmux` session for long seed sweeps.
 
 ```bash
 bash scripts/run_background.sh \
@@ -409,10 +409,24 @@ bash scripts/run_background.sh \
   --seeds a, b, c, d, e
 ```
 
+**tmux variant:**
+
+```bash
+bash scripts/run_background.sh \
+  --event 7 \
+  --season 2026 \
+  --name "Genesis Invitational" \
+  --post \
+  --seeds a, b, c, d, e \
+  --tmux \
+  --tmuxSession optimizer_genesis_post_seeds
+```
+
 Notes:
 
-- Logs are written to `logs/optimizer_<event>_<tournament>_<timestamp>.log`.
+- Logs are written to the optimizer log path computed by `utilities/outputPaths.js` (per seed when `--seeds` is used).
 - Seeds are executed sequentially within the background process.
+- `--tmux` starts a new tmux session and runs the background command inside it (fails if the session already exists).
 
 ### Validation rollup
 
