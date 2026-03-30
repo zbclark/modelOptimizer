@@ -9,7 +9,9 @@
 #     --season <SEASON> \
 #     --name "<TOURNAMENT_NAME>" \
 #     [--post] \
-#     [--seeds a,b,c,d,e]
+#     [--seeds a,b,c,d,e] \
+#     [--tmux] \
+#     [--tmuxSession <SESSION_NAME>]
 #
 # Notes:
 #   - Output is written to the optimizer log path (computed via outputPaths).
@@ -28,6 +30,8 @@ TOURNAMENT_NAME=""
 EXTRA_FLAGS=""
 SEEDS=""
 RUN_CONTEXT="run"
+TMUX_ENABLED="false"
+TMUX_SESSION=""
 
 while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -45,13 +49,17 @@ while [[ $# -gt 0 ]]; do
 			EXTRA_FLAGS="$EXTRA_FLAGS $1"; shift ;;
 		--seeds)
 			SEEDS="$2"; shift 2 ;;
+		--tmux)
+			TMUX_ENABLED="true"; shift ;;
+		--tmuxSession|--tmuxName)
+			TMUX_ENABLED="true"; TMUX_SESSION="$2"; shift 2 ;;
 		*)
 			echo "Unknown argument: $1" >&2; exit 1 ;;
 	esac
 done
 
 if [[ -z "$EVENT_ID" || -z "$SEASON" || -z "$TOURNAMENT_NAME" ]]; then
-	echo "Usage: bash scripts/run_background.sh --event <EVENT_ID> --season <SEASON> --name \"<TOURNAMENT_NAME>\" [--post] [--seeds a,b,c,d,e]"
+	echo "Usage: bash scripts/run_background.sh --event <EVENT_ID> --season <SEASON> --name \"<TOURNAMENT_NAME>\" [--post] [--seeds a,b,c,d,e] [--tmux] [--tmuxSession <SESSION_NAME>]"
 	exit 1
 fi
 
@@ -113,6 +121,43 @@ console.log(logFile);
 NODE
 }
 
+sanitize_shell() {
+	echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '_' | sed 's/^_*//;s/_*$//'
+}
+
+ensure_tmux() {
+	if ! command -v tmux >/dev/null 2>&1; then
+		echo "tmux is not installed. Install tmux or omit --tmux." >&2
+		exit 1
+	fi
+}
+
+resolve_tmux_session() {
+	if [[ -n "$TMUX_SESSION" ]]; then
+		echo "$TMUX_SESSION"
+		return
+	fi
+	local safe_name
+	safe_name="$(sanitize_shell "$TOURNAMENT_NAME")"
+	local base="optimizer_${EVENT_ID}_${safe_name}_${RUN_CONTEXT}"
+	if [[ -n "$SEEDS" ]]; then
+		base="${base}_seeds"
+	fi
+	echo "$base"
+}
+
+launch_tmux() {
+	local session_name="$1"
+	local command="$2"
+	local escaped
+	escaped=$(printf '%q' "$command")
+	if tmux has-session -t "$session_name" 2>/dev/null; then
+		echo "tmux session already exists: $session_name" >&2
+		exit 1
+	fi
+	tmux new-session -d -s "$session_name" bash -lc "$escaped"
+}
+
 # ---------------------------------------------------------------------------
 # Build and launch the command(s)
 # ---------------------------------------------------------------------------
@@ -120,15 +165,27 @@ if [[ -z "$SEEDS" ]]; then
 	LOG_FILE="$(compute_log_file "")"
 	mkdir -p "$(dirname "$LOG_FILE")"
 	CMD="node \"$ROOT_DIR/core/optimizer.js\" --event \"$EVENT_ID\" --season \"$SEASON\" --name \"$TOURNAMENT_NAME\"$EXTRA_FLAGS"
-	echo "Starting optimizer in the background..."
-	echo "  Log: $LOG_FILE"
-	# shellcheck disable=SC2086
-	nohup bash -c "$CMD" > "$LOG_FILE" 2>&1 &
-	PID=$!
-	echo "  PID: $PID"
-	echo ""
-	echo "Follow progress: tail -f \"$LOG_FILE\""
-	echo "Check if running: kill -0 $PID 2>/dev/null && echo running || echo done"
+	if [[ "$TMUX_ENABLED" == "true" ]]; then
+		ensure_tmux
+		TMUX_SESSION_NAME="$(resolve_tmux_session)"
+		RUN_CMD="$CMD > \"$LOG_FILE\" 2>&1"
+		echo "Starting optimizer in a tmux session..."
+		echo "  Session: $TMUX_SESSION_NAME"
+		echo "  Log: $LOG_FILE"
+		launch_tmux "$TMUX_SESSION_NAME" "$RUN_CMD"
+		echo "Follow progress: tail -f \"$LOG_FILE\""
+		echo "Attach: tmux attach -t $TMUX_SESSION_NAME"
+	else
+		echo "Starting optimizer in the background..."
+		echo "  Log: $LOG_FILE"
+		# shellcheck disable=SC2086
+		nohup bash -c "$CMD" > "$LOG_FILE" 2>&1 &
+		PID=$!
+		echo "  PID: $PID"
+		echo ""
+		echo "Follow progress: tail -f \"$LOG_FILE\""
+		echo "Check if running: kill -0 $PID 2>/dev/null && echo running || echo done"
+	fi
 else
 	# Multi-seed run: iterate seeds sequentially inside a single nohup shell
 	IFS=',' read -ra SEED_LIST <<< "$SEEDS"
@@ -142,13 +199,24 @@ else
 	done
 	SEED_CMDS="${SEED_CMDS}echo 'All seeds complete.'"
 
-	echo "Starting multi-seed optimizer run (seeds: $SEEDS) in the background..."
-	echo "  Logs: (per seed)"
-	# shellcheck disable=SC2086
-	nohup bash -c "$SEED_CMDS" > /dev/null 2>&1 &
-	PID=$!
-	echo "  PID: $PID"
-	echo ""
-	echo "Follow progress: tail -f <seed-log>"
-	echo "Check if running: kill -0 $PID 2>/dev/null && echo running || echo done"
+	if [[ "$TMUX_ENABLED" == "true" ]]; then
+		ensure_tmux
+		TMUX_SESSION_NAME="$(resolve_tmux_session)"
+		echo "Starting multi-seed optimizer run (seeds: $SEEDS) in a tmux session..."
+		echo "  Session: $TMUX_SESSION_NAME"
+		echo "  Logs: (per seed)"
+		launch_tmux "$TMUX_SESSION_NAME" "$SEED_CMDS"
+		echo "Follow progress: tail -f <seed-log>"
+		echo "Attach: tmux attach -t $TMUX_SESSION_NAME"
+	else
+		echo "Starting multi-seed optimizer run (seeds: $SEEDS) in the background..."
+		echo "  Logs: (per seed)"
+		# shellcheck disable=SC2086
+		nohup bash -c "$SEED_CMDS" > /dev/null 2>&1 &
+		PID=$!
+		echo "  PID: $PID"
+		echo ""
+		echo "Follow progress: tail -f <seed-log>"
+		echo "Check if running: kill -0 $PID 2>/dev/null && echo running || echo done"
+	fi
 fi
