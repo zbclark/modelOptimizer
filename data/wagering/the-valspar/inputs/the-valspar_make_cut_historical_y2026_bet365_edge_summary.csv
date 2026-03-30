@@ -1,0 +1,2 @@
+event_id,season,odds_year,book,market,total_rows,rows_with_outcomes,avg_edge,median_edge,hit_rate,brier,log_loss
+475,2026,2026,bet365,make_cut,80,36,-0.22584146194201166,-0.22567959319777556,0.1111111111111111,0.22817176475629874,0.649375350028413

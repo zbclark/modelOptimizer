@@ -1,0 +1,11 @@
+season,eventId,market,book,dgId,playerName,odds,stake,settledStake,totalReturn,net,roi,won,profit
+2026,475,top_5,bet365,16243,"Koepka, Brooks",7,15,15.00,0.00,-15.00,-1.0000,0,-15
+2026,475,top_5,draftkings,17646,"Fitzpatrick, Matt",4.65,14,14.00,65.10,51.10,3.6500,1,51.1
+2026,475,top_5,draftkings,29433,"Bridgeman, Jacob",6,12,12.00,0.00,-12.00,-1.0000,0,-12
+2026,475,top_5,draftkings,19895,"Schauffele, Xander",3.7,11,11.00,27.13,16.13,1.4667,1,16.13
+2026,475,top_20,draftkings,28323,"Koch, Greg",66,8,8.00,0.00,-8.00,-1.0000,0,-8
+2026,475,top_10,caesars,11451,"Garnett, Brice",31,8,8.00,0.00,-8.00,-1.0000,0,-8
+2026,475,top_10,draftkings,12920,"Willett, Danny",81,8,8.00,0.00,-8.00,-1.0000,0,-8
+2026,475,top_10,bet365,19846,"Bauchou, Zach",18,8,8.00,0.00,-8.00,-1.0000,0,-8
+2026,475,top_10,draftkings,25003,"Walker, Danny",44,8,8.00,0.00,-8.00,-1.0000,0,-8
+2026,475,top_10,bet365,12426,"Waring, Paul",51,8,8.00,0.00,-8.00,-1.0000,0,-8

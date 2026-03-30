@@ -1,0 +1,14 @@
+{
+  "event_id": "20",
+  "season": "2026",
+  "odds_year": "2026",
+  "book": "bet365",
+  "market": "frl",
+  "total_rows": 132,
+  "rows_with_outcomes": 0,
+  "avg_edge": -0.005217952787101725,
+  "median_edge": -0.003458718344904501,
+  "hit_rate": null,
+  "brier": null,
+  "log_loss": null
+}

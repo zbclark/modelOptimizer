@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const { parse } = require('csv-parse/sync');
 
 const { cleanMetricValue, calculateMetricTrends } = require('../core/modelCore');
@@ -254,7 +253,6 @@ const buildApproachDeltaMap = (rows = []) => {
 
 const buildResultsMetricSpecs = () => {
   const excludedMetrics = new Set([
-    'Birdies or Better',
     'Birdie Chances Created'
   ]);
   return GENERATED_METRIC_LABELS

@@ -190,6 +190,8 @@ const summaries = files.map(filePath => {
   const recommendation = data.recommendation || {};
   const recommendationApproach = recommendation.approach ?? null;
   const recommendationType = getRecommendationType(recommendationApproach);
+  const templateRecommendationApproach = recommendation.templateApproach ?? null;
+  const templateRecommendationType = getRecommendationType(templateRecommendationApproach);
   const baselineTemplate = recommendation.baselineTemplate ?? data.baselineTemplate ?? null;
   return {
     file: path.basename(filePath),
@@ -205,6 +207,8 @@ const summaries = files.map(filePath => {
     matchedPlayers: currentYearPlayers ?? optimized.matchedPlayers ?? null,
     recommendationApproach,
     recommendationType,
+    templateRecommendationApproach,
+    templateRecommendationType,
     baselineTemplate
   };
 });
@@ -221,6 +225,7 @@ summaries.sort((a, b) => {
 
 const best = summaries[0];
 const recommendationGroups = new Map();
+const templateRecommendationGroups = new Map();
 
 summaries.forEach(entry => {
   const key = [
@@ -246,6 +251,28 @@ summaries.forEach(entry => {
   }
 });
 
+summaries.forEach(entry => {
+  const key = [
+    entry.templateRecommendationType || 'unknown',
+    entry.templateRecommendationApproach || 'n/a'
+  ].join('|');
+
+  if (!templateRecommendationGroups.has(key)) {
+    templateRecommendationGroups.set(key, {
+      type: entry.templateRecommendationType || 'unknown',
+      approach: entry.templateRecommendationApproach || null,
+      seeds: [],
+      count: 0
+    });
+  }
+
+  const group = templateRecommendationGroups.get(key);
+  group.count += 1;
+  if (entry.seed) {
+    group.seeds.push(entry.seed);
+  }
+});
+
 const lines = [];
 lines.push('='.repeat(100));
 lines.push('MODEL OPTIMIZER SEED SUMMARY');
@@ -261,14 +288,16 @@ summaries.forEach((entry, index) => {
   const top20Text = typeof entry.top20 === 'number' ? `${entry.top20.toFixed(1)}%` : 'n/a';
   const top20WeightedText = typeof entry.top20WeightedScore === 'number' ? `${entry.top20WeightedScore.toFixed(1)}%` : 'n/a';
   const recType = entry.recommendationType || 'unknown';
+  const templateRecType = entry.templateRecommendationType || 'unknown';
   const baselineText = entry.baselineTemplate ? ` | baseline=${entry.baselineTemplate}` : '';
-  lines.push(`${index + 1}. seed=${entry.seed || 'n/a'} | corr=${entry.correlation?.toFixed(4) ?? 'n/a'} | top20=${top20Text} | top20W=${top20WeightedText} | rmse=${entry.rmse?.toFixed(2) ?? 'n/a'} | mae=${entry.mae?.toFixed(2) ?? 'n/a'} | players=${entry.matchedPlayers ?? 'n/a'} | rec=${recType}${baselineText} | file=${entry.file}`);
+  lines.push(`${index + 1}. seed=${entry.seed || 'n/a'} | corr=${entry.correlation?.toFixed(4) ?? 'n/a'} | top20=${top20Text} | top20W=${top20WeightedText} | rmse=${entry.rmse?.toFixed(2) ?? 'n/a'} | mae=${entry.mae?.toFixed(2) ?? 'n/a'} | players=${entry.matchedPlayers ?? 'n/a'} | rec=${recType}${baselineText} | templateRec=${templateRecType} | file=${entry.file}`);
 });
 
 lines.push('');
 lines.push('Best seed:');
 lines.push(`seed=${best.seed || 'n/a'} | file=${best.file}`);
 lines.push(`Recommendation for best seed: ${best.recommendationApproach ?? 'n/a'}${best.baselineTemplate ? ` | baseline=${best.baselineTemplate}` : ''}`);
+lines.push(`Template recommendation for best seed: ${best.templateRecommendationApproach ?? 'n/a'}`);
 if (best.recommendationType === 'baseline') {
   lines.push('Note: Baseline template recommended over optimized weights.');
 } else if (best.recommendationType === 'optimized') {
@@ -287,6 +316,18 @@ if (recommendationGroups.size === 0) {
     const approachText = group.approach ?? 'n/a';
     const baselineText = group.baselineTemplate ? ` | baseline=${group.baselineTemplate}` : '';
     lines.push(`- ${group.type}: ${approachText}${baselineText} | seeds=${seedsText} | count=${group.count}`);
+  });
+}
+
+lines.push('');
+lines.push('Template recommendation rollup (from results.json):');
+if (templateRecommendationGroups.size === 0) {
+  lines.push('n/a');
+} else {
+  templateRecommendationGroups.forEach(group => {
+    const seedsText = group.seeds.length > 0 ? group.seeds.join(', ') : 'n/a';
+    const approachText = group.approach ?? 'n/a';
+    lines.push(`- ${group.type}: ${approachText} | seeds=${seedsText} | count=${group.count}`);
   });
 }
 

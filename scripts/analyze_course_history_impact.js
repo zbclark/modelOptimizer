@@ -26,7 +26,7 @@ const OUTPUT_DIR = process.env.PRE_TOURNAMENT_OUTPUT_DIR
 // - Do NOT change writeback behavior for utilities/courseHistoryRegression.js in this migration.
 const SHOULD_WRITE_TEMPLATES = String(process.env.WRITE_TEMPLATES || '').trim().toLowerCase() === 'true';
 const DATAGOLF_API_KEY = String(process.env.DATAGOLF_API_KEY || '').trim();
-const DATAGOLF_CACHE_DIR = path.resolve(__dirname, '..', 'data', 'cache');
+const DATAGOLF_CACHE_DIR = path.resolve(__dirname, '..', 'data', 'cache', 'historical_rounds');
 const DATAGOLF_HISTORICAL_TTL_HOURS = (() => {
   const raw = parseFloat(String(process.env.DATAGOLF_HISTORICAL_TTL_HOURS || '').trim());
   return Number.isNaN(raw) ? 72 : Math.max(1, raw);

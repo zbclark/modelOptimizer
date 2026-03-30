@@ -4,7 +4,7 @@ const solver = require('javascript-lp-solver');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
-const OUTPUT_DIR = path.resolve(DATA_DIR, 'contests', 'draftkings', 'evaluations');
+const OUTPUT_DIR = path.resolve(DATA_DIR, 'wagering', 'contests', 'draftkings', 'evaluations');
 
 const ensureDir = dirPath => {
   if (!dirPath) return;
@@ -126,7 +126,7 @@ const main = () => {
   const lineupSize = 6;
   const topN = 20;
 
-  const dfsPointsPath = path.resolve(DATA_DIR, 'odds_archive', 'draftkings', `${eventId}.json`);
+  const dfsPointsPath = path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'draftkings', `${eventId}.json`);
   if (!fs.existsSync(dfsPointsPath)) {
     console.error(`❌ Missing DFS points file: ${dfsPointsPath}`);
     process.exit(1);

@@ -12,8 +12,8 @@ const {
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
-const CACHE_DIR = path.resolve(DATA_DIR, 'cache');
-const ODDS_ARCHIVE_DIR = path.resolve(DATA_DIR, 'odds_archive');
+const ODDS_ARCHIVE_DIR = path.resolve(DATA_DIR, 'wagering', 'odds_archive');
+const CACHE_DIR = path.resolve(ODDS_ARCHIVE_DIR, 'cache', 'datagolf');
 
 const ensureDir = dirPath => {
   if (!dirPath) return;

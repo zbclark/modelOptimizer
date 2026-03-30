@@ -96,7 +96,7 @@ const formatTimestamp = (dateValue = new Date(), timeZoneOverride = null) => {
       return date.toISOString();
     }
     return `${year}-${month}-${day}T${hour}:${minute}:${second}${offset}`;
-  } catch (error) {
+  } catch {
     return date.toISOString();
   }
 };
@@ -127,7 +127,7 @@ const formatCentralTimestamp = (dateValue = new Date(), timeZoneOverride = null,
       return null;
     }
     return `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}:${map.second} ${label}`;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -185,7 +185,7 @@ const formatDateKey = (dateValue = new Date(), timeZoneOverride = null) => {
     });
     if (!map.year || !map.month || !map.day) return date.toISOString().slice(0, 10);
     return `${map.year}-${map.month}-${map.day}`;
-  } catch (error) {
+  } catch {
     return date.toISOString().slice(0, 10);
   }
 };

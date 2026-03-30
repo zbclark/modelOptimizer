@@ -3590,10 +3590,25 @@ function generatePlayerRankings(players, metricGroups, historicalData, approachD
       const mean = entries.reduce((sum, entry) => sum + entry.signal, 0) / entries.length;
       const variance = entries.reduce((sum, entry) => sum + Math.pow(entry.signal - mean, 2), 0) / entries.length;
       const stdDev = Math.sqrt(variance) || 0;
-      const map = new Map();
-      entries.forEach(entry => {
+      const scoredEntries = entries.map(entry => {
         const zScore = stdDev > 0 ? (entry.signal - mean) / stdDev : 0;
-        map.set(entry.dgId, { signal: entry.signal, zScore });
+        return { ...entry, zScore };
+      });
+      const rankedEntries = [...scoredEntries].sort((a, b) => b.zScore - a.zScore);
+      let lastScore = null;
+      let lastRank = 0;
+      rankedEntries.forEach((entry, index) => {
+        const score = entry.zScore;
+        const rank = (lastScore !== null && Math.abs(score - lastScore) < 1e-9)
+          ? lastRank
+          : index + 1;
+        entry.zRank = rank;
+        lastScore = score;
+        lastRank = rank;
+      });
+      const map = new Map();
+      rankedEntries.forEach(entry => {
+        map.set(entry.dgId, { signal: entry.signal, zScore: entry.zScore, zRank: entry.zRank });
       });
       return map;
     };
@@ -3636,8 +3651,10 @@ function generatePlayerRankings(players, metricGroups, historicalData, approachD
 
       const signalValue = signalEntry?.signal ?? weightedSignal;
       const zScore = signalEntry?.zScore ?? 0;
+      const zRankValue = Number.isFinite(signalEntry?.zRank) ? signalEntry.zRank : null;
+      const zRankText = zRankValue !== null ? zRankValue : 'n/a';
       const weightedArrow = zScore >= 0 ? '↑' : '↓';
-      return `BucketSig ${weightedArrow} z=${zScore.toFixed(2)} (${signalValue.toFixed(3)}) [${bucketFlags.join(' ')}]`;
+      return `BucketSig ${weightedArrow} zRank=${zRankText} (${signalValue.toFixed(3)}) [${bucketFlags.join(' ')}]`;
     };
 
     const bucketSignalById = computeBucketSignalMap(deltaScoresById, courseSetupWeights);
@@ -3682,6 +3699,13 @@ function generatePlayerRankings(players, metricGroups, historicalData, approachD
       player.deltaTrendScore = typeof trendScore === 'number' ? trendScore : null;
       player.deltaPredictiveScore = typeof predScore === 'number' ? predScore : null;
       const bucketSignalEntry = bucketSignalById.get(String(player.dgId)) || null;
+      player.bucketSignal = bucketSignalEntry
+        ? {
+          value: bucketSignalEntry.signal,
+          zScore: bucketSignalEntry.zScore,
+          zRank: bucketSignalEntry.zRank
+        }
+        : null;
       player.deltaNote = buildDeltaNote(
         player.deltaTrendScore,
         player.deltaPredictiveScore,

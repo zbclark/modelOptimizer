@@ -1,0 +1,120 @@
+{
+  "summary": {
+    "contestKey": "188852941",
+    "contestType": "captain",
+    "eventId": "11",
+    "tournamentSlug": "the-players",
+    "entryId": "5089231278",
+    "entryName": "zbclarker (1/2)",
+    "entryRank": "5096",
+    "entryPoints": "219.35",
+    "entryLineup": "CPT Sahith Theegala G Ludvig Aberg G Russell Henley G Robert MacIntyre G Jacob Bridgeman G Austin Smotherman",
+    "entryTotalSalary": 51300,
+    "entryModelScore": 2.6423367406913085,
+    "entryActualPoints": 548,
+    "optimalTotalSalary": 49950,
+    "optimalModelScore": 5.092044186728046,
+    "optimalActualPoints": 371,
+    "unmatchedPlayers": []
+  },
+  "entryPlayers": [
+    {
+      "name": "Theegala, Sahith",
+      "role": "CPT",
+      "salary": 7000,
+      "modelScore": 0.29472297663017744,
+      "actualPoints": 74,
+      "matched": true
+    },
+    {
+      "name": "Aberg, Ludvig",
+      "role": "G",
+      "salary": 8700,
+      "modelScore": 0.8148960250777884,
+      "actualPoints": 98.5,
+      "matched": true
+    },
+    {
+      "name": "Henley, Russell",
+      "role": "G",
+      "salary": 9000,
+      "modelScore": 0.5897523715614335,
+      "actualPoints": 76,
+      "matched": true
+    },
+    {
+      "name": "MacIntyre, Robert",
+      "role": "G",
+      "salary": 8800,
+      "modelScore": -0.11885654049085895,
+      "actualPoints": 93.5,
+      "matched": true
+    },
+    {
+      "name": "Bridgeman, Jacob",
+      "role": "G",
+      "salary": 7900,
+      "modelScore": 0.44010018807202983,
+      "actualPoints": 95.5,
+      "matched": true
+    },
+    {
+      "name": "Smotherman, Austin",
+      "role": "G",
+      "salary": 6400,
+      "modelScore": 0.4743602315256497,
+      "actualPoints": 73.5,
+      "matched": true
+    }
+  ],
+  "optimalPlayers": [
+    {
+      "name": "Bhatia, Akshay",
+      "role": "CPT",
+      "salary": 7700,
+      "modelScore": 0.9115235328083318,
+      "actualPoints": 79,
+      "matched": true
+    },
+    {
+      "name": "McIlroy, Rory",
+      "role": "G",
+      "salary": 11700,
+      "modelScore": 1.025191489938235,
+      "actualPoints": 56,
+      "matched": true
+    },
+    {
+      "name": "Hodges, Lee",
+      "role": "G",
+      "salary": 6300,
+      "modelScore": 0.7202553319252173,
+      "actualPoints": 52.5,
+      "matched": true
+    },
+    {
+      "name": "Fisk, Steven",
+      "role": "G",
+      "salary": 6300,
+      "modelScore": 0.5843324172443749,
+      "actualPoints": 50,
+      "matched": true
+    },
+    {
+      "name": "Lee, Min Woo",
+      "role": "G",
+      "salary": 7500,
+      "modelScore": 0.6971413269880068,
+      "actualPoints": 74,
+      "matched": true
+    },
+    {
+      "name": "Novak, Andrew",
+      "role": "G",
+      "salary": 6600,
+      "modelScore": 0.6978383214197138,
+      "actualPoints": 20,
+      "matched": true
+    }
+  ]
+}

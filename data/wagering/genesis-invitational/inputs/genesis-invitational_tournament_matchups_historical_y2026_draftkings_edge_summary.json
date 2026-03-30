@@ -1,0 +1,14 @@
+{
+  "event_id": "7",
+  "season": "2026",
+  "odds_year": "2026",
+  "book": "draftkings",
+  "market": "tournament_matchups",
+  "total_rows": 253,
+  "rows_with_outcomes": 253,
+  "avg_edge": 0,
+  "median_edge": 0,
+  "hit_rate": 0.391304347826087,
+  "brier": 0.26211447073594785,
+  "log_loss": 0.7447598833886891
+}

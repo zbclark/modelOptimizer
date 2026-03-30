@@ -1,0 +1,14 @@
+{
+  "event_id": "10",
+  "season": "2026",
+  "odds_year": "2026",
+  "book": "sportsbook",
+  "market": "tournament_matchups",
+  "total_rows": 511,
+  "rows_with_outcomes": 511,
+  "avg_edge": 0,
+  "median_edge": 0,
+  "hit_rate": 0.34833659491193736,
+  "brier": 0.24239241661567126,
+  "log_loss": 0.6824546262617459
+}

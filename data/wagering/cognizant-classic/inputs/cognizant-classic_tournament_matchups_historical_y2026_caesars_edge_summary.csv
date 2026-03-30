@@ -1,0 +1,2 @@
+event_id,season,odds_year,book,market,total_rows,rows_with_outcomes,avg_edge,median_edge,hit_rate,brier,log_loss
+10,2026,2026,caesars,tournament_matchups,367,367,0,0,0.32697547683923706,0.23319694734447707,0.6641909006457086

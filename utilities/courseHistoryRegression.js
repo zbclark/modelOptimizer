@@ -11,35 +11,49 @@ const COURSE_HISTORY_REGRESSION = {
     "slope": -1.2133482129250956,
     "pValue": 0.15870370594050387
   },
-  "665": {
-    "slope": -0.9414115804834621,
-    "pValue": 0.26862406139293826
+  "241": {
+    "slope": 0,
+    "pValue": 0.9999999989999999
   },
-  "714": {
-    "slope": 1.5656819970763178,
-    "pValue": 0.28820684629056914
+  "665": {
+    "slope": -0.8699973725385858,
+    "pValue": 0.18592402898215932
+  },
+  "872": {
+    "slope": -13.496302422813246,
+    "pValue": 1.1102230246251565e-15
+  },
+  "897": {
+    "slope": -2.8245967179176508,
+    "pValue": 0.01721339942681044
+  },
+  "977": {
+    "slope": -2.868796090485672,
+    "pValue": 0.004823910022484723
   },
   "meta": {
-    "generatedAt": "2026-03-17T20:58:15-05:00",
-    "eventId": "475",
+    "generatedAt": "2026-03-24T10:34:20-05:00",
+    "eventId": "20",
     "season": 2026,
     "mode": "pre_event",
-    "courseNum": "665",
-    "courseNameKey": "INNISBROOK_COPPERHEAD",
-    "templateKey": "INNISBROOK_COPPERHEAD",
+    "courseNum": "897",
+    "courseNameKey": "MEMORIAL_PARK_GOLF_COURSE",
+    "templateKey": "MEMORIAL_PARK_GOLF_COURSE",
     "tours": [
       "pga"
     ],
     "eventScope": {
-      "eventId": "475",
+      "eventId": "20",
       "similarEventIds": [
-        "11",
-        "12",
-        "21"
+        "33",
+        "480",
+        "21",
+        "541"
       ],
       "puttingEventIds": [
         "11",
-        "18"
+        "12",
+        "475"
       ]
     },
     "yearScope": {

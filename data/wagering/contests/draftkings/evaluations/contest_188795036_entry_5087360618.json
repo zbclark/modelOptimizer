@@ -1,0 +1,120 @@
+{
+  "summary": {
+    "contestKey": "188795036",
+    "contestType": "showdown",
+    "eventId": "11",
+    "tournamentSlug": "the-players",
+    "entryId": "5087360618",
+    "entryName": "zbclarker",
+    "entryRank": "572",
+    "entryPoints": "269.95",
+    "entryLineup": "G Russell Henley G Ludvig Aberg G Jacob Bridgeman G Sepp Straka G Maverick McNealy G Justin Thomas",
+    "entryTotalSalary": 48800,
+    "entryModelScore": 2.0763388250059185,
+    "entryActualPoints": 516.5,
+    "optimalTotalSalary": 48500,
+    "optimalModelScore": 4.866846028157292,
+    "optimalActualPoints": 380,
+    "unmatchedPlayers": []
+  },
+  "entryPlayers": [
+    {
+      "name": "Henley, Russell",
+      "role": "G",
+      "salary": 9000,
+      "modelScore": 0.5897523715614335,
+      "actualPoints": 76,
+      "matched": true
+    },
+    {
+      "name": "Aberg, Ludvig",
+      "role": "G",
+      "salary": 8700,
+      "modelScore": 0.8148960250777884,
+      "actualPoints": 98.5,
+      "matched": true
+    },
+    {
+      "name": "Bridgeman, Jacob",
+      "role": "G",
+      "salary": 7900,
+      "modelScore": 0.44010018807202983,
+      "actualPoints": 95.5,
+      "matched": true
+    },
+    {
+      "name": "Straka, Sepp",
+      "role": "G",
+      "salary": 7600,
+      "modelScore": 0.024891239820759293,
+      "actualPoints": 89.5,
+      "matched": true
+    },
+    {
+      "name": "McNealy, Maverick",
+      "role": "G",
+      "salary": 7600,
+      "modelScore": 0.24919781101008634,
+      "actualPoints": 68.5,
+      "matched": true
+    },
+    {
+      "name": "Thomas, Justin",
+      "role": "G",
+      "salary": 8000,
+      "modelScore": -0.042498810536178926,
+      "actualPoints": 88.5,
+      "matched": true
+    }
+  ],
+  "optimalPlayers": [
+    {
+      "name": "Bhatia, Akshay",
+      "role": "G",
+      "salary": 7700,
+      "modelScore": 0.9115235328083318,
+      "actualPoints": 79,
+      "matched": true
+    },
+    {
+      "name": "McIlroy, Rory",
+      "role": "G",
+      "salary": 11700,
+      "modelScore": 1.025191489938235,
+      "actualPoints": 56,
+      "matched": true
+    },
+    {
+      "name": "Lee, Min Woo",
+      "role": "G",
+      "salary": 7500,
+      "modelScore": 0.6971413269880068,
+      "actualPoints": 74,
+      "matched": true
+    },
+    {
+      "name": "Hodges, Lee",
+      "role": "G",
+      "salary": 6300,
+      "modelScore": 0.7202553319252173,
+      "actualPoints": 52.5,
+      "matched": true
+    },
+    {
+      "name": "Novak, Andrew",
+      "role": "G",
+      "salary": 6600,
+      "modelScore": 0.6978383214197138,
+      "actualPoints": 20,
+      "matched": true
+    },
+    {
+      "name": "Aberg, Ludvig",
+      "role": "G",
+      "salary": 8700,
+      "modelScore": 0.8148960250777884,
+      "actualPoints": 98.5,
+      "matched": true
+    }
+  ]
+}

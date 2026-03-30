@@ -1,0 +1,14 @@
+{
+  "event_id": "6",
+  "season": "2026",
+  "odds_year": "2026",
+  "book": "caesars",
+  "market": "tournament_matchups",
+  "total_rows": 334,
+  "rows_with_outcomes": 334,
+  "avg_edge": 0,
+  "median_edge": 0,
+  "hit_rate": 0.38323353293413176,
+  "brier": 0.22888145675310606,
+  "log_loss": 0.6502349154492528
+}

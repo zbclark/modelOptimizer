@@ -1,0 +1,2 @@
+event_id,season,odds_year,book,market,total_rows,rows_with_outcomes,avg_edge,median_edge,hit_rate,brier,log_loss
+475,2026,2026,bet365,top_20,131,0,0.2774655324089365,0.30118631371088994,,,

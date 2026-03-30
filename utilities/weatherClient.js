@@ -19,7 +19,7 @@ const readJson = filePath => {
   if (!filePath || !fs.existsSync(filePath)) return null;
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -35,7 +35,7 @@ const isFresh = (filePath, ttlMs) => {
   try {
     const stats = fs.statSync(filePath);
     return Date.now() - stats.mtimeMs < ttlMs;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

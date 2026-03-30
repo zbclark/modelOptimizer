@@ -1,0 +1,14 @@
+{
+  "event_id": "20",
+  "season": "2026",
+  "odds_year": "2026",
+  "book": "",
+  "market": "frl",
+  "total_rows": 135,
+  "rows_with_outcomes": 0,
+  "avg_edge": 0.4305236762866324,
+  "median_edge": 0.4467601540329289,
+  "hit_rate": null,
+  "brier": null,
+  "log_loss": null
+}

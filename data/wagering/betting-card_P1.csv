@@ -1,0 +1,11 @@
+season,book,odd_source,tournament_slug,event,odds_generated_at,odds_graded_at,player,dg_id,market,odds,stake,settled stake,total return,net,roi,,p_model,p_implied,edge
+2026,bet365,live,texas-childrens-open,20,2026-03-26 10:28:37 UTC,,"Pavon, Matthieu",19960,top_20,7.5,18,,,,,,0.9550751359907369,0.13333333333333333,0.8217418026574036
+2026,bet365,live,texas-childrens-open,20,2026-03-26 10:28:37 UTC,,"Ford, David",31343,top_10,101,9,,,,,,0.5014498961869733,0.009900990099009901,0.4915489060879634
+2026,bet365,live,texas-childrens-open,20,2026-03-26 10:28:37 UTC,,"Greyserman, Max",23465,top_10,67,9,,,,,,0.506085982369212,0.014925373134328358,0.49116060923488364
+2026,bet365,live,texas-childrens-open,20,2026-03-26 10:28:37 UTC,,"Hojgaard, Rasmus",23838,top_10,56,9,,,,,,0.5066787695382682,0.017857142857142856,0.48882162668112533
+2026,bet365,live,texas-childrens-open,20,2026-03-26 10:28:37 UTC,,"Thorbjornsen, Michael",26649,top_10,41,10,,,,,,0.5129028304218746,0.024390243902439025,0.4885125865194355
+2026,draftkings,live,texas-childrens-open,20,2026-03-26 10:28:37 UTC,,"Lebioda, Hank",21943,top_5,68,9,,,,,,0.5,0.014705882352941176,0.4852941176470588
+2026,bet365,live,texas-childrens-open,20,2026-03-26 10:28:37 UTC,,"Smith, Jordan",18586,top_10,67,9,,,,,,0.5,0.014925373134328358,0.48507462686567165
+2026,bet365,live,texas-childrens-open,20,2026-03-26 10:32:00 UTC,,"Yellamaraju, Sudarshan over Theegala, Sahith / Gerard, Ryan",29925,3_balls,3.2,9,,,,,,0.4944757746304719,0.3125,0.18197577463047188
+2026,caesars,live,texas-childrens-open,20,2026-03-26 10:32:00 UTC,,"Glover, Lucas over Riley, Davis / Fisk, Steven",7399,3_balls,2.9,9,,,,,,0.5117454939454004,0.3448275862068966,0.1669179077385038
+2026,caesars,live,texas-childrens-open,20,2026-03-26 10:32:00 UTC,,"Lipsky, David over Kanaya, Takumi / Hojgaard, Rasmus",15980,3_balls,3,9,,,,,,0.48153938475134095,0.3333333333333333,0.14820605141800763

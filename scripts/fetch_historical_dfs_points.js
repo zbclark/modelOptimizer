@@ -8,8 +8,8 @@ const { getDataGolfHistoricalDfsPoints } = require('../utilities/dataGolfClient'
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
-const CACHE_DIR = path.resolve(DATA_DIR, 'cache');
-const DFS_ARCHIVE_DIR = path.resolve(DATA_DIR, 'odds_archive', 'draftkings');
+const CACHE_DIR = path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'cache', 'datagolf');
+const DFS_ARCHIVE_DIR = path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'draftkings');
 
 const ensureDir = dirPath => {
   if (!dirPath) return;

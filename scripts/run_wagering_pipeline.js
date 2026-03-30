@@ -160,7 +160,7 @@ const main = () => {
         return filtered;
       }
     }
-    const tourDir = path.resolve(DATA_DIR, 'odds_archive', 'outrights', String(tour || 'pga'));
+    const tourDir = path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'outrights', String(tour || 'pga'));
     if (fs.existsSync(tourDir)) {
       const years = fs.readdirSync(tourDir)
         .filter(entry => /^\d{4}$/.test(entry))
@@ -212,7 +212,18 @@ const main = () => {
     ];
   };
 
-  const supportedModelMarkets = new Set(['win', 'top_5', 'top_10', 'top_20']);
+  const supportedModelMarkets = new Set([
+    'win',
+    'top_5',
+    'top_10',
+    'top_20',
+    'tournament_matchups',
+    'round_matchups',
+    '3_balls',
+    '3balls',
+    '3-ball',
+    '3ball'
+  ]);
 
   const historicalOutrightBooks = [...DEFAULT_BOOKS];
   const historicalMatchupBooks = [...DEFAULT_BOOKS];
@@ -353,6 +364,10 @@ const main = () => {
         '--market', String(marketValue),
         '--oddsSource', String(sourceKey)
       ];
+      const resolvedMonthlyEventId = resolvedEventId || eventId;
+      if (resolvedMonthlyEventId) {
+        monthlyArgs.push('--eventId', String(resolvedMonthlyEventId));
+      }
       if (tournamentSlug) {
         monthlyArgs.push('--tournamentSlug', String(tournamentSlug));
       }
@@ -398,7 +413,7 @@ const main = () => {
     const safeMarket = String(market || 'win').trim().toLowerCase() || 'win';
     const safeBook = String(book || 'draftkings').trim().toLowerCase() || 'draftkings';
     const safeEventId = String(eventId || '').trim();
-    return path.resolve(DATA_DIR, 'odds_archive', 'outrights', safeTour, safeYear, safeMarket, safeEventId, `${safeBook}.json`);
+    return path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'outrights', safeTour, safeYear, safeMarket, safeEventId, `${safeBook}.json`);
   };
 
   const resolveMatchupsPath = ({ tour, year, book, eventId }) => {
@@ -406,7 +421,7 @@ const main = () => {
     const safeYear = String(year || '').trim();
     const safeBook = String(book || 'draftkings').trim().toLowerCase() || 'draftkings';
     const safeEventId = String(eventId || '').trim();
-    return path.resolve(DATA_DIR, 'odds_archive', 'matchups', safeTour, safeYear, safeEventId, `${safeBook}.json`);
+    return path.resolve(DATA_DIR, 'wagering', 'odds_archive', 'matchups', safeTour, safeYear, safeEventId, `${safeBook}.json`);
   };
 
   const runMarketBatch = (sourceKey) => {
@@ -414,7 +429,9 @@ const main = () => {
     markets.forEach(nextMarket => {
     const priorMarket = market;
     args.market = nextMarket;
-    const isSupportedModel = supportedModelMarkets.has(String(nextMarket).trim().toLowerCase());
+    const normalizedMarket = String(nextMarket).trim().toLowerCase();
+    const isSupportedModel = supportedModelMarkets.has(normalizedMarket);
+    const isMatchupMarket = ['tournament_matchups', 'round_matchups', '3_balls', '3balls', '3-ball', '3ball'].includes(normalizedMarket);
 
     if (!skipModelProbs) {
       if (!isSupportedModel) {
@@ -424,6 +441,14 @@ const main = () => {
           '--season', String(season),
           '--market', String(nextMarket)
         ];
+        if (isMatchupMarket) {
+          modelArgs.push('--oddsSource', String(sourceKey));
+          modelArgs.push('--tour', String(tour));
+          modelArgs.push('--year', String(year));
+          if (book) {
+            modelArgs.push('--book', String(book));
+          }
+        }
         if (eventId) {
           modelArgs.push('--eventId', String(eventId));
         }

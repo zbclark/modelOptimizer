@@ -4,7 +4,7 @@ const path = require('path');
 const DEFAULT_BASE_URL = 'https://api.draftkings.com/contests/v1/contests';
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.resolve(ROOT_DIR, 'data');
-const CONTESTS_DIR = path.resolve(DATA_DIR, 'contests', 'draftkings');
+const CONTESTS_DIR = path.resolve(DATA_DIR, 'wagering', 'contests', 'draftkings');
 
 const ensureDir = dirPath => {
   if (!dirPath) return;
@@ -17,7 +17,7 @@ const readJson = filePath => {
   if (!filePath || !fs.existsSync(filePath)) return null;
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (error) {
+  } catch {
     return null;
   }
 };

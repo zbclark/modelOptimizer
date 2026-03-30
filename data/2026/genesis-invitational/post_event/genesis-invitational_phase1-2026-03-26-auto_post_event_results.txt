@@ -1,0 +1,868 @@
+====================================================================================================
+ADAPTIVE WEIGHT OPTIMIZER - FINAL RESULTS
+====================================================================================================
+DRY RUN: OFF (templates written)
+RUN FINGERPRINT: see JSON output (runFingerprint)
+
+STEP 1: HISTORICAL METRIC CORRELATIONS
+Functions: buildHistoricalMetricSamples, computeHistoricalMetricCorrelations (optimizer.js)
+HISTORICAL METRIC CORRELATIONS (avg across years):
+  Scoring Average: Corr=0.5660, Samples=1894
+  Eagles or Better: Corr=0.0769, Samples=222
+  Birdies: Corr=0.3475, Samples=1862
+  Birdies or Better: Corr=0.3787, Samples=1894
+  SG Total: Corr=0.5646, Samples=1878
+  Driving Distance: Corr=0.2716, Samples=1894
+  Driving Accuracy: Corr=0.0843, Samples=1894
+  SG T2G: Corr=0.4568, Samples=1892
+  SG Approach: Corr=0.3402, Samples=1894
+  SG Around Green: Corr=0.1862, Samples=1892
+  SG OTT: Corr=0.2324, Samples=1893
+  SG Putting: Corr=0.3064, Samples=1893
+  GIR: Corr=0.3206, Samples=1894
+  Scrambling: Corr=0.3089, Samples=1891
+  Great Shots: Corr=0.2442, Samples=1894
+  Poor Shots: Corr=0.3522, Samples=1894
+  Fairway Proximity: Corr=0.1978, Samples=1894
+  Rough Proximity: Corr=0.1410, Samples=1892
+
+HISTORICAL METRIC CORRELATIONS (per year):
+  2021:
+    Scoring Average: Corr=0.4704, Samples=373
+    Eagles or Better: Corr=0.0896, Samples=38
+    Birdies: Corr=0.2539, Samples=366
+    Birdies or Better: Corr=0.2953, Samples=373
+    SG Total: Corr=0.5512, Samples=373
+    Driving Distance: Corr=0.2621, Samples=373
+    Driving Accuracy: Corr=-0.0143, Samples=373
+    SG T2G: Corr=0.3979, Samples=373
+    SG Approach: Corr=0.2968, Samples=373
+    SG Around Green: Corr=0.1756, Samples=373
+    SG OTT: Corr=0.1805, Samples=373
+    SG Putting: Corr=0.3060, Samples=373
+    GIR: Corr=0.2182, Samples=373
+    Scrambling: Corr=0.3318, Samples=373
+    Great Shots: Corr=0.2399, Samples=373
+    Poor Shots: Corr=0.3021, Samples=373
+    Fairway Proximity: Corr=0.0871, Samples=373
+    Rough Proximity: Corr=0.1117, Samples=373
+  2022:
+    Scoring Average: Corr=0.5888, Samples=389
+    Eagles or Better: Corr=-0.0314, Samples=57
+    Birdies: Corr=0.3495, Samples=383
+    Birdies or Better: Corr=0.3842, Samples=389
+    SG Total: Corr=0.5767, Samples=373
+    Driving Distance: Corr=0.2783, Samples=389
+    Driving Accuracy: Corr=0.1639, Samples=389
+    SG T2G: Corr=0.4617, Samples=387
+    SG Approach: Corr=0.3724, Samples=389
+    SG Around Green: Corr=0.2104, Samples=388
+    SG OTT: Corr=0.2266, Samples=389
+    SG Putting: Corr=0.3390, Samples=388
+    GIR: Corr=0.3566, Samples=389
+    Scrambling: Corr=0.3673, Samples=389
+    Great Shots: Corr=0.1745, Samples=389
+    Poor Shots: Corr=0.4298, Samples=389
+    Fairway Proximity: Corr=0.2066, Samples=389
+    Rough Proximity: Corr=0.2073, Samples=389
+  2023:
+    Scoring Average: Corr=0.6369, Samples=393
+    Eagles or Better: Corr=0.3754, Samples=29
+    Birdies: Corr=0.4774, Samples=382
+    Birdies or Better: Corr=0.4826, Samples=393
+    SG Total: Corr=0.5749, Samples=393
+    Driving Distance: Corr=0.2107, Samples=393
+    Driving Accuracy: Corr=0.1189, Samples=393
+    SG T2G: Corr=0.4751, Samples=393
+    SG Approach: Corr=0.3439, Samples=393
+    SG Around Green: Corr=0.1964, Samples=393
+    SG OTT: Corr=0.2365, Samples=393
+    SG Putting: Corr=0.2736, Samples=393
+    GIR: Corr=0.3028, Samples=393
+    Scrambling: Corr=0.3153, Samples=393
+    Great Shots: Corr=0.2662, Samples=393
+    Poor Shots: Corr=0.3639, Samples=393
+    Fairway Proximity: Corr=0.2740, Samples=393
+    Rough Proximity: Corr=0.0524, Samples=392
+  2024:
+    Scoring Average: Corr=0.5671, Samples=241
+    Eagles or Better: Corr=0.0000, Samples=34
+    Birdies: Corr=0.2982, Samples=239
+    Birdies or Better: Corr=0.3420, Samples=241
+    SG Total: Corr=0.5661, Samples=241
+    Driving Distance: Corr=0.2067, Samples=241
+    Driving Accuracy: Corr=0.1821, Samples=241
+    SG T2G: Corr=0.4852, Samples=241
+    SG Approach: Corr=0.3684, Samples=241
+    SG Around Green: Corr=0.1576, Samples=241
+    SG OTT: Corr=0.3355, Samples=241
+    SG Putting: Corr=0.2383, Samples=241
+    GIR: Corr=0.4006, Samples=241
+    Scrambling: Corr=0.2690, Samples=241
+    Great Shots: Corr=0.2040, Samples=241
+    Poor Shots: Corr=0.3214, Samples=241
+    Fairway Proximity: Corr=0.2546, Samples=241
+    Rough Proximity: Corr=0.1443, Samples=241
+  2025:
+    Scoring Average: Corr=0.5477, Samples=252
+    Eagles or Better: Corr=0.0000, Samples=23
+    Birdies: Corr=0.3155, Samples=248
+    Birdies or Better: Corr=0.3315, Samples=252
+    SG Total: Corr=0.5523, Samples=252
+    Driving Distance: Corr=0.2182, Samples=252
+    Driving Accuracy: Corr=0.0783, Samples=252
+    SG T2G: Corr=0.4424, Samples=252
+    SG Approach: Corr=0.3434, Samples=252
+    SG Around Green: Corr=0.1800, Samples=251
+    SG OTT: Corr=0.1106, Samples=252
+    SG Putting: Corr=0.3436, Samples=252
+    GIR: Corr=0.3824, Samples=252
+    Scrambling: Corr=0.2281, Samples=252
+    Great Shots: Corr=0.2301, Samples=252
+    Poor Shots: Corr=0.3514, Samples=252
+    Fairway Proximity: Corr=0.1856, Samples=252
+    Rough Proximity: Corr=0.1704, Samples=251
+  2026:
+    Scoring Average: Corr=0.5794, Samples=246
+    Eagles or Better: Corr=0.1112, Samples=41
+    Birdies: Corr=0.3621, Samples=244
+    Birdies or Better: Corr=0.4150, Samples=246
+    SG Total: Corr=0.5611, Samples=246
+    Driving Distance: Corr=0.4913, Samples=246
+    Driving Accuracy: Corr=-0.0370, Samples=246
+    SG T2G: Corr=0.4964, Samples=246
+    SG Approach: Corr=0.3183, Samples=246
+    SG Around Green: Corr=0.1824, Samples=246
+    SG OTT: Corr=0.3379, Samples=245
+    SG Putting: Corr=0.3365, Samples=246
+    GIR: Corr=0.3057, Samples=246
+    Scrambling: Corr=0.2929, Samples=243
+    Great Shots: Corr=0.3797, Samples=246
+    Poor Shots: Corr=0.3176, Samples=246
+    Fairway Proximity: Corr=0.1871, Samples=246
+    Rough Proximity: Corr=0.1886, Samples=246
+
+STEP 1b: CURRENT-SEASON EVENT-ONLY METRICS (2026, event only)
+Functions: runRanking (optimizer.js) -> buildPlayerData (utilities/dataPrep.js) -> generatePlayerRankings (modelCore.js)
+Additional: computeGeneratedMetricCorrelations, computeGeneratedMetricTopNCorrelations, trainTopNLogisticModel, crossValidateTopNLogisticByEvent, buildSuggestedMetricWeights, buildSuggestedGroupWeights (optimizer.js)
+APPROACH DELTA PRIOR (approachDeltaPrior):
+  Weight: 0.15
+  Source: /workspaces/modelOptimizer/data/approach_deltas/2026/approach_deltas_genesis-invitational_2026_03_04.json
+  Rows used: 72/72
+  Approach <100 GIR: Corr=-0.0056, Samples=72
+  Approach <100 SG: Corr=-0.0867, Samples=72
+  Approach <100 Prox: Corr=-0.1379, Samples=72
+  Approach <100 Good Shot Rate: Corr=0.0945, Samples=72
+  Approach <100 Poor Shot Avoid Rate: Corr=-0.0499, Samples=72
+  Approach <100 Good Shot Count: Corr=0.0414, Samples=72
+  Approach <100 Poor Shot Count: Corr=-0.0024, Samples=72
+  Approach <100 Weighted Δ Good Shot Rate: Corr=0.0849, Samples=72
+  Approach <100 Weighted Δ Poor Shot Avoid Rate: Corr=-0.0486, Samples=72
+  Approach <150 FW GIR: Corr=0.0223, Samples=72
+
+EVENT-ONLY means season 2026 only (current event rounds only).
+EVENT-ONLY GENERATED METRIC CORRELATIONS (2026, event only):
+  0. Driving Distance: Corr=0.9492, Samples=72
+  1. Driving Accuracy: Corr=0.6175, Samples=72
+  2. SG T2G: Corr=-0.0402, Samples=72
+  3. SG Approach: Corr=0.7745, Samples=72
+  4. SG Around Green: Corr=0.5748, Samples=72
+  5. SG OTT: Corr=0.3604, Samples=72
+  6. SG Putting: Corr=0.5431, Samples=72
+  7. Scrambling: Corr=0.6344, Samples=72
+  8. Great Shots: Corr=0.5068, Samples=72
+  9. Poor Shots: Corr=-0.5098, Samples=72
+  10. Scoring Average: Corr=-0.6592, Samples=72
+  11. Birdies or Better: Corr=-0.5987, Samples=72
+  12. Approach <100 GIR: Corr=-0.9626, Samples=72
+  13. Approach <100 SG: Corr=0.7929, Samples=72
+  14. Approach <100 Prox: Corr=-0.3620, Samples=72
+  15. Approach <150 FW GIR: Corr=-0.5133, Samples=72
+  16. Approach <150 FW SG: Corr=-0.3055, Samples=72
+  17. Approach <150 FW Prox: Corr=-0.0223, Samples=72
+  18. Approach <150 Rough GIR: Corr=0.0317, Samples=72
+  19. Approach <150 Rough SG: Corr=-0.0602, Samples=72
+  20. Approach <150 Rough Prox: Corr=0.0577, Samples=72
+  21. Approach >150 Rough GIR: Corr=0.0038, Samples=72
+  22. Approach >150 Rough SG: Corr=0.1180, Samples=72
+  23. Approach >150 Rough Prox: Corr=-0.0647, Samples=72
+  24. Approach <200 FW GIR: Corr=0.2802, Samples=72
+  25. Approach <200 FW SG: Corr=-0.2424, Samples=72
+  26. Approach <200 FW Prox: Corr=-0.2869, Samples=72
+  27. Approach >200 FW GIR: Corr=0.2782, Samples=72
+  28. Approach >200 FW SG: Corr=-0.1550, Samples=72
+  29. Approach >200 FW Prox: Corr=-0.0447, Samples=72
+
+EVENT-ONLY GENERATED METRIC TOP-20 SIGNAL (2026, event only):
+  0. Driving Distance: Corr=0.7785, Samples=72
+  1. Driving Accuracy: Corr=0.5712, Samples=72
+  2. SG T2G: Corr=-0.0831, Samples=72
+  3. SG Approach: Corr=0.6403, Samples=72
+  4. SG Around Green: Corr=0.4021, Samples=72
+  5. SG OTT: Corr=0.3286, Samples=72
+  6. SG Putting: Corr=0.5021, Samples=72
+  7. Scrambling: Corr=0.5756, Samples=72
+  8. Great Shots: Corr=0.4212, Samples=72
+  9. Poor Shots: Corr=-0.4315, Samples=72
+  10. Scoring Average: Corr=-0.4868, Samples=72
+  11. Birdies or Better: Corr=-0.5146, Samples=72
+  12. Approach <100 GIR: Corr=-0.7785, Samples=72
+  13. Approach <100 SG: Corr=0.6801, Samples=72
+  14. Approach <100 Prox: Corr=-0.2448, Samples=72
+  15. Approach <150 FW GIR: Corr=-0.2007, Samples=72
+  16. Approach <150 FW SG: Corr=-0.2228, Samples=72
+  17. Approach <150 FW Prox: Corr=-0.1059, Samples=72
+  18. Approach <150 Rough GIR: Corr=0.1235, Samples=72
+  19. Approach <150 Rough SG: Corr=-0.1404, Samples=72
+  20. Approach <150 Rough Prox: Corr=-0.0581, Samples=72
+  21. Approach >150 Rough GIR: Corr=0.0551, Samples=72
+  22. Approach >150 Rough SG: Corr=0.0522, Samples=72
+  23. Approach >150 Rough Prox: Corr=-0.0948, Samples=72
+  24. Approach <200 FW GIR: Corr=0.2242, Samples=72
+  25. Approach <200 FW SG: Corr=-0.2286, Samples=72
+  26. Approach <200 FW Prox: Corr=-0.3279, Samples=72
+  27. Approach >200 FW GIR: Corr=0.1772, Samples=72
+  28. Approach >200 FW SG: Corr=-0.1889, Samples=72
+  29. Approach >200 FW Prox: Corr=0.1845, Samples=72
+
+
+STEP 1c: CURRENT-SEASON GENERATED METRICS (2026, event + similar + putting)
+CURRENT-SEASON means season 2026 only (event + similar + putting events).
+Metric events (current season): [7, 14, 538, 33, 480, 9, 536, 23, 4, 5, 26]
+Blend settings: similarCourseEvents=7, similarBlend=0.55, puttingCourseEvents=3, puttingBlend=0.55 (SG Putting only)
+CURRENT-SEASON GENERATED METRIC CORRELATIONS (2026, event + similar + putting):
+  7. SG Putting: Corr=0.4294, Samples=2638.8999999999996
+  1. Driving Distance: Corr=0.2906, Samples=1667.05
+  2. Driving Accuracy: Corr=0.1645, Samples=1667.05
+  3. SG T2G: Corr=0.7194, Samples=1667.05
+  4. SG Approach: Corr=0.5396, Samples=1667.05
+  5. SG Around Green: Corr=0.3685, Samples=1667.05
+  6. SG OTT: Corr=0.3484, Samples=1667.05
+  9. Scrambling: Corr=0.4637, Samples=1667.05
+  10. Great Shots: Corr=0.4111, Samples=1667.05
+  11. Poor Shots: Corr=0.5684, Samples=1667.05
+  12. Scoring Average: Corr=0.8856, Samples=1667.05
+  13. Birdies or Better: Corr=0.6372, Samples=1667.05
+  17. Approach <100 GIR: Corr=0.1279, Samples=1328.6999999999998
+  18. Approach <100 SG: Corr=0.0864, Samples=1328.6999999999998
+  19. Approach <100 Prox: Corr=0.0090, Samples=1328.6999999999998
+  20. Approach <150 FW GIR: Corr=0.1910, Samples=1328.6999999999998
+  21. Approach <150 FW SG: Corr=0.1093, Samples=1328.6999999999998
+  22. Approach <150 FW Prox: Corr=0.0063, Samples=1328.6999999999998
+  29. Approach <200 FW GIR: Corr=0.2212, Samples=1328.6999999999998
+  30. Approach <200 FW SG: Corr=0.2206, Samples=1328.6999999999998
+  31. Approach <200 FW Prox: Corr=0.0076, Samples=1328.6999999999998
+  32. Approach >200 FW GIR: Corr=0.1703, Samples=1328.6999999999998
+  33. Approach >200 FW SG: Corr=0.1732, Samples=1328.6999999999998
+  34. Approach >200 FW Prox: Corr=0.0011, Samples=1328.6999999999998
+
+CURRENT-SEASON GENERATED METRIC TOP-20 SIGNAL (2026, event + similar + putting):
+  7. SG Putting: Corr=0.2498, Samples=2638.8999999999996
+  1. Driving Distance: Corr=0.1538, Samples=1667.05
+  2. Driving Accuracy: Corr=0.1271, Samples=1667.05
+  3. SG T2G: Corr=0.5117, Samples=1667.05
+  4. SG Approach: Corr=0.4093, Samples=1667.05
+  5. SG Around Green: Corr=0.2571, Samples=1667.05
+  6. SG OTT: Corr=0.2505, Samples=1667.05
+  9. Scrambling: Corr=0.3707, Samples=1667.05
+  10. Great Shots: Corr=0.3507, Samples=1667.05
+  11. Poor Shots: Corr=0.3522, Samples=1667.05
+  12. Scoring Average: Corr=0.5094, Samples=1667.05
+  13. Birdies or Better: Corr=0.4235, Samples=1667.05
+  17. Approach <100 GIR: Corr=0.0867, Samples=1328.6999999999998
+  18. Approach <100 SG: Corr=0.0782, Samples=1328.6999999999998
+  19. Approach <100 Prox: Corr=0.0453, Samples=1328.6999999999998
+  20. Approach <150 FW GIR: Corr=0.1480, Samples=1328.6999999999998
+  21. Approach <150 FW SG: Corr=0.0843, Samples=1328.6999999999998
+  22. Approach <150 FW Prox: Corr=0.0161, Samples=1328.6999999999998
+  29. Approach <200 FW GIR: Corr=0.1719, Samples=1328.6999999999998
+  30. Approach <200 FW SG: Corr=0.1965, Samples=1328.6999999999998
+  31. Approach <200 FW Prox: Corr=0.0623, Samples=1328.6999999999998
+  32. Approach >200 FW GIR: Corr=0.1287, Samples=1328.6999999999998
+  33. Approach >200 FW SG: Corr=0.1580, Samples=1328.6999999999998
+  34. Approach >200 FW Prox: Corr=0.0347, Samples=1328.6999999999998
+
+GROUP TOP-20 SIGNAL (composite groups):
+  Driving Performance: Corr=0.4712, Samples=72
+  Course Management: Corr=0.3448, Samples=72
+  Putting: Corr=0.2463, Samples=72
+  Around the Green: Corr=0.2345, Samples=72
+  Approach - Long (150-200): Corr=-0.1448, Samples=72
+  Approach - Very Long (>200): Corr=0.0698, Samples=72
+  Approach - Mid (100-150): Corr=0.0551, Samples=72
+  Approach - Short (<100): Corr=0.0360, Samples=72
+  Scoring: Corr=-0.0022, Samples=72
+  Group signal blend share: 60.0% (max|corr|=0.471, min gate=0.2, full=0.35).
+
+HISTORICAL CORE METRIC TOP-20 SIGNAL (all years, event only):
+Blend weight into top-20 signal: 65%
+  12. Scoring Average: Corr=0.4114, Samples=240
+  13. Birdies or Better: Corr=0.3756, Samples=240
+  1. Driving Distance: Corr=0.1031, Samples=240
+  2. Driving Accuracy: Corr=0.1330, Samples=240
+  3. SG T2G: Corr=0.4751, Samples=240
+  4. SG Approach: Corr=0.3996, Samples=240
+  5. SG Around Green: Corr=0.2344, Samples=240
+  6. SG OTT: Corr=0.2227, Samples=240
+  7. SG Putting: Corr=0.1946, Samples=240
+  11. Poor Shots: Corr=0.2992, Samples=240
+
+CURRENT-SEASON TOP-20 LOGISTIC MODEL (2026, event + similar + putting):
+  Samples: 1270
+  Accuracy: 90.4%
+  LogLoss: 0.2315
+  Top 10 Weighted Metrics:
+    1. SG Putting: weight=0.9623
+    2. SG T2G: weight=0.6902
+    3. Birdies or Better: weight=0.5968
+    4. SG Approach: weight=0.5476
+    5. SG Around Green: weight=0.4531
+    6. Poor Shots: weight=0.4086
+    7. Driving Distance: weight=0.3613
+    8. Scoring Average: weight=0.2763
+    9. SG OTT: weight=0.2349
+    10. Driving Accuracy: weight=0.2101
+
+EVENT-BASED TOP-20 CV SUMMARY (2026):
+  Events: 11
+  Samples: 1270
+  Best L2: 0
+  Avg LogLoss: 0.2632
+  Avg Accuracy: 89.1%
+  Folds Used: 11
+  K-FOLD SUMMARY:
+    K: 3
+    Events: 11
+    Samples: 1270
+    Best L2: 0
+    Avg LogLoss: 0.2570
+    Avg Accuracy: 89.1%
+    Folds Used: 3
+
+SUGGESTED METRIC WEIGHTS (TOP-20) - SOURCE: top20-logistic
+  1. SG Putting: weight=0.1899, top20Corr=0.2498, logisticWeight=0.9623
+  2. SG T2G: weight=0.1362, top20Corr=0.5117, logisticWeight=0.6902
+  3. Birdies or Better: weight=0.1178, top20Corr=0.4235, logisticWeight=0.5968
+  4. SG Approach: weight=0.1081, top20Corr=0.4093, logisticWeight=0.5476
+  5. SG Around Green: weight=0.0894, top20Corr=0.2571, logisticWeight=0.4531
+  6. Poor Shots: weight=0.0806, top20Corr=0.3522, logisticWeight=0.4086
+  7. Driving Distance: weight=0.0713, top20Corr=0.1538, logisticWeight=0.3613
+  8. Scoring Average: weight=0.0545, top20Corr=0.5094, logisticWeight=0.2763
+  9. SG OTT: weight=0.0464, top20Corr=0.2505, logisticWeight=0.2349
+  10. Driving Accuracy: weight=0.0415, top20Corr=0.1271, logisticWeight=0.2101
+  11. Approach <100 SG: weight=0.0231, top20Corr=0.0782, logisticWeight=0.1171
+  12. Great Shots: weight=0.0228, top20Corr=0.3507, logisticWeight=0.1158
+  13. Scrambling: weight=0.0171, top20Corr=0.3707, logisticWeight=0.0866
+  14. Approach <100 GIR: weight=0.0012, top20Corr=0.0867, logisticWeight=0.0063
+
+SUGGESTED GROUP WEIGHTS (TOP-20) - SOURCE: top20-group-blend
+  1. Driving Performance: weight=0.2397
+  2. Course Management: weight=0.1770
+  3. Putting: weight=0.1679
+  4. Around the Green: weight=0.1234
+  5. Approach - Long (150-200): weight=0.0922
+  6. Scoring: weight=0.0862
+  7. Approach - Mid (100-150): weight=0.0643
+  8. Approach - Very Long (>200): weight=0.0354
+  9. Approach - Short (<100): weight=0.0140
+
+CV RELIABILITY (event-based): 96.7%
+CONSERVATIVE GROUP WEIGHTS (CV-adjusted, model share 33.8%):
+  1. Driving Performance: weight=0.1770
+  2. Putting: weight=0.1698
+  3. Approach - Mid (100-150): weight=0.1152
+  4. Approach - Long (150-200): weight=0.1127
+  5. Scoring: weight=0.1019
+  6. Approach - Short (<100): weight=0.1006
+  7. Course Management: weight=0.0963
+  8. Around the Green: weight=0.0947
+  9. Approach - Very Long (>200): weight=0.0318
+
+STEP 1d: CURRENT-YEAR TEMPLATE BASELINE (2026)
+Functions: runRanking, evaluateRankings, computeTemplateCorrelationAlignment (optimizer.js)
+PAST PERFORMANCE WEIGHTING (course history regression):
+  Enabled: yes
+  Course Num: 500
+  Regression: slope=-4.2399, p=0.000000
+  Computed Weight: 0.40
+  Used Weight (config): 0.40
+  Regression Source: json (course_history_regression.json)
+  Course Context Updates: no (0 entries)
+
+VALIDATION / DELTA TREND INTEGRATION SUMMARY:
+  Validation Course Type: BALANCED
+  Validation Template: VALIDATION_BALANCED
+  Validation Prior Weight: 0.25
+  Delta Trend Prior Weight: 0.15
+  Delta Trends Source: /workspaces/modelOptimizer/data/2026/validation_outputs/Model_Delta_Trends.csv
+  Guardrail Totals: 41
+  Guardrails by Status: STABLE=6, WATCH=35, CHRONIC=0
+  Guardrail Ranges: STABLE=±10%, WATCH=±20%, CHRONIC=±35%
+
+CONFIGURATION_SHEET BASELINE (event-specific config weights):
+Template: CONFIGURATION_SHEET
+Correlation: 0.0315
+R²: 0.0010
+RMSE: 26.49
+MAE: 21.67
+Mean Error: 4.06
+Std Dev Error: 26.18
+Top-10 Accuracy: 30.0%
+Top-20 Accuracy: 30.0%
+Top-20 Weighted Score: 31.9%
+Matched Players: 72
+Top-20 Overlap: 6/20
+  Predicted Top-20 source: generatePlayerRankings (config weights)
+  Predicted Top-20: 17536, 18417, 6093, 14578, 13900, 22085, 21891, 11889, 14502, 13562, 29433, 18841, 17511, 12294, 23816, 29767, 17606, 18554, 17646, 23505
+  Actual Top-20: 29433, 21891, 10091, 6430, 27900, 19396, 11889, 26651, 19895, 22085, 12294, 10419, 14636, 16841, 18417, 22465, 28309, 25569, 26096, 23323, 23950
+  Overlap: 18417, 22085, 21891, 11889, 29433, 12294
+
+TEMPLATES TESTED (Step 1d):
+  - 7
+  - BALANCED
+  - INNISBROOK_COPPERHEAD
+  - MEMORIAL_PARK_GOLF_COURSE
+  - PEBBLE_BEACH_GOLF_LINKS
+  - PETE_DYE_STADIUM_COURSE
+  - PGA_NATIONAL_RESORT_CHAMPION_COURSE
+  - POWER
+  - TECHNICAL
+  - THE_RIVIERA_COUNTRY_CLUB
+  - TORREY_PINES_GOLF_COURSE
+  - TPC_LOUISIANA
+  - TPC_SAWGRASS
+  - VALIDATION_BALANCED
+  - WAIALAE_COUNTRY_CLUB
+  - WM_PHOENIX_OPEN_STADIUM_COURSE
+
+RAW TEMPLATE RESULTS (2026, per template):
+  CONFIGURATION_SHEET: Corr=0.0315, R²=0.0010, RMSE=26.49, MAE=21.67, Mean Err=4.06, Std Err=26.18, Top-10=30.0%, Top-20=30.0%, Top-20 Weighted=31.9%, Players=72
+  POWER: Corr=0.1044, R²=0.0109, RMSE=25.29, MAE=20.83, Mean Err=4.06, Std Err=24.96, Top-10=40.0%, Top-20=35.0%, Top-20 Weighted=31.3%, Players=72
+  TECHNICAL: Corr=0.1101, R²=0.0121, RMSE=25.29, MAE=21.00, Mean Err=4.06, Std Err=24.96, Top-10=40.0%, Top-20=40.0%, Top-20 Weighted=41.3%, Players=72
+  BALANCED: Corr=0.1209, R²=0.0146, RMSE=25.13, MAE=20.42, Mean Err=4.06, Std Err=24.80, Top-10=40.0%, Top-20=35.0%, Top-20 Weighted=30.0%, Players=72
+  TPC_LOUISIANA: Corr=0.0464, R²=0.0022, RMSE=26.01, MAE=21.97, Mean Err=4.06, Std Err=25.69, Top-10=30.0%, Top-20=25.0%, Top-20 Weighted=29.6%, Players=72
+  PEBBLE_BEACH_GOLF_LINKS: Corr=0.0308, R²=0.0010, RMSE=26.26, MAE=21.81, Mean Err=4.06, Std Err=25.94, Top-10=20.0%, Top-20=40.0%, Top-20 Weighted=36.9%, Players=72
+  WAIALAE_COUNTRY_CLUB: Corr=-0.0291, R²=0.0008, RMSE=28.30, MAE=23.97, Mean Err=4.06, Std Err=28.01, Top-10=0.0%, Top-20=20.0%, Top-20 Weighted=11.4%, Players=72
+  THE_RIVIERA_COUNTRY_CLUB: Corr=0.0315, R²=0.0010, RMSE=26.49, MAE=21.67, Mean Err=4.06, Std Err=26.18, Top-10=30.0%, Top-20=30.0%, Top-20 Weighted=31.9%, Players=72
+  PETE_DYE_STADIUM_COURSE: Corr=0.0363, R²=0.0013, RMSE=26.19, MAE=21.78, Mean Err=4.06, Std Err=25.87, Top-10=20.0%, Top-20=35.0%, Top-20 Weighted=35.0%, Players=72
+  TORREY_PINES_GOLF_COURSE: Corr=0.0677, R²=0.0046, RMSE=25.88, MAE=21.56, Mean Err=4.06, Std Err=25.56, Top-10=50.0%, Top-20=35.0%, Top-20 Weighted=37.5%, Players=72
+  WM_PHOENIX_OPEN_STADIUM_COURSE: Corr=0.1227, R²=0.0151, RMSE=25.04, MAE=20.61, Mean Err=4.06, Std Err=24.71, Top-10=30.0%, Top-20=40.0%, Top-20 Weighted=32.4%, Players=72
+  PGA_NATIONAL_RESORT_CHAMPION_COURSE: Corr=0.0709, R²=0.0050, RMSE=25.68, MAE=20.92, Mean Err=4.06, Std Err=25.35, Top-10=30.0%, Top-20=35.0%, Top-20 Weighted=26.9%, Players=72
+  TPC_SAWGRASS: Corr=0.0989, R²=0.0098, RMSE=25.38, MAE=20.92, Mean Err=4.06, Std Err=25.05, Top-10=40.0%, Top-20=30.0%, Top-20 Weighted=32.3%, Players=72
+  INNISBROOK_COPPERHEAD: Corr=0.0713, R²=0.0051, RMSE=25.68, MAE=20.86, Mean Err=4.06, Std Err=25.35, Top-10=30.0%, Top-20=35.0%, Top-20 Weighted=27.1%, Players=72
+  MEMORIAL_PARK_GOLF_COURSE: Corr=0.0698, R²=0.0049, RMSE=25.70, MAE=20.92, Mean Err=4.06, Std Err=25.38, Top-10=30.0%, Top-20=35.0%, Top-20 Weighted=27.1%, Players=72
+  VALIDATION_BALANCED: Corr=0.1209, R²=0.0146, RMSE=25.13, MAE=20.42, Mean Err=4.06, Std Err=24.80, Top-10=40.0%, Top-20=35.0%, Top-20 Weighted=30.0%, Players=72
+
+BEST TEMPLATE (for comparison):
+Template: THE_RIVIERA_COUNTRY_CLUB
+Correlation: 0.0315
+R²: 0.0010
+RMSE: 26.49
+MAE: 21.67
+Mean Error: 4.06
+Std Dev Error: 26.18
+Top-10 Accuracy: 30.0%
+Top-20 Accuracy: 30.0%
+Top-20 Weighted Score: 31.9%
+Matched Players: 72
+Top-20 Overlap: 6/20
+  Predicted Top-20 source: generatePlayerRankings (best template weights)
+  Predicted Top-20: 17536, 18417, 6093, 14578, 13900, 22085, 21891, 11889, 14502, 13562, 29433, 18841, 17511, 12294, 23816, 29767, 17606, 18554, 17646, 23505
+  Actual Top-20: 29433, 21891, 10091, 6430, 27900, 19396, 11889, 26651, 19895, 22085, 12294, 10419, 14636, 16841, 18417, 22465, 28309, 25569, 26096, 23323, 23950
+  Overlap: 18417, 22085, 21891, 11889, 29433, 12294
+
+RESULTS CURRENT (derived/loaded):
+  Source: Historical Data fin_text (event + season)
+  29433: 1 - Bridgeman, Jacob
+  10091: 2 - McIlroy, Rory
+  21891: 2 - Kitayama, Kurt
+  6430: 4 - Scott, Adam
+  27900: 5 - Potgieter, Aldrich
+  19396: 6 - Knapp, Jake
+  11889: 7 - Fox, Ryan
+  12294: 7 - Fleetwood, Tommy
+  19895: 7 - Schauffele, Xander
+  22085: 7 - Morikawa, Collin
+  26651: 7 - Young, Cameron
+  10419: 12 - Noren, Alex
+  14636: 12 - Spieth, Jordan
+  16841: 12 - Lee, Min Woo
+  18417: 12 - Scheffler, Scottie
+  22465: 16 - Penge, Marco
+  25569: 16 - Stevens, Sam
+  26096: 16 - Bhatia, Akshay
+  28309: 16 - Coody, Pierceson
+  23323: 20 - MacIntyre, Robert
+  23950: 20 - Aberg, Ludvig
+  14577: 22 - English, Harris
+  23014: 22 - Theegala, Sahith
+  13900: 24 - Lowry, Shane
+  17646: 24 - Fitzpatrick, Matt
+  23465: 24 - Greyserman, Max
+  28635: 24 - McCarty, Matt
+  11676: 28 - Finau, Tony
+  12965: 28 - Fowler, Rickie
+  13126: 28 - Taylor, Nick
+  13562: 28 - Matsuyama, Hideki
+  18554: 28 - Rai, Aaron
+  29767: 28 - Gerard, Ryan
+  14609: 34 - Kim, Si Woo
+  16283: 34 - Rodgers, Patrick
+  24766: 34 - Kim, Tom
+  15466: 37 - Cantlay, Patrick
+  17538: 37 - Homa, Max
+  17576: 37 - Conners, Corey
+  23816: 37 - Valimaki, Sami
+  18841: 41 - Hovland, Viktor
+  23604: 41 - Clark, Wyndham
+  24968: 41 - Griffin, Ben
+  13508: 44 - Vegas, Jhonattan
+  17780: 45 - Pendrith, Taylor
+  22760: 45 - Hisatsune, Ryo
+  19870: 47 - McCarthy, Denny
+  23475: 47 - Novak, Andrew
+  20722: 49 - Schmid, Matti
+  17511: 50 - Straka, Sepp
+  8825: 50 - Harman, Brian
+  13872: 51 - Bradley, Keegan
+  14502: 51 - Cauley, Bud
+  14578: 51 - Henley, Russell
+  15575: 51 - Hoge, Tom
+  17536: 51 - Spaun, J.J.
+  17543: 51 - Kim, Michael
+  17606: 51 - Berger, Daniel
+  17881: 51 - Yu, Kevin
+  18628: 51 - Campbell, Brian
+  18634: 51 - McNealy, Maverick
+  19483: 51 - Burns, Sam
+  21554: 51 - Poston, J.T.
+  22833: 51 - Echavarria, Nico
+  23504: 51 - Hoey, Rico
+  23505: 51 - McGreevy, Max
+  24342: 51 - Higgo, Garrick
+  27194: 51 - Hall, Harry
+  27774: 51 - Gotterup, Chris
+  6093: 51 - Rose, Justin
+  7399: 51 - Glover, Lucas
+  9771: 51 - Day, Jason
+
+STEP 2: TOP-20 GROUP WEIGHT TUNING
+Functions: selectOptimizableGroups, runRanking, evaluateRankings (optimizer.js)
+Scope: event 7 across all years (current-field only)
+TUNED TOP-20 GROUP WEIGHTS (BEST CANDIDATE):
+  Top-10: 57.7%
+  Top-20: 61.2%
+  RMSE: 20.78 | Corr: 0.6388 | Players: 263
+  Driving Performance: 0.1739
+  Putting: 0.1669
+  Approach - Mid (100-150): 0.1132
+  Approach - Long (150-200): 0.1210
+  Scoring: 0.1199
+  Approach - Short (<100): 0.1234
+  Course Management: 0.0732
+  Around the Green: 0.0762
+  Approach - Very Long (>200): 0.0323
+  Metric Weights (used unchanged from TECHNICAL):
+  Driving Performance::Driving Distance: 0.3012
+  Driving Performance::Driving Accuracy: 0.2808
+  Driving Performance::SG OTT: 0.4181
+  Approach - Short (<100)::Approach <100 GIR: 0.3422
+  Approach - Short (<100)::Approach <100 SG: 0.2848
+  Approach - Short (<100)::Approach <100 Prox: 0.3730
+  Approach - Mid (100-150)::Approach <150 FW GIR: 0.2313
+  Approach - Mid (100-150)::Approach <150 FW SG: 0.2703
+  Approach - Mid (100-150)::Approach <150 FW Prox: 0.1008
+  Approach - Mid (100-150)::Approach <150 Rough GIR: 0.1460
+  Approach - Mid (100-150)::Approach <150 Rough SG: 0.1831
+  Approach - Mid (100-150)::Approach <150 Rough Prox: 0.0685
+  Approach - Long (150-200)::Approach <200 FW GIR: 0.2228
+  Approach - Long (150-200)::Approach <200 FW SG: 0.2595
+  Approach - Long (150-200)::Approach <200 FW Prox: 0.1063
+  Approach - Long (150-200)::Approach >150 Rough GIR: 0.1823
+  Approach - Long (150-200)::Approach >150 Rough SG: 0.1588
+  Approach - Long (150-200)::Approach >150 Rough Prox: 0.0703
+  Approach - Very Long (>200)::Approach >200 FW GIR: 0.3992
+  Approach - Very Long (>200)::Approach >200 FW SG: 0.3929
+  Approach - Very Long (>200)::Approach >200 FW Prox: 0.2079
+  Putting::SG Putting: 1.0000
+  Around the Green::SG Around Green: 1.0000
+  Scoring::SG T2G: 0.4778
+  Scoring::Scoring Average: 0.1132
+  Scoring::Birdie Chances Created: 0.1171
+  Scoring::Scoring: Approach <100 SG: 0.0301
+  Scoring::Scoring: Approach <150 FW SG: 0.0690
+  Scoring::Scoring: Approach <150 Rough SG: 0.0395
+  Scoring::Scoring: Approach <200 FW SG: 0.0571
+  Scoring::Scoring: Approach >200 FW SG: 0.0454
+  Scoring::Scoring: Approach >150 Rough SG: 0.0507
+  Course Management::Scrambling: 0.1747
+  Course Management::Great Shots: 0.1517
+  Course Management::Poor Shot Avoidance: 0.0825
+  Course Management::Course Management: Approach <100 Prox: 0.1033
+  Course Management::Course Management: Approach <150 FW Prox: 0.1438
+  Course Management::Course Management: Approach <150 Rough Prox: 0.1029
+  Course Management::Course Management: Approach >150 Rough Prox: 0.0282
+  Course Management::Course Management: Approach <200 FW Prox: 0.1173
+  Course Management::Course Management: Approach >200 FW Prox: 0.0955
+  Course Management::Poor Shots: 0.0000
+
+STEP 3: WEIGHT OPTIMIZATION (2026 with approach metrics)
+Functions: adjustMetricWeights, computeMetricAlignmentScore, runRanking, evaluateRankings (optimizer.js)
+Objective: current-year results only (current-year field)
+Baseline Template: THE_RIVIERA_COUNTRY_CLUB
+Best Correlation: 0.3179
+Metric Alignment Score (Top-20 KPI blend): 0.2187
+Top-20 Composite Score: 51.6%
+Combined Objective Score: 0.5777 (corr 0.3, top20 0.5, alignment 0.2)
+Best R²: 0.1011
+Best RMSE: 22.57
+Best MAE: 18.33
+Best Mean Error: 4.06
+Best Std Dev Error: 22.21
+Improvement: 910.31%
+Top-10 Accuracy: 40.0%
+Top-20 Accuracy: 55.0%
+Top-20 Weighted Score: 48.3%
+Matched Players (current year): 72
+
+Optimized Group Weights:
+  Driving Performance: 11.4%
+  Approach - Short (<100): 11.4%
+  Approach - Mid (100-150): 11.4%
+  Approach - Long (150-200): 11.4%
+  Approach - Very Long (>200): 7.8%
+  Putting: 13.1%
+  Around the Green: 11.4%
+  Scoring: 11.4%
+  Course Management: 10.9%
+
+Optimized Metric Weights:
+  Driving Performance::Driving Distance: 0.3601
+  Driving Performance::Driving Accuracy: 0.2701
+  Driving Performance::SG OTT: 0.3697
+  Approach - Short (<100)::Approach <100 GIR: 0.6360
+  Approach - Short (<100)::Approach <100 SG: 0.3047
+  Approach - Short (<100)::Approach <100 Prox: 0.0593
+  Approach - Mid (100-150)::Approach <150 FW GIR: 0.2569
+  Approach - Mid (100-150)::Approach <150 FW SG: 0.2743
+  Approach - Mid (100-150)::Approach <150 FW Prox: 0.0542
+  Approach - Mid (100-150)::Approach <150 Rough GIR: 0.1962
+  Approach - Mid (100-150)::Approach <150 Rough SG: 0.1819
+  Approach - Mid (100-150)::Approach <150 Rough Prox: 0.0365
+  Approach - Long (150-200)::Approach <200 FW GIR: 0.2515
+  Approach - Long (150-200)::Approach <200 FW SG: 0.3045
+  Approach - Long (150-200)::Approach <200 FW Prox: 0.0220
+  Approach - Long (150-200)::Approach >150 Rough GIR: 0.2072
+  Approach - Long (150-200)::Approach >150 Rough SG: 0.2011
+  Approach - Long (150-200)::Approach >150 Rough Prox: 0.0137
+  Approach - Very Long (>200)::Approach >200 FW GIR: 0.3619
+  Approach - Very Long (>200)::Approach >200 FW SG: 0.4393
+  Approach - Very Long (>200)::Approach >200 FW Prox: 0.1988
+  Putting::SG Putting: 1.0000
+  Around the Green::SG Around Green: 1.0000
+  Scoring::SG T2G: 0.4580
+  Scoring::Scoring Average: 0.1229
+  Scoring::Birdie Chances Created: 0.1183
+  Scoring::Scoring: Approach <100 SG: 0.0438
+  Scoring::Scoring: Approach <150 FW SG: 0.0560
+  Scoring::Scoring: Approach <150 Rough SG: 0.0452
+  Scoring::Scoring: Approach <200 FW SG: 0.0498
+  Scoring::Scoring: Approach >200 FW SG: 0.0613
+  Scoring::Scoring: Approach >150 Rough SG: 0.0447
+  Course Management::Scrambling: 0.2103
+  Course Management::Great Shots: 0.1878
+  Course Management::Poor Shot Avoidance: 0.0825
+  Course Management::Course Management: Approach <100 Prox: 0.0585
+  Course Management::Course Management: Approach <150 FW Prox: 0.0192
+  Course Management::Course Management: Approach <150 Rough Prox: 0.1071
+  Course Management::Course Management: Approach >150 Rough Prox: 0.1334
+  Course Management::Course Management: Approach <200 FW Prox: 0.0599
+  Course Management::Course Management: Approach >200 FW Prox: 0.0759
+  Course Management::Poor Shots: 0.1480
+
+Metric Stats Diagnostics (current-year ranking):
+  Thresholds: stdDev<=0.05, count<10
+  Approach - Mid (100-150) :: Approach <150 FW GIR | mean=0.8086, stdDev=0.0326, min=0.7160, max=0.8830, count=72 [stdDev<=0.05]
+  Approach - Long (150-200) :: Approach <200 FW GIR | mean=0.6981, stdDev=0.0373, min=0.6270, max=0.7870, count=72 [stdDev<=0.05]
+  Approach - Short (<100) :: Approach <100 GIR | mean=0.8499, stdDev=0.0406, min=0.7750, max=0.9230, count=72 [stdDev<=0.05]
+  Approach - Long (150-200) :: Approach >150 Rough GIR | mean=0.3479, stdDev=0.0415, min=0.2690, max=0.4470, count=72 [stdDev<=0.05]
+  Approach - Very Long (>200) :: Approach >200 FW GIR | mean=0.4851, stdDev=0.0421, min=0.3850, max=0.6230, count=72 [stdDev<=0.05]
+  Approach - Mid (100-150) :: Approach <150 Rough GIR | mean=0.5579, stdDev=0.0459, min=0.4550, max=0.6450, count=72 [stdDev<=0.05]
+
+Optimized Rankings (Current Year 2026):
+  1: 18417 - Scheffler, Scottie | refined=1.2245, weighted=1.2245
+  2: 14578 - Henley, Russell | refined=0.9908, weighted=0.9908
+  3: 22085 - Morikawa, Collin | refined=0.7331, weighted=0.7331
+  4: 10091 - McIlroy, Rory | refined=0.7247, weighted=0.7247
+  5: 19895 - Schauffele, Xander | refined=0.6433, weighted=0.6433
+  6: 17511 - Straka, Sepp | refined=0.6358, weighted=0.6358
+  7: 15466 - Cantlay, Patrick | refined=0.5875, weighted=0.5875
+  8: 17646 - Fitzpatrick, Matt | refined=0.6147, weighted=0.6147
+  9: 12294 - Fleetwood, Tommy | refined=0.5524, weighted=0.5524
+  10: 23323 - MacIntyre, Robert | refined=0.4581, weighted=0.4581
+  11: 11889 - Fox, Ryan | refined=0.4775, weighted=0.4775
+  12: 26096 - Bhatia, Akshay | refined=0.4541, weighted=0.4541
+  13: 23950 - Aberg, Ludvig | refined=0.4735, weighted=0.4735
+  14: 13900 - Lowry, Shane | refined=0.4300, weighted=0.4300
+  15: 13562 - Matsuyama, Hideki | refined=0.4143, weighted=0.4143
+  16: 6093 - Rose, Justin | refined=0.3677, weighted=0.3677
+  17: 18841 - Hovland, Viktor | refined=0.2875, weighted=0.4792
+  18: 14609 - Kim, Si Woo | refined=0.2552, weighted=0.2552
+  19: 29433 - Bridgeman, Jacob | refined=0.2834, weighted=0.2834
+  20: 16841 - Lee, Min Woo | refined=0.2563, weighted=0.2563
+  21: 12965 - Fowler, Rickie | refined=0.2019, weighted=0.3366
+  22: 18634 - McNealy, Maverick | refined=0.2080, weighted=0.2080
+  23: 19396 - Knapp, Jake | refined=0.1957, weighted=0.1957
+  24: 26651 - Young, Cameron | refined=0.1420, weighted=0.2367
+  25: 24968 - Griffin, Ben | refined=0.1864, weighted=0.1864
+  26: 19483 - Burns, Sam | refined=0.1106, weighted=0.1843
+  27: 17576 - Conners, Corey | refined=0.1434, weighted=0.1434
+  28: 19870 - McCarthy, Denny | refined=0.1373, weighted=0.1373
+  29: 27194 - Hall, Harry | refined=0.0828, weighted=0.1381
+  30: 17536 - Spaun, J.J. | refined=0.1186, weighted=0.1186
+  31: 10419 - Noren, Alex | refined=0.0770, weighted=0.1283
+  32: 23504 - Hoey, Rico | refined=0.0451, weighted=0.0752
+  33: 14577 - English, Harris | refined=0.0503, weighted=0.0503
+  34: 22760 - Hisatsune, Ryo | refined=0.0372, weighted=0.0372
+  35: 17606 - Berger, Daniel | refined=0.0271, weighted=0.0271
+  36: 17543 - Kim, Michael | refined=0.0541, weighted=0.0541
+  37: 18554 - Rai, Aaron | refined=0.0344, weighted=0.0344
+  38: 29767 - Gerard, Ryan | refined=0.0420, weighted=0.0420
+  39: 14636 - Spieth, Jordan | refined=-0.0175, weighted=-0.0175
+  40: 9771 - Day, Jason | refined=-0.0095, weighted=-0.0095
+  41: 17780 - Pendrith, Taylor | refined=0.0144, weighted=0.0239
+  42: 7399 - Glover, Lucas | refined=-0.0268, weighted=-0.0268
+  43: 11676 - Finau, Tony | refined=-0.0256, weighted=-0.0256
+  44: 22465 - Penge, Marco | refined=-0.0909, weighted=-0.0909
+  45: 21891 - Kitayama, Kurt | refined=-0.0769, weighted=-0.0769
+  46: 23816 - Valimaki, Sami | refined=-0.1005, weighted=-0.1005
+  47: 13126 - Taylor, Nick | refined=-0.1097, weighted=-0.1097
+  48: 22833 - Echavarria, Nico | refined=-0.1453, weighted=-0.1453
+  49: 8825 - Harman, Brian | refined=-0.1140, weighted=-0.1900
+  50: 13872 - Bradley, Keegan | refined=-0.1873, weighted=-0.1873
+  51: 14502 - Cauley, Bud | refined=-0.1718, weighted=-0.1718
+  52: 6430 - Scott, Adam | refined=-0.2189, weighted=-0.2189
+  53: 23014 - Theegala, Sahith | refined=-0.2609, weighted=-0.2609
+  54: 28635 - McCarty, Matt | refined=-0.2163, weighted=-0.3605
+  55: 17538 - Homa, Max | refined=-0.2101, weighted=-0.3501
+  56: 25569 - Stevens, Sam | refined=-0.2808, weighted=-0.2808
+  57: 28309 - Coody, Pierceson | refined=-0.2800, weighted=-0.2800
+  58: 23604 - Clark, Wyndham | refined=-0.2912, weighted=-0.2912
+  59: 23505 - McGreevy, Max | refined=-0.3238, weighted=-0.3238
+  60: 16283 - Rodgers, Patrick | refined=-0.2985, weighted=-0.2985
+  61: 15575 - Hoge, Tom | refined=-0.2968, weighted=-0.2968
+  62: 23465 - Greyserman, Max | refined=-0.2962, weighted=-0.2962
+  63: 20722 - Schmid, Matti | refined=-0.4098, weighted=-0.4098
+  64: 17881 - Yu, Kevin | refined=-0.3989, weighted=-0.3989
+  65: 23475 - Novak, Andrew | refined=-0.4096, weighted=-0.4096
+  66: 13508 - Vegas, Jhonattan | refined=-0.4050, weighted=-0.6751
+  67: 21554 - Poston, J.T. | refined=-0.4801, weighted=-0.4801
+  68: 18628 - Campbell, Brian | refined=-0.4684, weighted=-0.4684
+  69: 24766 - Kim, Tom | refined=-0.4615, weighted=-0.4615
+  70: 27774 - Gotterup, Chris | refined=-0.5553, weighted=-0.5553
+  71: 24342 - Higgo, Garrick | refined=-0.6606, weighted=-0.6606
+  72: 27900 - Potgieter, Aldrich | refined=-0.7800, weighted=-0.7800
+
+STEP 4a: EVENT MULTI-YEAR VALIDATION (Baseline)
+Approach mode: current_only
+Functions: runRanking, aggregateYearlyEvaluations (optimizer.js)
+  2022: Corr=0.8472, R²=0.7177, RMSE=30.80, MAE=24.50, Mean Err=-23.19, Std Err=20.28, Top-10=60.0%, Top-20=55.0%, Top-20 Weighted=90.7%, Subset RMSE=7.80, Subset Top-20=90.0%, Pct RMSE=0.25, Stress=PASS, Top-10 Overlap=6/10, Top-20 Overlap=11/20, Players=32, Approach=l24/snapshot_l24, Leakage=approximation
+  2023: Corr=0.6121, R²=0.3747, RMSE=26.88, MAE=21.83, Mean Err=-19.10, Std Err=18.92, Top-10=40.0%, Top-20=55.0%, Top-20 Weighted=70.4%, Subset RMSE=8.62, Subset Top-20=75.0%, Pct RMSE=0.22, Stress=PASS, Top-10 Overlap=4/10, Top-20 Overlap=11/20, Players=41, Approach=l24/snapshot_l24, Leakage=approximation
+  2024: Corr=0.7665, R²=0.5875, RMSE=11.82, MAE=10.05, Mean Err=-6.95, Std Err=9.56, Top-10=50.0%, Top-20=70.0%, Top-20 Weighted=76.0%, Subset RMSE=6.83, Subset Top-20=85.0%, Pct RMSE=0.18, Stress=PASS, Top-10 Overlap=5/10, Top-20 Overlap=14/20, Players=38, Approach=l24/snapshot_l24, Leakage=approximation
+  2025: Corr=0.5500, R²=0.3025, RMSE=15.85, MAE=12.06, Mean Err=-2.80, Std Err=15.60, Top-10=50.0%, Top-20=65.0%, Top-20 Weighted=67.0%, Subset RMSE=13.13, Subset Top-20=65.0%, Pct RMSE=0.26, Stress=PASS, Top-10 Overlap=5/10, Top-20 Overlap=13/20, Players=51, Approach=l12/snapshot_l12, Leakage=approximation
+
+STEP 4a: EVENT MULTI-YEAR VALIDATION (No-Approach Baseline)
+Approach mode: none (forced)
+Functions: runRanking, aggregateYearlyEvaluations (optimizer.js)
+  2022: Corr=0.9188, R²=0.8442, RMSE=30.51, MAE=24.47, Mean Err=-23.84, Std Err=19.03, Top-10=80.0%, Top-20=55.0%, Top-20 Weighted=95.3%, Subset RMSE=4.03, Subset Top-20=95.0%, Pct RMSE=0.13, Stress=PASS, Top-10 Overlap=8/10, Top-20 Overlap=11/20, Players=32, Approach=none/none, Leakage=none
+  2023: Corr=0.8109, R²=0.6575, RMSE=24.69, MAE=19.29, Mean Err=-19.10, Std Err=15.65, Top-10=50.0%, Top-20=75.0%, Top-20 Weighted=92.2%, Subset RMSE=5.57, Subset Top-20=90.0%, Pct RMSE=0.14, Stress=PASS, Top-10 Overlap=5/10, Top-20 Overlap=15/20, Players=41, Approach=none/none, Leakage=none
+  2024: Corr=0.8282, R²=0.6860, RMSE=11.10, MAE=9.11, Mean Err=-6.95, Std Err=8.65, Top-10=60.0%, Top-20=80.0%, Top-20 Weighted=89.6%, Subset RMSE=5.59, Subset Top-20=85.0%, Pct RMSE=0.15, Stress=PASS, Top-10 Overlap=6/10, Top-20 Overlap=16/20, Players=38, Approach=none/none, Leakage=none
+  2025: Corr=0.7380, R²=0.5447, RMSE=12.49, MAE=9.43, Mean Err=-2.80, Std Err=12.17, Top-10=60.0%, Top-20=65.0%, Top-20 Weighted=75.7%, Subset RMSE=9.93, Subset Top-20=65.0%, Pct RMSE=0.20, Stress=PASS, Top-10 Overlap=6/10, Top-20 Overlap=13/20, Players=51, Approach=none/none, Leakage=none
+
+STEP 4b: EVENT MULTI-YEAR VALIDATION (Optimized)
+Approach mode: current_only
+Functions: runRanking, aggregateYearlyEvaluations (optimizer.js)
+  2022: Corr=0.8262, R²=0.6826, RMSE=30.92, MAE=24.66, Mean Err=-23.22, Std Err=20.42, Top-10=50.0%, Top-20=55.0%, Top-20 Weighted=88.9%, Subset RMSE=7.89, Subset Top-20=90.0%, Pct RMSE=0.25, Stress=PASS, Top-10 Overlap=5/10, Top-20 Overlap=11/20, Players=32, Approach=l24/snapshot_l24, Leakage=approximation
+  2023: Corr=0.6538, R²=0.4274, RMSE=26.42, MAE=22.07, Mean Err=-19.10, Std Err=18.26, Top-10=30.0%, Top-20=60.0%, Top-20 Weighted=75.0%, Subset RMSE=8.15, Subset Top-20=85.0%, Pct RMSE=0.20, Stress=PASS, Top-10 Overlap=3/10, Top-20 Overlap=12/20, Players=41, Approach=l24/snapshot_l24, Leakage=approximation
+  2024: Corr=0.7907, R²=0.6251, RMSE=11.29, MAE=9.58, Mean Err=-6.95, Std Err=8.90, Top-10=60.0%, Top-20=70.0%, Top-20 Weighted=77.6%, Subset RMSE=6.31, Subset Top-20=85.0%, Pct RMSE=0.17, Stress=PASS, Top-10 Overlap=6/10, Top-20 Overlap=14/20, Players=38, Approach=l24/snapshot_l24, Leakage=approximation
+  2025: Corr=0.6215, R²=0.3863, RMSE=14.52, MAE=11.22, Mean Err=-2.71, Std Err=14.27, Top-10=40.0%, Top-20=60.0%, Top-20 Weighted=69.4%, Subset RMSE=12.01, Subset Top-20=60.0%, Pct RMSE=0.24, Stress=PASS, Top-10 Overlap=4/10, Top-20 Overlap=12/20, Players=51, Approach=l12/snapshot_l12, Leakage=approximation
+
+APPROACH USAGE SUMMARY (Event Multi-Year Validation)
+| Year | Period | Source | Leakage |
+| --- | --- | --- | --- |
+| 2022 | l24 | snapshot_l24 | approximation |
+| 2023 | l24 | snapshot_l24 | approximation |
+| 2024 | l24 | snapshot_l24 | approximation |
+| 2025 | l12 | snapshot_l12 | approximation |
+
+TEMPLATE K-FOLD SETTINGS (Course-Type)
+  COURSE_TYPE: BALANCED
+  EVENT_KFOLD_K: LOEO (adaptive if unset)
+  EVENT_KFOLD_SEED: template (fixed)
+  OPT_SEED: n/a
+  Validation gate: not met (K-fold skipped)
+
+STEP 4a: TEMPLATE K-FOLD VALIDATION (Baseline)
+  skipped (validation recommended improvement 0.00% < 1%).
+
+STEP 4b: TEMPLATE K-FOLD VALIDATION (Optimized)
+  skipped (validation recommended improvement 0.00% < 1%).
+
+STEP 4a: COURSE-SPECIFIC LOEO VALIDATION (Baseline)
+  mode=leave_one_year_out, folds=4/4, Corr=0.1321, RMSE=25.83, Top-10=35.2%, Top-20=36.4%, Top-20 Weighted=50.4%, Players=153
+    Fold 1: year=2022, trainRounds=460, testRounds=109, players=32, Corr=0.3069, RMSE=30.19, Top-10=30.0%, Top-20=30.0%, Top-20W=57.9%
+    Fold 2: year=2023, trainRounds=435, testRounds=134, players=40, Corr=0.0242, RMSE=31.13, Top-10=20.0%, Top-20=35.0%, Top-20W=42.2%
+    Fold 3: year=2024, trainRounds=433, testRounds=136, players=38, Corr=0.2341, RMSE=18.92, Top-10=50.0%, Top-20=45.0%, Top-20W=55.6%
+    Fold 4: year=2025, trainRounds=379, testRounds=190, players=43, Corr=0.0122, RMSE=23.76, Top-10=40.0%, Top-20=35.0%, Top-20W=47.9%
+
+STEP 4b: COURSE-SPECIFIC LOEO VALIDATION (Optimized)
+  mode=leave_one_year_out, folds=4/4, Corr=0.1348, RMSE=25.96, Top-10=30.1%, Top-20=36.4%, Top-20 Weighted=49.6%, Players=153
+    Fold 1: year=2022, trainRounds=460, testRounds=109, players=32, Corr=0.3051, RMSE=30.18, Top-10=30.0%, Top-20=30.0%, Top-20W=62.3%
+    Fold 2: year=2023, trainRounds=435, testRounds=134, players=40, Corr=0.0163, RMSE=31.10, Top-10=10.0%, Top-20=35.0%, Top-20W=36.4%
+    Fold 3: year=2024, trainRounds=433, testRounds=136, players=38, Corr=0.1738, RMSE=20.39, Top-10=40.0%, Top-20=45.0%, Top-20W=54.8%
+    Fold 4: year=2025, trainRounds=379, testRounds=190, players=43, Corr=0.0836, RMSE=22.97, Top-10=40.0%, Top-20=35.0%, Top-20W=47.8%
+
+TEMPLATE K-FOLD INTERPRETATION
+  Insufficient event K-fold data to interpret (check folds used / matched players).
+
+RECOMMENDATION:
+Course-specific: Use optimized weights
+Course-specific note: Course-specific LOEO did not regress.
+Template/course-type: Use optimized weights
+Template note: Template K-fold used for template gate (no regression trigger).
+
+STANDARD TEMPLATE SELECTION:
+  Selected: BALANCED
+  Source: validation_course_type
+  Raw: BALANCED
+  Validation Course Type: BALANCED
+
+TEMPLATE WRITE SUMMARY:
+Event template (THE_RIVIERA_COUNTRY_CLUB): not written
+Standard templates: not written
+
+---
+
+HUMAN READABLE SUMMARY
+  • Correlation ≈ “ranking agreement” (higher is better).
+  • RMSE/MAE ≈ “how far off the predicted finish positions are” (lower is better).
+  • Top-20% = how often the model’s Top‑20 includes actual Top‑20 finishers.
+
+  Current‑year baseline vs optimized:
+    - Correlation: 0.0315 → 0.3179 (0.2864)
+    - Top‑20 weighted: 31.9% → 48.3%
+    - Verdict: Optimized improved current‑year fit.
+
+  Multi‑year validation (stability across years):
+    - Avg Top‑20 weighted: 76.0% → 77.7%
+    - Stress fails (lower is better): 0 → 0
+
+  Course‑specific LOEO (same event across years):
+    - Δ Corr=0.0027, Δ RMSE=0.13, Δ Top‑20W=-0.8%
+    - Verdict: No regression detected.
+  Course‑type event K‑fold: not enough data to interpret.
+
+  Recommendation (course‑specific): Use optimized weights
+  Note: Course-specific LOEO did not regress.
+  Recommendation (template/course‑type): Use optimized weights
+  Template note: Template K-fold used for template gate (no regression trigger).

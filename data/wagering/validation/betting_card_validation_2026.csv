@@ -1,0 +1,7 @@
+season,eventId,market,book,bets,wins,stake,profit,roi,hitRate
+2026,475,top_5,bet365,1,0,15,-15,-1,0
+2026,475,top_5,draftkings,3,2,37,55.230000000000004,1.4927027027027029,0.6666666666666666
+2026,475,top_20,draftkings,1,0,8,-8,-1,0
+2026,475,top_10,caesars,1,0,8,-8,-1,0
+2026,475,top_10,draftkings,2,0,16,-16,-1,0
+2026,475,top_10,bet365,2,0,16,-16,-1,0

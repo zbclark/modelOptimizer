@@ -124,10 +124,6 @@ function buildArtifactFilename({ artifactType, outputBaseName, tournamentSlug, t
       return `${tBase}_results.json`;
     case OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_CSV:
       return `${tBase}_results.csv`;
-    case OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_ZSCORES_CSV:
-      return `${tBase}_results_zscores.csv`;
-    case OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_FORMATTING_CSV:
-      return `${tBase}_results_formatting.csv`;
 
     case OUTPUT_ARTIFACTS.SEED_SUMMARY_TXT:
       return `${outputBaseName}_seed_summary.txt`;
@@ -218,8 +214,6 @@ function resolveArtifactDir({
     case OUTPUT_ARTIFACTS.POST_EVENT_RESULTS_TXT:
     case OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_JSON:
     case OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_CSV:
-    case OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_ZSCORES_CSV:
-    case OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_FORMATTING_CSV:
       return modeRoot;
 
     case OUTPUT_ARTIFACTS.SEED_SUMMARY_TXT:

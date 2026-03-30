@@ -1,0 +1,2 @@
+event_id,season,odds_year,book,market,total_rows,rows_with_outcomes,avg_edge,median_edge,hit_rate,brier,log_loss
+9,2026,2026,draftkings,3_balls,142,142,0,0,0.45774647887323944,0.2605168633662708,0.718702966159138
