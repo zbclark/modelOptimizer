@@ -84,7 +84,18 @@ const optSeedRaw = process.env.OPT_SEED || '';
 const outputTagRaw = String(process.env.OUTPUT_TAG || '').trim();
 const kfoldRaw = process.env.EVENT_KFOLD_K;
 
-const { resolveTournamentRoot, resolveModeRoot } = require(path.resolve(rootDir, 'utilities', 'outputPaths'));
+const {
+	resolveTournamentRoot,
+	resolveModeRoot,
+	resolveSeedRunRoot,
+	buildOutputBaseName,
+	buildArtifactPath,
+	OUTPUT_ARTIFACTS
+} = require(path.resolve(rootDir, 'utilities', 'outputPaths'));
+const {
+	loadSeasonManifestEntries,
+	resolveManifestEntryForEvent
+} = require(path.resolve(rootDir, 'utilities', 'manifestUtils'));
 const { resolveKFoldTag } = require(path.resolve(rootDir, 'utilities', 'kfoldTag'));
 
 const sanitize = value => String(value || '')
@@ -93,31 +104,65 @@ const sanitize = value => String(value || '')
 	.replace(/[^a-z0-9_\-]/g, '')
 	.replace(/^_+|_+$/g, '');
 
+let resolvedSlug = '';
+let resolvedName = tournamentName;
+if (season && eventId) {
+	const entries = loadSeasonManifestEntries(path.resolve(rootDir, 'data'), season);
+	const match = resolveManifestEntryForEvent(entries, { eventId, tournamentName });
+	if (match) {
+		resolvedSlug = String(match.tournamentSlug || '').trim();
+		resolvedName = String(match.tournamentName || resolvedName || '').trim();
+	}
+}
+
 const tournamentRoot = resolveTournamentRoot({
 	workspaceRoot: rootDir,
 	dataRoot: path.resolve(rootDir, 'data'),
 	season,
-	tournamentName,
-	tournamentSlug: null
+	tournamentName: resolvedName,
+	tournamentSlug: resolvedSlug || null
 });
 const modeRoot = resolveModeRoot({ tournamentRoot, mode: runContext });
-const loggingDir = modeRoot || path.resolve(rootDir, 'data');
+const seedRunRoot = resolveSeedRunRoot({
+	modeRoot,
+	mode: runContext,
+	isSeeded: !!optSeedRaw
+});
 
-const safeEvent = sanitize(tournamentName || eventId || 'event') || 'event';
-const seedSuffix = optSeedRaw
-	? `_seed-${sanitize(optSeedRaw)}`
-	: '';
-const outputTagSuffix = outputTagRaw
-	? `_${sanitize(outputTagRaw)}`
-	: '';
+const outputBaseName = buildOutputBaseName({
+	tournamentName: resolvedName,
+	tournamentSlug: resolvedSlug,
+	eventId,
+	seed: optSeedRaw,
+	outputTag: outputTagRaw
+});
+
+const isPost = runContext === 'post_event';
+const artifactType = optSeedRaw
+	? OUTPUT_ARTIFACTS.SEED_LOG_TXT
+	: (isPost ? OUTPUT_ARTIFACTS.POST_EVENT_LOG_TXT : OUTPUT_ARTIFACTS.PRE_EVENT_LOG_TXT);
+
+const logFile = buildArtifactPath({
+	artifactType,
+	outputBaseName,
+	tournamentSlug: resolvedSlug,
+	tournamentName: resolvedName,
+	modeRoot,
+	seedRunRoot
+});
+
+const safeEvent = sanitize(resolvedName || eventId || 'event') || 'event';
 const kfoldTag = resolveKFoldTag(kfoldRaw);
-const kfoldTagSuffix = (runContext === 'post_event' && !optSeedRaw)
+const seedSuffix = optSeedRaw ? `_seed-${sanitize(optSeedRaw)}` : '';
+const outputTagSuffix = outputTagRaw ? `_${sanitize(outputTagRaw)}` : '';
+const kfoldTagSuffix = (isPost && !optSeedRaw)
 	? `_${String(kfoldTag.tag || 'LOEO')}`
 	: '';
 
 const logContext = `${runContext}${seedSuffix}${kfoldTagSuffix}${outputTagSuffix}`;
-const logFile = path.resolve(loggingDir, `${safeEvent}_${logContext}_log.txt`);
-console.log(logFile);
+const fallbackDir = seedRunRoot || modeRoot || path.resolve(rootDir, 'data');
+const fallbackLog = path.resolve(fallbackDir, `${safeEvent}_${logContext}_log.txt`);
+console.log(logFile || fallbackLog);
 NODE
 }
 
@@ -149,13 +194,22 @@ resolve_tmux_session() {
 launch_tmux() {
 	local session_name="$1"
 	local command="$2"
-	local escaped
-	escaped=$(printf '%q' "$command")
+	local safe_session
+	safe_session="$(sanitize_shell "$session_name")"
+	local script_path
+	script_path="$(mktemp -t "optimizer_${safe_session}_XXXXXX.sh")"
+	cat > "$script_path" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+$command
+EOF
+	chmod +x "$script_path"
 	if tmux has-session -t "$session_name" 2>/dev/null; then
 		echo "tmux session already exists: $session_name" >&2
 		exit 1
 	fi
-	tmux new-session -d -s "$session_name" bash -lc "$escaped"
+	tmux new-session -d -s "$session_name" bash "$script_path"
+	echo "  Script: $script_path"
 }
 
 # ---------------------------------------------------------------------------

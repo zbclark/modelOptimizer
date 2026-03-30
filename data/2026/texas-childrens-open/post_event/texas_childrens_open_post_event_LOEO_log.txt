@@ -1,0 +1,66 @@
+Logging to /workspaces/modelOptimizer/data/2026/texas-childrens-open/post_event/texas_childrens_open_post_event_LOEO_log.txt
+Command: /usr/local/share/nvm/versions/node/v24.11.1/bin/node /workspaces/modelOptimizer/core/optimizer.js --event 20 --name Texas Children's Open --post --results --season 2026
+Env: OPT_TESTS=10000, EVENT_KFOLD_SEED=template, VALIDATION_APPROACH_MODE=current_only, APPROACH_DELTA_ROLLING_EVENTS=4, DATAGOLF_APPROACH_PERIOD=l24
+ℹ️  Skipping course history regression (post-tournament mode).
+ℹ️  Skipping early-season ramp summary (post-tournament mode).
+
+🔄 Loading configuration...
+ℹ️  Using course_context.json as primary configuration source.
+✓ Configuration loaded
+✓ Applied course context overrides (eventId)
+ℹ️  Current-event rounds policy: default
+   Defaults: metrics=include, baseline=include, optimization=include, historical=exclude
+🔄 Building metric config...
+✓ Metric config built
+
+--- LOADING ALL AVAILABLE TEMPLATES ---
+✓ Loaded POWER template
+✓ Loaded TECHNICAL template
+✓ Loaded BALANCED template
+✓ Loaded TPC_LOUISIANA template
+✓ Loaded PEBBLE_BEACH_GOLF_LINKS template
+✓ Loaded WAIALAE_COUNTRY_CLUB template
+✓ Loaded THE_RIVIERA_COUNTRY_CLUB template
+✓ Loaded PETE_DYE_STADIUM_COURSE template
+✓ Loaded TORREY_PINES_GOLF_COURSE template
+✓ Loaded WM_PHOENIX_OPEN_STADIUM_COURSE template
+✓ Loaded PGA_NATIONAL_RESORT_CHAMPION_COURSE template
+✓ Loaded TPC_SAWGRASS template
+✓ Loaded INNISBROOK_COPPERHEAD template
+✓ Loaded MEMORIAL_PARK_GOLF_COURSE template
+✓ Loaded event-specific weights (eventId: 20) from template: MEMORIAL_PARK_GOLF_COURSE
+✓ DataGolf rankings loaded (api, updated 2026-03-30 11:59:12 UTC)
+ℹ️  Loaded L12 approach snapshot from archive (approach_l12_2026-02-23.json).
+✓ Approach snapshot l24 ready (snapshot, updated 2026-02-23 14:52:29 UTC)
+ℹ️  Skipping L12 approach snapshot refresh (not end-of-season post-tournament run; cached snapshot found).
+ℹ️  Skipping YTD approach snapshot refresh (post-tournament run; cached snapshot found).
+ℹ️  Using event-aligned YTD snapshot for post-tournament run: approach_ytd_2026-03-30.json.
+✓ DataGolf field updates loaded (cache-current, Texas Children's Houston Open)
+✓ DataGolf player decompositions loaded (api, updated 2026-03-30 17:30:04 UTC)
+✓ DataGolf skill ratings loaded (api, display value, updated 2026-03-30 17:23:01 UTC)
+✓ DataGolf skill ratings loaded (api, display rank, updated 2026-03-30 17:23:01 UTC)
+✓ DataGolf historical rounds loaded (cache, pga 2026)
+ℹ️  Field updates name differs but event_id matches: expected Texas Children's Open, got Texas Children's Houston Open
+ℹ️  Validation outputs gating: only 0 POWER events in Course_Type_Classification (min 5).
+   Proceeding with validation outputs for reporting only.
+✓ Loaded validation template: VALIDATION_POWER
+ℹ️  Validation template is included in Step 1d template testing.
+ℹ️  Validation outputs loaded for reporting only (no template/constraint influence).
+   Set APPLY_VALIDATION_OUTPUTS=true to apply, or increase validation course-type coverage to clear the gate.
+
+🔄 Loading data...
+✓ Loaded field (cache/API): 135 players
+ℹ️  Weather penalties skipped for post-tournament run (no cached penalties found).
+✓ Loaded history (robust merged-source): 78873 rounds
+ℹ️  History source: refreshPolicy=force-refresh, api(cache=0, stale=5, api=0, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+ℹ️  History rows for event 20: 1710 (season 2026: 419)
+✓ Loaded approach: 0 rows (source: DataGolf approach skill (skipped, l24))
+✓ Using YTD approach snapshot for current season (259 rows, file: approach_ytd_2026-03-30.json, field overlap 133/135)
+ℹ️  Approach usage summary:
+   - Current-season rankings (baseline/optimization): snapshot_ytd
+   - Step 1b (event-only correlations): latest_snapshot_fallback
+   - Step 1c (event+similar+putting correlations): snapshot_ytd
+ℹ️  Derived 135 results from historical data.
+✓ Results-only approach delta JSON generated: /workspaces/modelOptimizer/data/approach_deltas/2026/approach_deltas_texas-childrens-open_2026_03_30.json
+✅ Post-event results CSV saved to: /workspaces/modelOptimizer/data/2026/texas-childrens-open/post_event/texas-childrens-open_results.csv
+✅ Results-only JSON saved to: /workspaces/modelOptimizer/data/2026/texas-childrens-open/post_event/texas-childrens-open_results.json

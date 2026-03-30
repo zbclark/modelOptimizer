@@ -8256,7 +8256,8 @@ async function prepareSnapshots({
     historicalRoundsSnapshot,
     IS_POST_TOURNAMENT_RUN,
     IS_PRE_TOURNAMENT_RUN,
-    CACHE_FIRST_REFRESH
+    CACHE_FIRST_REFRESH,
+    SHOULD_REFRESH_YTD
   };
 }
 
@@ -9332,7 +9333,8 @@ async function runAdaptiveOptimizer() {
     historicalRoundsSnapshot,
     IS_POST_TOURNAMENT_RUN,
     IS_PRE_TOURNAMENT_RUN,
-    CACHE_FIRST_REFRESH
+    CACHE_FIRST_REFRESH,
+    SHOULD_REFRESH_YTD
   } = await prepareSnapshots({
     runContext,
     manifestEventDateInfo,
