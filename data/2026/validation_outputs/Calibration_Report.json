@@ -102,17 +102,17 @@
       ],
       "calibrationBuckets": {
         "bucketCount": 10,
-        "totalPredictions": 150,
-        "matchedCount": 150,
+        "totalPredictions": 156,
+        "matchedCount": 156,
         "buckets": [
           {
             "bucket": 0,
             "minPct": 0,
             "maxPct": 0.1,
-            "count": 15,
+            "count": 16,
             "top5": 1,
             "top10": 3,
-            "top20": 4
+            "top20": 5
           },
           {
             "bucket": 1,
@@ -121,13 +121,13 @@
             "count": 15,
             "top5": 1,
             "top10": 3,
-            "top20": 4
+            "top20": 3
           },
           {
             "bucket": 2,
             "minPct": 0.2,
             "maxPct": 0.3,
-            "count": 15,
+            "count": 16,
             "top5": 0,
             "top10": 1,
             "top20": 3
@@ -145,10 +145,10 @@
             "bucket": 4,
             "minPct": 0.4,
             "maxPct": 0.5,
-            "count": 15,
+            "count": 16,
             "top5": 0,
             "top10": 0,
-            "top20": 0
+            "top20": 1
           },
           {
             "bucket": 5,
@@ -163,7 +163,7 @@
             "bucket": 6,
             "minPct": 0.6,
             "maxPct": 0.7,
-            "count": 15,
+            "count": 16,
             "top5": 0,
             "top10": 0,
             "top20": 3
@@ -175,13 +175,13 @@
             "count": 15,
             "top5": 1,
             "top10": 1,
-            "top20": 2
+            "top20": 1
           },
           {
             "bucket": 8,
             "minPct": 0.8,
             "maxPct": 0.9,
-            "count": 15,
+            "count": 16,
             "top5": 1,
             "top10": 1,
             "top20": 2
@@ -190,7 +190,7 @@
             "bucket": 9,
             "minPct": 0.9,
             "maxPct": 1,
-            "count": 15,
+            "count": 16,
             "top5": 0,
             "top10": 1,
             "top20": 1
@@ -200,21 +200,21 @@
       "plattCalibration": {
         "top10": {
           "available": true,
-          "a": -1.0519369793298854,
-          "b": -1.7425396179211912,
-          "samples": 150,
-          "logLoss": 0.27273281314545833,
-          "brier": 0.07242666197171133,
-          "baseRate": 0.08
+          "a": -1.0955774148264739,
+          "b": -1.7588750655676166,
+          "samples": 156,
+          "logLoss": 0.26416539690924623,
+          "brier": 0.0697215384932463,
+          "baseRate": 0.07692307692307693
         },
         "top20": {
           "available": true,
-          "a": -0.8071706193752802,
-          "b": -1.234000401063222,
-          "samples": 150,
-          "logLoss": 0.4227312804339478,
-          "brier": 0.1282335625035184,
-          "baseRate": 0.15333333333333332
+          "a": -0.8923282945955076,
+          "b": -1.2400853295435783,
+          "samples": 156,
+          "logLoss": 0.41041040348011465,
+          "brier": 0.12363731177050252,
+          "baseRate": 0.14743589743589744
         }
       },
       "accuracyMetrics": {
@@ -1528,86 +1528,303 @@
       }
     },
     {
+      "name": "Texas Childrens Open",
+      "topFinishers": [
+        {
+          "name": "Woodland, Gary",
+          "dgId": "12577",
+          "actualFinish": 1,
+          "predictedRank": 60,
+          "missScore": 59,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "Hojgaard, Nicolai",
+          "dgId": "23602",
+          "actualFinish": 2,
+          "predictedRank": 39,
+          "missScore": 37,
+          "inTopXPredicted": "Top 50"
+        },
+        {
+          "name": "Keefer, Johnny",
+          "dgId": "32457",
+          "actualFinish": 3,
+          "predictedRank": 113,
+          "missScore": 110,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "Lee, Min Woo",
+          "dgId": "16841",
+          "actualFinish": 3,
+          "predictedRank": 4,
+          "missScore": 1,
+          "inTopXPredicted": "Top 20"
+        },
+        {
+          "name": "Stevens, Sam",
+          "dgId": "25569",
+          "actualFinish": 5,
+          "predictedRank": 32,
+          "missScore": 27,
+          "inTopXPredicted": "Top 50"
+        },
+        {
+          "name": "Gotterup, Chris",
+          "dgId": "27774",
+          "actualFinish": 6,
+          "predictedRank": 62,
+          "missScore": 56,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "Day, Jason",
+          "dgId": "9771",
+          "actualFinish": 6,
+          "predictedRank": 78,
+          "missScore": 72,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "Yellamaraju, Sudarshan",
+          "dgId": "29925",
+          "actualFinish": 6,
+          "predictedRank": 1,
+          "missScore": 5,
+          "inTopXPredicted": "Top 20"
+        },
+        {
+          "name": "Knapp, Jake",
+          "dgId": "19396",
+          "actualFinish": 6,
+          "predictedRank": 7,
+          "missScore": 1,
+          "inTopXPredicted": "Top 20"
+        },
+        {
+          "name": "Theegala, Sahith",
+          "dgId": "23014",
+          "actualFinish": 10,
+          "predictedRank": 74,
+          "missScore": 64,
+          "inTopXPredicted": "Outside Top 50"
+        },
+        {
+          "name": "Burgoon, Bronson",
+          "dgId": "11082",
+          "actualFinish": 10,
+          "predictedRank": 97,
+          "missScore": 87,
+          "inTopXPredicted": "Outside Top 50"
+        }
+      ],
+      "calibrationBuckets": {
+        "bucketCount": 10,
+        "totalPredictions": 135,
+        "matchedCount": 131,
+        "buckets": [
+          {
+            "bucket": 0,
+            "minPct": 0,
+            "maxPct": 0.1,
+            "count": 13,
+            "top5": 1,
+            "top10": 3,
+            "top20": 3
+          },
+          {
+            "bucket": 1,
+            "minPct": 0.1,
+            "maxPct": 0.2,
+            "count": 13,
+            "top5": 0,
+            "top10": 0,
+            "top20": 3
+          },
+          {
+            "bucket": 2,
+            "minPct": 0.2,
+            "maxPct": 0.3,
+            "count": 14,
+            "top5": 2,
+            "top10": 2,
+            "top20": 2
+          },
+          {
+            "bucket": 3,
+            "minPct": 0.3,
+            "maxPct": 0.4,
+            "count": 13,
+            "top5": 0,
+            "top10": 0,
+            "top20": 2
+          },
+          {
+            "bucket": 4,
+            "minPct": 0.4,
+            "maxPct": 0.5,
+            "count": 13,
+            "top5": 1,
+            "top10": 2,
+            "top20": 2
+          },
+          {
+            "bucket": 5,
+            "minPct": 0.5,
+            "maxPct": 0.6,
+            "count": 14,
+            "top5": 0,
+            "top10": 2,
+            "top20": 4
+          },
+          {
+            "bucket": 6,
+            "minPct": 0.6,
+            "maxPct": 0.7,
+            "count": 11,
+            "top5": 0,
+            "top10": 0,
+            "top20": 1
+          },
+          {
+            "bucket": 7,
+            "minPct": 0.7,
+            "maxPct": 0.8,
+            "count": 14,
+            "top5": 0,
+            "top10": 1,
+            "top20": 2
+          },
+          {
+            "bucket": 8,
+            "minPct": 0.8,
+            "maxPct": 0.9,
+            "count": 12,
+            "top5": 1,
+            "top10": 1,
+            "top20": 1
+          },
+          {
+            "bucket": 9,
+            "minPct": 0.9,
+            "maxPct": 1,
+            "count": 14,
+            "top5": 0,
+            "top10": 0,
+            "top20": 0
+          }
+        ]
+      },
+      "plattCalibration": {
+        "top10": {
+          "available": true,
+          "a": -1.013612478360893,
+          "b": -1.7177616178644703,
+          "samples": 131,
+          "logLoss": 0.2829886179017312,
+          "brier": 0.07601184320695846,
+          "baseRate": 0.08396946564885496
+        },
+        "top20": {
+          "available": true,
+          "a": -0.9772643282691831,
+          "b": -1.1714533822617665,
+          "samples": 131,
+          "logLoss": 0.4162907902876204,
+          "brier": 0.12656974034470872,
+          "baseRate": 0.15267175572519084
+        }
+      },
+      "accuracyMetrics": {
+        "top5Predicted": 3,
+        "top10Predicted": 3,
+        "top20Predicted": 5,
+        "avgMissTop5": 46.8,
+        "avgMissTop10": 47.18181818181818
+      }
+    },
+    {
       "name": "The PLAYERS",
       "topFinishers": [
         {
           "name": "Young, Cameron",
           "dgId": "26651",
           "actualFinish": 1,
-          "predictedRank": 13,
-          "missScore": 12,
+          "predictedRank": 17,
+          "missScore": 16,
           "inTopXPredicted": "Top 20"
         },
         {
           "name": "Fitzpatrick, Matt",
           "dgId": "17646",
           "actualFinish": 2,
-          "predictedRank": 49,
-          "missScore": 47,
-          "inTopXPredicted": "Top 50"
+          "predictedRank": 5,
+          "missScore": 3,
+          "inTopXPredicted": "Top 20"
         },
         {
           "name": "Schauffele, Xander",
           "dgId": "19895",
           "actualFinish": 3,
-          "predictedRank": 59,
-          "missScore": 56,
-          "inTopXPredicted": "Outside Top 50"
+          "predictedRank": 15,
+          "missScore": 12,
+          "inTopXPredicted": "Top 20"
         },
         {
           "name": "MacIntyre, Robert",
           "dgId": "23323",
           "actualFinish": 4,
-          "predictedRank": 80,
-          "missScore": 76,
+          "predictedRank": 91,
+          "missScore": 87,
           "inTopXPredicted": "Outside Top 50"
         },
         {
           "name": "Yellamaraju, Sudarshan",
           "dgId": "29925",
           "actualFinish": 5,
-          "predictedRank": 21,
-          "missScore": 16,
+          "predictedRank": 32,
+          "missScore": 27,
           "inTopXPredicted": "Top 50"
         },
         {
           "name": "Aberg, Ludvig",
           "dgId": "23950",
           "actualFinish": 5,
-          "predictedRank": 3,
-          "missScore": 2,
+          "predictedRank": 8,
+          "missScore": 3,
           "inTopXPredicted": "Top 20"
         },
         {
           "name": "Bridgeman, Jacob",
           "dgId": "29433",
           "actualFinish": 5,
-          "predictedRank": 20,
-          "missScore": 15,
+          "predictedRank": 14,
+          "missScore": 9,
           "inTopXPredicted": "Top 20"
         },
         {
           "name": "Fleetwood, Tommy",
           "dgId": "12294",
           "actualFinish": 8,
-          "predictedRank": 63,
-          "missScore": 55,
-          "inTopXPredicted": "Outside Top 50"
+          "predictedRank": 43,
+          "missScore": 35,
+          "inTopXPredicted": "Top 50"
         },
         {
           "name": "Straka, Sepp",
           "dgId": "17511",
           "actualFinish": 8,
-          "predictedRank": 64,
-          "missScore": 56,
+          "predictedRank": 62,
+          "missScore": 54,
           "inTopXPredicted": "Outside Top 50"
         },
         {
           "name": "Thomas, Justin",
           "dgId": "14139",
           "actualFinish": 8,
-          "predictedRank": 79,
-          "missScore": 71,
+          "predictedRank": 64,
+          "missScore": 56,
           "inTopXPredicted": "Outside Top 50"
         }
       ],
@@ -1630,25 +1847,25 @@
             "minPct": 0.1,
             "maxPct": 0.2,
             "count": 12,
-            "top5": 2,
-            "top10": 2,
-            "top20": 5
+            "top5": 3,
+            "top10": 3,
+            "top20": 4
           },
           {
             "bucket": 2,
             "minPct": 0.2,
             "maxPct": 0.3,
-            "count": 12,
-            "top5": 0,
-            "top10": 0,
-            "top20": 1
+            "count": 11,
+            "top5": 1,
+            "top10": 1,
+            "top20": 2
           },
           {
             "bucket": 3,
             "minPct": 0.3,
             "maxPct": 0.4,
             "count": 12,
-            "top5": 1,
+            "top5": 0,
             "top10": 1,
             "top20": 1
           },
@@ -1656,9 +1873,9 @@
             "bucket": 4,
             "minPct": 0.4,
             "maxPct": 0.5,
-            "count": 11,
-            "top5": 1,
-            "top10": 1,
+            "count": 12,
+            "top5": 0,
+            "top10": 0,
             "top20": 1
           },
           {
@@ -1668,15 +1885,15 @@
             "count": 13,
             "top5": 0,
             "top10": 2,
-            "top20": 3
+            "top20": 4
           },
           {
             "bucket": 6,
             "minPct": 0.6,
             "maxPct": 0.7,
             "count": 12,
-            "top5": 1,
-            "top10": 2,
+            "top5": 0,
+            "top10": 0,
             "top20": 3
           },
           {
@@ -1684,9 +1901,9 @@
             "minPct": 0.7,
             "maxPct": 0.8,
             "count": 12,
-            "top5": 0,
-            "top10": 0,
-            "top20": 2
+            "top5": 1,
+            "top10": 1,
+            "top20": 1
           },
           {
             "bucket": 8,
@@ -1695,7 +1912,7 @@
             "count": 12,
             "top5": 0,
             "top10": 0,
-            "top20": 1
+            "top20": 0
           },
           {
             "bucket": 9,
@@ -1704,36 +1921,36 @@
             "count": 13,
             "top5": 0,
             "top10": 0,
-            "top20": 0
+            "top20": 1
           }
         ]
       },
       "plattCalibration": {
         "top10": {
           "available": true,
-          "a": -1.0857113988171807,
-          "b": -1.6993205058409688,
+          "a": -1.3546049298123783,
+          "b": -1.6027587222205824,
           "samples": 121,
-          "logLoss": 0.2777088288510506,
-          "brier": 0.07471084050723055,
+          "logLoss": 0.2669581451617804,
+          "brier": 0.07266442959220024,
           "baseRate": 0.08264462809917356
         },
         "top20": {
           "available": true,
-          "a": -1.0577696628222806,
-          "b": -0.9960853042459439,
+          "a": -1.1212770165551638,
+          "b": -0.9690421532903205,
           "samples": 121,
-          "logLoss": 0.4458110281232974,
-          "brier": 0.13877790219480673,
+          "logLoss": 0.4431551245092995,
+          "brier": 0.13803917149326492,
           "baseRate": 0.17355371900826447
         }
       },
       "accuracyMetrics": {
-        "top5Predicted": 3,
-        "top10Predicted": 4,
-        "top20Predicted": 5,
-        "avgMissTop5": 32,
-        "avgMissTop10": 40.6
+        "top5Predicted": 5,
+        "top10Predicted": 5,
+        "top20Predicted": 7,
+        "avgMissTop5": 22.428571428571427,
+        "avgMissTop10": 30.2
       }
     },
     {
@@ -2173,128 +2390,128 @@
   ],
   "calibrationBuckets": {
     "bucketCount": 10,
-    "totalPredictions": 1145,
-    "matchedCount": 1137,
+    "totalPredictions": 1286,
+    "matchedCount": 1274,
     "buckets": [
       {
         "bucket": 0,
         "minPct": 0,
         "maxPct": 0.1,
-        "count": 118,
-        "top5": 11,
-        "top10": 21,
-        "top20": 37
+        "count": 132,
+        "top5": 12,
+        "top10": 24,
+        "top20": 41
       },
       {
         "bucket": 1,
         "minPct": 0.1,
         "maxPct": 0.2,
-        "count": 113,
-        "top5": 12,
-        "top10": 19,
-        "top20": 34
+        "count": 126,
+        "top5": 13,
+        "top10": 20,
+        "top20": 35
       },
       {
         "bucket": 2,
         "minPct": 0.2,
         "maxPct": 0.3,
-        "count": 112,
-        "top5": 4,
-        "top10": 12,
-        "top20": 23
+        "count": 126,
+        "top5": 7,
+        "top10": 15,
+        "top20": 26
       },
       {
         "bucket": 3,
         "minPct": 0.3,
         "maxPct": 0.4,
-        "count": 112,
-        "top5": 9,
+        "count": 125,
+        "top5": 8,
         "top10": 14,
-        "top20": 24
+        "top20": 26
       },
       {
         "bucket": 4,
         "minPct": 0.4,
         "maxPct": 0.5,
-        "count": 109,
+        "count": 124,
         "top5": 6,
-        "top10": 8,
-        "top20": 18
+        "top10": 9,
+        "top20": 21
       },
       {
         "bucket": 5,
         "minPct": 0.5,
         "maxPct": 0.6,
-        "count": 117,
+        "count": 131,
         "top5": 5,
-        "top10": 8,
-        "top20": 19
+        "top10": 10,
+        "top20": 24
       },
       {
         "bucket": 6,
         "minPct": 0.6,
         "maxPct": 0.7,
-        "count": 113,
-        "top5": 2,
-        "top10": 6,
-        "top20": 18
+        "count": 125,
+        "top5": 1,
+        "top10": 4,
+        "top20": 19
       },
       {
         "bucket": 7,
         "minPct": 0.7,
         "maxPct": 0.8,
-        "count": 113,
-        "top5": 2,
-        "top10": 7,
+        "count": 127,
+        "top5": 3,
+        "top10": 9,
         "top20": 20
       },
       {
         "bucket": 8,
         "minPct": 0.8,
         "maxPct": 0.9,
-        "count": 113,
-        "top5": 2,
-        "top10": 7,
+        "count": 126,
+        "top5": 3,
+        "top10": 8,
         "top20": 18
       },
       {
         "bucket": 9,
         "minPct": 0.9,
         "maxPct": 1,
-        "count": 117,
+        "count": 132,
         "top5": 3,
         "top10": 8,
-        "top20": 14
+        "top20": 15
       }
     ]
   },
   "plattCalibration": {
     "top10": {
       "available": true,
-      "a": -0.9929259621981735,
-      "b": -1.6027038699304643,
-      "samples": 1137,
-      "logLoss": 0.31151604787405135,
-      "brier": 0.08612866503147833,
-      "baseRate": 0.09674582233948989
+      "a": -1.0247979837304786,
+      "b": -1.6071493546678022,
+      "samples": 1274,
+      "logLoss": 0.30673716954073404,
+      "brier": 0.08455030158240895,
+      "baseRate": 0.09497645211930926
     },
     "top20": {
       "available": true,
-      "a": -0.8152260388522897,
-      "b": -0.9530133097769061,
-      "samples": 1137,
-      "logLoss": 0.48898707739216835,
-      "brier": 0.155934171739643,
-      "baseRate": 0.19788918205804748
+      "a": -0.8451192450352415,
+      "b": -0.9730474635168128,
+      "samples": 1274,
+      "logLoss": 0.48042776018512784,
+      "brier": 0.15240258535188408,
+      "baseRate": 0.19230769230769232
     }
   },
   "plattSamples": {
-    "top10Count": 1137,
-    "top20Count": 1137
+    "top10Count": 1274,
+    "top20Count": 1274
   },
-  "totalTop5": 56,
-  "predictedTop5InTop20": 21,
-  "totalTop10": 110,
-  "predictedTop10InTop30": 54,
-  "generatedAt": "2026-03-23T16:11:52-05:00"
+  "totalTop5": 61,
+  "predictedTop5InTop20": 24,
+  "totalTop10": 121,
+  "predictedTop10InTop30": 58,
+  "generatedAt": "2026-03-30T13:48:30-05:00"
 }

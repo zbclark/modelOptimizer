@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-03-16T21:17:14-05:00",
+  "generatedAt": "2026-03-30T13:48:30-05:00",
   "season": 2026,
-  "runCount": 29,
-  "tournamentCount": 9,
-  "seedRunCount": 20,
+  "runCount": 42,
+  "tournamentCount": 11,
+  "seedRunCount": 23,
   "runs": [
     {
       "season": 2026,
@@ -1898,6 +1898,110 @@
     {
       "season": 2026,
       "eventId": "7",
+      "tournament": "Genesis Invitational",
+      "tournamentSlug": "genesis-invitational",
+      "filePath": "/workspaces/modelOptimizer/data/2026/genesis-invitational/post_event/genesis-invitational_phase1-2026-03-26-auto_post_event_results.json",
+      "isSeedRun": false,
+      "optSeed": null,
+      "dryRun": false,
+      "timestamp": "2026-03-26T12:33:11-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-26T12:30:15-05:00",
+        "eventId": "7",
+        "season": 2026,
+        "tournament": "Genesis Invitational",
+        "optSeed": null,
+        "tests": 200,
+        "dryRun": false,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": "Genesis Invitational (2026) - Tournament Field.csv",
+            "sha256": "272d6c7f0a11b76bbad38c7343c32164da3054b48af09c715e2a3467db7d1a63"
+          },
+          "historicalData": {
+            "path": "Genesis Invitational (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": "Genesis Invitational (2026) - Approach Skill (1).csv",
+            "sha256": "c19a75faa0d52a59db31e009bd5364f8a19c5e6e260d81c6adc3681162d456ed"
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_genesis-invitational_2026_03_04.json",
+            "sha256": "421c2f518596b9da03c8cffc2c96c2c6c7e15ec29b8392cbfdc281dfdee0a7ca"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "bfded2f81f5057eaa25ea6cfda50f7725882fe38ba9fe23cde31b87f2a9d6d07"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "aaa66351bdd3bb3581dc767c68bbb0842c433737a16382a1444214892b13060c"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "404fe0799a9528cec8aa08c18406c5990a7d12ad80f054d8f725c042b9cf7895"
+          }
+        }
+      },
+      "validationCourseType": "BALANCED",
+      "validationTemplateName": "VALIDATION_BALANCED",
+      "step1": {
+        "correlation": 0.031466955908856474,
+        "rmse": 26.4900400570143,
+        "mae": 21.666666666666668,
+        "top10": 30,
+        "top20": 30,
+        "top20WeightedScore": 31.876290519308903,
+        "matchedPlayers": 72,
+        "adjustedSubsetCorrelation": 0.14039488069972345
+      },
+      "step3": {
+        "correlation": 0.3179123991848166,
+        "rmse": 22.57456779455835,
+        "mae": 18.333333333333332,
+        "top10": 40,
+        "top20": 55.00000000000001,
+        "top20WeightedScore": 48.26462510621847,
+        "matchedPlayers": 72,
+        "adjustedSubsetCorrelation": 0.41128046819731173
+      },
+      "step3AlignmentScore": 0.21873192820596252,
+      "step3Top20CompositeScore": 0.5163231255310924,
+      "step3CombinedObjectiveScore": 0.5777216154638649,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": 0.9039370078740158,
+        "logLoss": 0.23148740826840086,
+        "bias": -2.4167509093081474,
+        "samples": 1270
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.8912961096159244,
+        "avgLogLoss": 0.26321014457316455,
+        "eventCount": 11,
+        "foldsUsed": 11
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.5660057016104775,
+        "strokesGainedTotal": 0.5645778827496433,
+        "strokesGainedT2G": 0.45682839269203185,
+        "strokesGainedApp": 0.34022373924289534,
+        "strokesGainedPutt": 0.3063837520236331,
+        "birdiesOrBetter": 0.37872684929603934
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "7",
       "tournament": "The Genesis Invitational",
       "tournamentSlug": "genesis-invitational",
       "filePath": "/workspaces/modelOptimizer/data/2026/genesis-invitational/post_event/the_genesis_invitational_post_event_results.json",
@@ -2544,6 +2648,784 @@
     },
     {
       "season": 2026,
+      "eventId": "20",
+      "tournament": "Texas Childrens Open",
+      "tournamentSlug": "texas-childrens-open",
+      "filePath": "/workspaces/modelOptimizer/data/2026/texas-childrens-open/post_event/texas-childrens-open_results.json",
+      "isSeedRun": false,
+      "optSeed": null,
+      "dryRun": false,
+      "timestamp": null,
+      "runFingerprint": null,
+      "validationCourseType": null,
+      "validationTemplateName": null,
+      "step1": null,
+      "step3": null,
+      "step3AlignmentScore": null,
+      "step3Top20CompositeScore": null,
+      "step3CombinedObjectiveScore": null,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": null,
+        "logLoss": null,
+        "bias": null,
+        "samples": null
+      },
+      "top20Cv": {
+        "avgAccuracy": null,
+        "avgLogLoss": null,
+        "eventCount": null,
+        "foldsUsed": null
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": null,
+        "strokesGainedTotal": null,
+        "strokesGainedT2G": null,
+        "strokesGainedApp": null,
+        "strokesGainedPutt": null,
+        "birdiesOrBetter": null
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "11",
+      "tournament": "The PLAYERS",
+      "tournamentSlug": "the-players",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-players/post_event/the-players_loeo_phase1-2026-03-26-post-players-rerun_post_event_results.json",
+      "isSeedRun": false,
+      "optSeed": null,
+      "dryRun": false,
+      "timestamp": "2026-03-26T13:52:35-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-26T13:51:23-05:00",
+        "eventId": "11",
+        "season": 2026,
+        "tournament": "The PLAYERS",
+        "optSeed": null,
+        "tests": 200,
+        "dryRun": false,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": null,
+            "sha256": null
+          },
+          "historicalData": {
+            "path": "The PLAYERS (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": null,
+            "sha256": null
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_the-players_2026_03_16.json",
+            "sha256": "277f48bd563e2809c5c9eb67536d81f104ff172af48cae7bff71f9e519d8a55f"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "bfded2f81f5057eaa25ea6cfda50f7725882fe38ba9fe23cde31b87f2a9d6d07"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "847c7310362f44fbae34aca19f1e5867357ec55de06c3a02cd2fa9329536ee0c"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "0a8c161667b9c7b39a9743c4c8af34a506e12e10aa447a5268923b8c432bc742"
+          }
+        }
+      },
+      "validationCourseType": "TECHNICAL",
+      "validationTemplateName": "VALIDATION_TECHNICAL",
+      "step1": {
+        "correlation": 0.15869807380997789,
+        "rmse": 41.2464874537545,
+        "mae": 33.40495867768595,
+        "top10": 10,
+        "top20": 25,
+        "top20WeightedScore": 17.985888855766447,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.3392968432461726
+      },
+      "step3": {
+        "correlation": 0.7851592102430307,
+        "rmse": 23.91358409214795,
+        "mae": 19.41322314049587,
+        "top10": 60,
+        "top20": 70,
+        "top20WeightedScore": 75.32169736103099,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.8749424197263244
+      },
+      "step3AlignmentScore": 0.204856450149051,
+      "step3Top20CompositeScore": 0.7266084868051549,
+      "step3CombinedObjectiveScore": 0.7515637699539371,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": 0.9110236220472441,
+        "logLoss": 0.2242147062849919,
+        "bias": -2.4069403758749313,
+        "samples": 1270
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.9018106440301848,
+        "avgLogLoss": 0.24980985636035466,
+        "eventCount": 11,
+        "foldsUsed": 11
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.56933302240839,
+        "strokesGainedTotal": 0.5459327698946341,
+        "strokesGainedT2G": 0.48541852104427774,
+        "strokesGainedApp": 0.3497455268638771,
+        "strokesGainedPutt": 0.26117437131397786,
+        "birdiesOrBetter": 0.4119161702260822
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "11",
+      "tournament": "The PLAYERS",
+      "tournamentSlug": "the-players",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-players/post_event/the-players_loeo_phase2-2026-03-26-post-players_post_event_results.json",
+      "isSeedRun": false,
+      "optSeed": null,
+      "dryRun": false,
+      "timestamp": "2026-03-26T15:13:09-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-26T15:12:00-05:00",
+        "eventId": "11",
+        "season": 2026,
+        "tournament": "The PLAYERS",
+        "optSeed": null,
+        "tests": 200,
+        "dryRun": false,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": null,
+            "sha256": null
+          },
+          "historicalData": {
+            "path": "The PLAYERS (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": null,
+            "sha256": null
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_the-players_2026_03_16.json",
+            "sha256": "277f48bd563e2809c5c9eb67536d81f104ff172af48cae7bff71f9e519d8a55f"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "bfded2f81f5057eaa25ea6cfda50f7725882fe38ba9fe23cde31b87f2a9d6d07"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "41f14ced566273b60032dd2bd92c7ad1e3895689ade46080b55c42d2cdc5dc3e"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "6076473ec3e0955ab6d5edc196e5a9387c79652ba6bcf42518d1969912e01728"
+          }
+        }
+      },
+      "validationCourseType": "TECHNICAL",
+      "validationTemplateName": "VALIDATION_TECHNICAL",
+      "step1": {
+        "correlation": 0.15869807380997789,
+        "rmse": 41.2464874537545,
+        "mae": 33.40495867768595,
+        "top10": 10,
+        "top20": 25,
+        "top20WeightedScore": 17.985888855766447,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.3392968432461726
+      },
+      "step3": {
+        "correlation": 0.7891777691969273,
+        "rmse": 23.862034578276766,
+        "mae": 19.41322314049587,
+        "top10": 60,
+        "top20": 70,
+        "top20WeightedScore": 75.71432398365565,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.8767511177347243
+      },
+      "step3AlignmentScore": 0.20256938770156424,
+      "step3Top20CompositeScore": 0.7285716199182782,
+      "step3CombinedObjectiveScore": 0.7529194141088347,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": 0.9110236220472441,
+        "logLoss": 0.22421470628499182,
+        "bias": -2.4069403758749313,
+        "samples": 1270
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.9018106440301848,
+        "avgLogLoss": 0.2498098563603546,
+        "eventCount": 11,
+        "foldsUsed": 11
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.56933302240839,
+        "strokesGainedTotal": 0.5459327698946341,
+        "strokesGainedT2G": 0.48541852104427774,
+        "strokesGainedApp": 0.3497455268638771,
+        "strokesGainedPutt": 0.26117437131397786,
+        "birdiesOrBetter": 0.4119161702260822
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "11",
+      "tournament": "The PLAYERS",
+      "tournamentSlug": "the-players",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-players/post_event/the-players_loeo_phase4-2026-03-27-post-players_post_event_results.json",
+      "isSeedRun": false,
+      "optSeed": null,
+      "dryRun": false,
+      "timestamp": "2026-03-27T09:20:43-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-27T09:19:33-05:00",
+        "eventId": "11",
+        "season": 2026,
+        "tournament": "The PLAYERS",
+        "optSeed": null,
+        "tests": 200,
+        "dryRun": false,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": null,
+            "sha256": null
+          },
+          "historicalData": {
+            "path": "The PLAYERS (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": null,
+            "sha256": null
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_the-players_2026_03_16.json",
+            "sha256": "277f48bd563e2809c5c9eb67536d81f104ff172af48cae7bff71f9e519d8a55f"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "bfded2f81f5057eaa25ea6cfda50f7725882fe38ba9fe23cde31b87f2a9d6d07"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "41f14ced566273b60032dd2bd92c7ad1e3895689ade46080b55c42d2cdc5dc3e"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "6076473ec3e0955ab6d5edc196e5a9387c79652ba6bcf42518d1969912e01728"
+          }
+        }
+      },
+      "validationCourseType": "TECHNICAL",
+      "validationTemplateName": "VALIDATION_TECHNICAL",
+      "step1": {
+        "correlation": 0.15869807380997789,
+        "rmse": 41.2464874537545,
+        "mae": 33.40495867768595,
+        "top10": 10,
+        "top20": 25,
+        "top20WeightedScore": 17.985888855766447,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.3392968432461726
+      },
+      "step3": {
+        "correlation": 0.7851907146250735,
+        "rmse": 23.901830906044772,
+        "mae": 19.34710743801653,
+        "top10": 60,
+        "top20": 70,
+        "top20WeightedScore": 76.2954572051163,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.874339520390191
+      },
+      "step3AlignmentScore": 0.20369837497017348,
+      "step3Top20CompositeScore": 0.7314772860255815,
+      "step3CombinedObjectiveScore": 0.7538870877035692,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": 0.9110236220472441,
+        "logLoss": 0.22421470628499185,
+        "bias": -2.4069403758749313,
+        "samples": 1270
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.9018106440301848,
+        "avgLogLoss": 0.2498098563603546,
+        "eventCount": 11,
+        "foldsUsed": 11
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.56933302240839,
+        "strokesGainedTotal": 0.5459327698946341,
+        "strokesGainedT2G": 0.48541852104427774,
+        "strokesGainedApp": 0.3497455268638771,
+        "strokesGainedPutt": 0.26117437131397786,
+        "birdiesOrBetter": 0.4119161702260822
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "11",
+      "tournament": "The PLAYERS",
+      "tournamentSlug": "the-players",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-players/post_event/the-players_loeo_phase5-2026-03-27-post-players_post_event_results.json",
+      "isSeedRun": false,
+      "optSeed": null,
+      "dryRun": false,
+      "timestamp": "2026-03-27T09:57:41-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-27T09:56:25-05:00",
+        "eventId": "11",
+        "season": 2026,
+        "tournament": "The PLAYERS",
+        "optSeed": null,
+        "tests": 200,
+        "dryRun": false,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": null,
+            "sha256": null
+          },
+          "historicalData": {
+            "path": "The PLAYERS (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": null,
+            "sha256": null
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_the-players_2026_03_16.json",
+            "sha256": "277f48bd563e2809c5c9eb67536d81f104ff172af48cae7bff71f9e519d8a55f"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "bfded2f81f5057eaa25ea6cfda50f7725882fe38ba9fe23cde31b87f2a9d6d07"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "41f14ced566273b60032dd2bd92c7ad1e3895689ade46080b55c42d2cdc5dc3e"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "6076473ec3e0955ab6d5edc196e5a9387c79652ba6bcf42518d1969912e01728"
+          }
+        }
+      },
+      "validationCourseType": "TECHNICAL",
+      "validationTemplateName": "VALIDATION_TECHNICAL",
+      "step1": {
+        "correlation": 0.15869807380997789,
+        "rmse": 41.2464874537545,
+        "mae": 33.40495867768595,
+        "top10": 10,
+        "top20": 25,
+        "top20WeightedScore": 17.985888855766447,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.3392968432461726
+      },
+      "step3": {
+        "correlation": 0.7855792686702673,
+        "rmse": 23.997072824247365,
+        "mae": 19.512396694214875,
+        "top10": 60,
+        "top20": 70,
+        "top20WeightedScore": 75.66529598507714,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.8735062999593551
+      },
+      "step3AlignmentScore": 0.1989291878157159,
+      "step3Top20CompositeScore": 0.7283264799253857,
+      "step3CombinedObjectiveScore": 0.7518930490448046,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": 0.9110236220472441,
+        "logLoss": 0.2242147062849919,
+        "bias": -2.4069403758749313,
+        "samples": 1270
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.9018106440301848,
+        "avgLogLoss": 0.24980985636035466,
+        "eventCount": 11,
+        "foldsUsed": 11
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.56933302240839,
+        "strokesGainedTotal": 0.5459327698946341,
+        "strokesGainedT2G": 0.48541852104427774,
+        "strokesGainedApp": 0.3497455268638771,
+        "strokesGainedPutt": 0.26117437131397786,
+        "birdiesOrBetter": 0.4119161702260822
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "11",
+      "tournament": "The PLAYERS",
+      "tournamentSlug": "the-players",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-players/post_event/the-players_loeo_phase6-2026-03-27-post-players_post_event_results.json",
+      "isSeedRun": false,
+      "optSeed": null,
+      "dryRun": false,
+      "timestamp": "2026-03-27T11:44:44-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-27T11:43:25-05:00",
+        "eventId": "11",
+        "season": 2026,
+        "tournament": "The PLAYERS",
+        "optSeed": null,
+        "tests": 200,
+        "dryRun": false,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": null,
+            "sha256": null
+          },
+          "historicalData": {
+            "path": "The PLAYERS (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": null,
+            "sha256": null
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_the-players_2026_03_16.json",
+            "sha256": "277f48bd563e2809c5c9eb67536d81f104ff172af48cae7bff71f9e519d8a55f"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "bfded2f81f5057eaa25ea6cfda50f7725882fe38ba9fe23cde31b87f2a9d6d07"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "41f14ced566273b60032dd2bd92c7ad1e3895689ade46080b55c42d2cdc5dc3e"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "981a45ddda91824c9fc047ca9bf1c81cd08e88eece04515a9184dbb655569e8b"
+          }
+        }
+      },
+      "validationCourseType": "TECHNICAL",
+      "validationTemplateName": "VALIDATION_TECHNICAL",
+      "step1": {
+        "correlation": 0.15869807380997789,
+        "rmse": 41.2464874537545,
+        "mae": 33.40495867768595,
+        "top10": 10,
+        "top20": 25,
+        "top20WeightedScore": 17.985888855766447,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.3392968432461726
+      },
+      "step3": {
+        "correlation": 0.7980585044460873,
+        "rmse": 23.522628458290473,
+        "mae": 19.198347107438018,
+        "top10": 60,
+        "top20": 70,
+        "top20WeightedScore": 75.85593304963247,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.8848733233979136
+      },
+      "step3AlignmentScore": 0.20721025374310065,
+      "step3Top20CompositeScore": 0.7292796652481623,
+      "step3CombinedObjectiveScore": 0.7550696336653043,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": 0.9110236220472441,
+        "logLoss": 0.2242147062849919,
+        "bias": -2.4069403758749313,
+        "samples": 1270
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.9018106440301848,
+        "avgLogLoss": 0.24980985636035466,
+        "eventCount": 11,
+        "foldsUsed": 11
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.56933302240839,
+        "strokesGainedTotal": 0.5459327698946341,
+        "strokesGainedT2G": 0.48541852104427774,
+        "strokesGainedApp": 0.3497455268638771,
+        "strokesGainedPutt": 0.26117437131397786,
+        "birdiesOrBetter": 0.4119161702260822
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "11",
+      "tournament": "The PLAYERS",
+      "tournamentSlug": "the-players",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-players/post_event/the-players_loeo_phase7-2026-03-30-post-players_post_event_results.json",
+      "isSeedRun": false,
+      "optSeed": null,
+      "dryRun": false,
+      "timestamp": "2026-03-30T09:38:15-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-30T09:36:59-05:00",
+        "eventId": "11",
+        "season": 2026,
+        "tournament": "The PLAYERS",
+        "optSeed": null,
+        "tests": 200,
+        "dryRun": false,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": null,
+            "sha256": null
+          },
+          "historicalData": {
+            "path": "The PLAYERS (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": null,
+            "sha256": null
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_the-players_2026_03_16.json",
+            "sha256": "277f48bd563e2809c5c9eb67536d81f104ff172af48cae7bff71f9e519d8a55f"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "bfded2f81f5057eaa25ea6cfda50f7725882fe38ba9fe23cde31b87f2a9d6d07"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "41f14ced566273b60032dd2bd92c7ad1e3895689ade46080b55c42d2cdc5dc3e"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "981a45ddda91824c9fc047ca9bf1c81cd08e88eece04515a9184dbb655569e8b"
+          }
+        }
+      },
+      "validationCourseType": "TECHNICAL",
+      "validationTemplateName": "VALIDATION_TECHNICAL",
+      "step1": {
+        "correlation": 0.15869807380997789,
+        "rmse": 41.2464874537545,
+        "mae": 33.40495867768595,
+        "top10": 10,
+        "top20": 25,
+        "top20WeightedScore": 17.985888855766447,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.3392968432461726
+      },
+      "step3": {
+        "correlation": 0.7848721703177525,
+        "rmse": 23.921876982107978,
+        "mae": 19.31404958677686,
+        "top10": 60,
+        "top20": 70,
+        "top20WeightedScore": 75.58617693669952,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.8737975884026554
+      },
+      "step3AlignmentScore": 0.2025036787190558,
+      "step3Top20CompositeScore": 0.7279308846834975,
+      "step3CombinedObjectiveScore": 0.7519466357613172,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": 0.9153024911032028,
+        "logLoss": 0.21702148563301765,
+        "bias": -2.4570256129502734,
+        "samples": 1405
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.905666653794129,
+        "avgLogLoss": 0.2419658714717469,
+        "eventCount": 12,
+        "foldsUsed": 12
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.56933302240839,
+        "strokesGainedTotal": 0.5459327698946341,
+        "strokesGainedT2G": 0.48541852104427774,
+        "strokesGainedApp": 0.3497455268638771,
+        "strokesGainedPutt": 0.26117437131397786,
+        "birdiesOrBetter": 0.4119161702260822
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "11",
+      "tournament": "The PLAYERS",
+      "tournamentSlug": "the-players",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-players/post_event/the-players_loeo_phase7-2026-03-30-post_post_event_results.json",
+      "isSeedRun": false,
+      "optSeed": null,
+      "dryRun": false,
+      "timestamp": "2026-03-30T13:45:54-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-30T13:44:46-05:00",
+        "eventId": "11",
+        "season": 2026,
+        "tournament": "The PLAYERS",
+        "optSeed": null,
+        "tests": 200,
+        "dryRun": false,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": null,
+            "sha256": null
+          },
+          "historicalData": {
+            "path": "The PLAYERS (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": null,
+            "sha256": null
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_the-players_2026_03_16.json",
+            "sha256": "277f48bd563e2809c5c9eb67536d81f104ff172af48cae7bff71f9e519d8a55f"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "bfded2f81f5057eaa25ea6cfda50f7725882fe38ba9fe23cde31b87f2a9d6d07"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "07a589244a19eba15bf2a6e1b0f2c91aa8a93941872049353d09a02f46555839"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "209de1c3411607ba5a3ff53ba8dda1fee6d87853696dbbbf1cc41d74bf4ce7a8"
+          }
+        }
+      },
+      "validationCourseType": "BALANCED",
+      "validationTemplateName": "VALIDATION_BALANCED",
+      "step1": {
+        "correlation": 0.15869807380997789,
+        "rmse": 41.2464874537545,
+        "mae": 33.40495867768595,
+        "top10": 10,
+        "top20": 25,
+        "top20WeightedScore": 17.985888855766447,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.3392968432461726
+      },
+      "step3": {
+        "correlation": 0.8367353841338948,
+        "rmse": 22.095772004975696,
+        "mae": 17.99173553719008,
+        "top10": 50,
+        "top20": 80,
+        "top20WeightedScore": 77.31765863910329,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.9140563609267037
+      },
+      "step3AlignmentScore": 0.2458625775967779,
+      "step3Top20CompositeScore": 0.7865882931955164,
+      "step3CombinedObjectiveScore": 0.7933907119775202,
+      "kFold": {
+        "correlation": 0.4004274219372722,
+        "rmse": 82.72640462067767,
+        "mae": 66.39503816793894,
+        "top10": 42.29007633587786,
+        "top20": 51.545801526717554,
+        "top20WeightedScore": 35.56815543044462,
+        "matchedPlayers": 524,
+        "adjustedSubsetCorrelation": null
+      },
+      "kFoldFoldCount": 3,
+      "top20Logistic": {
+        "accuracy": 0.9153024911032028,
+        "logLoss": 0.21702148563301765,
+        "bias": -2.4570256129502734,
+        "samples": 1405
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.905666653794129,
+        "avgLogLoss": 0.2419658714717469,
+        "eventCount": 12,
+        "foldsUsed": 12
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.56933302240839,
+        "strokesGainedTotal": 0.5459327698946341,
+        "strokesGainedT2G": 0.48541852104427774,
+        "strokesGainedApp": 0.3497455268638771,
+        "strokesGainedPutt": 0.26117437131397786,
+        "birdiesOrBetter": 0.4119161702260822
+      }
+    },
+    {
+      "season": 2026,
       "eventId": "11",
       "tournament": "The PLAYERS",
       "tournamentSlug": "the-players",
@@ -2766,6 +3648,368 @@
         "strokesGainedApp": 0.3497455268638771,
         "strokesGainedPutt": 0.26117437131397786,
         "birdiesOrBetter": 0.4119161702260822
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "11",
+      "tournament": "The PLAYERS",
+      "tournamentSlug": "the-players",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-players/post_event/seed_runs/the-players_seed-seed-a_phase6-2026-03-27-post-seed-a_post_event_results.json",
+      "isSeedRun": true,
+      "optSeed": "seed-a",
+      "dryRun": false,
+      "timestamp": "2026-03-27T11:57:25-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-27T11:56:10-05:00",
+        "eventId": "11",
+        "season": 2026,
+        "tournament": "The PLAYERS",
+        "optSeed": "seed-a",
+        "tests": 200,
+        "dryRun": false,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": null,
+            "sha256": null
+          },
+          "historicalData": {
+            "path": "The PLAYERS (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": null,
+            "sha256": null
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_the-players_2026_03_16.json",
+            "sha256": "277f48bd563e2809c5c9eb67536d81f104ff172af48cae7bff71f9e519d8a55f"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "bfded2f81f5057eaa25ea6cfda50f7725882fe38ba9fe23cde31b87f2a9d6d07"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "41f14ced566273b60032dd2bd92c7ad1e3895689ade46080b55c42d2cdc5dc3e"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "981a45ddda91824c9fc047ca9bf1c81cd08e88eece04515a9184dbb655569e8b"
+          }
+        }
+      },
+      "validationCourseType": "TECHNICAL",
+      "validationTemplateName": "VALIDATION_TECHNICAL",
+      "step1": {
+        "correlation": 0.15869807380997789,
+        "rmse": 41.2464874537545,
+        "mae": 33.40495867768595,
+        "top10": 10,
+        "top20": 25,
+        "top20WeightedScore": 17.985888855766447,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.3392968432461726
+      },
+      "step3": {
+        "correlation": 0.7879490982972603,
+        "rmse": 23.886612315979097,
+        "mae": 19.34710743801653,
+        "top10": 60,
+        "top20": 70,
+        "top20WeightedScore": 76.74749866890487,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.8754911258637041
+      },
+      "step3AlignmentScore": 0.20031901790777878,
+      "step3Top20CompositeScore": 0.7337374933445243,
+      "step3CombinedObjectiveScore": 0.755093013207629,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": 0.9110236220472441,
+        "logLoss": 0.22421470628499185,
+        "bias": -2.4069403758749313,
+        "samples": 1270
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.9018106440301848,
+        "avgLogLoss": 0.2498098563603546,
+        "eventCount": 11,
+        "foldsUsed": 11
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.56933302240839,
+        "strokesGainedTotal": 0.5459327698946341,
+        "strokesGainedT2G": 0.48541852104427774,
+        "strokesGainedApp": 0.3497455268638771,
+        "strokesGainedPutt": 0.26117437131397786,
+        "birdiesOrBetter": 0.4119161702260822
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "11",
+      "tournament": "The PLAYERS",
+      "tournamentSlug": "the-players",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-players/post_event/seed_runs/the-players_seed-seed-b_phase6-2026-03-27-post-seed-b_post_event_results.json",
+      "isSeedRun": true,
+      "optSeed": "seed-b",
+      "dryRun": false,
+      "timestamp": "2026-03-27T11:59:00-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-27T11:57:41-05:00",
+        "eventId": "11",
+        "season": 2026,
+        "tournament": "The PLAYERS",
+        "optSeed": "seed-b",
+        "tests": 200,
+        "dryRun": false,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": null,
+            "sha256": null
+          },
+          "historicalData": {
+            "path": "The PLAYERS (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": null,
+            "sha256": null
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_the-players_2026_03_16.json",
+            "sha256": "277f48bd563e2809c5c9eb67536d81f104ff172af48cae7bff71f9e519d8a55f"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "bfded2f81f5057eaa25ea6cfda50f7725882fe38ba9fe23cde31b87f2a9d6d07"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "41f14ced566273b60032dd2bd92c7ad1e3895689ade46080b55c42d2cdc5dc3e"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "981a45ddda91824c9fc047ca9bf1c81cd08e88eece04515a9184dbb655569e8b"
+          }
+        }
+      },
+      "validationCourseType": "TECHNICAL",
+      "validationTemplateName": "VALIDATION_TECHNICAL",
+      "step1": {
+        "correlation": 0.15869807380997789,
+        "rmse": 41.2464874537545,
+        "mae": 33.40495867768595,
+        "top10": 10,
+        "top20": 25,
+        "top20WeightedScore": 17.985888855766447,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.3392968432461726
+      },
+      "step3": {
+        "correlation": 0.7993361821622651,
+        "rmse": 23.52824924206419,
+        "mae": 19.181818181818183,
+        "top10": 60,
+        "top20": 70,
+        "top20WeightedScore": 76.4078417687771,
+        "matchedPlayers": 121,
+        "adjustedSubsetCorrelation": 0.8853204172876304
+      },
+      "step3AlignmentScore": 0.20663776752316682,
+      "step3Top20CompositeScore": 0.7320392088438855,
+      "step3CombinedObjectiveScore": 0.7565838084985992,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": 0.9110236220472441,
+        "logLoss": 0.22421470628499193,
+        "bias": -2.406940375874931,
+        "samples": 1270
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.9018106440301848,
+        "avgLogLoss": 0.2498098563603546,
+        "eventCount": 11,
+        "foldsUsed": 11
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.56933302240839,
+        "strokesGainedTotal": 0.5459327698946341,
+        "strokesGainedT2G": 0.48541852104427774,
+        "strokesGainedApp": 0.3497455268638771,
+        "strokesGainedPutt": 0.26117437131397786,
+        "birdiesOrBetter": 0.4119161702260822
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "475",
+      "tournament": "The Valspar",
+      "tournamentSlug": "the-valspar",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-valspar/post_event/the-valspar_results.json",
+      "isSeedRun": false,
+      "optSeed": null,
+      "dryRun": false,
+      "timestamp": null,
+      "runFingerprint": null,
+      "validationCourseType": null,
+      "validationTemplateName": null,
+      "step1": null,
+      "step3": null,
+      "step3AlignmentScore": null,
+      "step3Top20CompositeScore": null,
+      "step3CombinedObjectiveScore": null,
+      "kFold": null,
+      "kFoldFoldCount": null,
+      "top20Logistic": {
+        "accuracy": null,
+        "logLoss": null,
+        "bias": null,
+        "samples": null
+      },
+      "top20Cv": {
+        "avgAccuracy": null,
+        "avgLogLoss": null,
+        "eventCount": null,
+        "foldsUsed": null
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": null,
+        "strokesGainedTotal": null,
+        "strokesGainedT2G": null,
+        "strokesGainedApp": null,
+        "strokesGainedPutt": null,
+        "birdiesOrBetter": null
+      }
+    },
+    {
+      "season": 2026,
+      "eventId": "475",
+      "tournament": "The Valspar",
+      "tournamentSlug": "the-valspar",
+      "filePath": "/workspaces/modelOptimizer/data/2026/the-valspar/post_event/seed_runs/the-valspar_seed-e_post_event_results.json",
+      "isSeedRun": true,
+      "optSeed": "e",
+      "dryRun": true,
+      "timestamp": "2026-03-23T16:11:52-05:00",
+      "runFingerprint": {
+        "algorithm": "sha256",
+        "createdAt": "2026-03-23T16:04:32-05:00",
+        "eventId": "475",
+        "season": 2026,
+        "tournament": "The Valspar",
+        "optSeed": "e",
+        "tests": 10000,
+        "dryRun": true,
+        "includeCurrentEventRounds": null,
+        "templateOverride": null,
+        "files": {
+          "configurationSheet": {
+            "path": null,
+            "sha256": null
+          },
+          "tournamentField": {
+            "path": null,
+            "sha256": null
+          },
+          "historicalData": {
+            "path": "The Valspar (2026) - Historical Data.csv",
+            "sha256": null
+          },
+          "approachSkill": {
+            "path": null,
+            "sha256": null
+          },
+          "approachDeltaPrior": {
+            "path": "approach_deltas_the-valspar_2026_03_23.json",
+            "sha256": "16573a84c0123b332a4d85eec4644b82826c53eb5ddcf239fb86b7b61b724091"
+          },
+          "weightTemplatesJs": {
+            "path": "weightTemplates.js",
+            "sha256": "90fd9c168aa99a353e0c293e561a92fd033d8bf3fa95d56133e8e80d383b8f6c"
+          },
+          "validationWeightTemplates": {
+            "path": "Weight_Templates.csv",
+            "sha256": "aaa66351bdd3bb3581dc767c68bbb0842c433737a16382a1444214892b13060c"
+          },
+          "validationDeltaTrends": {
+            "path": "Model_Delta_Trends.csv",
+            "sha256": "404fe0799a9528cec8aa08c18406c5990a7d12ad80f054d8f725c042b9cf7895"
+          }
+        }
+      },
+      "validationCourseType": "BALANCED",
+      "validationTemplateName": "VALIDATION_BALANCED",
+      "step1": {
+        "correlation": 0.16746084441914852,
+        "rmse": 45.617491771858255,
+        "mae": 37.72592592592593,
+        "top10": 10,
+        "top20": 35,
+        "top20WeightedScore": 26.84965194629068,
+        "matchedPlayers": 135,
+        "adjustedSubsetCorrelation": 0.3898370394985378
+      },
+      "step3": {
+        "correlation": 0.7278350250245421,
+        "rmse": 31.175964150940715,
+        "mae": 25.244444444444444,
+        "top10": 40,
+        "top20": 70,
+        "top20WeightedScore": 75.66928075216093,
+        "matchedPlayers": 135,
+        "adjustedSubsetCorrelation": 0.8525753585016096
+      },
+      "step3AlignmentScore": 0.2083339579713375,
+      "step3Top20CompositeScore": 0.7283464037608046,
+      "step3CombinedObjectiveScore": 0.7441818514312173,
+      "kFold": {
+        "correlation": 0.29485014993913194,
+        "rmse": 85.29150436172358,
+        "mae": 67.38181818181818,
+        "top10": 33.30909090909091,
+        "top20": 45.08181818181818,
+        "top20WeightedScore": 32.29827668514932,
+        "matchedPlayers": 550,
+        "adjustedSubsetCorrelation": null
+      },
+      "kFoldFoldCount": 3,
+      "top20Logistic": {
+        "accuracy": 0.9125984251968504,
+        "logLoss": 0.22446553621151705,
+        "bias": -2.40453224789006,
+        "samples": 1270
+      },
+      "top20Cv": {
+        "avgAccuracy": 0.9043066929548051,
+        "avgLogLoss": 0.24944121060605154,
+        "eventCount": 11,
+        "foldsUsed": 11
+      },
+      "historicalAvgCorrelations": {
+        "scoringAverage": 0.5506962376976924,
+        "strokesGainedTotal": 0.5328218370977649,
+        "strokesGainedT2G": 0.41745771310616214,
+        "strokesGainedApp": 0.2961454484626837,
+        "strokesGainedPutt": 0.3042932140850767,
+        "birdiesOrBetter": 0.3646384861966927
       }
     },
     {
@@ -3485,7 +4729,7 @@
       "tournament": "Genesis Invitational",
       "tournamentSlug": "genesis-invitational",
       "eventId": "7",
-      "runCount": 2,
+      "runCount": 3,
       "seedRunCount": 1,
       "bestRun": {
         "season": 2026,
@@ -3844,12 +5088,61 @@
       }
     },
     {
+      "tournamentKey": "texas-childrens-open",
+      "tournament": "Texas Childrens Open",
+      "tournamentSlug": "texas-childrens-open",
+      "eventId": "20",
+      "runCount": 1,
+      "seedRunCount": 0,
+      "bestRun": {
+        "season": 2026,
+        "eventId": "20",
+        "tournament": "Texas Childrens Open",
+        "tournamentSlug": "texas-childrens-open",
+        "filePath": "/workspaces/modelOptimizer/data/2026/texas-childrens-open/post_event/texas-childrens-open_results.json",
+        "isSeedRun": false,
+        "optSeed": null,
+        "dryRun": false,
+        "timestamp": null,
+        "runFingerprint": null,
+        "validationCourseType": null,
+        "validationTemplateName": null,
+        "step1": null,
+        "step3": null,
+        "step3AlignmentScore": null,
+        "step3Top20CompositeScore": null,
+        "step3CombinedObjectiveScore": null,
+        "kFold": null,
+        "kFoldFoldCount": null,
+        "top20Logistic": {
+          "accuracy": null,
+          "logLoss": null,
+          "bias": null,
+          "samples": null
+        },
+        "top20Cv": {
+          "avgAccuracy": null,
+          "avgLogLoss": null,
+          "eventCount": null,
+          "foldsUsed": null
+        },
+        "historicalAvgCorrelations": {
+          "scoringAverage": null,
+          "strokesGainedTotal": null,
+          "strokesGainedT2G": null,
+          "strokesGainedApp": null,
+          "strokesGainedPutt": null,
+          "birdiesOrBetter": null
+        }
+      }
+    },
+    {
       "tournamentKey": "the-players",
       "tournament": "The PLAYERS",
       "tournamentSlug": "the-players",
       "eventId": "11",
-      "runCount": 2,
-      "seedRunCount": 1,
+      "runCount": 11,
+      "seedRunCount": 3,
       "bestRun": {
         "season": 2026,
         "eventId": "11",
@@ -3961,6 +5254,127 @@
           "strokesGainedApp": 0.3497455268638771,
           "strokesGainedPutt": 0.26117437131397786,
           "birdiesOrBetter": 0.4119161702260822
+        }
+      }
+    },
+    {
+      "tournamentKey": "the-valspar",
+      "tournament": "The Valspar",
+      "tournamentSlug": "the-valspar",
+      "eventId": "475",
+      "runCount": 2,
+      "seedRunCount": 1,
+      "bestRun": {
+        "season": 2026,
+        "eventId": "475",
+        "tournament": "The Valspar",
+        "tournamentSlug": "the-valspar",
+        "filePath": "/workspaces/modelOptimizer/data/2026/the-valspar/post_event/seed_runs/the-valspar_seed-e_post_event_results.json",
+        "isSeedRun": true,
+        "optSeed": "e",
+        "dryRun": true,
+        "timestamp": "2026-03-23T16:11:52-05:00",
+        "runFingerprint": {
+          "algorithm": "sha256",
+          "createdAt": "2026-03-23T16:04:32-05:00",
+          "eventId": "475",
+          "season": 2026,
+          "tournament": "The Valspar",
+          "optSeed": "e",
+          "tests": 10000,
+          "dryRun": true,
+          "includeCurrentEventRounds": null,
+          "templateOverride": null,
+          "files": {
+            "configurationSheet": {
+              "path": null,
+              "sha256": null
+            },
+            "tournamentField": {
+              "path": null,
+              "sha256": null
+            },
+            "historicalData": {
+              "path": "The Valspar (2026) - Historical Data.csv",
+              "sha256": null
+            },
+            "approachSkill": {
+              "path": null,
+              "sha256": null
+            },
+            "approachDeltaPrior": {
+              "path": "approach_deltas_the-valspar_2026_03_23.json",
+              "sha256": "16573a84c0123b332a4d85eec4644b82826c53eb5ddcf239fb86b7b61b724091"
+            },
+            "weightTemplatesJs": {
+              "path": "weightTemplates.js",
+              "sha256": "90fd9c168aa99a353e0c293e561a92fd033d8bf3fa95d56133e8e80d383b8f6c"
+            },
+            "validationWeightTemplates": {
+              "path": "Weight_Templates.csv",
+              "sha256": "aaa66351bdd3bb3581dc767c68bbb0842c433737a16382a1444214892b13060c"
+            },
+            "validationDeltaTrends": {
+              "path": "Model_Delta_Trends.csv",
+              "sha256": "404fe0799a9528cec8aa08c18406c5990a7d12ad80f054d8f725c042b9cf7895"
+            }
+          }
+        },
+        "validationCourseType": "BALANCED",
+        "validationTemplateName": "VALIDATION_BALANCED",
+        "step1": {
+          "correlation": 0.16746084441914852,
+          "rmse": 45.617491771858255,
+          "mae": 37.72592592592593,
+          "top10": 10,
+          "top20": 35,
+          "top20WeightedScore": 26.84965194629068,
+          "matchedPlayers": 135,
+          "adjustedSubsetCorrelation": 0.3898370394985378
+        },
+        "step3": {
+          "correlation": 0.7278350250245421,
+          "rmse": 31.175964150940715,
+          "mae": 25.244444444444444,
+          "top10": 40,
+          "top20": 70,
+          "top20WeightedScore": 75.66928075216093,
+          "matchedPlayers": 135,
+          "adjustedSubsetCorrelation": 0.8525753585016096
+        },
+        "step3AlignmentScore": 0.2083339579713375,
+        "step3Top20CompositeScore": 0.7283464037608046,
+        "step3CombinedObjectiveScore": 0.7441818514312173,
+        "kFold": {
+          "correlation": 0.29485014993913194,
+          "rmse": 85.29150436172358,
+          "mae": 67.38181818181818,
+          "top10": 33.30909090909091,
+          "top20": 45.08181818181818,
+          "top20WeightedScore": 32.29827668514932,
+          "matchedPlayers": 550,
+          "adjustedSubsetCorrelation": null
+        },
+        "kFoldFoldCount": 3,
+        "top20Logistic": {
+          "accuracy": 0.9125984251968504,
+          "logLoss": 0.22446553621151705,
+          "bias": -2.40453224789006,
+          "samples": 1270
+        },
+        "top20Cv": {
+          "avgAccuracy": 0.9043066929548051,
+          "avgLogLoss": 0.24944121060605154,
+          "eventCount": 11,
+          "foldsUsed": 11
+        },
+        "historicalAvgCorrelations": {
+          "scoringAverage": 0.5506962376976924,
+          "strokesGainedTotal": 0.5328218370977649,
+          "strokesGainedT2G": 0.41745771310616214,
+          "strokesGainedApp": 0.2961454484626837,
+          "strokesGainedPutt": 0.3042932140850767,
+          "birdiesOrBetter": 0.3646384861966927
         }
       }
     },
@@ -4088,65 +5502,65 @@
   ],
   "aggregates": {
     "step3Correlation": {
-      "count": 9,
-      "mean": 0.8061448980340509,
-      "median": 0.8115088230515752,
+      "count": 10,
+      "mean": 0.7983139107331001,
+      "median": 0.8063099995482245,
       "min": 0.6928464800269056,
       "max": 0.8968000458049041
     },
     "step3Top20WeightedScore": {
-      "count": 9,
-      "mean": 80.92822127717369,
-      "median": 81.75551933771149,
+      "count": 10,
+      "mean": 80.40232722467242,
+      "median": 79.69183635216581,
       "min": 70.8036360797165,
       "max": 91.17225539844618
     },
     "step3Top20": {
-      "count": 9,
-      "mean": 77.77777777777777,
-      "median": 80,
+      "count": 10,
+      "mean": 77,
+      "median": 77.5,
       "min": 60,
       "max": 85
     },
     "step3Rmse": {
-      "count": 9,
-      "mean": 23.0165580456023,
-      "median": 22.741631827593597,
+      "count": 10,
+      "mean": 23.83249865613614,
+      "median": 24.156165495815518,
       "min": 13.204586745184837,
       "max": 38.01981602081223
     },
     "step3Mae": {
-      "count": 9,
-      "mean": 17.8516386918461,
-      "median": 18.619834710743802,
+      "count": 10,
+      "mean": 18.59091926710594,
+      "median": 19.412376371765344,
       "min": 9.746478873239436,
       "max": 30.275641025641026
     },
     "step1Correlation": {
-      "count": 9,
-      "mean": 0.6407519504113804,
-      "median": 0.722646812399906,
-      "min": 0.23803547602376926,
+      "count": 10,
+      "mean": 0.5934228398121573,
+      "median": 0.6933175065253827,
+      "min": 0.16746084441914852,
       "max": 0.847640856401711
     },
     "kFoldCorrelation": {
-      "count": 9,
-      "mean": 0.28533420860869857,
-      "median": 0.30498429926085374,
+      "count": 10,
+      "mean": 0.2862858027417419,
+      "median": 0.3043780577552069,
       "min": 0.1755787162975975,
       "max": 0.3352328390586414
     },
     "top20LogisticAccuracy": {
-      "count": 9,
-      "mean": 0.9340777935579392,
-      "median": 0.9326424870466321,
+      "count": 10,
+      "mean": 0.9319298567218304,
+      "median": 0.9312041866671288,
       "min": 0.9092511013215859,
       "max": 0.9558541266794626
     },
     "top20CvAccuracy": {
-      "count": 9,
-      "mean": 0.9133589214259215,
-      "median": 0.9064979718595512,
+      "count": 10,
+      "mean": 0.9124536985788099,
+      "median": 0.9054023324071782,
       "min": 0.895039777337914,
       "max": 0.9396530349723909
     }

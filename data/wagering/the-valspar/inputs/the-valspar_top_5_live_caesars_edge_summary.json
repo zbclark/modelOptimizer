@@ -1,0 +1,14 @@
+{
+  "event_id": "475",
+  "season": "2026",
+  "odds_year": "2026",
+  "book": "caesars",
+  "market": "top_5",
+  "total_rows": 131,
+  "rows_with_outcomes": 0,
+  "avg_edge": -0.02282538778191455,
+  "median_edge": -0.03225806451590987,
+  "hit_rate": null,
+  "brier": null,
+  "log_loss": null
+}

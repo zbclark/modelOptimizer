@@ -19,7 +19,7 @@ function teardownLogging() {
   if (ACTIVE_HANDLE && typeof ACTIVE_HANDLE.teardown === 'function') {
     try {
       ACTIVE_HANDLE.teardown();
-    } catch (error) {
+    } catch {
       // Ignore
     }
   }
@@ -43,13 +43,13 @@ function setupLogging(outputDir, eventName, context, options = {}) {
       const timestamp = formatTimestampForFilename(new Date());
       const archivePath = path.join(archiveDir, `${path.basename(logFile)}.${timestamp}.bak`);
       fs.renameSync(logFile, archivePath);
-    } catch (error) {
+    } catch {
       // Ignore archive failures and continue.
     }
   }
   try {
     fs.writeFileSync(logFile, '');
-  } catch (error) {
+  } catch {
     // Ignore
   }
   // IMPORTANT: keep the original function references so we can restore them exactly.
@@ -64,7 +64,7 @@ function setupLogging(outputDir, eventName, context, options = {}) {
     if (!fileEnabled) return;
     try {
       fs.appendFileSync(logFile, chunk);
-    } catch (error) {
+    } catch {
       // If the log file cannot be written, stop trying.
       fileEnabled = false;
     }
@@ -84,12 +84,12 @@ function setupLogging(outputDir, eventName, context, options = {}) {
     tornDown = true;
     try {
       process.stdout.write = origStdoutWrite;
-    } catch (error) {
+    } catch {
       // Ignore
     }
     try {
       process.stderr.write = origStderrWrite;
-    } catch (error) {
+    } catch {
       // Ignore
     }
 

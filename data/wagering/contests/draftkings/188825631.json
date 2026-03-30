@@ -1,0 +1,329 @@
+{
+  "contestDetail": {
+    "contestSummary": "This 2823-player contest features $60,000.00 in total prizes and pays out the top 595 finishing positions. First place wins $20,000.00.",
+    "payoutSummary": [
+      {
+        "minPosition": 1,
+        "maxPosition": 1,
+        "tierPayoutDescriptions": {
+          "Cash": "$20,000.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$20,000.00",
+            "quantity": 1,
+            "value": 20000
+          }
+        ]
+      },
+      {
+        "minPosition": 2,
+        "maxPosition": 2,
+        "tierPayoutDescriptions": {
+          "Cash": "$5,000.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$5,000.00",
+            "quantity": 1,
+            "value": 5000
+          }
+        ]
+      },
+      {
+        "minPosition": 3,
+        "maxPosition": 3,
+        "tierPayoutDescriptions": {
+          "Cash": "$3,000.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$3,000.00",
+            "quantity": 1,
+            "value": 3000
+          }
+        ]
+      },
+      {
+        "minPosition": 4,
+        "maxPosition": 4,
+        "tierPayoutDescriptions": {
+          "Cash": "$1,500.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$1,500.00",
+            "quantity": 1,
+            "value": 1500
+          }
+        ]
+      },
+      {
+        "minPosition": 5,
+        "maxPosition": 5,
+        "tierPayoutDescriptions": {
+          "Cash": "$1,000.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$1,000.00",
+            "quantity": 1,
+            "value": 1000
+          }
+        ]
+      },
+      {
+        "minPosition": 6,
+        "maxPosition": 6,
+        "tierPayoutDescriptions": {
+          "Cash": "$500.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$500.00",
+            "quantity": 1,
+            "value": 500
+          }
+        ]
+      },
+      {
+        "minPosition": 7,
+        "maxPosition": 8,
+        "tierPayoutDescriptions": {
+          "Cash": "$250.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$250.00",
+            "quantity": 1,
+            "value": 250
+          }
+        ]
+      },
+      {
+        "minPosition": 9,
+        "maxPosition": 10,
+        "tierPayoutDescriptions": {
+          "Cash": "$200.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$200.00",
+            "quantity": 1,
+            "value": 200
+          }
+        ]
+      },
+      {
+        "minPosition": 11,
+        "maxPosition": 15,
+        "tierPayoutDescriptions": {
+          "Cash": "$175.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$175.00",
+            "quantity": 1,
+            "value": 175
+          }
+        ]
+      },
+      {
+        "minPosition": 16,
+        "maxPosition": 20,
+        "tierPayoutDescriptions": {
+          "Cash": "$150.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$150.00",
+            "quantity": 1,
+            "value": 150
+          }
+        ]
+      },
+      {
+        "minPosition": 21,
+        "maxPosition": 25,
+        "tierPayoutDescriptions": {
+          "Cash": "$125.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$125.00",
+            "quantity": 1,
+            "value": 125
+          }
+        ]
+      },
+      {
+        "minPosition": 26,
+        "maxPosition": 35,
+        "tierPayoutDescriptions": {
+          "Cash": "$100.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$100.00",
+            "quantity": 1,
+            "value": 100
+          }
+        ]
+      },
+      {
+        "minPosition": 36,
+        "maxPosition": 49,
+        "tierPayoutDescriptions": {
+          "Cash": "$75.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$75.00",
+            "quantity": 1,
+            "value": 75
+          }
+        ]
+      },
+      {
+        "minPosition": 50,
+        "maxPosition": 89,
+        "tierPayoutDescriptions": {
+          "Cash": "$60.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$60.00",
+            "quantity": 1,
+            "value": 60
+          }
+        ]
+      },
+      {
+        "minPosition": 90,
+        "maxPosition": 205,
+        "tierPayoutDescriptions": {
+          "Cash": "$50.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$50.00",
+            "quantity": 1,
+            "value": 50
+          }
+        ]
+      },
+      {
+        "minPosition": 206,
+        "maxPosition": 595,
+        "tierPayoutDescriptions": {
+          "Cash": "$40.00"
+        },
+        "payoutDescriptions": [
+          {
+            "payoutDescriptionType": "Text",
+            "order": 1,
+            "payoutDescription": "$40.00",
+            "quantity": 1,
+            "value": 40
+          }
+        ]
+      }
+    ],
+    "PayoutDescription": "$60,000",
+    "IsCashPrizeOnly": true,
+    "scoringStyleId": 1,
+    "contestStateDetail": "Completed",
+    "sport": "GOLF",
+    "isGuaranteed": true,
+    "isPrivate": false,
+    "isResizable": false,
+    "wasResized": false,
+    "exclusions": [
+      "AllContests",
+      "ContestTypeBlackList-153",
+      "GameTypeBlackList-153",
+      "PaidGameTypeBlackList-153",
+      "DenyLeagueList-26",
+      "DenyPaidLeagueList-26",
+      "SportsBlackList-0",
+      "DenyPaidSportsList-0",
+      "PaidContests",
+      "PublicContest"
+    ],
+    "acceptedTickets": [
+      524,
+      8392
+    ],
+    "payoutDescriptions": {
+      "Cash": "$60,000.00"
+    },
+    "payoutDescriptionMetadata": [
+      {
+        "payoutDescriptionType": "Text",
+        "order": 0,
+        "payoutDescription": "$60,000.00",
+        "quantity": 1,
+        "value": 60000
+      }
+    ],
+    "fppAward": 0,
+    "sortOrder": -1001,
+    "filters": [],
+    "contestStartTime": "2026-03-14T17:10:00.0000000Z",
+    "gameTypeId": 153,
+    "ticketOnlyEntry": false,
+    "gameSetKey": "C9F46D92A7425807C49449E2F2227E06",
+    "contestKey": "188825631",
+    "name": "PGA TOUR Showdown $60K Sand Trap [$20K to 1st] (Late Round 3 TOUR)",
+    "draftGroupId": 143322,
+    "playTypeId": 169128,
+    "entries": 2823,
+    "maximumEntries": 2823,
+    "maximumEntriesPerUser": 84,
+    "entryFee": 25,
+    "crownAmount": 13750,
+    "totalPayouts": 60000,
+    "contestState": "Completed",
+    "attributes": {
+      "IsGuranteed": "true",
+      "Is Starred": "true",
+      "Allow Pregeneration": "true",
+      "Ignore EntryFeeMin": "true",
+      "ShortName": "%leaguename% Sand Trap",
+      "IsTournament": "true",
+      "ContestApproved": "true"
+    },
+    "crownsAwarded": 0
+  },
+  "errorStatus": {}
+}

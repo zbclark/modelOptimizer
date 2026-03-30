@@ -1,0 +1,14 @@
+{
+  "event_id": "475",
+  "season": "2026",
+  "odds_year": "2026",
+  "book": "bet365",
+  "market": "top_5",
+  "total_rows": 132,
+  "rows_with_outcomes": 129,
+  "avg_edge": 0.407167061332526,
+  "median_edge": 0.4159216311084937,
+  "hit_rate": 0.03875968992248062,
+  "brier": 0.2100919743778227,
+  "log_loss": 0.6129404416359349
+}

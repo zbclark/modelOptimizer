@@ -17,7 +17,7 @@ const readJson = filePath => {
   if (!filePath || !fs.existsSync(filePath)) return null;
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (error) {
+  } catch {
     return null;
   }
 };

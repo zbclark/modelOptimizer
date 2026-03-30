@@ -345,7 +345,7 @@ function writeCleanRunSummaryLog(options = {}) {
       let payload = null;
       try {
         payload = JSON.parse(fs.readFileSync(rankingPath, 'utf8'));
-      } catch (error) {
+      } catch {
         return null;
       }
       const players = Array.isArray(payload?.players) ? payload.players : [];
@@ -561,7 +561,7 @@ function writeCleanRunSummaryLog(options = {}) {
   }
   if (validationRunSummary) {
     summaryLines.push('');
-    summaryLines.push('--- VALIDATION RUNNER INPUTS ---');
+    summaryLines.push('--- VALIDATION PIPELINE INPUTS ---');
     if (validationRunSummary.outputDir) summaryLines.push(`- Output dir: ${validationRunSummary.outputDir}`);
     if (validationRunSummary.inputsDir) summaryLines.push(`- Inputs dir: ${validationRunSummary.inputsDir}`);
     if (validationRunSummary.rankingsJsonPath) summaryLines.push(`- Rankings JSON: ${validationRunSummary.rankingsJsonPath}`);

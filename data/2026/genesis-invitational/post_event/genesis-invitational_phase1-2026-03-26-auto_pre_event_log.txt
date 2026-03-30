@@ -1,0 +1,171 @@
+Logging to /workspaces/modelOptimizer/data/2026/genesis-invitational/post_event/genesis-invitational_phase1-2026-03-26-auto_pre_event_log.txt
+
+=== PRE-EVENT RUN SUMMARY ===
+Event: 7 (The Genesis Invitational)
+CourseNum: 500
+CourseNameKey: THE_RIVIERA_COUNTRY_CLUB
+Season: 2026
+Run Mode: run
+Timestamp: 2026-03-26T12:33:12-05:00
+
+🔄 Course context / configuration
+- Config source: course_context.json
+- Config file: /workspaces/modelOptimizer/utilities/course_context.json
+- Applied overrides: eventId=7, courseNum=500
+- Course type: BALANCED
+- Template key: THE_RIVIERA_COUNTRY_CLUB
+
+🔄 Course history regression
+- Inputs generated
+- Regression snapshot: /workspaces/modelOptimizer/data/2026/genesis-invitational/pre_event/course_history_regression/course_history_regression.json
+- Completed date: 2026-03-26T12:30:14-05:00
+
+🔄 Player ramp summary
+- File: /workspaces/modelOptimizer/data/2026/genesis-invitational/pre_event/analysis/early_season_ramp_sg_total.json
+- Completed date: 2026-02-26T14:36:36-06:00
+- Loaded: 591 players (maxEvents=6)
+
+🔄 Templates
+
+- Selected template: THE_RIVIERA_COUNTRY_CLUB (eventId=7)
+	File: /workspaces/modelOptimizer/utilities/weightTemplates.js
+- Validation template loaded: VALIDATION_BALANCED (applied)
+	Files:
+	- /workspaces/modelOptimizer/data/2026/validation_outputs/Weight_Templates.csv
+	- /workspaces/modelOptimizer/data/2026/validation_outputs/Weight_Templates.json
+
+🔄 Data sources (used this run)
+
+DataGolf
+- Field updates: used (csv_field): /workspaces/modelOptimizer/data/2026/genesis-invitational/inputs/Genesis Invitational (2026) - Tournament Field.csv (last updated 2026-03-02T11:15:36-06:00)
+
+Approach snapshots
+- YTD: /workspaces/modelOptimizer/data/approach_snapshot/approach_ytd_latest.json
+- L12: /workspaces/modelOptimizer/data/approach_snapshot/approach_l12_2026-02-23.json
+- L24: /workspaces/modelOptimizer/data/approach_snapshot/approach_l24_2026-02-23.json
+
+Field
+- Field updates CSV: /workspaces/modelOptimizer/data/2026/genesis-invitational/inputs/Genesis Invitational (2026) - Tournament Field.csv (last updated 2026-03-02T11:15:36-06:00)
+- Field loaded: 72 players
+
+Weather (Meteoblue)
+- Forecast used: no (unavailable)
+
+Historical Rounds
+- Years used: 2021–2025 (eventId=7, courseNum=500)
+- Cache files:
+	- /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json
+	- /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2022.json
+	- /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2023.json
+	- /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2024.json
+	- /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2025.json
+
+--- STEP 1a: HISTORICAL METRIC CORRELATIONS ---
+- Event: 7 | CourseNum: 500
+- Years evaluated: 2021–2025
+- Rounds used (all players): 1894
+- Source files (rounds by year):
+	- 2021: n/a (all players=373)
+	- 2022: n/a (all players=389)
+	- 2023: n/a (all players=393)
+	- 2024: n/a (all players=241)
+	- 2025: n/a (all players=252)
+
+--- STEP 1b: CURRENT-SEASON EVENT-ONLY CORRELATIONS ---
+- Event: 7 | CourseNum: 500
+- Rounds used: 246
+- Event-only approach snapshots: pre=/workspaces/modelOptimizer/data/2026/genesis-invitational/inputs/Genesis Invitational (2026) - Approach Skill (1).csv, post=/workspaces/modelOptimizer/data/approach_snapshot/archive/approach_ytd_2026-02-23.json
+- Event-only approach rows: 176 (field overlap 100.0%)
+
+--- STEP 1c: EVENT + SIMILAR + PUTTING CORRELATIONS ---
+- Event: 7 | CourseNum: 500
+- Years used: 2021, 2022, 2023, 2024, 2025, 2026
+- Events included (event + similar + putting) with rounds by year (actual rows used):
+	- Event 4 / Course 4 | 2021: 312, 2022: 314, 2023: 302, 2024: 313, 2025: 292, 2026: 294 | Total: 1827 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 4 / Course 104 | 2021: 153, 2022: 156, 2023: 156, 2024: 156, 2025: 147, 2026: 147 | Total: 915 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 5 / Course 5 | 2021: 289, 2022: 217, 2023: 226, 2024: 160, 2025: 236, 2026: 240 | Total: 1368 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 7 / Course 500 | 2021: 373, 2022: 389, 2023: 393, 2024: 241, 2025: 0, 2026: 246 | Total: 1642 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 7 / Course 939 | 2021: 0, 2022: 0, 2023: 0, 2024: 0, 2025: 252, 2026: 0 | Total: 252 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 9 / Course 9 | 2021: 389, 2022: 394, 2023: 383, 2024: 254, 2025: 246, 2026: 244 | Total: 1910 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 14 / Course 14 | 2021: 0, 2022: 283, 2023: 277, 2024: 298, 2025: 296, 2026: 0 | Total: 1154 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 23 / Course 23 | 2021: 372, 2022: 377, 2023: 368, 2024: 250, 2025: 257, 2026: 0 | Total: 1624 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 26 / Course 43 | 2021: 0, 2022: 0, 2023: 442, 2024: 0, 2025: 0, 2026: 0 | Total: 442 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 33 / Course 241 | 2021: 0, 2022: 0, 2023: 0, 2024: 0, 2025: 459, 2026: 0 | Total: 459 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 33 / Course 872 | 2021: 0, 2022: 0, 2023: 0, 2024: 0, 2025: 0, 2026: 0 | Total: 0 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 480 / Course 241 | 2021: 0, 2022: 0, 2023: 0, 2024: 0, 2025: 0, 2026: 0 | Total: 0 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 480 / Course 872 | 2021: 463, 2022: 0, 2023: 444, 2024: 272, 2025: 0, 2026: 0 | Total: 1179 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 536 / Course 23 | 2021: 0, 2022: 0, 2023: 0, 2024: 0, 2025: 0, 2026: 0 | Total: 0 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 538 / Course 241 | 2021: 0, 2022: 0, 2023: 0, 2024: 0, 2025: 0, 2026: 0 | Total: 0 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+	- Event 538 / Course 872 | 2021: 0, 2022: 0, 2023: 0, 2024: 0, 2025: 0, 2026: 0 | Total: 0 | Source: /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json … 2025
+- History source files:
+	- /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2021.json
+	- /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2022.json
+	- /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2023.json
+	- /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2024.json
+	- /workspaces/modelOptimizer/data/cache/historical_rounds/datagolf_historical_rounds_pga_all_2025.json
+- Approach source: csv_primary (325 rows)
+- Rounds used: multi-season event+similar+putting (see events/courseNums above)
+- Metrics included: 24 (Driving Distance, Driving Accuracy, SG T2G, SG Approach, SG Around Green, SG OTT, SG Putting, Scrambling, Great Shots, Poor Shots, Scoring Average, Birdies or Better, Approach <100 GIR, Approach <100 SG, Approach <100 Prox, Approach <150 FW GIR, Approach <150 FW SG, Approach <150 FW Prox, Approach <200 FW GIR, Approach <200 FW SG, Approach <200 FW Prox, Approach >200 FW GIR, Approach >200 FW SG, Approach >200 FW Prox)
+- Metrics excluded: Birdie Chances Created, SG Total, Greens in Regulation, Fairway Proximity, Rough Proximity
+
+--- STEP 1d: CURRENT-SEASON TEMPLATE BASELINE ---
+- Years evaluated: 2022, 2023, 2024, 2025
+- Rounds by year (actual rows used):
+	- 2022: 109 rounds
+	- 2023: 134 rounds
+	- 2024: 136 rounds
+	- 2025: 190 rounds
+- Approach usage: current season (2026) only
+- Approach source: csv_primary (325 rows)
+
+--- STEP 2/3: OPTIMIZATION SETTINGS ---
+- Objective weights: corr=0.30, top20=0.50, align=0.20
+
+--- APPROACH DELTA PRIOR ---
+- Label: approachDeltaPrior
+- Weight: 0.15
+- Mode: previous_event
+- Rows used: 72/72
+- Files:
+	- /workspaces/modelOptimizer/data/approach_deltas/2026/approach_deltas_pebble-beach_2026_02-18.json
+- Previous snapshot: /workspaces/modelOptimizer/data/2026/genesis-invitational/inputs/Genesis Invitational (2026) - Approach Skill (1).csv
+- Current snapshot: /workspaces/modelOptimizer/data/approach_snapshot/archive/approach_ytd_2026-02-23.json
+
+--- VALIDATION RUNNER INPUTS ---
+- Output dir: /workspaces/modelOptimizer/data/2026/validation_outputs
+- Inputs dir: /workspaces/modelOptimizer/data/2026/genesis-invitational/inputs
+- Rankings JSON: /workspaces/modelOptimizer/data/2026/genesis-invitational/pre_event/genesis-invitational_pre_event_rankings.json
+- Rankings CSV: /workspaces/modelOptimizer/data/2026/genesis-invitational/pre_event/genesis-invitational_pre_event_rankings.csv
+- Results JSON: /workspaces/modelOptimizer/data/2026/genesis-invitational/post_event/genesis-invitational_results.json
+- Results CSV: /workspaces/modelOptimizer/data/2026/genesis-invitational/post_event/genesis-invitational_results.csv
+- Course context: /workspaces/modelOptimizer/utilities/course_context.json
+- Top-20 blend: /workspaces/modelOptimizer/data/2026/validation_outputs/top20_blend/genesis-invitational_top20_template_blend.json
+
+✅ Outputs
+- Results JSON: /workspaces/modelOptimizer/data/2026/genesis-invitational/post_event/genesis-invitational_phase1-2026-03-26-auto_post_event_results.json
+- Results TXT: /workspaces/modelOptimizer/data/2026/genesis-invitational/post_event/genesis-invitational_phase1-2026-03-26-auto_post_event_results.txt
+- Completed: 2026-03-26T12:33:12-05:00
+
+HUMAN READABLE SUMMARY
+  • Correlation ≈ “ranking agreement” (higher is better).
+  • RMSE/MAE ≈ “how far off the predicted finish positions are” (lower is better).
+  • Top-20% = how often the model’s Top‑20 includes actual Top‑20 finishers.
+
+  Current‑year baseline vs optimized:
+    - Correlation: 0.0315 → 0.3179 (0.2864)
+    - Top‑20 weighted: 31.9% → 48.3%
+    - Verdict: Optimized improved current‑year fit.
+
+  Multi‑year validation (stability across years):
+    - Avg Top‑20 weighted: 76.0% → 77.7%
+    - Stress fails (lower is better): 0 → 0
+
+  Course‑specific LOEO (same event across years):
+    - Δ Corr=0.0027, Δ RMSE=0.13, Δ Top‑20W=-0.8%
+    - Verdict: No regression detected.
+  Course‑type event K‑fold: not enough data to interpret.
+
+  Recommendation (course‑specific): Use optimized weights
+  Note: Course-specific LOEO did not regress.
+  Recommendation (template/course‑type): Use optimized weights
+  Template note: Template K-fold used for template gate (no regression trigger).

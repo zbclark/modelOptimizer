@@ -1,0 +1,14 @@
+{
+  "event_id": "6",
+  "season": "2026",
+  "odds_year": "2026",
+  "book": "bet365",
+  "market": "tournament_matchups",
+  "total_rows": 490,
+  "rows_with_outcomes": 490,
+  "avg_edge": 0,
+  "median_edge": 0,
+  "hit_rate": 0.3795918367346939,
+  "brier": 0.2257809489293231,
+  "log_loss": 0.643036241269245
+}

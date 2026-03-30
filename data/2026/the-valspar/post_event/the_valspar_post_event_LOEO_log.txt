@@ -1,0 +1,62 @@
+Logging to /workspaces/modelOptimizer/data/2026/the-valspar/post_event/the_valspar_post_event_LOEO_log.txt
+Command: /usr/local/share/nvm/versions/node/v24.11.1/bin/node /workspaces/modelOptimizer/core/optimizer.js --event 475 --season 2026 --tournament The Valspar Championship --results
+Env: OPT_TESTS=10000, EVENT_KFOLD_SEED=template, VALIDATION_APPROACH_MODE=current_only, APPROACH_DELTA_ROLLING_EVENTS=4, DATAGOLF_APPROACH_PERIOD=l24
+ℹ️  Skipping course history regression (post-tournament mode).
+ℹ️  Skipping early-season ramp summary (post-tournament mode).
+
+🔄 Loading configuration...
+ℹ️  Using course_context.json as primary configuration source.
+✓ Configuration loaded
+✓ Applied course context overrides (eventId)
+ℹ️  Current-event rounds policy: default
+   Defaults: metrics=include, baseline=include, optimization=include, historical=exclude
+🔄 Building metric config...
+✓ Metric config built
+
+--- LOADING ALL AVAILABLE TEMPLATES ---
+✓ Loaded POWER template
+✓ Loaded TECHNICAL template
+✓ Loaded BALANCED template
+✓ Loaded TPC_LOUISIANA template
+✓ Loaded PEBBLE_BEACH_GOLF_LINKS template
+✓ Loaded WAIALAE_COUNTRY_CLUB template
+✓ Loaded THE_RIVIERA_COUNTRY_CLUB template
+✓ Loaded PETE_DYE_STADIUM_COURSE template
+✓ Loaded TORREY_PINES_GOLF_COURSE template
+✓ Loaded WM_PHOENIX_OPEN_STADIUM_COURSE template
+✓ Loaded PGA_NATIONAL_RESORT_CHAMPION_COURSE template
+✓ Loaded TPC_SAWGRASS template
+✓ Loaded INNISBROOK_COPPERHEAD template
+✓ Loaded MEMORIAL_PARK_GOLF_COURSE template
+✓ Loaded event-specific weights (eventId: 475) from template: INNISBROOK_COPPERHEAD
+✓ DataGolf rankings loaded (api, updated 2026-03-23 12:46:56 UTC)
+ℹ️  Loaded L12 approach snapshot from archive (approach_l12_2026-02-23.json).
+✓ Approach snapshot l24 ready (snapshot, updated 2026-02-23 14:52:29 UTC)
+ℹ️  Skipping L12 approach snapshot refresh (not end-of-season post-tournament run; cached snapshot found).
+ℹ️  Skipping YTD approach snapshot refresh (post-tournament run; cached snapshot found).
+ℹ️  Using event-aligned YTD snapshot for post-tournament run: approach_ytd_2026-03-23.json.
+✓ DataGolf field updates loaded (cache-current, Valspar Championship)
+ℹ️  Field updates name differs but event_id matches: expected The Valspar Championship, got Valspar Championship
+✓ DataGolf player decompositions loaded (api, updated 2026-03-25 21:41:39 UTC)
+✓ DataGolf skill ratings loaded (api, display value, updated 2026-03-23 17:24:24 UTC)
+✓ DataGolf skill ratings loaded (api, display rank, updated 2026-03-23 17:24:24 UTC)
+✓ DataGolf historical rounds loaded (cache, pga 2026)
+✓ Loaded validation template: VALIDATION_BALANCED
+ℹ️  Validation template is included in Step 1d template testing.
+✓ Applied delta trend guardrails (11 metrics)
+
+🔄 Loading data...
+✓ Loaded field (cache/API): 135 players
+ℹ️  Weather adjustments loaded from cache (weather-only: R1 AM=0, R1 PM=0, R2 AM=0, R2 PM=0; net: R1 AM=0, R1 PM=0, R2 AM=0, R2 PM=0; combined: R1 AM=0, R1 PM=-0.05, R2 AM=-0.05, R2 PM=0).
+✓ Loaded history (robust merged-source): 78454 rounds
+ℹ️  History source: refreshPolicy=force-refresh, api(cache=0, stale=5, api=0, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+ℹ️  History rows for event 475: 2194 (season 2026: 417)
+✓ Loaded approach: 0 rows (source: DataGolf approach skill (skipped, l24))
+✓ Using YTD approach snapshot for current season (254 rows, file: approach_ytd_2026-03-23.json, field overlap 131/135)
+ℹ️  Approach usage summary:
+   - Current-season rankings (baseline/optimization): snapshot_ytd
+   - Step 1b (event-only correlations): latest_snapshot_fallback
+   - Step 1c (event+similar+putting correlations): snapshot_ytd
+ℹ️  Derived 135 results from historical data.
+✅ Post-event results CSV saved to: /workspaces/modelOptimizer/data/2026/the-valspar/post_event/the-valspar_results.csv
+✅ Results-only JSON saved to: /workspaces/modelOptimizer/data/2026/the-valspar/post_event/the-valspar_results.json

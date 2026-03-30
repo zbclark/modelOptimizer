@@ -1,0 +1,2 @@
+event_id,season,odds_year,book,market,total_rows,rows_with_outcomes,avg_edge,median_edge,hit_rate,brier,log_loss
+475,2026,2026,caesars,win,135,135,-0.004462956416571506,0.00045374554233591075,0.037037037037037035,0.03638574003006496,0.1808784405426181

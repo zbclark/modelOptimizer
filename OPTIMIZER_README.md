@@ -7,17 +7,71 @@
 
 ## Future development (not implemented)
 
-- **Course-history regression priors** fully integrated into scoring weights (currently optional, output-only from analysis script).
-- **Weather integration** fully active end-to-end (infrastructure exists; activation requires `WEATHER_ENABLED=1` and a valid Meteoblue API key).
 - **Automated field reconciliation** (auto-matching player IDs between DataGolf, configuration sheet, and approach-skill snapshot without manual overrides).
 - **DraftKings DFS lineup integration** bridging optimizer scores to `run_dk_model_lineups.js` in a single pipeline call.
 - **Live in-round adjustment** using live tournament stats mid-round (scaffolding exists in `dataGolfClient.js`; not yet connected to ranking output).
+
+### Refactor safety checks (must stay green)
+
+Use these smoke runs to confirm refactor changes do **not** alter outputs, especially in the wagering pipeline:
+
+- Use a unique tag **per run** (not just per phase) to avoid overwrites.
+- Recommended format: `phase<N>-YYYY-MM-DD-<run>` where `<run>` is `pre`, `post`, `results`, `validation`, `validation-all`, `wager-hist`, `wager-live`.
+- Example tags: `phase1-2026-03-26-pre`, `phase1-2026-03-26-post`, `phase1-2026-03-26-results`.
+
+### Optimizer pre-event (explicit)
+
+```bash
+OUTPUT_TAG=phase1-2026-03-26-pre-players node core/optimizer.js --event 11 --season 2026 --tournament "The PLAYERS" --pre
+```
+
+### Optimizer post-event (explicit)
+
+```bash
+OPT_TESTS=200 OUTPUT_TAG=phase1-2026-03-27-post-players node core/optimizer.js --event 11 --season 2026 --tournament "The PLAYERS" --post
+```
+
+### Optimizer results-only (aliases)
+
+```bash
+OUTPUT_TAG=phase1-2026-03-26-results node core/optimizer.js --event 11 --season 2026 --tournament "The PLAYERS" --results
+```
+
+### Optimizer validation-only (aliases)
+
+```bash
+OUTPUT_TAG=phase1-2026-03-26-validation-only-alt node core/optimizer.js --event 11 --season 2026 --tournament "The PLAYERS" --name "all" --validation
+```
+
+### Validation rollup (season)
+
+```bash
+OUTPUT_TAG=phase1-2026-03-26-validation-all node core/optimizer.js --season 2026 --name "all" --validation
+```
+
+### Validation rollup (explicit tournament)
+
+```bash
+OUTPUT_TAG=phase1-2026-03-26-validation-single node core/optimizer.js --event 11 --season 2026 --tournament "The PLAYERS" --post --validation
+```
+
+### Wagering pipeline (historical + live)
+
+```bash
+OUTPUT_TAG=phase1-2026-03-26-wager-live node scripts/run_wagering_pipeline.js --season 2026 --event 20 --name "Texas Children's Open" --oddsSource live --oddsPoint current --market all
+```
+
+**Invariant checklist:**
+
+- Optimizer artifacts appear under `data/<season>/<tournament>/{pre_event|post_event}/` with the same filenames and counts.
+- Validation outputs remain under `data/<season>/validation_outputs/` with the same CSV/JSON schemas.
+- Wagering pipeline outputs remain under `data/wagering/<tournament_slug>/` and `data/wagering/` with no missing files or schema drift.
 
 ---
 
 ## Goal
 
-Build **tournament-specific, out-of-sample player rankings** by blending weighted historical performance, course context, and approach-skill signals, and evaluate those rankings post-event to measure predictive accuracy. The goal is to answer: *does the model's score ordering correspond to actual tournament outcomes?*
+Build **tournament-specific, out-of-sample player rankings** by blending weighted historical performance, course context, and approach-skill signals, and evaluate those rankings post-event to measure predictive accuracy. The goal is to answer: *does the model's score ordering correspond to actual tournament outcomes AND does the top10 top20 overlap have significant correlation?*
 
 ---
 
@@ -39,7 +93,7 @@ This section makes the intent explicit: **what questions are we trying to answer
 - **Are metric weights pointing at the right signals?** Does the calibration report suggest any metric groups are over- or under-weighted?
 - **Does performance persist by course type?** Do POWER, TECHNICAL, and BALANCED templates each show consistent Spearman across similar events?
 
-### What would convince me
+### What would convince me?
 
 - **Consistent positive Spearman** ($\rho_s \geq 0.15$) across at least 10–15 events in a season.
 - **Top-20 hit rate above 60%** for model top-10 picks across multiple course types.
@@ -50,10 +104,9 @@ This section makes the intent explicit: **what questions are we trying to answer
 
 ## Pipeline overview (optimizer)
 
-In practice, you usually run **one of two entry points**:
+In practice, you run the **optimizer entry point**:
 
-1. **`core/optimizer.js`** — end-to-end pre/post workflow (load inputs, fetch DataGolf data, score players, write rankings, evaluate post-event, optionally run validation).
-2. **`core/validationRunner.js`** — season-level rollups only (reads existing post-event artifacts; does not re-run scoring).
+1. **`core/optimizer.js`** — end-to-end pre/post workflow (load inputs, fetch DataGolf data, score players, write rankings, evaluate post-event, optionally run validation rollups).
 
 For **analysis workflows**, additional scripts are available:
 
@@ -61,25 +114,26 @@ For **analysis workflows**, additional scripts are available:
 - `scripts/analyze_early_season_ramp.js` — computes early-season ramp priors from DataGolf historical rounds.
 - `scripts/summarizeSeedResults.js` — summarizes seeded post-event runs and cleans up non-best seed artifacts.
 
-> **Refactor note:** Validation currently runs as an optional hook inside `optimizer.js` or standalone via `validationRunner.js`. **Future refactor goal:** make `optimizer.js` the single entry point for pre, post, and validation, with analysis scripts as optional extensions.
+> **Refactor note:** Validation runs via `optimizer.js` (validation module is internal). **Future refactor goal:** keep `optimizer.js` as the single entry point for pre, post, and validation, with analysis scripts as optional extensions.
 
 ### Pre-event behavior
 
-- Loads configuration sheet, historical data, and approach-skill CSV from `data/<season>/<tournament>/inputs/`.
-- Fetches live DataGolf data (rankings, approach skill, field updates, decompositions, skill ratings) via API or cache.
+- Uses **DataGolf API/cache by default** for rankings, approach skill, field updates, decompositions, and skill ratings.
+- Falls back to tournament CSV inputs in `data/<season>/<tournament>/inputs/` when present (configuration sheet, historical data, approach-skill CSV).
 - Scores players using weighted group z-scores, BCC, approach deltas, ramp dampening, and optional course-fit and weather adjustments.
 - Writes pre-event rankings (CSV + JSON), signal contributions, and a run log to `data/<season>/<tournament>/pre_event/`.
 
 ### Post-event behavior
 
-- Loads the same inputs plus actual tournament results.
+- Uses **DataGolf API/cache by default** for historical rounds/results and live tournament stats when available.
+- Falls back to local tournament inputs/results CSVs when present.
 - Evaluates predictions vs outcomes, computes Spearman / RMSE / MAE / top-N hit rates.
 - Writes post-event results (CSV + JSON), tournament results files, and can run seeded optimization passes to `data/<season>/<tournament>/post_event/`.
-- Post-event artifacts are the inputs for `validationRunner.js` season-level rollups.
+- Post-event artifacts are the inputs for season-level validation rollups (invoked via `optimizer.js`).
 
 ### Validation-only and utility modes
 
-- **Validation-only** (`--validation` flag or `validationRunner.js` directly): reads existing post-event artifacts; computes calibration, template correlation, and season summary reports.
+- **Validation-only** (`--validation` flag in `optimizer.js`): reads existing post-event artifacts; computes calibration, template correlation, and season summary reports.
 - **Results-only** (`--results` flag): forces post-event mode; useful for re-running evaluations without re-fetching data.
 - **Delta-only** (`--delta` flag): runs approach delta processing only; writes `approach_deltas/` files without scoring.
 - **Dry-run** (`--dryRun` flag): runs the pipeline without writing output files; useful for configuration validation.
@@ -115,7 +169,7 @@ Course metadata comes from `utilities/course_context.json`, keyed by event ID. T
 The optimizer and analysis scripts pull DataGolf data and cache results under `data/cache/`. TTL settings are controlled by `DATAGOLF_*_TTL_HOURS` environment variables.
 
 | Data type | Cache file | TTL env var | Used for |
-|-----------|-----------|-------------|---------|
+| --------- | --------- | ----------- | ------- |
 | Rankings | `datagolf_rankings.json` | `DATAGOLF_RANKINGS_TTL_HOURS` | Baseline player rankings + skill estimates |
 | Approach skill | `datagolf_approach_skill_<period>.json` | `DATAGOLF_APPROACH_TTL_HOURS` | Approach-skill snapshots |
 | Field updates | `datagolf_field_updates_<tour>.json` | `DATAGOLF_FIELD_TTL_HOURS` | Event field, course name, start date |
@@ -221,7 +275,7 @@ $$
 
 ### 11. Weather wave penalty
 
-If weather integration is enabled (`WEATHER_ENABLED=1`), SG metrics and approach bucket metrics are adjusted by a tee-wave penalty derived from hourly forecast data (wind, rain probability, convective risk) and the player's R1/R2 tee wave assignment.
+If weather integration is enabled (`WEATHER_ENABLED=1` **or** `WEATHER_API_KEY` is set), SG metrics and approach bucket metrics are adjusted by a tee-wave penalty derived from hourly forecast data (wind, rain probability, convective risk) and the player's R1/R2 tee wave assignment.
 
 ---
 
@@ -230,45 +284,13 @@ If weather integration is enabled (`WEATHER_ENABLED=1`), SG metrics and approach
 See the **Pipeline overview** section above for the primary breakdown. Key distinctions:
 
 - **Pre-event** (`--pre`): generates rankings only; results are not available. Outputs include `_pre_event_rankings.csv/json`, `_signal_contributions.json`, and `_pre_event_log.txt`.
-- **Post-event** (`--post`): evaluates predictions against results. Outputs include `_post_event_results.csv/json`, tournament results files, and optionally seed_runs.
+- **Post-event** (`--post`): evaluates predictions against results. Outputs include `<output-base>_post_event_results.json`, the results sheet at `<tournament-slug>_results.csv`, tournament results files, and optionally seed_runs.
 - **Validation** (`--validation`): season-level rollups; reads all post-event artifacts and writes calibration, template, and season-summary reports.
 - **Delta** (`--delta`): approach delta processing only; writes `approach_deltas/` files.
 
 ---
 
-## Outputs and storage layout
-
-### Base folder layout
-
-`data/` is the default root (legacy `output/` is only used for read compatibility).
-
-```text
-data/
-  cache/
-    field/
-    historical_rounds/
-    other/
-    weather/
-  approach_snapshot/
-    approach_l24.json
-    approach_l12.json
-    approach_ytd_latest.json
-    archive/
-  approach_deltas/
-  <season>/
-    manifest.json
-    <tournament-slug>/
-      inputs/
-      pre_event/
-      post_event/
-      pre_event/dryrun/
-      post_event/seed_runs/
-    validation_outputs/
-      metric_analysis/
-      template_correlation_summaries/
-      top20_blend/
-      season_summaries/
-```
+See **Appendix B — Storage layout & naming conventions** for the full directory tree.
 
 ### Pre-event artifacts (`data/<season>/<tournament>/pre_event/`)
 
@@ -287,10 +309,13 @@ data/
 - `<output-base>_post_event_log.txt`
 - `<tournament-slug>_results.json`
 - `<tournament-slug>_results.csv`
-- `<tournament-slug>_results_zscores.csv`
-- `<tournament-slug>_results_formatting.csv`
 - `seed_runs/*` (seeded runs)
 - `<output-base>_seed_summary.txt` (from `scripts/summarizeSeedResults.js`)
+
+**Key distinction (naming + content):**
+
+- **Post-event results** (`<output-base>_post_event_results.json` plus the **results sheet** at `<tournament-slug>_results.csv`) are **model‑vs‑actual comparison outputs**. They include model values alongside actual results metrics, plus performance notes and model rank/finish position.
+- **Tournament results (raw)** (`<tournament-slug>_results.json`) are **actual‑only event result tables**. The base name is the **slugified tournament name** (not the output base name).
 
 ### Validation artifacts (`data/<season>/validation_outputs/`)
 
@@ -330,7 +355,18 @@ node core/optimizer.js --event 7 --season 2026 --tournament "Genesis Invitationa
 - `DATAGOLF_APPROACH_PERIOD=l24` (unless overridden)
 - `VALIDATION_APPROACH_MODE=current_only`
 - `APPROACH_DELTA_ROLLING_EVENTS=4`
+- `--apiYears <YYYY[-YYYY]>` is optional; use to override the historical DataGolf year window
 - Output root under `data/<season>/<tournament>/pre_event/`
+
+**Optional flags (common):**
+
+- `--dryRun` (validate + skip writes)
+- `--dataDir <path>` / `--outputDir <path>` / `--dir <subfolder>` (override data/output roots)
+- `--approachDeltaCurrent <path>` / `--approachDeltaPrevious <path>` / `--approachDeltaIgnoreLag`
+- `--rollingDeltas <N>`
+- `--includeCurrentEventRounds` / `--excludeCurrentEventRounds`
+- `--forceFieldUpdates`
+- `--log` / `--verbose`
 
 ### Post-event evaluation run
 
@@ -348,15 +384,50 @@ node core/optimizer.js --event 7 --season 2026 --tournament "Genesis Invitationa
 - Post-event outputs under `data/<season>/<tournament>/post_event/`
 - Validation artifacts under `data/<season>/validation_outputs/` (when validation is enabled)
 
+**Optional flags (common):**
+
+- `--results` (force post-event evaluation)
+- `--validation` (include validation rollups after post-event)
+- `--dryRun` (validate + skip writes)
+- `--dataDir <path>` / `--outputDir <path>` / `--dir <subfolder>` (override data/output roots)
+- `--approachDeltaCurrent <path>` / `--approachDeltaPrevious <path>` / `--approachDeltaIgnoreLag`
+- `--rollingDeltas <N>`
+- `--includeCurrentEventRounds` / `--excludeCurrentEventRounds`
+- `--forceFieldUpdates`
+- `--log` / `--verbose`
+
+### Post-event seed runs (primary: tmux + `run_background.sh`)
+
+For seeded post-event runs, use `scripts/run_background.sh` as the **primary** entry point. It launches the optimizer in the background (nohup) and is safe to run inside a `tmux` session for long seed sweeps.
+
+```bash
+bash scripts/run_background.sh \
+  --event 7 \
+  --season 2026 \
+  --name "Genesis Invitational" \
+  --post \
+  --seeds a, b, c, d, e
+```
+
+Notes:
+
+- Logs are written to `logs/optimizer_<event>_<tournament>_<timestamp>.log`.
+- Seeds are executed sequentially within the background process.
+
 ### Validation rollup
 
 ```bash
-node core/validationRunner.js
+node core/optimizer.js --season 2026 --name "all" --validation
 ```
 
 **Required flags:**
 
 - none (uses available artifacts on disk)
+
+**Optional flags (common):**
+
+- `--dataDir <path>` / `--outputDir <path>` / `--dir <subfolder>` (override data/output roots)
+- `--log` / `--verbose`
 
 ### Early-season ramp analysis
 
@@ -411,97 +482,151 @@ node scripts/summarizeSeedResults.js --tournament "Genesis Invitational" --seaso
 
 ### `core/optimizer.js`
 
-- `--event <id>` / `--eventId <id>`
-- `--season <year>` / `--year <year>`
-- `--tournament "<name>"` / `--name "<name>"`
-- `--template <key>`
-- `--pre` / `--post`
-- `--validation` / `--validationOnly` / `--runValidation`
-- `--results` / `--resultsOnly`
-- `--delta` / `--deltaOnly`
-- `--tests <N>`
-- `--seed <value>` (via `OPT_SEED` or explicit value)
-- `--rollingDeltas <N>`
-- `--approachDeltaCurrent <path>`
-- `--approachDeltaPrevious <path>`
-- `--approachDeltaIgnoreLag`
-- `--includeCurrentEventRounds` / `--excludeCurrentEventRounds`
-- `--forceFieldUpdates`
-- `--dryRun`
-- `--writeTemplates`
-- `--writeValidationTemplates`
-- `--log` / `--verbose`
-- `--dir <subfolder>`
-- `--dataDir <path>`
-- `--outputDir <path>`
-- `--apiYears <YYYY[,YYYY]>`
+- `--event <id>` / `--eventId <id>` — event ID to run. **Default:** none (required unless season-level validation).
+- `--season <year>` / `--year <year>` — season year. **Default:** none (required unless season-level validation).
+- `--tournament "<name>"` / `--name "<name>"` — label used for output naming + manifest resolution. **Default:** derived from DataGolf field/manifest.
+- `--template <key>` — override template key. **Default:** from course context/config sheet; fallback to course/event key.
+- `--pre` / `--post` — force pre- or post-event mode. **Default:** none (explicit mode required).
+- `--validation` / `--validationOnly` / `--runValidation` — validation-only season rollups. **Default:** false.
+- `--results` / `--resultsOnly` — results-only export using existing pre-event rankings. **Default:** false.
+- `--delta` / `--deltaOnly` — approach-delta-only run (writes `approach_deltas/`). **Default:** false.
+- `--tests <N>` — optimizer test count. **Default:** `OPT_TESTS` or `1500`.
+- `--seed <value>` — RNG seed (overrides `OPT_SEED`). **Default:** unset.
+- `--rollingDeltas <N>` — rolling window for delta trends. **Default:** `APPROACH_DELTA_ROLLING_EVENTS` (4).
+- `--approachDeltaCurrent <path>` — explicit delta snapshot path. **Default:** unset.
+- `--approachDeltaPrevious <path>` — explicit prior delta snapshot path. **Default:** unset.
+- `--approachDeltaIgnoreLag` — ignore lag check between delta snapshots. **Default:** false.
+- `--includeCurrentEventRounds` / `--excludeCurrentEventRounds` — override current-event round inclusion. **Default:** auto.
+- `--forceFieldUpdates` — refresh DataGolf field cache. **Default:** false.
+- `--dryRun` — validate + skip writes. **Default:** false.
+- `--writeTemplates` — write template artifacts (forces `dryRun=false`). **Default:** false.
+- `--writeValidationTemplates` — write validation templates. **Default:** false.
+- `--log` / `--verbose` — force logging on. **Default:** logging enabled unless `LOGGING_ENABLED=0`.
+- `--dir <subfolder>` — set data/output root under `data/<subfolder>`. **Default:** `data/`.
+- `--dataDir <path>` — override data root. **Default:** `data/`.
+- `--outputDir <path>` — override output root. **Default:** `data/`.
+- `--apiYears <YYYY[,YYYY]>` — override historical DataGolf year window. **Default:** unset.
 
 ### `scripts/analyze_early_season_ramp.js`
 
-- `--dir <subfolder>`
-- `--dataDir <path>`
-- `--outputDir <path>`
-- `--metric finish|sg_total`
-- `--maxEvents <N>`
-- `--minEvents <N>`
-- `--tours <tour1,tour2>`
-- `--baselineSeasons <N>`
-- `--apiYears <YYYY[-YYYY]>`
-- `--apiTour <tour>`
-- `--debugApi`
+- `--dir <subfolder>` — set data root under `data/<subfolder>`. **Default:** unset.
+- `--dataDir <path>` — override data root. **Default:** `data/`.
+- `--outputDir <path>` — override output root. **Default:** `data/analysis/`.
+- `--metric finish|sg_total` — metric to model. **Default:** `finish`.
+- `--maxEvents <N>` — max events per season. **Default:** 6.
+- `--minEvents <N>` — minimum events required. **Default:** 3.
+- `--tours <tour1,tour2>` — filter tours (comma-separated). **Default:** all tours in data.
+- `--baselineSeasons <N>` — seasons used for baseline. **Default:** 5.
+- `--apiYears <YYYY[-YYYY]>` — years to fetch from DataGolf API. **Default:** required.
+- `--apiTour <tour>` — DataGolf tour for API pulls. **Default:** `pga` (or the single tour from `--tours`).
+- `--debugApi` — log API payload details. **Default:** false.
 
 ### `scripts/summarizeSeedResults.js`
 
-- `--tournament "<name>"` / `--name "<name>"`
-- `--event <id>` / `--eventId <id>`
-- `--season <year>`
-- `--dir <path>` / `--outputDir <path>`
+- `--tournament "<name>"` / `--name "<name>"` — tournament label. **Default:** none (required if `--event` not supplied).
+- `--event <id>` / `--eventId <id>` — event ID. **Default:** none (required if `--tournament` not supplied).
+- `--season <year>` — scope to a season. **Default:** most recent season found in `data/`.
+- `--dir <path>` / `--outputDir <path>` — override seed-results directory. **Default:** `data/<season>/<tournament>/post_event/seed_runs` → `post_event` → `data/` (fallback to legacy `output/`).
 
 ## Environment variables
 
 ### Core optimizer controls
 
-- `OPT_SEED`, `OPT_TESTS`, `LOGGING_ENABLED`
-- `WRITE_TEMPLATES`, `WRITE_VALIDATION_TEMPLATES`
-- `VALIDATION_APPROACH_MODE`
-- `APPROACH_BLEND_WEIGHTS`, `APPROACH_GROUP_CAP`
-- `APPROACH_DELTA_ROLLING_EVENTS`, `APPROACH_DELTA_MIN_DAYS`, `APPROACH_DELTA_SNAPSHOT_ONLY_EVENTS`
-- `OPT_OBJECTIVE_CORR`, `OPT_OBJECTIVE_TOP20`, `OPT_OBJECTIVE_ALIGN`, `OPT_LOEO_PENALTY`, `OPT_LOEO_TOP_N`
-- `PAST_PERF_RAMP_WEIGHT`
+- `OPT_SEED` — RNG seed for optimization runs. **Default:** unset (random).
+- `OPT_TESTS` — optimization test count. **Default:** unset (falls back to `1500`).
+- `LOGGING_ENABLED` — enable/disable logging. **Default:** `true` (set `0/false` to disable).
+- `WRITE_TEMPLATES` — write template artifacts. **Default:** `false`.
+- `WRITE_VALIDATION_TEMPLATES` — write validation template artifacts. **Default:** `false`.
+- `VALIDATION_APPROACH_MODE` — approach snapshot policy for validation. **Default:** `current_only`. **Options:** `current_only`, `none`.
+- `APPROACH_BLEND_WEIGHTS` — blend YTD/L12/L24 approach snapshots (e.g., `0.6,0.3,0.1`). **Default:** unset (no blend).
+- `APPROACH_GROUP_CAP` — cap total approach group weight. **Default:** unset (disabled). **Range:** `0–1`.
+- `APPROACH_DELTA_ROLLING_EVENTS` — rolling window for delta trends. **Default:** `4`.
+- `APPROACH_DELTA_MIN_DAYS` — minimum days between delta snapshots. **Default:** `5`.
+- `APPROACH_DELTA_SNAPSHOT_ONLY_EVENTS` — comma list of event IDs/slugs to force snapshot-only deltas. **Default:** unset.
+- `OPT_OBJECTIVE_CORR` — override objective weight for correlation. **Default:** unset (uses `0.3`).
+- `OPT_OBJECTIVE_TOP20` — override objective weight for Top‑20 hit rate. **Default:** unset (uses `0.5`).
+- `OPT_OBJECTIVE_ALIGN` — override objective weight for template alignment. **Default:** unset (uses `0.2`).
+- `OPT_LOEO_PENALTY` — LOEO penalty factor. **Default:** `0`.
+- `OPT_LOEO_TOP_N` — LOEO top‑N threshold. **Default:** `0`.
+- `PAST_PERF_RAMP_WEIGHT` — ramp dampening weight. **Default:** `0.4`.
 
 ### DataGolf + cache controls
 
-- `DATAGOLF_API_KEY`
-- `DATAGOLF_RANKINGS_TTL_HOURS`, `DATAGOLF_APPROACH_TTL_HOURS`
-- `DATAGOLF_FIELD_TTL_HOURS`, `DATAGOLF_SKILL_TTL_HOURS`, `DATAGOLF_DECOMP_TTL_HOURS`, `DATAGOLF_HISTORICAL_TTL_HOURS`
-- `DATAGOLF_FIELD_TOUR`, `DATAGOLF_DECOMP_TOUR`, `DATAGOLF_HISTORICAL_TOUR`, `DATAGOLF_HISTORICAL_EVENT_ID`, `DATAGOLF_HISTORICAL_YEAR`
+- `DATAGOLF_API_KEY` — DataGolf API key. **Default:** unset.
+- `DATAGOLF_RANKINGS_TTL_HOURS` — rankings cache TTL. **Default:** `24`.
+- `DATAGOLF_APPROACH_TTL_HOURS` — approach cache TTL. **Default:** `24`.
+- `DATAGOLF_FIELD_TTL_HOURS` — field updates TTL. **Default:** `6`.
+- `DATAGOLF_SKILL_TTL_HOURS` — skill ratings TTL. **Default:** `24`.
+- `DATAGOLF_DECOMP_TTL_HOURS` — decompositions TTL. **Default:** `24`.
+- `DATAGOLF_HISTORICAL_TTL_HOURS` — historical rounds TTL. **Default:** `72`.
+- `DATAGOLF_FIELD_TOUR` — field updates tour. **Default:** `pga`.
+- `DATAGOLF_DECOMP_TOUR` — decompositions tour. **Default:** `pga`.
+- `DATAGOLF_HISTORICAL_TOUR` — historical rounds tour. **Default:** `pga`.
+- `DATAGOLF_HISTORICAL_EVENT_ID` — historical rounds event ID. **Default:** `all`.
+- `DATAGOLF_HISTORICAL_YEAR` — historical rounds year override. **Default:** unset.
 
 ### Approach snapshot refresh
 
-- `APPROACH_L12_REFRESH_MONTH`, `APPROACH_L12_FORCE_REFRESH`, `APPROACH_L12_REFRESH_SEASON`, `APPROACH_L12_REFRESH_EVENT_ID`
-- `APPROACH_SNAPSHOT_RETENTION_YTD`
+- `APPROACH_L12_REFRESH_MONTH` — month to refresh L12 snapshot. **Default:** `12`.
+- `APPROACH_L12_FORCE_REFRESH` — force L12 refresh. **Default:** `false`.
+- `APPROACH_L12_REFRESH_SEASON` — season used for refresh. **Default:** unset.
+- `APPROACH_L12_REFRESH_EVENT_ID` — event ID used for refresh. **Default:** `60`.
+- `APPROACH_SNAPSHOT_RETENTION_YTD` — number of YTD snapshots to retain. **Default:** `4` (min `2`).
 
 ### Model scoring toggles
 
-- `MODEL_GROUP_SCORE_Z`, `MODEL_BCC_PRESTANDARDIZED`
-- `MODEL_SHRINKAGE`, `MODEL_SHRINKAGE_MIN`, `MODEL_SHRINKAGE_MAX`
-- `MODEL_APPROACH_COVERAGE_WEIGHT`
-- `MODEL_COURSE_FIT_METHOD`, `MODEL_COURSE_FIT_*`
-- `MODEL_TEE_TIME_BIAS`, `MODEL_TEE_TIME_MAX_SHIFT`, `MODEL_TEE_TIME_MIN_PLAYERS`, `MODEL_TEE_TIME_EARLY_ADVANTAGE`
+- `MODEL_GROUP_SCORE_Z` — use group‑level z‑scores. **Default:** `false`.
+- `MODEL_BCC_PRESTANDARDIZED` — treat BCC as pre‑standardized. **Default:** `false`.
+- `MODEL_SHRINKAGE` — enable shrinkage toward field mean. **Default:** `false`.
+- `MODEL_SHRINKAGE_MIN` — shrinkage floor. **Default:** `0.4`.
+- `MODEL_SHRINKAGE_MAX` — shrinkage ceiling. **Default:** `1.0`.
+- `MODEL_APPROACH_COVERAGE_WEIGHT` — weight of approach coverage in data coverage. **Default:** `0.8`.
+- `MODEL_COURSE_FIT_METHOD` — course‑fit method. **Default:** `topn`. **Options:** `topn`, `weighted`.
+- `MODEL_COURSE_FIT_POOR_MULT` — poor‑fit multiplier. **Default:** `0.8`.
+- `MODEL_COURSE_FIT_GOOD_MULT` — good‑fit multiplier. **Default:** `0.95`.
+- `MODEL_COURSE_FIT_STRONG_MULT` — strong‑fit multiplier. **Default:** `1.0`.
+- `MODEL_COURSE_FIT_STRONG_Z` — weighted fit strong threshold. **Default:** `0.35`.
+- `MODEL_COURSE_FIT_GOOD_Z` — weighted fit good threshold. **Default:** `0.15`.
+- `MODEL_COURSE_FIT_POOR_Z` — weighted fit poor threshold. **Default:** `-0.35`.
+- `MODEL_TEE_TIME_BIAS` — tee‑time bias strength. **Default:** `0.0` (disabled).
+- `MODEL_TEE_TIME_MAX_SHIFT` — max tee‑time multiplier shift. **Default:** `0.03` (clamped `0–0.2`).
+- `MODEL_TEE_TIME_MIN_PLAYERS` — minimum players to enable bias. **Default:** `20` (min `5`).
+- `MODEL_TEE_TIME_EARLY_ADVANTAGE` — sign for early vs late advantage. **Default:** `1` (early‑wave advantage).
 
 ### Weather integration
 
-- `WEATHER_ENABLED`, `WEATHER_API_KEY`, `WEATHER_TTL_HOURS`, `WEATHER_PACKAGE`, `WEATHER_FORECAST_DAYS`
-- `WEATHER_WAVE_AM_START`, `WEATHER_WAVE_AM_END`, `WEATHER_WAVE_PM_START`, `WEATHER_WAVE_PM_END`
-- `WEATHER_RAIN_PROB_*`, `WEATHER_RAIN_AMT_*`, `WEATHER_CONVECTIVE_*`, `WEATHER_WIND_*`, `WEATHER_PENALTY_CAP`
-- `WEATHER_UPDATE_CONTEXT`
+- `WEATHER_ENABLED` — force weather on/off. **Default:** enabled when `WEATHER_API_KEY` is set.
+- `WEATHER_API_KEY` — Meteoblue API key. **Default:** unset.
+- `WEATHER_TTL_HOURS` — weather cache TTL. **Default:** `6`.
+- `WEATHER_PACKAGE` — Meteoblue package name. **Default:** `basic-1h_basic-day`.
+- `WEATHER_FORECAST_DAYS` — forecast horizon (days). **Default:** `4` (clamped `2–7`).
+- `WEATHER_WAVE_AM_START` / `WEATHER_WAVE_AM_END` — AM window hours. **Default:** `6–12`.
+- `WEATHER_WAVE_PM_START` / `WEATHER_WAVE_PM_END` — PM window hours. **Default:** `12–18`.
+- `WEATHER_RAIN_PROB_MAX_PENALTY` — max rain‑prob penalty. **Default:** `0.10`.
+- `WEATHER_RAIN_PROB_GAMMA` — rain‑prob curve. **Default:** `1.7`.
+- `WEATHER_RAIN_AMT_LOW` / `MED` / `HIGH` — rain amount thresholds. **Default:** `0.5 / 2.0 / 5.0`.
+- `WEATHER_RAIN_AMT_PENALTY_LOW` / `MED` / `HIGH` — rain amount penalties. **Default:** `0.02 / 0.04 / 0.06`.
+- `WEATHER_CONVECTIVE_PROB_THRESHOLD` — convective risk threshold. **Default:** `40`.
+- `WEATHER_CONVECTIVE_PENALTY` — convective penalty. **Default:** `0.08`.
+- `WEATHER_WIND_SUSTAINED_THRESHOLD` — sustained wind threshold (mph). **Default:** `15`.
+- `WEATHER_WIND_GUST_THRESHOLD` — gust threshold (mph). **Default:** `20`.
+- `WEATHER_WIND_PENALTY_ONE` — penalty when sustained **or** gust exceeds threshold. **Default:** `0.03`.
+- `WEATHER_WIND_PENALTY_BOTH` — penalty when sustained **and** gust exceed threshold. **Default:** `0.05`.
+- `WEATHER_PENALTY_CAP` — max total weather penalty. **Default:** `0.14`.
+- `WEATHER_UPDATE_CONTEXT` — write back course location updates. **Default:** `false`.
+- `MODEL_WEATHER_WAVE_ENABLED` — apply weather penalties in scoring. **Default:** `0` (disabled).
+- `MODEL_WEATHER_WAVE_R1_EARLY_PENALTY` / `MODEL_WEATHER_WAVE_R1_LATE_PENALTY` — base R1 penalties. **Default:** `0`.
+- `MODEL_WEATHER_WAVE_R2_EARLY_PENALTY` / `MODEL_WEATHER_WAVE_R2_LATE_PENALTY` — base R2 penalties. **Default:** `0`.
 
 ### Analysis script controls
 
-- `PRE_TOURNAMENT_EVENT_ID`, `PRE_TOURNAMENT_SEASON`, `PRE_TOURNAMENT_OUTPUT_DIR`
-- `COURSE_HISTORY_DECAY_LAMBDA`, `COURSE_HISTORY_DEBUG`
-- `DATAGOLF_DEBUG`
-- `SKIP_SEED_CLEANUP`
+- `PRE_TOURNAMENT_EVENT_ID` — event ID for course‑history regression. **Default:** unset (required).
+- `PRE_TOURNAMENT_SEASON` — season for course‑history regression. **Default:** unset (required).
+- `PRE_TOURNAMENT_OUTPUT_DIR` — output dir for regression artifacts. **Default:** `data/course_history_regression/`.
+- `COURSE_HISTORY_DECAY_LAMBDA` — decay lambda for course‑history weights. **Default:** `0.25`.
+- `COURSE_HISTORY_DEBUG` — enable course‑history debug logging. **Default:** `false`.
+- `DATAGOLF_DEBUG` — enable DataGolf debug logging. **Default:** `false`.
+- `SKIP_SEED_CLEANUP` — skip seed‑run cleanup in `summarizeSeedResults.js`. **Default:** `false`.
 
 ---
 
@@ -609,8 +734,11 @@ data/
     <tournament-slug>/
       inputs/
       pre_event/
+        analysis/
+        course_history_regression/
         dryrun/
       post_event/
+        dryrun/
         seed_runs/
     validation_outputs/
       metric_analysis/
@@ -643,16 +771,48 @@ Approach >200 FW GIR, Approach >200 FW SG, Approach >200 FW Prox,
 Refined Weighted Score, WAR, Delta Trend Score, Delta Predictive Score
 ```
 
-### Post-event results CSV (`<output-base>_post_event_results.csv`)
+**Note:** The last two columns are currently emitted with median annotations in the header (e.g., `Delta Trend Score (median=0.181)`), but the underlying data remains unchanged.
+
+### Post-event results CSV (results sheet)
+
+**Naming (per code):** the results sheet is written as `<tournament-slug>_results.csv`.
+**Legacy names (older runs only):** `<tournament-slug>_post_event_results.csv` or `tournament_results.csv`.
 
 ```text
-Performance Analysis, DG ID, Player Name, Model Rank, Finish Position, Score,
-SG Total, SG Total - Model, Driving Distance, Driving Distance - Model,
-Driving Accuracy, Driving Accuracy - Model, SG T2G, SG T2G - Model,
-SG Approach, SG Approach - Model, SG Around Green, SG Around Green - Model,
-SG OTT, SG OTT - Model, SG Putting, SG Putting - Model,
-Greens in Regulation, Greens in Regulation - Model, Fairway Proximity, Fairway Proximity - Model,
-Rough Proximity, Rough Proximity - Model, SG BS, Scoring Average, Scrambling, Great Shots, Poor Shot Avoidance
+Performance Notes, DG ID, Player Name, Finish Position, Model Rank,
+SG Total (Actual), SG Total (Model),
+Driving Distance (Actual), Driving Distance (Model),
+Driving Accuracy (Actual), Driving Accuracy (Model),
+SG T2G (Actual), SG T2G (Model),
+SG Approach (Actual), SG Approach (Model),
+SG Around Green (Actual), SG Around Green (Model),
+SG OTT (Actual), SG OTT (Model),
+SG Putting (Actual), SG Putting (Model),
+Greens in Regulation (Actual), Greens in Regulation (Model),
+Scrambling (Actual), Scrambling (Model),
+Great Shots (Actual), Great Shots (Model),
+Poor Shots (Actual), Poor Shots (Model),
+Scoring Average (Actual), Scoring Average (Model),
+Fairway Proximity (Actual), Fairway Proximity (Model),
+Rough Proximity (Actual), Rough Proximity (Model),
+Approach <100 GIR (Actual), Approach <100 GIR (Model),
+Approach <100 SG (Actual), Approach <100 SG (Model),
+Approach <100 Prox (Actual), Approach <100 Prox (Model),
+Approach <150 FW GIR (Actual), Approach <150 FW GIR (Model),
+Approach <150 FW SG (Actual), Approach <150 FW SG (Model),
+Approach <150 FW Prox (Actual), Approach <150 FW Prox (Model),
+Approach <150 Rough GIR (Actual), Approach <150 Rough GIR (Model),
+Approach <150 Rough SG (Actual), Approach <150 Rough SG (Model),
+Approach <150 Rough Prox (Actual), Approach <150 Rough Prox (Model),
+Approach >150 Rough GIR (Actual), Approach >150 Rough GIR (Model),
+Approach >150 Rough SG (Actual), Approach >150 Rough SG (Model),
+Approach >150 Rough Prox (Actual), Approach >150 Rough Prox (Model),
+Approach <200 FW GIR (Actual), Approach <200 FW GIR (Model),
+Approach <200 FW SG (Actual), Approach <200 FW SG (Model),
+Approach <200 FW Prox (Actual), Approach <200 FW Prox (Model),
+Approach >200 FW GIR (Actual), Approach >200 FW GIR (Model),
+Approach >200 FW SG (Actual), Approach >200 FW SG (Model),
+Approach >200 FW Prox (Actual), Approach >200 FW Prox (Model)
 ```
 
 ### Signal contributions JSON (`<output-base>_signal_contributions.json`)
@@ -660,30 +820,28 @@ Rough Proximity, Rough Proximity - Model, SG BS, Scoring Average, Scrambling, Gr
 - Top-level keys: `runTimestamp`, `eventId`, `season`, `tournament`, `players` (array).
 - Per-player fields: `dgId`, `playerName`, `rank`, `refinedWeightedScore`, `weightedScore`, `confidenceFactor`, `rampDampening`, `dataCoverage`, `shrinkageAlpha`, `deltaBonus`, `courseFitMultiplier`, `teeTimeMultiplier`, `groupScores` (object by group name), `approachDeltaRow`.
 
-### Tournament results CSV (`<tournament-slug>_results.csv`)
+### Tournament results JSON (`<tournament-slug>_results.json`)
 
-```text
-event_id, season, tournament, dg_id, player_name, model_rank, finish_position,
-sg_total, sg_putt, sg_arg, sg_app, sg_ott, sg_t2g, driving_dist, driving_acc,
-gir, prox_fw, prox_rgh, scrambling, great_shots, poor_shots, scoring_avg,
-birdies_or_better, fin_text
-```
-
-### Tournament results z-scores CSV (`<tournament-slug>_results_zscores.csv`)
-
-Same columns as `_results.csv` but metric columns contain field-normalized z-scores rather than raw values.
+- Top-level keys: `generatedAt`, `tournament`, `eventId`, `season`, `source`, `eventName`, `courseName`, `lastUpdated`, `metricStats`, `zScores`, `results`, `resultsSheetCsv`, `apiSnapshots`.
+- `results` rows match the results sheet columns (model vs actual), with a `Performance Analysis` field alongside the metric columns.
 
 ### Validation summary CSV (per-event rollup, `Season_Post_Event_Summary.csv`)
 
 ```text
-Season, Event ID, Tournament, Course Type, Template Used, Spearman, RMSE, MAE, Top 5, Top 10, Top 20, Top 50
+Tournament, Slug, Event ID, Run Count, Seed Runs, Best Seed, Step3 Correlation, Step3 RMSE, Step3 MAE,
+Step3 Top10, Step3 Top20, Step3 Top20 Weighted, KFold Correlation, Top20 Logistic Acc, Top20 CV Acc
 ```
 
 ### Calibration report CSV (`Calibration_Report.csv`)
 
+**Current format:** report-style CSV with section headers. Example sections include:
+
 ```text
-season, event_id, tournament, course_type, template_key, metric_group,
-suggested_weight, current_weight, spearman_contribution, avg_z, coverage_pct
+🎯 POST-TOURNAMENT CALIBRATION ANALYSIS
+
+WINNER PREDICTION ACCURACY
+Metric, Accuracy, Count
+...
 ```
 
 ### Metric analysis CSV (`<tournament>_metric_analysis.csv`)
@@ -881,25 +1039,24 @@ $$
 ### Utilities
 
 - `utilities/logging.js` — Structured logging + run log setup. Insertion points: `core/optimizer.js` logging initialization and run context.
-- `utilities/timeUtils.js` — Timestamp formatting and date parsing helpers. Insertion points: `core/optimizer.js` run timestamps + snapshot freshness; `core/validationRunner.js` outputs and archives.
-- `utilities/csvLoader.js` — CSV parsing helpers. Insertion points: `core/optimizer.js` inputs; `core/validationRunner.js` validation sources; analysis scripts that read CSVs.
+- `utilities/timeUtils.js` — Timestamp formatting and date parsing helpers. Insertion points: `core/optimizer.js` run timestamps + snapshot freshness; validation pipeline outputs and archives.
+- `utilities/csvLoader.js` — CSV parsing helpers. Insertion points: `core/optimizer.js` inputs; validation sources; analysis scripts that read CSVs.
 - `utilities/dataPrep.js` — Builds player data, parses historical rows, and normalizes positions/dates. Insertion points: `core/optimizer.js` player data assembly; `scripts/analyze_early_season_ramp.js` parsing helpers.
-- `utilities/configParser.js` — Reads configuration sheet and shared config cells. Insertion points: `core/optimizer.js` config load; `core/validationRunner.js` calibration + template alignment.
+- `utilities/configParser.js` — Reads configuration sheet and shared config cells. Insertion points: `core/optimizer.js` config load; validation calibration + template alignment.
 - `utilities/metricConfigBuilder.js` — Expands metric groups/weights from config. Insertion points: `core/optimizer.js` group/metric construction.
-- `utilities/weightTemplates.js` — Template weights by course type/event. Insertion points: `core/optimizer.js` baseline weights; `core/validationRunner.js` template reporting.
+- `utilities/weightTemplates.js` — Template weights by course type/event. Insertion points: `core/optimizer.js` baseline weights; validation template reporting.
 - `utilities/deltaPlayerScores.js` — Computes delta-based player scores for approach priors. Insertion points: `core/optimizer.js` approach delta enrichment.
-- `utilities/approachDelta.js` — Loads approach snapshot data and computes deltas. Insertion points: `core/optimizer.js` approach delta generation; `core/validationRunner.js` approach snapshot usage.
-- `utilities/approachEventDelta.js` — Builds event-only approach rows and metric values. Insertion points: `core/optimizer.js` event-only approach modeling; `core/validationRunner.js` event snapshot evaluation.
-- `utilities/shotDistribution.js` — Applies shot-distribution adjustments to metric weights. Insertion points: `core/optimizer.js` pre-event weight tuning.
-- `utilities/top20TemplateBlend.js` — Blends template weights with Top‑20 signals. Insertion points: `core/optimizer.js` pre-event weight blending; `core/validationRunner.js` template alignment summaries.
+- `utilities/approachDelta.js` — Loads approach snapshot data and computes deltas. Insertion points: `core/optimizer.js` approach delta generation; validation approach snapshot usage.
+- `utilities/approachEventDelta.js` — Builds event-only approach rows and metric values. Insertion points: `core/optimizer.js` event-only approach modeling; validation event snapshot evaluation.
+- `utilities/top20TemplateBlend.js` — Blends template weights with Top‑20 signals. Insertion points: `core/optimizer.js` pre-event weight blending; validation template alignment summaries.
 - `utilities/kfoldTag.js` — Generates LOEO/KFOLD tag labels. Insertion points: `core/optimizer.js` seeded run labeling + output naming.
 - `utilities/runSummaryLog.js` — Writes consolidated run summaries. Insertion points: `core/optimizer.js` pre/post run summary artifact.
-- `utilities/tournamentResultsCsv.js` — Result formatting helpers for CSV outputs. Insertion points: `core/optimizer.js` post-event results; `core/validationRunner.js` output formatting.
-- `utilities/manifestUtils.js` — Manifest lookup, tournament resolution, snapshot pairing. Insertion points: `core/optimizer.js` event/tournament resolution + approach snapshot selection; `core/validationRunner.js` season rollups.
-- `utilities/dataGolfClient.js` — DataGolf API wrappers with caching. Insertion points: `core/optimizer.js` (rankings/approach/field/skills/history/live stats), `core/validationRunner.js` (approach/historical).
+- `utilities/tournamentResultsCsv.js` — Result formatting helpers for CSV outputs. Insertion points: `core/optimizer.js` post-event results; validation output formatting.
+- `utilities/manifestUtils.js` — Manifest lookup, tournament resolution, snapshot pairing. Insertion points: `core/optimizer.js` event/tournament resolution + approach snapshot selection; validation season rollups.
+- `utilities/dataGolfClient.js` — DataGolf API wrappers with caching. Insertion points: `core/optimizer.js` (rankings/approach/field/skills/history/live stats), validation approach/historical usage.
 - `utilities/weatherClient.js` — Meteoblue weather lookups + cache. Insertion points: `core/optimizer.js` weather wave penalty computation.
 - `utilities/buildRecentYears.js` — Helper for year window generation. Insertion points: `core/optimizer.js` historical year scope; `scripts/analyze_course_history_impact.js`.
 - `utilities/collectRecords.js` — Aggregates historical rounds from API/cache/CSV. Insertion points: `core/optimizer.js` history assembly; `scripts/analyze_course_history_impact.js`.
 - `utilities/extractHistoricalRows.js` — Normalizes DataGolf historical payload rows. Insertion points: `core/optimizer.js` and analysis scripts.
-- `utilities/outputPaths.js` / `utilities/outputArtifacts.js` — Centralized artifact naming and output path resolution. Insertion points: `core/optimizer.js` + `core/validationRunner.js` output paths; seed summary output naming.
+- `utilities/outputPaths.js` / `utilities/outputArtifacts.js` — Centralized artifact naming and output path resolution. Insertion points: `core/optimizer.js` + validation output paths; seed summary output naming.
 - `utilities/courseHistoryRegression.js` — Optional regression lookup helper (generated by analysis script). Insertion points: `core/modelCore.js` course-history prior weights during scoring.

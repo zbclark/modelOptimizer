@@ -1,0 +1,929 @@
+season,market,odds_source,odds_year,book,label,path,exists
+2026,top_5,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_odds_join.csv,true
+2026,top_5,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_odds_eval.csv,true
+2026,top_5,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_edge_summary.json,true
+2026,top_5,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_edge_summary.csv,true
+2026,top_5,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_odds_join.csv,true
+2026,top_5,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_odds_eval.csv,true
+2026,top_5,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_edge_summary.json,true
+2026,top_5,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_edge_summary.csv,true
+2026,top_5,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_odds_join.csv,true
+2026,top_5,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_odds_eval.csv,true
+2026,top_5,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_edge_summary.json,true
+2026,top_5,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_edge_summary.csv,true
+2026,top_5,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_odds_join.csv,true
+2026,top_5,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_odds_eval.csv,true
+2026,top_5,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_edge_summary.json,true
+2026,top_5,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_edge_summary.csv,true
+2026,top_5,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_odds_join.csv,true
+2026,top_10,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_odds_eval.csv,true
+2026,top_10,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_edge_summary.json,true
+2026,top_10,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_edge_summary.csv,true
+2026,top_10,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_odds_join.csv,true
+2026,top_10,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_odds_eval.csv,true
+2026,top_10,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_edge_summary.json,true
+2026,top_10,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_edge_summary.csv,true
+2026,top_10,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_odds_join.csv,true
+2026,top_10,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_odds_eval.csv,true
+2026,top_10,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_edge_summary.json,true
+2026,top_10,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_edge_summary.csv,true
+2026,top_10,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_odds_join.csv,true
+2026,top_10,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_odds_eval.csv,true
+2026,top_10,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_edge_summary.json,true
+2026,top_10,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_edge_summary.csv,true
+2026,top_10,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_odds_join.csv,true
+2026,top_20,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_odds_eval.csv,true
+2026,top_20,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_edge_summary.json,true
+2026,top_20,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_edge_summary.csv,true
+2026,top_20,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_odds_join.csv,true
+2026,top_20,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_odds_eval.csv,true
+2026,top_20,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_edge_summary.json,true
+2026,top_20,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_edge_summary.csv,true
+2026,top_20,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_odds_join.csv,true
+2026,top_20,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_odds_eval.csv,true
+2026,top_20,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_edge_summary.json,true
+2026,top_20,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_edge_summary.csv,true
+2026,top_20,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_odds_join.csv,true
+2026,top_20,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_odds_eval.csv,true
+2026,top_20,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_edge_summary.json,true
+2026,top_20,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_edge_summary.csv,true
+2026,top_20,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_odds_join.csv,true
+2026,top_5,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_odds_eval.csv,true
+2026,top_5,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_edge_summary.json,true
+2026,top_5,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_edge_summary.csv,true
+2026,top_5,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_odds_join.csv,true
+2026,top_5,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_odds_eval.csv,true
+2026,top_5,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_edge_summary.json,true
+2026,top_5,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_edge_summary.csv,true
+2026,top_5,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_odds_join.csv,true
+2026,top_5,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_odds_eval.csv,true
+2026,top_5,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_edge_summary.json,true
+2026,top_5,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_edge_summary.csv,true
+2026,top_5,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_odds_join.csv,true
+2026,top_5,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_odds_eval.csv,true
+2026,top_5,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_edge_summary.json,true
+2026,top_5,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_edge_summary.csv,true
+2026,top_5,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_odds_join.csv,true
+2026,top_10,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_odds_eval.csv,true
+2026,top_10,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_edge_summary.json,true
+2026,top_10,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_edge_summary.csv,true
+2026,top_10,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_odds_join.csv,true
+2026,top_10,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_odds_eval.csv,true
+2026,top_10,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_edge_summary.json,true
+2026,top_10,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_edge_summary.csv,true
+2026,top_10,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_odds_join.csv,true
+2026,top_10,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_odds_eval.csv,true
+2026,top_10,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_edge_summary.json,true
+2026,top_10,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_edge_summary.csv,true
+2026,top_10,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_odds_join.csv,true
+2026,top_10,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_odds_eval.csv,true
+2026,top_10,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_edge_summary.json,true
+2026,top_10,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_edge_summary.csv,true
+2026,top_10,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_odds_join.csv,true
+2026,top_20,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_odds_eval.csv,true
+2026,top_20,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_edge_summary.json,true
+2026,top_20,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_edge_summary.csv,true
+2026,top_20,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_odds_join.csv,true
+2026,top_20,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_odds_eval.csv,true
+2026,top_20,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_edge_summary.json,true
+2026,top_20,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_edge_summary.csv,true
+2026,top_20,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_odds_join.csv,true
+2026,top_20,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_odds_eval.csv,true
+2026,top_20,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_edge_summary.json,true
+2026,top_20,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_edge_summary.csv,true
+2026,top_20,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_odds_join.csv,true
+2026,top_20,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_odds_eval.csv,true
+2026,top_20,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_edge_summary.json,true
+2026,top_20,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_edge_summary.csv,true
+2026,top_20,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_odds_join.csv,true
+2026,top_5,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_odds_eval.csv,true
+2026,top_5,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_edge_summary.json,true
+2026,top_5,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_edge_summary.csv,true
+2026,top_5,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_odds_join.csv,true
+2026,top_5,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_odds_eval.csv,true
+2026,top_5,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_edge_summary.json,true
+2026,top_5,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_edge_summary.csv,true
+2026,top_5,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_odds_join.csv,true
+2026,top_5,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_odds_eval.csv,true
+2026,top_5,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_edge_summary.json,true
+2026,top_5,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_edge_summary.csv,true
+2026,top_5,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_odds_join.csv,true
+2026,top_5,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_odds_eval.csv,true
+2026,top_5,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_edge_summary.json,true
+2026,top_5,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_edge_summary.csv,true
+2026,top_5,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_odds_join.csv,true
+2026,top_10,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_odds_eval.csv,true
+2026,top_10,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_edge_summary.json,true
+2026,top_10,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_edge_summary.csv,true
+2026,top_10,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_odds_join.csv,true
+2026,top_10,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_odds_eval.csv,true
+2026,top_10,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_edge_summary.json,true
+2026,top_10,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_edge_summary.csv,true
+2026,top_10,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_odds_join.csv,true
+2026,top_10,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_odds_eval.csv,true
+2026,top_10,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_edge_summary.json,true
+2026,top_10,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_edge_summary.csv,true
+2026,top_10,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_odds_join.csv,true
+2026,top_10,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_odds_eval.csv,true
+2026,top_10,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_edge_summary.json,true
+2026,top_10,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_edge_summary.csv,true
+2026,top_10,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_odds_join.csv,true
+2026,top_20,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_odds_eval.csv,true
+2026,top_20,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_edge_summary.json,true
+2026,top_20,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_edge_summary.csv,true
+2026,top_20,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_odds_join.csv,true
+2026,top_20,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_odds_eval.csv,true
+2026,top_20,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_edge_summary.json,true
+2026,top_20,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_edge_summary.csv,true
+2026,top_20,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_odds_join.csv,true
+2026,top_20,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_odds_eval.csv,true
+2026,top_20,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_edge_summary.json,true
+2026,top_20,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_edge_summary.csv,true
+2026,top_20,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_odds_join.csv,true
+2026,top_20,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_odds_eval.csv,true
+2026,top_20,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_edge_summary.json,true
+2026,top_20,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_edge_summary.csv,true
+2026,top_20,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,win,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/win/latest.json,true
+2026,win,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_model_probs.csv,true
+2026,win,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_bet365_odds_join.csv,true
+2026,win,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_bet365_odds_eval.csv,true
+2026,win,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_bet365_edge_summary.json,true
+2026,win,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_bet365_edge_summary.csv,true
+2026,win,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,win,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,win,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/win/latest.json,true
+2026,win,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_model_probs.csv,true
+2026,win,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_caesars_odds_join.csv,true
+2026,win,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_caesars_odds_eval.csv,true
+2026,win,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_caesars_edge_summary.json,true
+2026,win,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_caesars_edge_summary.csv,true
+2026,win,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,win,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,win,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/win/latest.json,true
+2026,win,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_model_probs.csv,true
+2026,win,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_draftkings_odds_join.csv,true
+2026,win,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_draftkings_odds_eval.csv,true
+2026,win,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_draftkings_edge_summary.json,true
+2026,win,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_draftkings_edge_summary.csv,true
+2026,win,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,win,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,win,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/win/latest.json,true
+2026,win,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_model_probs.csv,true
+2026,win,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_sportsbook_odds_join.csv,true
+2026,win,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_sportsbook_odds_eval.csv,true
+2026,win,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_sportsbook_edge_summary.json,true
+2026,win,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_sportsbook_edge_summary.csv,true
+2026,win,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,win,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_odds_join.csv,true
+2026,top_5,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_odds_eval.csv,true
+2026,top_5,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_edge_summary.json,true
+2026,top_5,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_edge_summary.csv,true
+2026,top_5,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_odds_join.csv,true
+2026,top_5,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_odds_eval.csv,true
+2026,top_5,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_edge_summary.json,true
+2026,top_5,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_edge_summary.csv,true
+2026,top_5,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_odds_join.csv,true
+2026,top_5,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_odds_eval.csv,true
+2026,top_5,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_edge_summary.json,true
+2026,top_5,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_edge_summary.csv,true
+2026,top_5,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_odds_join.csv,true
+2026,top_5,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_odds_eval.csv,true
+2026,top_5,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_edge_summary.json,true
+2026,top_5,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_edge_summary.csv,true
+2026,top_5,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_odds_join.csv,true
+2026,top_10,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_odds_eval.csv,true
+2026,top_10,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_edge_summary.json,true
+2026,top_10,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_edge_summary.csv,true
+2026,top_10,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_odds_join.csv,true
+2026,top_10,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_odds_eval.csv,true
+2026,top_10,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_edge_summary.json,true
+2026,top_10,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_edge_summary.csv,true
+2026,top_10,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_odds_join.csv,true
+2026,top_10,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_odds_eval.csv,true
+2026,top_10,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_edge_summary.json,true
+2026,top_10,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_edge_summary.csv,true
+2026,top_10,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_odds_join.csv,true
+2026,top_10,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_odds_eval.csv,true
+2026,top_10,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_edge_summary.json,true
+2026,top_10,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_edge_summary.csv,true
+2026,top_10,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_odds_join.csv,true
+2026,top_20,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_odds_eval.csv,true
+2026,top_20,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_edge_summary.json,true
+2026,top_20,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_edge_summary.csv,true
+2026,top_20,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_odds_join.csv,true
+2026,top_20,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_odds_eval.csv,true
+2026,top_20,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_edge_summary.json,true
+2026,top_20,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_edge_summary.csv,true
+2026,top_20,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_odds_join.csv,true
+2026,top_20,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_odds_eval.csv,true
+2026,top_20,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_edge_summary.json,true
+2026,top_20,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_edge_summary.csv,true
+2026,top_20,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_odds_join.csv,true
+2026,top_20,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_odds_eval.csv,true
+2026,top_20,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_edge_summary.json,true
+2026,top_20,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_edge_summary.csv,true
+2026,top_20,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,make_cut,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/make_cut/latest.json,true
+2026,make_cut,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_model_probs.csv,true
+2026,make_cut,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_bet365_odds_join.csv,true
+2026,make_cut,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_bet365_odds_eval.csv,true
+2026,make_cut,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_bet365_edge_summary.json,true
+2026,make_cut,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_bet365_edge_summary.csv,true
+2026,make_cut,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,make_cut,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,make_cut,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/make_cut/latest.json,true
+2026,make_cut,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_model_probs.csv,true
+2026,make_cut,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_caesars_odds_join.csv,true
+2026,make_cut,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_caesars_odds_eval.csv,true
+2026,make_cut,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_caesars_edge_summary.json,true
+2026,make_cut,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_caesars_edge_summary.csv,true
+2026,make_cut,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,make_cut,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,make_cut,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/make_cut/latest.json,true
+2026,make_cut,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_model_probs.csv,true
+2026,make_cut,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_draftkings_odds_join.csv,true
+2026,make_cut,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_draftkings_odds_eval.csv,true
+2026,make_cut,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_draftkings_edge_summary.json,true
+2026,make_cut,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_draftkings_edge_summary.csv,true
+2026,make_cut,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,make_cut,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,make_cut,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/make_cut/latest.json,true
+2026,make_cut,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_model_probs.csv,true
+2026,make_cut,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_sportsbook_odds_join.csv,true
+2026,make_cut,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_sportsbook_odds_eval.csv,true
+2026,make_cut,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_sportsbook_edge_summary.json,true
+2026,make_cut,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_sportsbook_edge_summary.csv,true
+2026,make_cut,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,make_cut,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,mc,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/mc/latest.json,true
+2026,mc,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_model_probs.csv,true
+2026,mc,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_bet365_odds_join.csv,true
+2026,mc,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_bet365_odds_eval.csv,true
+2026,mc,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_bet365_edge_summary.json,true
+2026,mc,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_bet365_edge_summary.csv,true
+2026,mc,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,mc,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,mc,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/mc/latest.json,true
+2026,mc,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_model_probs.csv,true
+2026,mc,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_caesars_odds_join.csv,true
+2026,mc,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_caesars_odds_eval.csv,true
+2026,mc,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_caesars_edge_summary.json,true
+2026,mc,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_caesars_edge_summary.csv,true
+2026,mc,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,mc,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,mc,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/mc/latest.json,true
+2026,mc,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_model_probs.csv,true
+2026,mc,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_draftkings_odds_join.csv,true
+2026,mc,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_draftkings_odds_eval.csv,true
+2026,mc,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_draftkings_edge_summary.json,true
+2026,mc,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_draftkings_edge_summary.csv,true
+2026,mc,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,mc,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,mc,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/mc/latest.json,true
+2026,mc,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_model_probs.csv,true
+2026,mc,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_sportsbook_odds_join.csv,true
+2026,mc,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_sportsbook_odds_eval.csv,true
+2026,mc,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_sportsbook_edge_summary.json,true
+2026,mc,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_sportsbook_edge_summary.csv,true
+2026,mc,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,mc,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,frl,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,frl,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,frl,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,frl,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_eval.csv,true
+2026,frl,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_edge_summary.json,true
+2026,frl,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_edge_summary.csv,true
+2026,frl,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,frl,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,frl,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,frl,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,frl,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_caesars_odds_join.csv,true
+2026,frl,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_caesars_odds_eval.csv,true
+2026,frl,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_caesars_edge_summary.json,true
+2026,frl,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_caesars_edge_summary.csv,true
+2026,frl,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,frl,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,frl,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,frl,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,frl,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_draftkings_odds_join.csv,true
+2026,frl,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_draftkings_odds_eval.csv,true
+2026,frl,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_draftkings_edge_summary.json,true
+2026,frl,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_draftkings_edge_summary.csv,true
+2026,frl,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,frl,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,frl,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,frl,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,frl,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_sportsbook_odds_join.csv,true
+2026,frl,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_sportsbook_odds_eval.csv,true
+2026,frl,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_sportsbook_edge_summary.json,true
+2026,frl,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_sportsbook_edge_summary.csv,true
+2026,frl,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,frl,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,tournament_matchups,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/matchups/pga/tournament_matchups/latest.json,true
+2026,tournament_matchups,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_model_probs.csv,true
+2026,tournament_matchups,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_bet365_odds_join.csv,true
+2026,tournament_matchups,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_bet365_odds_eval.csv,true
+2026,tournament_matchups,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_bet365_edge_summary.json,true
+2026,tournament_matchups,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_bet365_edge_summary.csv,true
+2026,tournament_matchups,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,tournament_matchups,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,tournament_matchups,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/matchups/pga/tournament_matchups/latest.json,true
+2026,tournament_matchups,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_model_probs.csv,true
+2026,tournament_matchups,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_caesars_odds_join.csv,true
+2026,tournament_matchups,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_caesars_odds_eval.csv,true
+2026,tournament_matchups,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_caesars_edge_summary.json,true
+2026,tournament_matchups,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_caesars_edge_summary.csv,true
+2026,tournament_matchups,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,tournament_matchups,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,tournament_matchups,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/matchups/pga/tournament_matchups/latest.json,true
+2026,tournament_matchups,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_model_probs.csv,true
+2026,tournament_matchups,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_draftkings_odds_join.csv,true
+2026,tournament_matchups,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_draftkings_odds_eval.csv,true
+2026,tournament_matchups,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_draftkings_edge_summary.json,true
+2026,tournament_matchups,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_draftkings_edge_summary.csv,true
+2026,tournament_matchups,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,tournament_matchups,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,tournament_matchups,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/matchups/pga/tournament_matchups/latest.json,true
+2026,tournament_matchups,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_model_probs.csv,true
+2026,tournament_matchups,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_sportsbook_odds_join.csv,true
+2026,tournament_matchups,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_sportsbook_odds_eval.csv,true
+2026,tournament_matchups,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_sportsbook_edge_summary.json,true
+2026,tournament_matchups,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_sportsbook_edge_summary.csv,true
+2026,tournament_matchups,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,tournament_matchups,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,round_matchups,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,round_matchups,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,round_matchups,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,round_matchups,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_bet365_odds_eval.csv,true
+2026,round_matchups,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_bet365_edge_summary.json,true
+2026,round_matchups,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_bet365_edge_summary.csv,true
+2026,round_matchups,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,round_matchups,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,round_matchups,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,round_matchups,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,round_matchups,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,round_matchups,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_caesars_odds_eval.csv,true
+2026,round_matchups,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_caesars_edge_summary.json,true
+2026,round_matchups,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_caesars_edge_summary.csv,true
+2026,round_matchups,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,round_matchups,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,round_matchups,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,round_matchups,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,round_matchups,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,round_matchups,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_draftkings_odds_eval.csv,true
+2026,round_matchups,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_draftkings_edge_summary.json,true
+2026,round_matchups,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_draftkings_edge_summary.csv,true
+2026,round_matchups,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,round_matchups,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,round_matchups,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,round_matchups,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,round_matchups,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,round_matchups,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_sportsbook_odds_eval.csv,true
+2026,round_matchups,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_sportsbook_edge_summary.json,true
+2026,round_matchups,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_sportsbook_edge_summary.csv,true
+2026,round_matchups,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,round_matchups,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,3_balls,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,3_balls,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,3_balls,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,3_balls,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_bet365_odds_eval.csv,true
+2026,3_balls,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_bet365_edge_summary.json,true
+2026,3_balls,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_bet365_edge_summary.csv,true
+2026,3_balls,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,3_balls,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,3_balls,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,3_balls,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,3_balls,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,3_balls,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_caesars_odds_eval.csv,true
+2026,3_balls,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_caesars_edge_summary.json,true
+2026,3_balls,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_caesars_edge_summary.csv,true
+2026,3_balls,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,3_balls,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,3_balls,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,3_balls,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,3_balls,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,3_balls,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_draftkings_odds_eval.csv,true
+2026,3_balls,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_draftkings_edge_summary.json,true
+2026,3_balls,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_draftkings_edge_summary.csv,true
+2026,3_balls,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,3_balls,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,3_balls,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,3_balls,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,3_balls,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,3_balls,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_sportsbook_odds_eval.csv,true
+2026,3_balls,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_sportsbook_edge_summary.json,true
+2026,3_balls,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_sportsbook_edge_summary.csv,true
+2026,3_balls,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,3_balls,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,win,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/win/latest.json,true
+2026,win,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_model_probs.csv,true
+2026,win,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_bet365_odds_join.csv,true
+2026,win,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_bet365_odds_eval.csv,true
+2026,win,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_bet365_edge_summary.json,true
+2026,win,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_bet365_edge_summary.csv,true
+2026,win,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,win,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,win,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/win/latest.json,true
+2026,win,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_model_probs.csv,true
+2026,win,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_caesars_odds_join.csv,true
+2026,win,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_caesars_odds_eval.csv,true
+2026,win,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_caesars_edge_summary.json,true
+2026,win,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_caesars_edge_summary.csv,true
+2026,win,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,win,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,win,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/win/latest.json,true
+2026,win,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_model_probs.csv,true
+2026,win,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_draftkings_odds_join.csv,true
+2026,win,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_draftkings_odds_eval.csv,true
+2026,win,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_draftkings_edge_summary.json,true
+2026,win,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_draftkings_edge_summary.csv,true
+2026,win,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,win,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,win,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/win/latest.json,true
+2026,win,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_model_probs.csv,true
+2026,win,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_sportsbook_odds_join.csv,true
+2026,win,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_sportsbook_odds_eval.csv,true
+2026,win,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_sportsbook_edge_summary.json,true
+2026,win,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_win_live_sportsbook_edge_summary.csv,true
+2026,win,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,win,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_odds_join.csv,true
+2026,top_5,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_odds_eval.csv,true
+2026,top_5,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_edge_summary.json,true
+2026,top_5,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_bet365_edge_summary.csv,true
+2026,top_5,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_odds_join.csv,true
+2026,top_5,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_odds_eval.csv,true
+2026,top_5,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_edge_summary.json,true
+2026,top_5,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_caesars_edge_summary.csv,true
+2026,top_5,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_odds_join.csv,true
+2026,top_5,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_odds_eval.csv,true
+2026,top_5,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_edge_summary.json,true
+2026,top_5,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_draftkings_edge_summary.csv,true
+2026,top_5,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_5,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_5/latest.json,true
+2026,top_5,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_model_probs.csv,true
+2026,top_5,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_odds_join.csv,true
+2026,top_5,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_odds_eval.csv,true
+2026,top_5,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_edge_summary.json,true
+2026,top_5,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_5_live_sportsbook_edge_summary.csv,true
+2026,top_5,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_5,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_odds_join.csv,true
+2026,top_10,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_odds_eval.csv,true
+2026,top_10,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_edge_summary.json,true
+2026,top_10,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_bet365_edge_summary.csv,true
+2026,top_10,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_odds_join.csv,true
+2026,top_10,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_odds_eval.csv,true
+2026,top_10,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_edge_summary.json,true
+2026,top_10,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_caesars_edge_summary.csv,true
+2026,top_10,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_odds_join.csv,true
+2026,top_10,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_odds_eval.csv,true
+2026,top_10,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_edge_summary.json,true
+2026,top_10,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_draftkings_edge_summary.csv,true
+2026,top_10,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_10,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_10/latest.json,true
+2026,top_10,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_model_probs.csv,true
+2026,top_10,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_odds_join.csv,true
+2026,top_10,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_odds_eval.csv,true
+2026,top_10,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_edge_summary.json,true
+2026,top_10,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_10_live_sportsbook_edge_summary.csv,true
+2026,top_10,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_10,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_odds_join.csv,true
+2026,top_20,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_odds_eval.csv,true
+2026,top_20,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_edge_summary.json,true
+2026,top_20,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_bet365_edge_summary.csv,true
+2026,top_20,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_odds_join.csv,true
+2026,top_20,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_odds_eval.csv,true
+2026,top_20,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_edge_summary.json,true
+2026,top_20,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_caesars_edge_summary.csv,true
+2026,top_20,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_odds_join.csv,true
+2026,top_20,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_odds_eval.csv,true
+2026,top_20,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_edge_summary.json,true
+2026,top_20,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_draftkings_edge_summary.csv,true
+2026,top_20,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,top_20,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/top_20/latest.json,true
+2026,top_20,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_model_probs.csv,true
+2026,top_20,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_odds_join.csv,true
+2026,top_20,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_odds_eval.csv,true
+2026,top_20,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_edge_summary.json,true
+2026,top_20,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_top_20_live_sportsbook_edge_summary.csv,true
+2026,top_20,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,top_20,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,make_cut,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/make_cut/latest.json,true
+2026,make_cut,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_model_probs.csv,true
+2026,make_cut,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_bet365_odds_join.csv,true
+2026,make_cut,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_bet365_odds_eval.csv,true
+2026,make_cut,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_bet365_edge_summary.json,true
+2026,make_cut,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_bet365_edge_summary.csv,true
+2026,make_cut,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,make_cut,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,make_cut,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/make_cut/latest.json,true
+2026,make_cut,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_model_probs.csv,true
+2026,make_cut,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_caesars_odds_join.csv,true
+2026,make_cut,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_caesars_odds_eval.csv,true
+2026,make_cut,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_caesars_edge_summary.json,true
+2026,make_cut,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_caesars_edge_summary.csv,true
+2026,make_cut,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,make_cut,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,make_cut,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/make_cut/latest.json,true
+2026,make_cut,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_model_probs.csv,true
+2026,make_cut,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_draftkings_odds_join.csv,true
+2026,make_cut,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_draftkings_odds_eval.csv,true
+2026,make_cut,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_draftkings_edge_summary.json,true
+2026,make_cut,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_draftkings_edge_summary.csv,true
+2026,make_cut,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,make_cut,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,make_cut,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/make_cut/latest.json,true
+2026,make_cut,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_model_probs.csv,true
+2026,make_cut,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_sportsbook_odds_join.csv,true
+2026,make_cut,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_sportsbook_odds_eval.csv,true
+2026,make_cut,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_sportsbook_edge_summary.json,true
+2026,make_cut,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_make_cut_live_sportsbook_edge_summary.csv,true
+2026,make_cut,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,make_cut,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,mc,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/mc/latest.json,true
+2026,mc,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_model_probs.csv,true
+2026,mc,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_bet365_odds_join.csv,true
+2026,mc,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_bet365_odds_eval.csv,true
+2026,mc,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_bet365_edge_summary.json,true
+2026,mc,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_bet365_edge_summary.csv,true
+2026,mc,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,mc,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,mc,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/mc/latest.json,true
+2026,mc,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_model_probs.csv,true
+2026,mc,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_caesars_odds_join.csv,true
+2026,mc,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_caesars_odds_eval.csv,true
+2026,mc,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_caesars_edge_summary.json,true
+2026,mc,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_caesars_edge_summary.csv,true
+2026,mc,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,mc,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,mc,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/mc/latest.json,true
+2026,mc,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_model_probs.csv,true
+2026,mc,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_draftkings_odds_join.csv,true
+2026,mc,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_draftkings_odds_eval.csv,true
+2026,mc,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_draftkings_edge_summary.json,true
+2026,mc,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_draftkings_edge_summary.csv,true
+2026,mc,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,mc,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,mc,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/mc/latest.json,true
+2026,mc,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_model_probs.csv,true
+2026,mc,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_sportsbook_odds_join.csv,true
+2026,mc,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_sportsbook_odds_eval.csv,true
+2026,mc,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_sportsbook_edge_summary.json,true
+2026,mc,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_mc_live_sportsbook_edge_summary.csv,true
+2026,mc,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,mc,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,frl,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,frl,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,frl,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,frl,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_eval.csv,true
+2026,frl,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_edge_summary.json,true
+2026,frl,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_edge_summary.csv,true
+2026,frl,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,frl,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,frl,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,frl,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,frl,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_caesars_odds_join.csv,true
+2026,frl,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_caesars_odds_eval.csv,true
+2026,frl,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_caesars_edge_summary.json,true
+2026,frl,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_caesars_edge_summary.csv,true
+2026,frl,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,frl,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,frl,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,frl,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,frl,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_draftkings_odds_join.csv,true
+2026,frl,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_draftkings_odds_eval.csv,true
+2026,frl,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_draftkings_edge_summary.json,true
+2026,frl,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_draftkings_edge_summary.csv,true
+2026,frl,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,frl,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,frl,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,frl,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,frl,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_sportsbook_odds_join.csv,true
+2026,frl,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_sportsbook_odds_eval.csv,true
+2026,frl,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_sportsbook_edge_summary.json,true
+2026,frl,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_sportsbook_edge_summary.csv,true
+2026,frl,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,frl,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,tournament_matchups,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/matchups/pga/tournament_matchups/latest.json,true
+2026,tournament_matchups,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_model_probs.csv,true
+2026,tournament_matchups,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_bet365_odds_join.csv,true
+2026,tournament_matchups,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_bet365_odds_eval.csv,true
+2026,tournament_matchups,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_bet365_edge_summary.json,true
+2026,tournament_matchups,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_bet365_edge_summary.csv,true
+2026,tournament_matchups,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,tournament_matchups,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,tournament_matchups,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/matchups/pga/tournament_matchups/latest.json,true
+2026,tournament_matchups,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_model_probs.csv,true
+2026,tournament_matchups,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_caesars_odds_join.csv,true
+2026,tournament_matchups,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_caesars_odds_eval.csv,true
+2026,tournament_matchups,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_caesars_edge_summary.json,true
+2026,tournament_matchups,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_caesars_edge_summary.csv,true
+2026,tournament_matchups,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,tournament_matchups,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,tournament_matchups,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/matchups/pga/tournament_matchups/latest.json,true
+2026,tournament_matchups,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_model_probs.csv,true
+2026,tournament_matchups,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_draftkings_odds_join.csv,true
+2026,tournament_matchups,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_draftkings_odds_eval.csv,true
+2026,tournament_matchups,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_draftkings_edge_summary.json,true
+2026,tournament_matchups,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_draftkings_edge_summary.csv,true
+2026,tournament_matchups,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,tournament_matchups,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,tournament_matchups,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/matchups/pga/tournament_matchups/latest.json,true
+2026,tournament_matchups,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_model_probs.csv,true
+2026,tournament_matchups,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_sportsbook_odds_join.csv,true
+2026,tournament_matchups,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_sportsbook_odds_eval.csv,true
+2026,tournament_matchups,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_sportsbook_edge_summary.json,true
+2026,tournament_matchups,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_tournament_matchups_live_sportsbook_edge_summary.csv,true
+2026,tournament_matchups,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,tournament_matchups,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,round_matchups,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,round_matchups,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,round_matchups,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,round_matchups,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_bet365_odds_eval.csv,true
+2026,round_matchups,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_bet365_edge_summary.json,true
+2026,round_matchups,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_bet365_edge_summary.csv,true
+2026,round_matchups,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,round_matchups,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,round_matchups,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,round_matchups,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,round_matchups,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,round_matchups,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_caesars_odds_eval.csv,true
+2026,round_matchups,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_caesars_edge_summary.json,true
+2026,round_matchups,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_caesars_edge_summary.csv,true
+2026,round_matchups,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,round_matchups,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,round_matchups,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,round_matchups,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,round_matchups,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,round_matchups,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_draftkings_odds_eval.csv,true
+2026,round_matchups,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_draftkings_edge_summary.json,true
+2026,round_matchups,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_draftkings_edge_summary.csv,true
+2026,round_matchups,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,round_matchups,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,round_matchups,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,round_matchups,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,round_matchups,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,round_matchups,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_sportsbook_odds_eval.csv,true
+2026,round_matchups,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_sportsbook_edge_summary.json,true
+2026,round_matchups,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_round_matchups_live_sportsbook_edge_summary.csv,true
+2026,round_matchups,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,round_matchups,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,3_balls,live,2026,bet365,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,3_balls,live,2026,bet365,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,3_balls,live,2026,bet365,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,3_balls,live,2026,bet365,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_bet365_odds_eval.csv,true
+2026,3_balls,live,2026,bet365,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_bet365_edge_summary.json,true
+2026,3_balls,live,2026,bet365,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_bet365_edge_summary.csv,true
+2026,3_balls,live,2026,bet365,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,3_balls,live,2026,bet365,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,3_balls,live,2026,caesars,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,3_balls,live,2026,caesars,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,3_balls,live,2026,caesars,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,3_balls,live,2026,caesars,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_caesars_odds_eval.csv,true
+2026,3_balls,live,2026,caesars,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_caesars_edge_summary.json,true
+2026,3_balls,live,2026,caesars,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_caesars_edge_summary.csv,true
+2026,3_balls,live,2026,caesars,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,3_balls,live,2026,caesars,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,3_balls,live,2026,draftkings,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,3_balls,live,2026,draftkings,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,3_balls,live,2026,draftkings,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,3_balls,live,2026,draftkings,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_draftkings_odds_eval.csv,true
+2026,3_balls,live,2026,draftkings,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_draftkings_edge_summary.json,true
+2026,3_balls,live,2026,draftkings,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_draftkings_edge_summary.csv,true
+2026,3_balls,live,2026,draftkings,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,3_balls,live,2026,draftkings,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false
+2026,3_balls,live,2026,sportsbook,Odds archive,/workspaces/modelOptimizer/data/wagering/odds_live/outrights/pga/frl/latest.json,true
+2026,3_balls,live,2026,sportsbook,Model probabilities,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_model_probs.csv,true
+2026,3_balls,live,2026,sportsbook,Odds join,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_frl_live_bet365_odds_join.csv,true
+2026,3_balls,live,2026,sportsbook,Odds evaluation,/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_sportsbook_odds_eval.csv,true
+2026,3_balls,live,2026,sportsbook,Edge summary (json),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_sportsbook_edge_summary.json,true
+2026,3_balls,live,2026,sportsbook,Edge summary (csv),/workspaces/modelOptimizer/data/wagering/texas-childrens-open/inputs/texas-childrens-open_3_balls_live_sportsbook_edge_summary.csv,true
+2026,3_balls,live,2026,sportsbook,DK lineups (json),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.json,false
+2026,3_balls,live,2026,sportsbook,DK lineups (csv),/workspaces/modelOptimizer/data/wagering/fantasy/draftkings/pga/main/top_lineups.csv,false

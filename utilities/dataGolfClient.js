@@ -5,6 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { readJson, writeJson } = require('./fileUtils');
 
 const DEFAULT_TIMEOUT_MS = 20000;
 const DEFAULT_RETRIES = 3;
@@ -12,28 +13,6 @@ const DEFAULT_BACKOFF_MS = 2000;
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-const ensureDir = dirPath => {
-  if (!dirPath) return;
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-};
-
-const readJson = filePath => {
-  if (!filePath || !fs.existsSync(filePath)) return null;
-  try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (error) {
-    return null;
-  }
-};
-
-const writeJson = (filePath, payload) => {
-  if (!filePath) return;
-  ensureDir(path.dirname(filePath));
-  fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
-};
 
 const normalizeNameForMatch = value => String(value || '')
   .toLowerCase()
@@ -64,7 +43,7 @@ const isFresh = (filePath, ttlMs) => {
   try {
     const stats = fs.statSync(filePath);
     return Date.now() - stats.mtimeMs < ttlMs;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

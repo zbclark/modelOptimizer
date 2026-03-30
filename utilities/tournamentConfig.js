@@ -26,7 +26,7 @@ function findFileByPattern(dirPath, patterns) {
         return path.join(dirPath, matchingFile);
       }
     }
-  } catch (err) {
+  } catch {
     // Directory doesn't exist or can't be read
   }
   return null;

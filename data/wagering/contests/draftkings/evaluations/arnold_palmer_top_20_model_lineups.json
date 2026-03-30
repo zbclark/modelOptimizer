@@ -1,0 +1,1010 @@
+{
+  "generatedAt": "2026-03-19T00:44:25.578Z",
+  "eventId": "9",
+  "tournamentSlug": "arnold-palmer-invitational",
+  "salaryCap": 50000,
+  "lineupSize": 6,
+  "topN": 20,
+  "lineups": [
+    {
+      "rank": 1,
+      "totalSalary": 49200,
+      "totalModelScore": 4.38927580903989,
+      "totalActualPoints": 305.5,
+      "players": [
+        {
+          "dgId": "18417",
+          "name": "Scheffler, Scottie",
+          "salary": 14100,
+          "modelScore": 0.7560865752651064,
+          "actualPoints": 73.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        },
+        {
+          "dgId": "22985",
+          "name": "Smotherman, Austin",
+          "salary": 6400,
+          "modelScore": 0.4472514793321743,
+          "actualPoints": 25
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "totalSalary": 49700,
+      "totalModelScore": 4.2529637325901986,
+      "totalActualPoints": 345.5,
+      "players": [
+        {
+          "dgId": "18417",
+          "name": "Scheffler, Scottie",
+          "salary": 14100,
+          "modelScore": 0.7560865752651064,
+          "actualPoints": 73.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "17365",
+          "name": "Mitchell, Keith",
+          "salary": 6900,
+          "modelScore": 0.31093940288248323,
+          "actualPoints": 65
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "totalSalary": 50000,
+      "totalModelScore": 4.242568239244392,
+      "totalActualPoints": 312,
+      "players": [
+        {
+          "dgId": "18417",
+          "name": "Scheffler, Scottie",
+          "salary": 14100,
+          "modelScore": 0.7560865752651064,
+          "actualPoints": 73.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "29767",
+          "name": "Gerard, Ryan",
+          "salary": 7200,
+          "modelScore": 0.3005439095366769,
+          "actualPoints": 31.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "totalSalary": 47900,
+      "totalModelScore": 4.2409446048731665,
+      "totalActualPoints": 325.5,
+      "players": [
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "12294",
+          "name": "Fleetwood, Tommy",
+          "salary": 10300,
+          "modelScore": 0.47391694596913914,
+          "actualPoints": 48
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "totalSalary": 44000,
+      "totalModelScore": 4.2142791382362015,
+      "totalActualPoints": 302.5,
+      "players": [
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        },
+        {
+          "dgId": "22985",
+          "name": "Smotherman, Austin",
+          "salary": 6400,
+          "modelScore": 0.4472514793321743,
+          "actualPoints": 25
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "totalSalary": 45800,
+      "totalModelScore": 4.211617886220321,
+      "totalActualPoints": 335,
+      "players": [
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21891",
+          "name": "Kitayama, Kurt",
+          "salary": 8200,
+          "modelScore": 0.44459022731629344,
+          "actualPoints": 57.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "totalSalary": 46800,
+      "totalModelScore": 4.198206812139758,
+      "totalActualPoints": 348.5,
+      "players": [
+        {
+          "dgId": "14609",
+          "name": "Kim, Si Woo",
+          "salary": 9200,
+          "modelScore": 0.4311791532357303,
+          "actualPoints": 71
+        },
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "totalSalary": 49700,
+      "totalModelScore": 4.163509410676979,
+      "totalActualPoints": 320,
+      "players": [
+        {
+          "dgId": "18417",
+          "name": "Scheffler, Scottie",
+          "salary": 14100,
+          "modelScore": 0.7560865752651064,
+          "actualPoints": 73.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "17365",
+          "name": "Mitchell, Keith",
+          "salary": 6900,
+          "modelScore": 0.31093940288248323,
+          "actualPoints": 65
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        },
+        {
+          "dgId": "22985",
+          "name": "Smotherman, Austin",
+          "salary": 6400,
+          "modelScore": 0.4472514793321743,
+          "actualPoints": 25
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "totalSalary": 50000,
+      "totalModelScore": 4.153113917331172,
+      "totalActualPoints": 286.5,
+      "players": [
+        {
+          "dgId": "18417",
+          "name": "Scheffler, Scottie",
+          "salary": 14100,
+          "modelScore": 0.7560865752651064,
+          "actualPoints": 73.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "29767",
+          "name": "Gerard, Ryan",
+          "salary": 7200,
+          "modelScore": 0.3005439095366769,
+          "actualPoints": 31.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        },
+        {
+          "dgId": "22985",
+          "name": "Smotherman, Austin",
+          "salary": 6400,
+          "modelScore": 0.4472514793321743,
+          "actualPoints": 25
+        }
+      ]
+    },
+    {
+      "rank": 10,
+      "totalSalary": 47900,
+      "totalModelScore": 4.151490282959947,
+      "totalActualPoints": 300,
+      "players": [
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "12294",
+          "name": "Fleetwood, Tommy",
+          "salary": 10300,
+          "modelScore": 0.47391694596913914,
+          "actualPoints": 48
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        },
+        {
+          "dgId": "22985",
+          "name": "Smotherman, Austin",
+          "salary": 6400,
+          "modelScore": 0.4472514793321743,
+          "actualPoints": 25
+        }
+      ]
+    },
+    {
+      "rank": 11,
+      "totalSalary": 49700,
+      "totalModelScore": 4.148829030944066,
+      "totalActualPoints": 332.5,
+      "players": [
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21891",
+          "name": "Kitayama, Kurt",
+          "salary": 8200,
+          "modelScore": 0.44459022731629344,
+          "actualPoints": 57.5
+        },
+        {
+          "dgId": "12294",
+          "name": "Fleetwood, Tommy",
+          "salary": 10300,
+          "modelScore": 0.47391694596913914,
+          "actualPoints": 48
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 12,
+      "totalSalary": 49200,
+      "totalModelScore": 4.133585374169179,
+      "totalActualPoints": 315,
+      "players": [
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "10091",
+          "name": "McIlroy, Rory",
+          "salary": 11600,
+          "modelScore": 0.3665577152651517,
+          "actualPoints": 37.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 13,
+      "totalSalary": 45800,
+      "totalModelScore": 4.122163564307101,
+      "totalActualPoints": 309.5,
+      "players": [
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21891",
+          "name": "Kitayama, Kurt",
+          "salary": 8200,
+          "modelScore": 0.44459022731629344,
+          "actualPoints": 57.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        },
+        {
+          "dgId": "22985",
+          "name": "Smotherman, Austin",
+          "salary": 6400,
+          "modelScore": 0.4472514793321743,
+          "actualPoints": 25
+        }
+      ]
+    },
+    {
+      "rank": 14,
+      "totalSalary": 48800,
+      "totalModelScore": 4.113751138545101,
+      "totalActualPoints": 334,
+      "players": [
+        {
+          "dgId": "18417",
+          "name": "Scheffler, Scottie",
+          "salary": 14100,
+          "modelScore": 0.7560865752651064,
+          "actualPoints": 73.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "30332",
+          "name": "Bennett, Daniel",
+          "salary": 6000,
+          "modelScore": 0.1717268088373858,
+          "actualPoints": 53.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 15,
+      "totalSalary": 47600,
+      "totalModelScore": 4.109802976168378,
+      "totalActualPoints": 339,
+      "players": [
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "19895",
+          "name": "Schauffele, Xander",
+          "salary": 10000,
+          "modelScore": 0.3427753172643514,
+          "actualPoints": 61.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 16,
+      "totalSalary": 46800,
+      "totalModelScore": 4.108752490226538,
+      "totalActualPoints": 323,
+      "players": [
+        {
+          "dgId": "14609",
+          "name": "Kim, Si Woo",
+          "salary": 9200,
+          "modelScore": 0.4311791532357303,
+          "actualPoints": 71
+        },
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        },
+        {
+          "dgId": "22985",
+          "name": "Smotherman, Austin",
+          "salary": 6400,
+          "modelScore": 0.4472514793321743,
+          "actualPoints": 25
+        }
+      ]
+    },
+    {
+      "rank": 17,
+      "totalSalary": 45400,
+      "totalModelScore": 4.107106179743922,
+      "totalActualPoints": 280,
+      "players": [
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "12294",
+          "name": "Fleetwood, Tommy",
+          "salary": 10300,
+          "modelScore": 0.47391694596913914,
+          "actualPoints": 48
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        },
+        {
+          "dgId": "22985",
+          "name": "Smotherman, Austin",
+          "salary": 6400,
+          "modelScore": 0.4472514793321743,
+          "actualPoints": 25
+        }
+      ]
+    },
+    {
+      "rank": 18,
+      "totalSalary": 48600,
+      "totalModelScore": 4.106091238210658,
+      "totalActualPoints": 355.5,
+      "players": [
+        {
+          "dgId": "14609",
+          "name": "Kim, Si Woo",
+          "salary": 9200,
+          "modelScore": 0.4311791532357303,
+          "actualPoints": 71
+        },
+        {
+          "dgId": "14577",
+          "name": "English, Harris",
+          "salary": 8900,
+          "modelScore": 0.5810899044614184,
+          "actualPoints": 70.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21891",
+          "name": "Kitayama, Kurt",
+          "salary": 8200,
+          "modelScore": 0.44459022731629344,
+          "actualPoints": 57.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 19,
+      "totalSalary": 47200,
+      "totalModelScore": 4.104444927728041,
+      "totalActualPoints": 312.5,
+      "players": [
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21891",
+          "name": "Kitayama, Kurt",
+          "salary": 8200,
+          "modelScore": 0.44459022731629344,
+          "actualPoints": 57.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "12294",
+          "name": "Fleetwood, Tommy",
+          "salary": 10300,
+          "modelScore": 0.47391694596913914,
+          "actualPoints": 48
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        }
+      ]
+    },
+    {
+      "rank": 20,
+      "totalSalary": 49300,
+      "totalModelScore": 4.1017787405487764,
+      "totalActualPoints": 296.5,
+      "players": [
+        {
+          "dgId": "18417",
+          "name": "Scheffler, Scottie",
+          "salary": 14100,
+          "modelScore": 0.7560865752651064,
+          "actualPoints": 73.5
+        },
+        {
+          "dgId": "22833",
+          "name": "Echavarria, Nico",
+          "salary": 7000,
+          "modelScore": 0.8778148227154449,
+          "actualPoints": 65.5
+        },
+        {
+          "dgId": "23602",
+          "name": "Hojgaard, Nicolai",
+          "salary": 7200,
+          "modelScore": 0.8570746265890871,
+          "actualPoints": 62.5
+        },
+        {
+          "dgId": "21944",
+          "name": "Moore, Taylor",
+          "salary": 6400,
+          "modelScore": 0.5367058012453939,
+          "actualPoints": 50.5
+        },
+        {
+          "dgId": "13900",
+          "name": "Lowry, Shane",
+          "salary": 8100,
+          "modelScore": 0.9143425038926829,
+          "actualPoints": 28.5
+        },
+        {
+          "dgId": "27900",
+          "name": "Potgieter, Aldrich",
+          "salary": 6500,
+          "modelScore": 0.1597544108410614,
+          "actualPoints": 16
+        }
+      ]
+    }
+  ]
+}

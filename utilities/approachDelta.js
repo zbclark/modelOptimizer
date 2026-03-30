@@ -90,6 +90,8 @@ const parseNumber = (value, isPercent = false) => {
   return parsed;
 };
 
+const parseApproachNumber = (value, isPercent = false) => parseNumber(value, isPercent);
+
 const buildApproachIndex = rows => {
   const index = new Map();
   rows.forEach(row => {
@@ -363,7 +365,7 @@ const loadApproachCsv = (filePath) => {
     try {
       const payload = JSON.parse(fs.readFileSync(resolvedPath, 'utf8'));
       return extractApproachRowsFromJson(payload);
-    } catch (error) {
+    } catch {
       return [];
     }
   }
@@ -376,6 +378,7 @@ const loadApproachCsv = (filePath) => {
 
 module.exports = {
   METRIC_DEFS,
+  parseApproachNumber,
   loadApproachCsv,
   computeApproachDeltas,
   extractApproachRowsFromJson

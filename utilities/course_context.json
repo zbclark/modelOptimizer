@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-23T20:45:56-05:00",
+  "updatedAt": "2026-03-30T09:49:31-05:00",
   "sourceDir": "apps-scripts/modelOptimizer/data",
   "defaultTours": [
     "pga"
@@ -512,7 +512,7 @@
         "11"
       ],
       "courseNameKey": "TPC_SAWGRASS",
-      "courseType": "TECHNICAL",
+      "courseType": "BALANCED",
       "pastPerformance": true,
       "similarCourseIds": [
         "475",
@@ -770,7 +770,7 @@
         "897"
       ],
       "courseNameKey": "MEMORIAL_PARK_GOLF_COURSE",
-      "courseType": "POWER",
+      "courseType": "TECHNICAL",
       "pastPerformance": true,
       "similarCourseIds": [
         "33",
@@ -784,14 +784,14 @@
         "475"
       ],
       "similarCourseCourseNums": {
+        "21": [
+          "21"
+        ],
         "33": [
           "241"
         ],
         "480": [
           "872"
-        ],
-        "21": [
-          "21"
         ],
         "541": [
           "977"
@@ -809,7 +809,7 @@
         ]
       },
       "similarCoursesWeight": 0.15,
-      "puttingCoursesWeight": 0.20,
+      "puttingCoursesWeight": 0.2,
       "shotDistribution": {
         "under100": 0.058,
         "from100to150": 0.272,

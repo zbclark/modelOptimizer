@@ -26,10 +26,14 @@ const {
   parseTimestampToMs
 } = require('../utilities/timeUtils');
 const { loadCsv } = require('../utilities/csvLoader');
+const { ensureDirectory, readJsonFile, writeJsonFile } = require('../utilities/fileUtils');
 const { buildPlayerData } = require('../utilities/dataPrep');
-const { generatePlayerRankings, cleanMetricValue, calculateMetricTrends } = require('./modelCore');
+const { generatePlayerRankings, cleanMetricValue } = require('./modelCore');
 const { getSharedConfig } = require('../utilities/configParser');
+const { parseEnvNumber } = require('../utilities/envParser');
+const { parseArgs } = require('../utilities/argParser');
 const { buildMetricGroupsFromConfig } = require('../utilities/metricConfigBuilder');
+const { flattenMetricWeights } = require('../utilities/metricWeights');
 const { WEIGHT_TEMPLATES } = require('../utilities/weightTemplates');
 const { getDeltaPlayerScoresForEvent } = require('../utilities/deltaPlayerScores');
 const { METRIC_DEFS, loadApproachCsv, computeApproachDeltas, extractApproachRowsFromJson } = require('../utilities/approachDelta');
@@ -69,16 +73,9 @@ const {
   resolveRegressionRoot,
   resolveDryRunRoot,
   buildOutputBaseName,
-  buildArtifactPath,
   OUTPUT_ARTIFACTS
 } = require('../utilities/outputPaths');
-
-function extractApproachRowsFromSnapshotPayload(payload) {
-  if (typeof extractApproachRowsFromJson === 'function') {
-    return extractApproachRowsFromJson(payload) || [];
-  }
-  return [];
-}
+const { OutputArtifactManager } = require('../utilities/outputArtifactManager');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 let DATA_ROOT_DIR = path.resolve(ROOT_DIR, 'data');
@@ -133,7 +130,6 @@ const DATAGOLF_CACHE_FIELD_DIR = path.resolve(DATAGOLF_CACHE_ROOT_DIR, 'field');
 const DATAGOLF_CACHE_HISTORICAL_DIR = path.resolve(DATAGOLF_CACHE_ROOT_DIR, 'historical_rounds');
 const DATAGOLF_CACHE_OTHER_DIR = path.resolve(DATAGOLF_CACHE_ROOT_DIR, 'other');
 const DATAGOLF_CACHE_WEATHER_DIR = path.resolve(DATAGOLF_CACHE_ROOT_DIR, 'weather');
-const TRACE_PLAYER = String(process.env.TRACE_PLAYER || '').trim();
 let LOGGING_ENABLED = true;
 let LOGGING_INITIALIZED = false;
 let LOGGING_HANDLE = null;
@@ -390,6 +386,7 @@ const buildFeatureVector = (player, metricSpecs) => {
 
 // Parse CLI arguments
 const args = process.argv.slice(2);
+const parsedArgs = parseArgs(args);
 let TEMPLATE = null;
 let OVERRIDE_EVENT_ID = null;
 let OVERRIDE_SEASON = null;
@@ -412,8 +409,16 @@ let FORCE_PRE_FLAG = false;
 let FORCE_POST_FLAG = false;
 let FORCE_FIELD_UPDATES = false;
 let RUN_VALIDATION_ONLY = false;
+let RUN_VALIDATION_REQUESTED = false;
 let RUN_RESULTS_ONLY = false;
 let RUN_DELTA_ONLY = false;
+
+if (parsedArgs.hasFlag(['--log', '--verbose'])) {
+  LOGGING_ENABLED = true;
+}
+if (parsedArgs.hasFlag(['--dryRun', '--dry-run'])) {
+  DRY_RUN = true;
+}
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--template' && args[i + 1]) {
@@ -432,9 +437,6 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--tests' && args[i + 1]) {
     const parsedTests = parseInt(String(args[i + 1]).trim(), 10);
     MAX_TESTS_OVERRIDE = Number.isNaN(parsedTests) ? null : parsedTests;
-  }
-  if (args[i] === '--log' || args[i] === '--verbose') {
-    LOGGING_ENABLED = true;
   }
   if ((args[i] === '--dir' || args[i] === '--folder') && args[i + 1]) {
     OVERRIDE_DIR = String(args[i + 1]).trim();
@@ -476,6 +478,7 @@ for (let i = 0; i < args.length; i++) {
     args[i] === '--run-validation'
   ) {
     RUN_VALIDATION_ONLY = true;
+    RUN_VALIDATION_REQUESTED = true;
   }
   if (args[i] === '--results' || args[i] === '--resultsOnly' || args[i] === '--results-only') {
     RUN_RESULTS_ONLY = true;
@@ -506,9 +509,6 @@ for (let i = 0; i < args.length; i++) {
     || args[i] === '--refresh-field-updates'
   ) {
     FORCE_FIELD_UPDATES = true;
-  }
-  if (args[i] === '--dryRun' || args[i] === '--dry-run') {
-    DRY_RUN = true;
   }
   if (args[i] === '--includeCurrentEventRounds' || args[i] === '--include-current-event-rounds') {
     INCLUDE_CURRENT_EVENT_ROUNDS = true;
@@ -564,10 +564,81 @@ if (typeof OVERRIDE_ROLLING_DELTAS === 'number' && OVERRIDE_ROLLING_DELTAS >= 0)
   APPROACH_DELTA_ROLLING_EVENTS = OVERRIDE_ROLLING_DELTAS;
 }
 
-// --- Determine context for logging (pre/post/other) ---
-let runContext = 'run';
-if (FORCE_PRE_FLAG) runContext = 'pre_event';
-else if (FORCE_POST_FLAG) runContext = 'post_event';
+const RUN_MODES = {
+  PRE: 'pre',
+  POST: 'post',
+  RESULTS_ONLY: 'results_only',
+  VALIDATION_ONLY: 'validation_only',
+  DELTA_ONLY: 'delta_only'
+};
+
+const buildRunContext = ({
+  forceMode,
+  forcePreFlag,
+  forcePostFlag,
+  runResultsOnly,
+  runValidationOnly,
+  validationRequested,
+  runDeltaOnly,
+  tournamentName,
+  postTournamentHint = null
+} = {}) => {
+  const normalizedTournamentName = String(tournamentName || '').trim();
+  const normalizedTournamentNameLower = normalizedTournamentName.toLowerCase();
+  const wantsValidationOnly = runValidationOnly && !forcePostFlag && !forcePreFlag;
+  const isSeasonValidationName = normalizedTournamentNameLower === 'all';
+  const isSeasonValidation = !!wantsValidationOnly && (
+    !normalizedTournamentName
+    || ['all', 'season', 'all-tournaments', '*'].includes(normalizedTournamentNameLower)
+  );
+
+  let mode = null;
+  if (wantsValidationOnly) mode = RUN_MODES.VALIDATION_ONLY;
+  else if (runDeltaOnly) mode = RUN_MODES.DELTA_ONLY;
+  else if (runResultsOnly) mode = RUN_MODES.RESULTS_ONLY;
+  else if (forceMode === 'pre') mode = RUN_MODES.PRE;
+  else if (forceMode === 'post') mode = RUN_MODES.POST;
+  else if (postTournamentHint === true) mode = RUN_MODES.POST;
+  else if (postTournamentHint === false) mode = RUN_MODES.PRE;
+
+  const isPre = mode === RUN_MODES.PRE;
+  const isPost = mode === RUN_MODES.POST
+    || mode === RUN_MODES.RESULTS_ONLY
+    || mode === RUN_MODES.VALIDATION_ONLY;
+  const isResultsOnly = mode === RUN_MODES.RESULTS_ONLY;
+  const isValidationOnly = mode === RUN_MODES.VALIDATION_ONLY;
+  const isDeltaOnly = mode === RUN_MODES.DELTA_ONLY;
+  const shouldScaffold = !isResultsOnly && !isSeasonValidation;
+  const requireTournamentName = forceMode === 'pre'
+    || forceMode === 'post'
+    || runResultsOnly
+    || (validationRequested && !wantsValidationOnly)
+    || (!forceMode && !postTournamentHint);
+  const label = forcePreFlag
+    ? 'pre_event'
+    : (forcePostFlag ? 'post_event' : 'run');
+
+  return {
+    mode,
+    label,
+    forceMode,
+    forcePreFlag: !!forcePreFlag,
+    forcePostFlag: !!forcePostFlag,
+    postTournamentHint,
+    normalizedTournamentName,
+    isSeasonValidationName,
+    isSeasonValidation,
+    isPre,
+    isPost,
+    isResultsOnly,
+    isValidationOnly,
+    isDeltaOnly,
+    validationRequested: !!validationRequested,
+    shouldScaffold,
+    requireTournamentName,
+    preferPostOutputDir: !!isPost || (!!postTournamentHint && !forceMode)
+  };
+};
 
 if (!LOGGING_ENABLED) {
   console.log = () => {};
@@ -582,13 +653,18 @@ if (OPT_SEED_RAW) {
   console.log(`OPT_SEED: ${OPT_SEED_RAW}`);
 }
 
-const normalizedTournamentName = String(TOURNAMENT_NAME || '').trim().toLowerCase();
-const RUN_SEASON_VALIDATION = RUN_VALIDATION_ONLY && (
-  !normalizedTournamentName
-  || ['all', 'season', 'all-tournaments', '*'].includes(normalizedTournamentName)
-);
+const runContextBase = buildRunContext({
+  forceMode: FORCE_RUN_MODE,
+  forcePreFlag: FORCE_PRE_FLAG,
+  forcePostFlag: FORCE_POST_FLAG,
+  runResultsOnly: RUN_RESULTS_ONLY,
+  runValidationOnly: RUN_VALIDATION_ONLY,
+  validationRequested: RUN_VALIDATION_REQUESTED,
+  runDeltaOnly: RUN_DELTA_ONLY,
+  tournamentName: TOURNAMENT_NAME
+});
 
-if (!OVERRIDE_EVENT_ID && !RUN_SEASON_VALIDATION) {
+if (!OVERRIDE_EVENT_ID && !runContextBase.isSeasonValidation) {
   console.error('\n❌ Missing required argument: --event <eventId>');
   console.error('   Example: node optimizer.js --event 6 --season 2026 --tournament "Sony Open"');
   process.exit(1);
@@ -649,18 +725,6 @@ function resolveObjectiveWeights(defaults, overrides = {}) {
   return normalized;
 }
 
-function resolveOutputBaseName({ tournamentSlug, tournamentName, eventId }) {
-  const raw = tournamentSlug
-    || normalizeTournamentSlug(tournamentName || '') || ''
-    || (eventId ? `event_${eventId}` : 'event');
-  const normalized = String(raw || '')
-    .toLowerCase()
-    .replace(/\s+/g, '_')
-    .replace(/[^a-z0-9_\-]/g, '')
-    .replace(/^optimizer[_-]+/, '');
-  return normalized || (eventId ? `event_${eventId}` : 'event');
-}
-
 function findFirstExisting(paths = []) {
   return (paths || []).find(filePath => filePath && fs.existsSync(filePath)) || null;
 }
@@ -678,21 +742,6 @@ function listCsvFilesInDirs(dirs) {
     });
   });
   return files;
-}
-
-function findPlayerRankingModelCsv(outputDir, tournamentName) {
-  if (!outputDir || !fs.existsSync(outputDir)) return null;
-  const exactName = tournamentName ? `${tournamentName} - Player Ranking Model.csv` : null;
-  if (exactName) {
-    const exactPath = path.resolve(outputDir, exactName);
-    if (fs.existsSync(exactPath)) return exactPath;
-  }
-  const candidates = fs.readdirSync(outputDir)
-    .filter(name => name.toLowerCase().includes('player ranking model.csv'))
-    .map(name => path.resolve(outputDir, name));
-  if (candidates.length === 0) return null;
-  candidates.sort((a, b) => a.localeCompare(b));
-  return candidates[0];
 }
 
 function findValidationFileByKeywords(dirs, keywords = []) {
@@ -751,7 +800,7 @@ function resolveFileTimestamp(filePath) {
   if (!filePath || !fs.existsSync(filePath)) return null;
   try {
     return formatTimestamp(new Date(fs.statSync(filePath).mtimeMs || Date.now()));
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -927,30 +976,6 @@ function isStep1cCourseAllowed(row, courseMap) {
   return allowed.has(String(courseNum).trim());
 }
 
-function buildEventCourseRoundSummary(rows, eventIdSet) {
-  const counts = new Map();
-  (rows || []).forEach(row => {
-    const eventId = String(row?.event_id || '').trim();
-    if (!eventId || (eventIdSet && !eventIdSet.has(eventId))) return;
-    const courseNum = resolveCourseNumFromHistoryRow(row);
-    if (!courseNum) return;
-    const key = `${eventId}|${courseNum}`;
-    counts.set(key, (counts.get(key) || 0) + 1);
-  });
-  const entries = Array.from(counts.entries()).map(([key, rounds]) => {
-    const [eventId, courseNum] = key.split('|');
-    return { eventId, courseNum, rounds };
-  });
-  entries.sort((a, b) => {
-    const eventDiff = Number(a.eventId) - Number(b.eventId);
-    if (!Number.isNaN(eventDiff) && eventDiff !== 0) return eventDiff;
-    const courseDiff = Number(a.courseNum) - Number(b.courseNum);
-    if (!Number.isNaN(courseDiff) && courseDiff !== 0) return courseDiff;
-    return String(a.courseNum).localeCompare(String(b.courseNum));
-  });
-  return entries;
-}
-
 function evaluateFieldIntegrity({ fieldData, fieldIdSet, approachRows, minPlayers, minApproachOverlapPct, strict }) {
   const summary = {
     fieldPlayers: Array.isArray(fieldData) ? fieldData.length : 0,
@@ -1015,11 +1040,9 @@ function buildLowDataAlert(players, options = {}) {
 }
 
 function getEnvNumberValue(name, fallback) {
-  const raw = parseFloat(String(process.env[name] || '').trim());
-  return Number.isNaN(raw) ? fallback : raw;
+  const parsed = parseEnvNumber(name, fallback);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
-
-const isTruthy = value => ['1', 'true', 'yes', 'on'].includes(String(value || '').trim().toLowerCase());
 
 const safeDateKey = value => {
   if (!value) return null;
@@ -1842,16 +1865,6 @@ function parseValidationDeltaTrends(filePath) {
   return results.length ? results : null;
 }
 
-function determineValidationCourseType(typeSummaries) {
-  const scores = Object.entries(typeSummaries || {}).map(([type, metrics]) => {
-    if (!metrics || metrics.length === 0) return { type, score: -Infinity };
-    const total = metrics.reduce((sum, entry) => sum + Math.abs(entry.avgCorrelation || 0), 0);
-    return { type, score: total / metrics.length };
-  });
-  scores.sort((a, b) => b.score - a.score);
-  return scores[0]?.score > -Infinity ? scores[0].type : null;
-}
-
 function buildTop20SignalMap(top20Correlations = [], top20Logistic = null, metricLabels = []) {
   const signalMap = new Map();
   const corrEntries = Array.isArray(top20Correlations)
@@ -2061,30 +2074,6 @@ function buildValidationMetricConstraints(metricConfig, validationWeights = [], 
   });
 
   return constraints;
-}
-
-function flattenMetricWeights(metricConfig, metricWeights) {
-  const flattened = {};
-  if (!metricConfig || !Array.isArray(metricConfig.groups)) return flattened;
-  if (!metricWeights) return flattened;
-
-  metricConfig.groups.forEach(group => {
-    group.metrics.forEach(metric => {
-      const flatKey = `${group.name}::${metric.name}`;
-      if (Object.prototype.hasOwnProperty.call(metricWeights, flatKey)) {
-        const value = metricWeights[flatKey];
-        flattened[flatKey] = typeof value === 'number' ? value : (value?.weight ?? null);
-        return;
-      }
-      const groupBlock = metricWeights[group.name];
-      if (groupBlock && Object.prototype.hasOwnProperty.call(groupBlock, metric.name)) {
-        const entry = groupBlock[metric.name];
-        flattened[flatKey] = typeof entry === 'number' ? entry : (entry?.weight ?? null);
-      }
-    });
-  });
-
-  return flattened;
 }
 
 function templatesAreDifferent(templateA, templateB, metricConfig, tolerance = 1e-4) {
@@ -2417,7 +2406,7 @@ function resolveApproachDeltaTimestamp(filePath, meta) {
   if (!Number.isNaN(filenameTime)) return filenameTime;
   try {
     return fs.statSync(filePath).mtimeMs;
-  } catch (error) {
+  } catch {
     return 0;
   }
 }
@@ -2492,7 +2481,7 @@ function resolveApproachSnapshotTimestamp(source) {
   if (!resolvedPath.toLowerCase().endsWith('.json')) {
     try {
       return fs.statSync(resolvedPath).mtimeMs;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -2506,7 +2495,7 @@ function resolveApproachSnapshotTimestamp(source) {
   }
   try {
     return fs.statSync(resolvedPath).mtimeMs;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -3191,13 +3180,14 @@ function generateSheetLikePlayerNotes(player, groups, groupStats) {
     hasPoorFitNote = true;
   }
 
-  const bucketSigMatch = player.deltaNote ? player.deltaNote.match(/BucketSig\s+([↑↓])\s+z=([\-\d.]+)/) : null;
-  if (bucketSigMatch) {
-    const bucketArrow = bucketSigMatch[1];
-    const bucketZ = parseFloat(bucketSigMatch[2]);
-    if (hasPoorFitNote && (bucketArrow === '↑' || bucketZ >= 0.75)) {
+  const bucketSignalZ = player.bucketSignal && Number.isFinite(player.bucketSignal.zScore)
+    ? player.bucketSignal.zScore
+    : null;
+  if (bucketSignalZ !== null) {
+    const bucketArrow = bucketSignalZ >= 0 ? '↑' : '↓';
+    if (hasPoorFitNote && (bucketArrow === '↑' || bucketSignalZ >= 0.75)) {
       notes.push('ℹ️ Recent bucket trend strong (short-term) despite poor baseline fit');
-    } else if (hasStrongFitNote && (bucketArrow === '↓' || bucketZ <= -0.75)) {
+    } else if (hasStrongFitNote && (bucketArrow === '↓' || bucketSignalZ <= -0.75)) {
       notes.push('ℹ️ Recent bucket trend weak (short-term) despite strong baseline fit');
     }
   }
@@ -3296,558 +3286,129 @@ function generateSheetLikePlayerNotes(player, groups, groupStats) {
   return notes.join(' | ');
 }
 
-function buildPerformanceNotes({ finishPosition, modelRank, actualTrends, approachDeltaRow, actualMetrics, modelMetrics }) {
-  const notes = [];
-  const getCategoryForMetric = metricName => {
-    if (!metricName) return '';
-    const metricLower = String(metricName).toLowerCase();
-    if (metricLower.includes('ott') || metricLower.includes('driving')) return 'Driving';
-    if (metricLower.includes('approach') || metricLower.includes('iron')) return 'Approach';
-    if (metricLower.includes('around') || metricLower.includes('arg') || metricLower.includes('short game')) return 'Short Game';
-    if (metricLower.includes('putting') || metricLower.includes('putt')) return 'Putting';
-    if (metricLower.includes('total') || metricLower.includes('t2g')) return 'Overall';
-    if (metricLower.includes('gir') || metricLower.includes('greens')) return 'Approach';
-    if (metricLower.includes('proximity') || metricLower.includes('prox')) return 'Approach';
-    return '';
-  };
-  if (Number.isFinite(finishPosition) && Number.isFinite(modelRank)) {
-    const diff = modelRank - finishPosition;
-    if (diff >= 10) {
-      notes.push(`✅ Beat model by ${diff}`);
-    } else if (diff <= -10) {
-      notes.push(`⚠️ Missed model by ${Math.abs(diff)}`);
-    } else if (Math.abs(diff) >= 3) {
-      notes.push(`≈ Near model (${diff >= 0 ? '+' : ''}${diff})`);
-    }
-  }
+const RESULTS_SNAPSHOT_FIELDS = [
+  { label: 'SG Total' },
+  { label: 'Driving Distance' },
+  { label: 'Driving Accuracy' },
+  { label: 'SG T2G' },
+  { label: 'SG Approach' },
+  { label: 'SG Around Green' },
+  { label: 'SG OTT' },
+  { label: 'SG Putting' },
+  { label: 'Greens in Regulation' },
+  { label: 'Fairway Proximity' },
+  { label: 'Rough Proximity' },
+  { label: 'SG BS', hasModel: false },
+  { label: 'Scoring Average' },
+  { label: 'Birdies or Better' },
+  { label: 'Scrambling' },
+  { label: 'Great Shots' },
+  { label: 'Poor Shot Avoidance', alias: 'Poor Shots' }
+];
 
-  if (Number.isFinite(finishPosition) && Number.isFinite(modelRank)) {
-    const performedWell = finishPosition <= 20;
-    const predictedWell = modelRank <= 20;
-    if (performedWell && predictedWell) {
-      notes.push('✅ Success aligned with model');
-    } else if (performedWell && !predictedWell) {
-      notes.push('⚠️ Success despite model prediction');
-    } else if (!performedWell && predictedWell) {
-      notes.push('❌ Underperformed model prediction');
-    }
-  }
-
-  if (Array.isArray(actualMetrics) && Array.isArray(modelMetrics)) {
-    const labelIndexMap = new Map(GENERATED_METRIC_LABELS.map((label, index) => [label, index]));
-    const comparableLabels = [
-      'SG Total', 'SG T2G', 'SG Approach', 'SG Around Green', 'SG OTT', 'SG Putting',
-      'Driving Distance', 'Driving Accuracy', 'Greens in Regulation',
-      'Fairway Proximity', 'Rough Proximity'
-    ];
-    const deltas = [];
-    comparableLabels.forEach(label => {
-      const idx = labelIndexMap.get(label);
-      if (typeof idx !== 'number') return;
-      const actual = actualMetrics[idx];
-      const model = modelMetrics[idx];
-      if (typeof actual !== 'number' || Number.isNaN(actual)) return;
-      if (typeof model !== 'number' || Number.isNaN(model)) return;
-      const diff = actual - model;
-      deltas.push({ label, diff, actual, model });
-    });
-
-    deltas.sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
-    deltas.slice(0, 4).forEach(entry => {
-      const lowerBetter = LOWER_BETTER_GENERATED_METRICS.has(entry.label);
-      const better = lowerBetter ? entry.diff < 0 : entry.diff > 0;
-      const isPercent = SHEET_LIKE_PERCENTAGE_INDICES.has(labelIndexMap.get(entry.label));
-      const diffDisplay = isPercent
-        ? `${(entry.diff * 100).toFixed(2)}%`
-        : entry.label.includes('SG')
-          ? entry.diff.toFixed(3)
-          : entry.diff.toFixed(2);
-      const prefix = better ? '✅' : '⚠️';
-      notes.push(`${prefix} ${entry.label} ${better ? 'beat' : 'missed'} model (${diffDisplay})`);
-    });
-  }
-
-  if (Array.isArray(actualTrends) && actualTrends.length > 0 && Array.isArray(actualMetrics)) {
-    const labelIndexMap = new Map(GENERATED_METRIC_LABELS.map((label, index) => [label, index]));
-    const trendMetricLabels = [
-      'SG Total', 'Driving Distance', 'Driving Accuracy', 'SG T2G',
-      'SG Approach', 'SG Around Green', 'SG OTT', 'SG Putting',
-      'Greens in Regulation', 'Scrambling', 'Great Shots', 'Poor Shots',
-      'Scoring Average', 'Birdies or Better', 'Fairway Proximity', 'Rough Proximity'
-    ];
-
-    const trendAnalysis = [];
-    actualTrends.forEach((trendValue, trendIndex) => {
-      if (typeof trendValue !== 'number' || Number.isNaN(trendValue)) return;
-      if (Math.abs(trendValue) <= 0.05) return;
-      const metricLabel = trendMetricLabels[trendIndex];
-      if (!metricLabel) return;
-      const metricIdx = labelIndexMap.get(metricLabel);
-      if (typeof metricIdx !== 'number') return;
-
-      const currentValue = actualMetrics[metricIdx];
-      if (typeof currentValue !== 'number' || Number.isNaN(currentValue)) return;
-
-      const isHigherBetter = !LOWER_BETTER_GENERATED_METRICS.has(metricLabel);
-      const isPositiveTrend = trendValue > 0;
-
-      let isGoodPerformance;
-      if (metricLabel.includes('SG')) {
-        isGoodPerformance = isHigherBetter ? currentValue > 0 : currentValue < 0;
-      } else if (Array.isArray(modelMetrics)) {
-        const modelValue = modelMetrics[metricIdx];
-        if (typeof modelValue === 'number' && Number.isFinite(modelValue)) {
-          isGoodPerformance = isHigherBetter ? currentValue > modelValue : currentValue < modelValue;
-        } else {
-          isGoodPerformance = isHigherBetter ? currentValue > 0 : currentValue < 0;
-        }
-      } else {
-        isGoodPerformance = isHigherBetter ? currentValue > 0 : currentValue < 0;
-      }
-
-      const isCorrelationConfirmed = (isPositiveTrend && isGoodPerformance)
-        || (!isPositiveTrend && !isGoodPerformance);
-      const significanceScore = Math.abs(trendValue) * (isCorrelationConfirmed ? 2 : 1);
-
-      trendAnalysis.push({
-        metric: metricLabel,
-        trendValue,
-        trendDirection: isPositiveTrend ? 'improving' : 'declining',
-        correlation: isCorrelationConfirmed ? 'confirmed' : 'contradicted',
-        significance: significanceScore
-      });
-    });
-
-    trendAnalysis.sort((a, b) => b.significance - a.significance);
-    if (trendAnalysis.length > 0) {
-      const trendsToShow = Math.min(trendAnalysis.length, 3);
-      const primaryTrend = trendAnalysis[0];
-      const category = getCategoryForMetric(primaryTrend.metric);
-      if (category) {
-        const directionArrow = primaryTrend.trendDirection === 'improving' ? '↑' : '↓';
-        notes.push(`${directionArrow} ${category}`);
-      }
-      for (let t = 0; t < trendsToShow; t++) {
-        const trend = trendAnalysis[t];
-        const trendEmoji = trend.trendDirection === 'improving' ? '📈' : '📉';
-        const trendDisplay = Math.abs(trend.trendValue).toFixed(3);
-        const trendNote = `${trendEmoji} ${trend.metric}: ${trend.correlation === 'confirmed' ? 'trend continuing' : 'trend reversing'} (${trendDisplay})`;
-        notes.push(trendNote);
-      }
-    }
-  }
-
-  const trendMetricNames = [
-    'Total game', 'Driving', 'Accuracy', 'Tee-to-green',
-    'Approach', 'Around green', 'Off tee', 'Putting',
-    'GIR', 'Scrambling', 'Great shots', 'Poor shots',
-    'Scoring', 'Birdies', 'Fairway Prox', 'Rough Prox'
-  ];
-  if (Array.isArray(actualTrends) && actualTrends.length > 0) {
-    let strongest = null;
-    actualTrends.forEach((value, index) => {
-      if (typeof value !== 'number' || Number.isNaN(value)) return;
-      if (!strongest || Math.abs(value) > Math.abs(strongest.value)) {
-        strongest = { index, value };
-      }
-    });
-    if (strongest && Math.abs(strongest.value) >= 0.01) {
-      const arrow = strongest.value > 0 ? '↑' : '↓';
-      const metricName = trendMetricNames[strongest.index] || 'Trend';
-      notes.push(`${arrow} ${metricName}`);
-    }
-  }
-
-  if (approachDeltaRow && typeof approachDeltaRow === 'object') {
-    const deltaCandidates = Object.entries(approachDeltaRow)
-      .filter(([key, value]) => key.includes('_sg_per_shot') && typeof value === 'number' && Number.isFinite(value))
-      .map(([key, value]) => ({ key, value }));
-    if (deltaCandidates.length > 0) {
-      deltaCandidates.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
-      const best = deltaCandidates[0];
-      if (best && Math.abs(best.value) >= 0.05) {
-        const arrow = best.value > 0 ? '↑' : '↓';
-        const label = best.key
-          .replace(/^delta_/, '')
-          .replace(/_sg_per_shot$/, '')
-          .replace(/_/g, ' ');
-        notes.push(`Δ Approach ${arrow} ${label}`);
-      }
-    }
-  }
-
-  return notes.join(' | ');
-}
-
-function buildActualMetricsFromHistory(rows, eventId, season) {
-  const eventKey = String(eventId || '').trim();
-  const seasonKey = String(season || '').trim();
-  const sums = new Map();
-  const counts = new Map();
-
-  const metricLabels = GENERATED_METRIC_LABELS.slice(0, 17);
-  const labelToValue = (label, row) => {
-    switch (label) {
-      case 'SG Total':
-        return cleanMetricValue(row.sg_total);
-      case 'Driving Distance':
-        return cleanMetricValue(row.driving_dist);
-      case 'Driving Accuracy':
-        return cleanMetricValue(row.driving_acc, true);
-      case 'SG T2G':
-        return cleanMetricValue(row.sg_t2g);
-      case 'SG Approach':
-        return cleanMetricValue(row.sg_app);
-      case 'SG Around Green':
-        return cleanMetricValue(row.sg_arg);
-      case 'SG OTT':
-        return cleanMetricValue(row.sg_ott);
-      case 'SG Putting':
-        return cleanMetricValue(row.sg_putt);
-      case 'Greens in Regulation':
-        return cleanMetricValue(row.gir, true);
-      case 'Scrambling':
-        return cleanMetricValue(row.scrambling, true);
-      case 'Great Shots':
-        return cleanMetricValue(row.great_shots);
-      case 'Poor Shots':
-        return cleanMetricValue(row.poor_shots);
-      case 'Scoring Average':
-        return cleanMetricValue(row.score);
-      case 'Birdies or Better':
-        return deriveBirdiesOrBetterFromRow(row);
-      case 'Birdie Chances Created':
-        return null;
-      case 'Fairway Proximity':
-        return cleanMetricValue(row.prox_fw);
-      case 'Rough Proximity':
-        return cleanMetricValue(row.prox_rgh);
-      default:
-        return null;
-    }
-  };
-
-  (rows || []).forEach(row => {
-    const rowEvent = String(row?.event_id || '').trim();
-    if (eventKey && rowEvent !== eventKey) return;
-    const rowSeason = String(row?.season || row?.year || '').trim();
-    if (seasonKey && rowSeason !== seasonKey) return;
-    const dgId = String(row?.dg_id || '').trim();
-    if (!dgId) return;
-
-    metricLabels.forEach((label, index) => {
-      const value = labelToValue(label, row);
-      if (typeof value !== 'number' || Number.isNaN(value)) return;
-      const key = `${dgId}::${index}`;
-      sums.set(key, (sums.get(key) || 0) + value);
-      counts.set(key, (counts.get(key) || 0) + 1);
-    });
-  });
-
-  const metricsById = new Map();
-  sums.forEach((sum, key) => {
-    const [dgId, index] = key.split('::');
-    const count = counts.get(key) || 0;
-    if (!metricsById.has(dgId)) metricsById.set(dgId, Array(35).fill(null));
-    const metrics = metricsById.get(dgId);
-    const idx = parseInt(index, 10);
-    if (!Number.isNaN(idx) && count > 0) {
-      metrics[idx] = sum / count;
-    }
-  });
-
-  return metricsById;
-}
-
-function buildActualTrendsFromHistory(rows, eventId, season) {
-  const eventKey = String(eventId || '').trim();
-  const seasonKey = String(season || '').trim();
-  const roundsByPlayer = new Map();
-
-  (rows || []).forEach(row => {
-    const rowEvent = String(row?.event_id || '').trim();
-    if (eventKey && rowEvent !== eventKey) return;
-    const rowSeason = String(row?.season || row?.year || '').trim();
-    if (seasonKey && rowSeason !== seasonKey) return;
-    const dgId = String(row?.dg_id || '').trim();
-    if (!dgId) return;
-
-    const date = row?.date || row?.round_date || row?.start_date || row?.end_date || row?.event_completed || null;
-    const roundNum = Number(row?.round_num || row?.round || row?.roundNum || 0);
-    const entry = {
-      date: date || `${rowSeason}-01-01`,
-      roundNum: Number.isFinite(roundNum) ? roundNum : 0,
-      metrics: {
-        scoringAverage: cleanMetricValue(row.score),
-        eagles: cleanMetricValue(row.eagles_or_better),
-        birdies: cleanMetricValue(row.birdies),
-        birdiesOrBetter: deriveBirdiesOrBetterFromRow(row),
-        strokesGainedTotal: cleanMetricValue(row.sg_total),
-        drivingDistance: cleanMetricValue(row.driving_dist),
-        drivingAccuracy: cleanMetricValue(row.driving_acc, true),
-        strokesGainedT2G: cleanMetricValue(row.sg_t2g),
-        strokesGainedApp: cleanMetricValue(row.sg_app),
-        strokesGainedArg: cleanMetricValue(row.sg_arg),
-        strokesGainedOTT: cleanMetricValue(row.sg_ott),
-        strokesGainedPutt: cleanMetricValue(row.sg_putt),
-        greensInReg: cleanMetricValue(row.gir, true),
-        scrambling: cleanMetricValue(row.scrambling, true),
-        greatShots: cleanMetricValue(row.great_shots),
-        poorShots: cleanMetricValue(row.poor_shots),
-        fairwayProx: cleanMetricValue(row.prox_fw),
-        roughProx: cleanMetricValue(row.prox_rgh)
-      }
-    };
-
-    if (!roundsByPlayer.has(dgId)) roundsByPlayer.set(dgId, []);
-    roundsByPlayer.get(dgId).push(entry);
-  });
-
-  const trendsById = new Map();
-  roundsByPlayer.forEach((rounds, dgId) => {
-    trendsById.set(dgId, calculateMetricTrends(rounds));
-  });
-
-  return trendsById;
-}
-
-function buildApproachDeltaMap(rows = []) {
+const buildModelByIdFromRankingPlayers = (players = []) => {
   const map = new Map();
-  (rows || []).forEach(row => {
-    const dgId = String(row?.dg_id || row?.dgId || '').trim();
+  (players || []).forEach(player => {
+    const dgId = String(player?.dgId || '').trim();
     if (!dgId) return;
-    map.set(dgId, row);
-  });
-  return map;
-}
-
-function buildResultsMetricSpecs() {
-  const excludedMetrics = new Set([
-    'Birdies or Better',
-    'Birdie Chances Created'
-  ]);
-  return GENERATED_METRIC_LABELS
-    .map((label, index) => ({ label, index }))
-    .filter(spec => !excludedMetrics.has(spec.label));
-}
-
-function parseRankingCsvModelValues(filePath, metricSpecs) {
-  if (!filePath || !fs.existsSync(filePath)) return new Map();
-  const rows = parseCsvRows(filePath);
-  if (!rows.length) return new Map();
-
-  let headerIndex = -1;
-  let headerRow = null;
-  rows.forEach((row, idx) => {
-    if (headerIndex !== -1) return;
-    const cells = row.map(cell => String(cell || '').trim());
-    const dgIndex = cells.findIndex(cell => cell.toLowerCase() === 'dg id');
-    if (dgIndex !== -1) {
-      headerIndex = idx;
-      headerRow = cells;
-    }
-  });
-
-  if (headerIndex === -1 || !headerRow) return new Map();
-
-  const headerMap = new Map();
-  headerRow.forEach((cell, idx) => {
-    if (!cell) return;
-    headerMap.set(cell, idx);
-  });
-
-  const dgIdIdx = headerMap.get('DG ID');
-  if (typeof dgIdIdx !== 'number') return new Map();
-  const nameIdx = headerMap.get('Player Name');
-  const rankIdx = headerMap.get('Rank');
-
-  const metricColumns = (metricSpecs || [])
-    .map(spec => ({ spec, idx: headerMap.get(spec.label) }))
-    .filter(entry => typeof entry.idx === 'number');
-
-  const map = new Map();
-  rows.slice(headerIndex + 1).forEach(row => {
-    const dgIdRaw = row[dgIdIdx];
-    if (dgIdRaw === undefined || dgIdRaw === null || String(dgIdRaw).trim() === '') return;
-    const dgId = String(dgIdRaw).trim();
-    if (!dgId) return;
-
-    const playerName = typeof nameIdx === 'number' ? String(row[nameIdx] || '').trim() : '';
-    const rankRaw = typeof rankIdx === 'number' ? String(row[rankIdx] || '').trim() : '';
-    const rank = rankRaw ? Number(rankRaw.replace(/[^0-9.-]/g, '')) : NaN;
-
-    const metrics = Array(GENERATED_METRIC_LABELS.length).fill(null);
-    metricColumns.forEach(({ spec, idx }) => {
-      const rawValue = row[idx];
-      const isPercent = SHEET_LIKE_PERCENTAGE_INDICES.has(spec.index);
-      const parsed = parseApproachNumber(rawValue, isPercent);
-      if (typeof parsed === 'number' && Number.isFinite(parsed)) {
-        metrics[spec.index] = parsed;
-      }
-    });
-
     map.set(dgId, {
       dgId,
-      name: playerName || null,
-      rank: Number.isFinite(rank) ? rank : null,
-      metrics
+      name: player?.name || null,
+      rank: Number.isFinite(player?.rank) ? player.rank : null,
+      metrics: Array.isArray(player?.metrics) ? player.metrics : null
     });
   });
-
   return map;
-}
+};
 
-function buildPostEventResultsCsv({
-  rankingsById,
-  resultsById,
-  actualMetricsById,
-  actualTrendsById,
-  approachDeltaById
-}) {
-  const resultMetricSpecs = buildResultsMetricSpecs();
-  const metricHeaders = resultMetricSpecs.map(spec => spec.label);
+const buildTournamentResultsSnapshotRows = ({
+  results,
+  modelById,
+  actualMetricsById
+}) => {
+  const labelIndexMap = new Map(GENERATED_METRIC_LABELS.map((label, index) => [label, index]));
+  const rows = [];
 
-  const headers = [
-    'Performance Notes',
-    'DG ID',
-    'Player Name',
-    'Finish Position',
-    'Model Rank',
-    ...metricHeaders.flatMap(label => [`${label} (Actual)`, `${label} (Model)`])
-  ];
+  (results || []).forEach(entry => {
+    const dgId = String(entry?.dgId || '').trim();
+    if (!dgId) return;
+    const modelEntry = modelById?.get(dgId) || null;
+    const playerName = entry?.playerName || modelEntry?.name || 'Unknown';
+    const finishPosition = Number.isFinite(entry?.finishPosition) ? entry.finishPosition : null;
+    const finishText = entry?.finishText || (finishPosition !== null ? String(finishPosition) : '');
+    const row = {
+      'Performance Analysis': '',
+      'DG ID': dgId,
+      'Player Name': playerName,
+      'Model Rank': modelEntry?.rank ?? '',
+      'Finish Position': finishText || '',
+      'Score': entry?.score ?? ''
+    };
 
-  const approachDeltaSpecs = buildApproachDeltaMetricSpecs();
-  const approachLabelToKey = approachDeltaSpecs.reduce((acc, spec) => {
-    acc[spec.label] = spec.key;
-    return acc;
-  }, {});
-  const resolveApproachActualValue = (label, row) => {
-    if (!label || !row) return null;
-    const deltaKey = approachLabelToKey[label];
-    if (!deltaKey) return null;
-    if (deltaKey.startsWith('delta_')) {
-      const suffix = deltaKey.slice('delta_'.length);
-      const currentKey = `curr_${suffix}`;
-      const previousKey = `prev_${suffix}`;
-      const currentValue = row?.[currentKey];
-      const previousValue = row?.[previousKey];
-
-      const shotSuffixes = ['gir_rate', 'sg_per_shot', 'proximity_per_shot'];
-      const isPerShotMetric = shotSuffixes.some(suffixKey => suffix.endsWith(suffixKey));
-      if (isPerShotMetric) {
-        const baseSuffix = suffix
-          .replace(/gir_rate$/, 'shot_count')
-          .replace(/sg_per_shot$/, 'shot_count')
-          .replace(/proximity_per_shot$/, 'shot_count');
-        const prevCount = row?.[`prev_${baseSuffix}`];
-        const currCount = row?.[`curr_${baseSuffix}`];
-        if (
-          typeof currentValue === 'number'
-          && Number.isFinite(currentValue)
-          && typeof previousValue === 'number'
-          && Number.isFinite(previousValue)
-          && typeof prevCount === 'number'
-          && Number.isFinite(prevCount)
-          && typeof currCount === 'number'
-          && Number.isFinite(currCount)
-        ) {
-          const deltaShots = currCount - prevCount;
-          if (deltaShots > 0) {
-            const impliedTotal = (currentValue * currCount) - (previousValue * prevCount);
-            const impliedValue = impliedTotal / deltaShots;
-            if (Number.isFinite(impliedValue)) {
-              if (suffix.endsWith('gir_rate')) {
-                return Math.min(1, Math.max(0, impliedValue));
-              }
-              return impliedValue;
-            }
-          }
-        }
+    const actualMetrics = actualMetricsById?.get(dgId) || [];
+    RESULTS_SNAPSHOT_FIELDS.forEach(field => {
+      const labelKey = field.alias || field.label;
+      const metricIndex = typeof field.index === 'number' ? field.index : labelIndexMap.get(labelKey);
+      const actualValue = typeof metricIndex === 'number' ? actualMetrics[metricIndex] : null;
+      row[field.label] = typeof actualValue === 'number' && Number.isFinite(actualValue) ? actualValue : '';
+      if (field.hasModel !== false) {
+        const modelMetrics = Array.isArray(modelEntry?.metrics) ? modelEntry.metrics : [];
+        const modelValue = typeof metricIndex === 'number' ? modelMetrics[metricIndex] : null;
+        row[`${field.label} - Model`] = typeof modelValue === 'number' && Number.isFinite(modelValue) ? modelValue : '';
       }
-
-      if (typeof currentValue === 'number' && Number.isFinite(currentValue)) return currentValue;
-      return null;
-    }
-    const fallbackValue = row?.[deltaKey];
-    return (typeof fallbackValue === 'number' && Number.isFinite(fallbackValue)) ? fallbackValue : null;
-  };
-
-  const allIds = new Set([
-    ...Array.from(rankingsById.keys()),
-    ...Array.from(resultsById.keys())
-  ]);
-  const orderedIds = Array.from(allIds).sort((a, b) => {
-    const rankA = resultsById.get(a);
-    const rankB = resultsById.get(b);
-    const hasRankA = Number.isFinite(rankA);
-    const hasRankB = Number.isFinite(rankB);
-    if (hasRankA && hasRankB) return rankA - rankB;
-    if (hasRankA) return -1;
-    if (hasRankB) return 1;
-    const modelA = rankingsById.get(a)?.rank;
-    const modelB = rankingsById.get(b)?.rank;
-    const hasModelA = Number.isFinite(modelA);
-    const hasModelB = Number.isFinite(modelB);
-    if (hasModelA && hasModelB) return modelA - modelB;
-    if (hasModelA) return -1;
-    if (hasModelB) return 1;
-    return Number(a) - Number(b);
-  });
-
-  const blankRow = Array(headers.length).fill('');
-  const rows = [blankRow, blankRow, blankRow, blankRow, headers];
-
-  orderedIds.forEach(dgId => {
-    const model = rankingsById.get(dgId) || null;
-    const finishPosition = resultsById.get(dgId) ?? null;
-    const actualMetrics = actualMetricsById.get(dgId) || Array(35).fill(null);
-    const actualTrends = actualTrendsById.get(dgId) || [];
-    const approachDeltaRow = approachDeltaById.get(dgId) || null;
-
-    const performanceNotes = buildPerformanceNotes({
-      finishPosition,
-      modelRank: model?.rank ?? null,
-      actualTrends,
-      approachDeltaRow,
-      actualMetrics,
-      modelMetrics: Array.isArray(model?.metrics) ? model.metrics : null
     });
 
-    const playerName = model?.name || approachDeltaRow?.player_name || null;
-    const actualRank = Number.isFinite(finishPosition) ? finishPosition : '';
-    const modelRank = model?.rank ?? '';
-
-    const baseValues = [actualRank, modelRank];
-
-    resultMetricSpecs.forEach(spec => {
-      const { label, index: idx } = spec;
-      let actualValue = null;
-      if (idx < 17) {
-        actualValue = actualMetrics[idx];
-      } else {
-        actualValue = resolveApproachActualValue(label, approachDeltaRow);
-      }
-
-      const modelValue = Array.isArray(model?.metrics) ? model.metrics[idx] : null;
-      const formattedActual = typeof actualValue === 'number' && Number.isFinite(actualValue)
-        ? formatSheetMetricValue(actualValue, idx)
-        : '';
-      const formattedModel = typeof modelValue === 'number' && Number.isFinite(modelValue)
-        ? formatSheetMetricValue(modelValue, idx)
-        : '';
-      baseValues.push(formattedActual, formattedModel);
-    });
-
-    rows.push([
-      performanceNotes || '',
-      dgId,
-      playerName || '',
-      ...baseValues
-    ]);
+    rows.push(row);
   });
 
-  return rows.map(row => row.map(value => JSON.stringify(value ?? '')).join(',')).join('\n');
-}
+  rows.sort((a, b) => {
+    const posA = Number(a['Finish Position']) || 999;
+    const posB = Number(b['Finish Position']) || 999;
+    return posA - posB;
+  });
+
+  return rows;
+};
+
+const computeSnapshotMetricStats = results => {
+  const buckets = {};
+  (results || []).forEach(entry => {
+    RESULTS_SNAPSHOT_FIELDS.forEach(field => {
+      if (field.hasModel === false) return;
+      const value = entry?.[field.label];
+      if (typeof value !== 'number' || Number.isNaN(value)) return;
+      if (!buckets[field.label]) buckets[field.label] = [];
+      buckets[field.label].push(value);
+    });
+  });
+
+  const stats = {};
+  Object.entries(buckets).forEach(([label, values]) => {
+    const count = values.length;
+    if (!count) return;
+    const mean = values.reduce((sum, value) => sum + value, 0) / count;
+    const variance = values.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / count;
+    stats[label] = { mean, stdDev: Math.sqrt(variance) };
+  });
+
+  return stats;
+};
+
+const buildSnapshotZScores = (rows, metricStats) => {
+  return (rows || []).map(row => {
+    const zScores = {};
+    Object.entries(metricStats || {}).forEach(([metric, stats]) => {
+      const value = row?.[metric];
+      if (typeof value !== 'number' || Number.isNaN(value)) return;
+      if (!stats || !stats.stdDev || stats.stdDev === 0) return;
+      zScores[metric] = (value - stats.mean) / stats.stdDev;
+    });
+    return {
+      dgId: row?.['DG ID'] || null,
+      zScores
+    };
+  });
+};
 
 function buildSheetLikeRankingCsv(ranking, groups) {
   const players = Array.isArray(ranking?.players) ? ranking.players : [];
@@ -3888,7 +3449,7 @@ function buildSheetLikeRankingCsv(ranking, groups) {
   const blankRow = Array(headers.length).fill('');
 
   // Add a dedicated median row for quick filtering/benchmarking in Sheets.
-  // NOTE: Leave DG ID blank so downstream parsers (validationRunner) skip this row.
+  // NOTE: Leave DG ID blank so downstream validation parsers skip this row.
   const medianHistoricalMetrics = metricLabels.slice(0, 17).map((_, idx) => {
     const median = computeMedian(players.map(player => player.metrics?.[idx]));
     return median === null ? '' : formatSheetMetricValue(median, idx);
@@ -4156,73 +3717,6 @@ function computeHistoricalMetricCorrelations(samples) {
   return { perYear, average: aggregate };
 }
 
-function computeGeneratedMetricCorrelations(players, results) {
-  const { map: resultsById } = buildFinishPositionMap(results);
-
-  return GENERATED_METRIC_LABELS.map((label, index) => {
-    const xValues = [];
-    const yValues = [];
-
-    players.forEach(player => {
-      const dgId = String(player.dgId || '').trim();
-      if (!dgId) return;
-      const finishPosition = resultsById.get(dgId);
-      if (typeof finishPosition !== 'number' || Number.isNaN(finishPosition)) return;
-      if (!Array.isArray(player.metrics) || typeof player.metrics[index] !== 'number') return;
-      const rawValue = player.metrics[index];
-      if (Number.isNaN(rawValue)) return;
-      const adjustedValue = LOWER_BETTER_GENERATED_METRICS.has(label) ? -rawValue : rawValue;
-      xValues.push(adjustedValue);
-      yValues.push(-finishPosition);
-    });
-
-    if (xValues.length < 5) {
-      return { index, label, correlation: 0, samples: xValues.length };
-    }
-
-    return {
-      index,
-      label,
-      correlation: calculateSpearmanCorrelation(xValues, yValues),
-      samples: xValues.length
-    };
-  });
-}
-
-function computeGeneratedMetricTopNCorrelations(players, results, topN = 20) {
-  const { map: resultsById } = buildFinishPositionMap(results);
-
-  return GENERATED_METRIC_LABELS.map((label, index) => {
-    const xValues = [];
-    const yValues = [];
-
-    players.forEach(player => {
-      const dgId = String(player.dgId || '').trim();
-      if (!dgId) return;
-      const finishPosition = resultsById.get(dgId);
-      if (typeof finishPosition !== 'number' || Number.isNaN(finishPosition)) return;
-      if (!Array.isArray(player.metrics) || typeof player.metrics[index] !== 'number') return;
-      const rawValue = player.metrics[index];
-      if (Number.isNaN(rawValue)) return;
-      const adjustedValue = LOWER_BETTER_GENERATED_METRICS.has(label) ? -rawValue : rawValue;
-      const isTopN = finishPosition <= topN ? 1 : 0;
-      xValues.push(adjustedValue);
-      yValues.push(isTopN);
-    });
-
-    if (xValues.length < 5) {
-      return { index, label, correlation: 0, samples: xValues.length };
-    }
-
-    return {
-      index,
-      label,
-      correlation: calculateSpearmanCorrelation(xValues, yValues),
-      samples: xValues.length
-    };
-  });
-}
-
 function sigmoid(value) {
   if (value < -50) return 0;
   if (value > 50) return 1;
@@ -4308,15 +3802,12 @@ function trainTopNLogisticModel(players, results, metricLabels, options = {}) {
   for (let iter = 0; iter < iterations; iter++) {
     const grad = Array(featureCount).fill(0);
     let gradBias = 0;
-    let loss = 0;
 
     for (let i = 0; i < normalizedRows.length; i++) {
       const row = normalizedRows[i];
       const linear = row.reduce((sum, value, idx) => sum + value * weights[idx], bias);
       const pred = sigmoid(linear);
       const error = pred - labels[i];
-      loss += -labels[i] * Math.log(pred + 1e-9) - (1 - labels[i]) * Math.log(1 - pred + 1e-9);
-
       for (let j = 0; j < featureCount; j++) {
         grad[j] += error * row[j];
       }
@@ -4909,7 +4400,7 @@ function buildSuggestedGroupWeightsFromGroupSignals(groupCorrelations, sourceLab
   return { source: sourceLabel, weights };
 }
 
-function buildTopNSamplesFromPlayers(players, results, metricSpecs, topN = 20) {
+function buildTopNSamplesFromPlayers(players, results, metricSpecs) {
   const { map: resultsById } = buildFinishPositionMap(results);
 
   return players.reduce((acc, player) => {
@@ -5341,21 +4832,6 @@ function blendCorrelationLists(baseList, blendList, blendWeight) {
   return baseList.map(entry => {
     const blendEntry = blendMap.get(entry.label);
     if (!blendEntry || typeof blendEntry.correlation !== 'number') return entry;
-    const baseCorr = typeof entry.correlation === 'number' ? entry.correlation : 0;
-    return {
-      ...entry,
-      correlation: baseCorr * (1 - blendWeight) + blendEntry.correlation * blendWeight
-    };
-  });
-}
-
-function blendSingleMetricCorrelation(baseList, blendList, targetLabel, blendWeight) {
-  if (!Array.isArray(baseList) || baseList.length === 0) return baseList || [];
-  if (!Array.isArray(blendList) || blendList.length === 0 || blendWeight <= 0) return baseList;
-  const blendEntry = blendList.find(entry => entry.label === targetLabel);
-  if (!blendEntry || typeof blendEntry.correlation !== 'number') return baseList;
-  return baseList.map(entry => {
-    if (entry.label !== targetLabel) return entry;
     const baseCorr = typeof entry.correlation === 'number' ? entry.correlation : 0;
     return {
       ...entry,
@@ -5987,28 +5463,6 @@ function buildRunFingerprint({
   };
 }
 
-function ensureDirectory(dirPath) {
-  if (!dirPath) return;
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-}
-
-function readJsonFile(filePath) {
-  if (!filePath || !fs.existsSync(filePath)) return null;
-  try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch (error) {
-    return null;
-  }
-}
-
-function writeJsonFile(filePath, payload) {
-  if (!filePath) return;
-  ensureDirectory(path.dirname(filePath));
-  fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
-}
-
 function getPayloadLastUpdated(payload) {
   if (!payload || typeof payload !== 'object') return null;
   return payload.last_updated || payload.lastUpdated || null;
@@ -6073,7 +5527,7 @@ function loadCourseHistoryRegressionMap(options = {}) {
         path: path.resolve(ROOT_DIR, 'utilities', 'courseHistoryRegression.js')
       };
     }
-  } catch (error) {
+  } catch {
     return null;
   }
 
@@ -6188,7 +5642,6 @@ function upsertCourseContextPastPerformanceWeights(courseContext, regressionMap)
   if (!regressionMap || typeof regressionMap !== 'object') {
     return { updated: false, updates: [], context: courseContext };
   }
-
   const updates = [];
   let updated = false;
 
@@ -6405,7 +5858,7 @@ function resolveApproachOverrideEntry(rawPath, sourceLabel) {
   let time = 0;
   try {
     time = fs.statSync(resolved).mtimeMs || 0;
-  } catch (error) {
+  } catch {
     time = 0;
   }
   return {
@@ -6445,7 +5898,7 @@ function resolveApproachCsvForEntry(entry, season) {
           mtimeMs: (() => {
             try {
               return fs.statSync(path.resolve(entrySearchDir, name)).mtimeMs || 0;
-            } catch (error) {
+            } catch {
               return 0;
             }
           })()
@@ -6924,35 +6377,6 @@ function buildModifiedGroups(groups, groupWeights, metricWeights) {
   }));
 }
 
-function flattenMetricWeights(metricWeights) {
-  if (!metricWeights || typeof metricWeights !== 'object') return {};
-
-  const flatWeights = {};
-  const keys = Object.keys(metricWeights);
-  const hasFlat = keys.some(key => key.includes('::') && typeof metricWeights[key] === 'number');
-
-  if (hasFlat) {
-    keys.forEach(key => {
-      if (typeof metricWeights[key] === 'number') {
-        flatWeights[key] = metricWeights[key];
-      }
-    });
-    return flatWeights;
-  }
-
-  keys.forEach(groupName => {
-    const groupMetrics = metricWeights[groupName];
-    if (!groupMetrics || typeof groupMetrics !== 'object') return;
-    Object.entries(groupMetrics).forEach(([metricName, metricConfig]) => {
-      if (metricConfig && typeof metricConfig.weight === 'number') {
-        flatWeights[`${groupName}::${metricName}`] = metricConfig.weight;
-      }
-    });
-  });
-
-  return flatWeights;
-}
-
 function nestMetricWeights(metricWeights) {
   if (!metricWeights || typeof metricWeights !== 'object') return {};
 
@@ -7076,6 +6500,13 @@ function formatRankingPlayers(players, groups = null, groupStats = null) {
       waveRound2: player.waveRound2 ?? null,
       weatherWavePenaltyR1: typeof player.weatherWavePenaltyR1 === 'number' ? player.weatherWavePenaltyR1 : null,
       weatherWavePenaltyR2: typeof player.weatherWavePenaltyR2 === 'number' ? player.weatherWavePenaltyR2 : null,
+      bucketSignal: player.bucketSignal
+        ? {
+          value: typeof player.bucketSignal.value === 'number' ? player.bucketSignal.value : null,
+          zScore: typeof player.bucketSignal.zScore === 'number' ? player.bucketSignal.zScore : null,
+          zRank: typeof player.bucketSignal.zRank === 'number' ? player.bucketSignal.zRank : null
+        }
+        : null,
       notes
     };
   });
@@ -7580,7 +7011,7 @@ function listApproachCsvCandidates(season, excludePath = null) {
       let mtimeMs = 0;
       try {
         mtimeMs = fs.statSync(filePath).mtimeMs || 0;
-      } catch (error) {
+      } catch {
         mtimeMs = 0;
       }
       candidates.push({ file: file, path: filePath, mtimeMs });
@@ -7611,7 +7042,7 @@ function detectPostTournamentFromHistory(historyPath, eventId, season) {
       if (seasonStr && rowSeason !== seasonStr) return false;
       return !!String(row?.fin_text || row?.finish || row?.finishPosition || '').trim();
     });
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -7988,178 +7419,98 @@ function writeDeltaPlayerScoresFiles(targets, deltaScoresByEvent, options = {}) 
   return outputs;
 }
 
-async function runAdaptiveOptimizer() {
-  const requiredFiles = [
-    { name: 'Configuration Sheet', path: null },
-    { name: 'Tournament Field', path: null },
-    { name: 'Historical Data', path: null },
-    { name: 'Approach Skill', path: null }
-  ];
-
-  const CURRENT_EVENT_ID = OVERRIDE_EVENT_ID;
-  const CURRENT_SEASON = OVERRIDE_SEASON ?? 2026;
-  const tournamentNameFallback = TOURNAMENT_NAME;
-  let resultsJsonPath = null;
-  let resultsTextPath = null;
-  let preEventRankingPath = null;
-  let preEventRankingCsvPath = null;
-  let signalReportPath = null;
-  let dryRunTemplatePath = null;
-  let dryRunDeltaScoresPath = null;
-  let validationRunSummary = null;
-  let optimizationObjectiveWeights = null;
-  let summaryOutputBaseName = null;
-  let summaryTournamentSlug = null;
-  let seedRunsParentDir = null;
-  const emitCleanSummaryLog = (extraOptions = {}) => writeCleanRunSummaryLog({
-    summaryOutputBaseName,
-    summaryTournamentSlug,
-    isPostRun: IS_POST_TOURNAMENT_RUN,
-    outputDir: seedRunsParentDir || OUTPUT_DIR,
-    tournamentName: TOURNAMENT_NAME,
-    tournamentNameFallback,
-    canonicalTournamentName,
-    currentEventId: CURRENT_EVENT_ID,
-    currentSeason: CURRENT_SEASON,
-    runContext,
-    courseContextEntryFinal,
-    sharedConfig,
-    courseTemplateKey,
-    shouldRunPreEventArtifacts: SHOULD_RUN_PRE_EVENT_ARTIFACTS,
-    regressionSnapshot,
-    rampSummary,
-    rampPlayers,
-    rampMaxEvents,
-    validationData,
-    validationOutputsDir,
-    validationTemplateName,
-    applyValidationOutputs,
-    rankingsSnapshot,
-    approachSkillSnapshot,
-    playerDecompositionsSnapshot,
-    skillRatingsValueSnapshot,
-    skillRatingsRankSnapshot,
-    datagolfApproachPeriod: DATAGOLF_APPROACH_PERIOD,
-    approachDataCurrentSource,
-    approachDataCurrentCount: Array.isArray(approachDataCurrent) ? approachDataCurrent.length : null,
-    approachSnapshotYtd,
-    approachSnapshotL12,
-    approachSnapshotL24,
-    approachBlendWeights,
-    approachBlendWeightsRaw: APPROACH_BLEND_WEIGHTS_RAW,
-    approachEventOnlyMeta,
-    approachYtdUpdatedThisRun,
-    fieldUpdatesSnapshot,
-    fieldUpdatesUpdatedThisRun,
-    fieldDataLength: fieldData?.length || 0,
-    weatherEnabled: WEATHER_ENABLED,
-    weatherWaveSummary,
-    lastFiveYears,
-    effectiveSeason,
-    tours,
-    datagolfHistoricalEventId: DATAGOLF_HISTORICAL_EVENT_ID,
-    datagolfCacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
-    step1cUsedRounds,
-    historyData,
-    allEventRounds,
-    roundsByYear,
-    hasCurrentResults: HAS_CURRENT_RESULTS,
-    trainingMetricNotes,
-    validationYears,
-    approachDeltaPriorMode,
-    approachDeltaPriorFiles,
-    approachDeltaPriorMeta,
-    approachDeltaRowsUsed: Array.isArray(approachDeltaRows) ? approachDeltaRows.length : null,
-    approachDeltaRowsTotal: Array.isArray(approachDeltaRowsAll) ? approachDeltaRowsAll.length : null,
-    approachDeltaPriorWeight: APPROACH_DELTA_PRIOR_WEIGHT,
-    approachDeltaPriorLabel: APPROACH_DELTA_PRIOR_LABEL,
-    optimizationObjectiveWeights,
-    optimizationApproachCap: APPROACH_GROUP_CAP,
-    optimizationLoeoPenalty: OPT_LOEO_PENALTY,
-    optimizationLoeoTopN: OPT_LOEO_TOP_N,
-    validationRunSummary,
-    resultsJsonPath,
-    resultsTextPath,
-    preEventRankingPath,
-    preEventRankingCsvPath,
-    signalReportPath,
-    dryRunTemplatePath,
-    dryRunDeltaScoresPath,
-    resolveFileTimestamp,
-    resolveCourseNumFromHistoryRow,
-    formatSnapshotUsageLine,
-    resolveSnapshotUpdatedAt,
-    buildHistoricalCachePaths,
-    courseContextPath: COURSE_CONTEXT_PATH,
-    templateFilePath: path.resolve(ROOT_DIR, 'utilities', 'weightTemplates.js'),
-    ...extraOptions
-  });
-  const shouldUpsertManifest = !!TOURNAMENT_NAME;
+function resolveInputsAndDirs({
+  overrideEventId,
+  overrideSeason,
+  tournamentName,
+  tournamentNameFallback,
+  forceRunMode,
+  forcePreFlag,
+  forcePostFlag,
+  runResultsOnly,
+  runValidationOnly,
+  runDeltaOnly,
+  overrideOutputDir,
+  dataRootDir,
+  rootDir
+}) {
+  const CURRENT_EVENT_ID = overrideEventId;
+  const CURRENT_SEASON = overrideSeason ?? 2026;
+  const shouldUpsertManifest = !!tournamentName;
   const manifestUpsert = shouldUpsertManifest
     ? ensureManifestEntry({
-      dataRootDir: DATA_ROOT_DIR,
+      dataRootDir,
       season: CURRENT_SEASON,
       eventId: CURRENT_EVENT_ID,
-      tournamentName: TOURNAMENT_NAME,
-      tournamentSlug: normalizeTournamentSlug(TOURNAMENT_NAME),
+      tournamentName,
+      tournamentSlug: normalizeTournamentSlug(tournamentName),
       logger: console
     })
     : null;
   const manifestEntries = manifestUpsert?.entries?.length
     ? manifestUpsert.entries
-    : loadSeasonManifestEntries(DATA_ROOT_DIR, CURRENT_SEASON);
+    : loadSeasonManifestEntries(dataRootDir, CURRENT_SEASON);
   const manifestEntry = resolveManifestEntryForEvent(manifestEntries, {
     eventId: CURRENT_EVENT_ID,
-    tournamentSlug: normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
-    tournamentName: TOURNAMENT_NAME || tournamentNameFallback
+    tournamentSlug: normalizeTournamentSlug(tournamentName || tournamentNameFallback),
+    tournamentName: tournamentName || tournamentNameFallback
   });
   const manifestTournamentSlug = manifestEntry?.tournamentSlug
     ? normalizeTournamentSlug(manifestEntry.tournamentSlug)
     : null;
   const manifestTournamentName = manifestEntry?.tournamentName || null;
-  const canonicalTournamentName = manifestTournamentName || TOURNAMENT_NAME || tournamentNameFallback;
+  const canonicalTournamentName = manifestTournamentName || tournamentName || tournamentNameFallback;
   const canonicalTournamentSlug = manifestTournamentSlug
-    || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback);
+    || normalizeTournamentSlug(tournamentName || tournamentNameFallback);
   const manifestEventDateInfo = resolveEventStartDateFromManifest({
-    dataRootDir: DATA_ROOT_DIR,
+    dataRootDir,
     season: CURRENT_SEASON,
     eventId: CURRENT_EVENT_ID,
     tournamentSlug: canonicalTournamentSlug,
     tournamentName: canonicalTournamentName
   });
-  const seasonDir = path.resolve(DATA_ROOT_DIR, String(CURRENT_SEASON));
-  const tournamentDir = RUN_SEASON_VALIDATION
+  const runContext = buildRunContext({
+    forceMode: forceRunMode,
+    forcePreFlag,
+    forcePostFlag,
+    runResultsOnly,
+    runValidationOnly,
+    runDeltaOnly,
+    tournamentName
+  });
+  const seasonDir = path.resolve(dataRootDir, String(CURRENT_SEASON));
+  const tournamentDir = runContext.isSeasonValidation
     ? null
     : (manifestTournamentSlug
         ? path.resolve(seasonDir, manifestTournamentSlug)
         : resolveTournamentDir(
             CURRENT_SEASON,
-            canonicalTournamentSlug || TOURNAMENT_NAME,
+            canonicalTournamentSlug || tournamentName,
             tournamentNameFallback
           ));
-  const shouldScaffold = !RUN_RESULTS_ONLY && !RUN_SEASON_VALIDATION;
+  const shouldScaffold = runContext.shouldScaffold;
   if (tournamentDir && shouldScaffold) {
     ensureTournamentScaffolding(tournamentDir);
   }
   const tournamentInputsDir = tournamentDir ? path.resolve(tournamentDir, 'inputs') : null;
-  const preEventOutputDir = RUN_SEASON_VALIDATION
+  const preEventOutputDir = runContext.isSeasonValidation
     ? null
     : resolveModeRoot({
       tournamentRoot: tournamentDir,
       mode: 'pre_event',
-      outputDirOverride: OVERRIDE_OUTPUT_DIR
+      outputDirOverride: overrideOutputDir
     });
-  const postEventOutputDir = RUN_SEASON_VALIDATION
+  const postEventOutputDir = runContext.isSeasonValidation
     ? null
     : resolveModeRoot({
       tournamentRoot: tournamentDir,
       mode: 'post_event',
-      outputDirOverride: OVERRIDE_OUTPUT_DIR
+      outputDirOverride: overrideOutputDir
     });
   const validationOutputsDir = resolveValidationRoot({
-    dataRoot: DATA_ROOT_DIR,
+    dataRoot: dataRootDir,
     season: CURRENT_SEASON,
-    workspaceRoot: ROOT_DIR
+    workspaceRoot: rootDir
   });
 
   TOURNAMENT_INPUT_DIRS = tournamentInputsDir ? [tournamentInputsDir] : [];
@@ -8178,411 +7529,64 @@ async function runAdaptiveOptimizer() {
     if (validationOutputsDir) ensureDirectory(validationOutputsDir);
   }
 
-  if (RUN_VALIDATION_ONLY) {
-    try {
-      const { runValidation, runSeasonValidation } = require('./validationRunner');
-      if (RUN_SEASON_VALIDATION && typeof runSeasonValidation === 'function') {
-        console.log('🧪 Running validation runner for all season tournaments...');
-        const validationResult = await runSeasonValidation({
-          season: CURRENT_SEASON,
-          dataRootDir: DATA_ROOT_DIR,
-          logger: console,
-          writeTemplates: WRITE_TEMPLATES,
-          dryRun: DRY_RUN,
-          dryRunDir: null
-        });
-        console.log(`✅ Validation outputs written to: ${validationResult.outputDir}`);
-        return;
-      }
-      if (typeof runValidation !== 'function') {
-        throw new Error('validationRunner is unavailable');
-      }
-      console.log('🧪 Running validation runner (standalone mode)...');
-      const validationResult = await runValidation({
-        season: CURRENT_SEASON,
-        dataRootDir: DATA_ROOT_DIR,
-        tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
-        tournamentSlug: null,
-        tournamentDir,
-        eventId: CURRENT_EVENT_ID,
-        writeTemplates: WRITE_TEMPLATES,
-        dryRun: DRY_RUN,
-        dryRunDir: null
-      });
-      console.log(`✅ Validation outputs written to: ${validationResult.outputDir}`);
-      return;
-    } catch (error) {
-      console.error(`\n❌ Validation runner failed: ${error.message}`);
-      process.exit(1);
-    }
-  }
+  return {
+    CURRENT_EVENT_ID,
+    CURRENT_SEASON,
+    shouldUpsertManifest,
+    manifestUpsert,
+    manifestEntries,
+    manifestEntry,
+    manifestTournamentSlug,
+    manifestTournamentName,
+    canonicalTournamentName,
+    canonicalTournamentSlug,
+    manifestEventDateInfo,
+    runContext,
+    seasonDir,
+    tournamentDir,
+    shouldScaffold,
+    tournamentInputsDir,
+    preEventOutputDir,
+    postEventOutputDir,
+    validationOutputsDir
+  };
+}
 
-  let APPROACH_DELTA_PATH = findApproachDeltaFile(
-    buildApproachDeltaSearchDirs(CURRENT_SEASON, [OUTPUT_DIR, DATA_DIR, DEFAULT_DATA_DIR]),
-    TOURNAMENT_NAME,
-    tournamentNameFallback,
-    CURRENT_SEASON
-  );
-  if (RUN_DELTA_ONLY) {
-    APPROACH_DELTA_PATH = null;
-    console.log('ℹ️  Delta-only mode: forcing approach delta auto-generation.');
-  }
-  if (OVERRIDE_APPROACH_DELTA_CURRENT || OVERRIDE_APPROACH_DELTA_PREVIOUS) {
-    APPROACH_DELTA_PATH = null;
-    console.log('ℹ️  Approach delta overrides provided; will auto-generate delta JSON.');
-  }
-  let CONFIG_PATH = resolveTournamentFile('Configuration Sheet', TOURNAMENT_NAME, CURRENT_SEASON, tournamentNameFallback);
-  if (CONFIG_PATH && tournamentInputsDir) {
-    const normalizedInputsDir = path.resolve(tournamentInputsDir);
-    const normalizedConfigPath = path.resolve(CONFIG_PATH);
-    if (!normalizedConfigPath.startsWith(normalizedInputsDir + path.sep)) {
-      CONFIG_PATH = null;
-    }
-  }
-  let FIELD_PATH = resolveTournamentFile('Tournament Field', TOURNAMENT_NAME, CURRENT_SEASON, tournamentNameFallback);
-  if (FIELD_PATH && tournamentInputsDir) {
-    const normalizedInputsDir = path.resolve(tournamentInputsDir) + path.sep;
-    const normalizedFieldPath = path.resolve(FIELD_PATH);
-    if (!normalizedFieldPath.startsWith(normalizedInputsDir)) {
-      FIELD_PATH = null;
-    }
-  }
-  const HISTORY_PATH = resolveTournamentFile('Historical Data', TOURNAMENT_NAME, CURRENT_SEASON, tournamentNameFallback);
-  let APPROACH_PATH = resolveTournamentFile('Approach Skill', TOURNAMENT_NAME, CURRENT_SEASON, tournamentNameFallback);
-  const manifestApproach = manifestEntry
-    ? resolveApproachCsvForEntry(manifestEntry, CURRENT_SEASON)
-    : null;
-  if (manifestApproach?.path && fs.existsSync(manifestApproach.path)) {
-    APPROACH_PATH = manifestApproach.path;
-  }
-  if (APPROACH_PATH && tournamentInputsDir) {
-    const normalizedInputsDir = path.resolve(tournamentInputsDir) + path.sep;
-    const normalizedApproachPath = path.resolve(APPROACH_PATH);
-    if (!normalizedApproachPath.startsWith(normalizedInputsDir)) {
-      APPROACH_PATH = null;
-    }
-  }
-  const POST_TOURNAMENT_HINT = FORCE_RUN_MODE === 'post'
-    ? true
-    : (FORCE_RUN_MODE === 'pre'
-      ? false
-      : detectPostTournamentFromHistory(
-          HISTORY_PATH,
-          CURRENT_EVENT_ID,
-          CURRENT_SEASON
-        ));
-  const normalizedTournamentName = String(TOURNAMENT_NAME || '').trim();
-  const isSeasonValidationName = normalizedTournamentName.toLowerCase() === 'all';
-  const requireTournamentName = FORCE_RUN_MODE === 'pre'
-    || FORCE_RUN_MODE === 'post'
-    || RUN_RESULTS_ONLY
-    || RUN_VALIDATION_ONLY
-    || (!FORCE_RUN_MODE && !POST_TOURNAMENT_HINT);
-  if (requireTournamentName && !normalizedTournamentName) {
-    console.error('\n❌ Run requires --name (tournament name).');
-    console.error('   Required for pre, post, results-only, and validation runs.');
-    console.error('   Use --name "all" only for season validation runs.');
-    console.error('   Example: node core/optimizer.js --event 9 --season 2026 --name "Arnold Palmer Invitational" --pre');
-    process.exit(1);
-  }
-  if (RUN_SEASON_VALIDATION && !isSeasonValidationName) {
-    console.error('\n❌ Season validation requires --name "all" to indicate full-season scope.');
-    console.error('   Example: node core/optimizer.js --season 2026 --name "all" --validation --season');
-    process.exit(1);
-  }
-  if (RUN_VALIDATION_ONLY && !RUN_SEASON_VALIDATION && isSeasonValidationName) {
-    console.error('\n❌ "all" is reserved for season validation runs.');
-    console.error('   Use --name "<tournament name>" for single-tournament validation.');
-    process.exit(1);
-  }
-  const currentEventRoundsDefaults = { ...CURRENT_EVENT_ROUNDS_DEFAULTS };
-  if (POST_TOURNAMENT_HINT) {
-    currentEventRoundsDefaults.currentSeasonBaseline = true;
-    currentEventRoundsDefaults.currentSeasonOptimization = true;
-  }
-  if (FORCE_RUN_MODE === 'pre') {
-    console.log('ℹ️  Forced pre-tournament mode (--pre).');
-  } else if (FORCE_RUN_MODE === 'post') {
-    console.log('ℹ️  Forced post-tournament mode (--post).');
-  }
-
-  const preferPostEventOutputDir = FORCE_RUN_MODE === 'post'
-    || (!FORCE_RUN_MODE && POST_TOURNAMENT_HINT);
-  const preferredOutputDir = preferPostEventOutputDir
-    ? postEventOutputDir
-    : preEventOutputDir;
-  if (preferredOutputDir) {
-    OUTPUT_DIR = preferredOutputDir;
-  }
-
-  const seedRunsDir = (!OVERRIDE_OUTPUT_DIR && OPT_SEED_RAW && preferPostEventOutputDir && postEventOutputDir)
-    ? resolveSeedRunRoot({
-      modeRoot: postEventOutputDir,
-      mode: 'post_event',
-      isSeeded: true
-    })
-    : null;
-  if (seedRunsDir) {
-    ensureDirectory(seedRunsDir);
-    OUTPUT_DIR = seedRunsDir;
-  }
-
-  requiredFiles[0].path = CONFIG_PATH;
-  requiredFiles[1].path = FIELD_PATH;
-  requiredFiles[2].path = HISTORY_PATH;
-  requiredFiles[3].path = APPROACH_PATH;
-
-  const missingFiles = requiredFiles.filter(file => !file.path || !fs.existsSync(file.path));
-  const missingCoreCsv = missingFiles.filter(file => ['Tournament Field', 'Historical Data', 'Approach Skill'].includes(file.name));
-  const missingConfigCsv = missingFiles.filter(file => file.name === 'Configuration Sheet');
-  if (missingFiles.length > 0) {
-    console.log('\n⚠️  Missing input CSVs (these were migration-only; API/cache is primary):');
-    missingFiles.forEach(file => {
-      const fileExists = file.path ? fs.existsSync(file.path) : false;
-      const fileLabel = file.path
-        ? `${file.path}${fileExists ? '' : ' (missing)'}`
-        : 'n/a';
-      console.log(`   - ${file.name}: ${fileLabel}`);
-    });
-    console.warn('\nExpected locations:');
-    console.warn(`   - ${tournamentInputsDir}`);
-    console.warn(`   - ${seasonDir}`);
-    console.warn(`   - ${DATA_DIR}`);
-    console.warn(`   - ${DEFAULT_DATA_DIR}`);
-  }
-
-  const shouldFetchApi = missingCoreCsv.length > 0;
-  const optionalApiFlag = String(process.env.DATAGOLF_FETCH_OPTIONAL || '').trim().toLowerCase();
-  const shouldFetchOptionalApi = optionalApiFlag
-    ? !['false', '0', 'no', 'off'].includes(optionalApiFlag)
-    : true;
-  if (!shouldFetchApi) {
-    console.log('ℹ️  CSV inputs present: ; skipping DataGolf core fetches (API fallback mode).');
-  }
-  if (!shouldFetchOptionalApi) {
-    console.log('ℹ️  Optional DataGolf snapshots disabled (skill ratings / decompositions).');
-  }
-
-  const fallbackDirName = CONFIG_PATH ? path.basename(path.dirname(CONFIG_PATH)) : null;
-  const outputDir = OUTPUT_DIR
-    || preEventOutputDir
-    || (fallbackDirName ? path.resolve(ROOT_DIR, 'data', fallbackDirName) : null);
-  if (LOGGING_ENABLED && !LOGGING_INITIALIZED) {
-    const loggingDir = typeof OVERRIDE_OUTPUT_DIR === 'string' && OVERRIDE_OUTPUT_DIR.length > 0
-      ? OVERRIDE_OUTPUT_DIR
-      : outputDir;
-    if (loggingDir) {
-      const outputTagRaw = String(process.env.OUTPUT_TAG || '').trim();
-      const outputTagSuffix = outputTagRaw
-        ? `_${outputTagRaw.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_\-]/g, '')}`
-        : '';
-      const seedSuffix = OPT_SEED_RAW
-        ? `_seed-${String(OPT_SEED_RAW).toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_\-]/g, '')}`
-        : '';
-      const kfoldTag = resolveKFoldTag(process.env.EVENT_KFOLD_K);
-      const kfoldTagSuffix = (runContext === 'post_event' && !OPT_SEED_RAW)
-        ? `_${String(kfoldTag.tag || 'LOEO')}`
-        : '';
-      const logContext = `${runContext}${seedSuffix}${kfoldTagSuffix}${outputTagSuffix}`;
-      LOGGING_HANDLE = setupLogging(
-        loggingDir,
-        canonicalTournamentSlug || TOURNAMENT_NAME || OVERRIDE_EVENT_ID || 'event',
-        logContext
-      );
-      LOGGING_INITIALIZED = true;
-      console.log(`Command: ${process.argv.join(' ')}`);
-      const envKeysForLog = [
-        'OUTPUT_TAG',
-        'OPT_SEED',
-        'OPT_TESTS',
-        'WRITE_TEMPLATES',
-        'WRITE_VALIDATION_TEMPLATES',
-        'APPLY_VALIDATION_OUTPUTS',
-        'EVENT_KFOLD_K',
-        'EVENT_KFOLD_SEED',
-        'VALIDATION_APPROACH_MODE',
-        'APPROACH_BLEND_WEIGHTS',
-        'APPROACH_DELTA_ROLLING_EVENTS',
-        'APPROACH_DELTA_MIN_DAYS',
-        'APPROACH_DELTA_SNAPSHOT_ONLY_EVENTS',
-        'MODEL_APPROACH_DELTA_TREND_ROLLING_WEIGHT',
-        'MODEL_APPROACH_DELTA_TREND_PRIOR_WEIGHT',
-        'MODEL_APPROACH_CAP_MIN',
-        'MODEL_APPROACH_CAP_MAX',
-        'DATAGOLF_APPROACH_PERIOD',
-        'WEATHER_ENABLED',
-        'WEATHER_BASE_LATE_EARLY_ADV',
-        'MODEL_FIELD_MIN_PLAYERS',
-        'MODEL_FIELD_MIN_APPROACH_OVERLAP'
-      ];
-      const envPairs = envKeysForLog
-        .map(key => [key, process.env[key]])
-        .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
-        .map(([key, value]) => `${key}=${String(value).trim()}`);
-      if (envPairs.length > 0) {
-        console.log(`Env: ${envPairs.join(', ')}`);
-      }
-
-      // Ensure we always restore stdio overrides even if the script exits early.
-      if (LOGGING_HANDLE && typeof LOGGING_HANDLE.teardown === 'function') {
-        process.once('exit', () => {
-          try {
-            LOGGING_HANDLE.teardown();
-          } catch (error) {
-            // Ignore
-          }
-        });
-      }
-    }
-  }
-  const isSeedRunDir = outputDir && path.basename(outputDir) === 'seed_runs';
-  seedRunsParentDir = isSeedRunDir ? path.dirname(outputDir) : null;
-  const parentAnalysisDir = seedRunsParentDir ? path.resolve(seedRunsParentDir, 'analysis') : null;
-  const parentRegressionDir = seedRunsParentDir ? path.resolve(seedRunsParentDir, 'course_history_regression') : null;
-  const parentHasRamp = parentAnalysisDir && fs.existsSync(path.resolve(parentAnalysisDir, 'early_season_ramp_sg_total.json'));
-  const parentHasRegression = parentRegressionDir && fs.existsSync(path.resolve(parentRegressionDir, 'course_history_regression.json'));
-  const SHOULD_RUN_PRE_EVENT_ARTIFACTS = FORCE_RUN_MODE === 'pre'
-    || (!FORCE_RUN_MODE && !POST_TOURNAMENT_HINT);
-  const analysisOutputDir = (tournamentDir && SHOULD_RUN_PRE_EVENT_ARTIFACTS)
-    ? resolveAnalysisRoot({ tournamentRoot: tournamentDir, mode: 'pre_event' })
-    : null;
-  const regressionOutputDir = (tournamentDir && SHOULD_RUN_PRE_EVENT_ARTIFACTS)
-    ? resolveRegressionRoot({ tournamentRoot: tournamentDir, mode: 'pre_event' })
-    : null;
-  const dryRunBaseDir = preferPostEventOutputDir ? postEventOutputDir : preEventOutputDir;
-  const dryRunOutputDir = dryRunBaseDir
-    ? resolveDryRunRoot({ modeRoot: dryRunBaseDir })
-    : null;
-  if (analysisOutputDir) ensureDirectory(analysisOutputDir);
-  if (regressionOutputDir) ensureDirectory(regressionOutputDir);
-  if (dryRunOutputDir) ensureDirectory(dryRunOutputDir);
-  if (regressionOutputDir) {
-    process.env.PRE_TOURNAMENT_OUTPUT_DIR = regressionOutputDir;
-  } else if (outputDir) {
-    process.env.PRE_TOURNAMENT_OUTPUT_DIR = outputDir;
-  }
-  if (WRITE_TEMPLATES) {
-    process.env.WRITE_TEMPLATES = 'true';
-  }
-  process.env.PRE_TOURNAMENT_EVENT_ID = String(CURRENT_EVENT_ID || '');
-  process.env.PRE_TOURNAMENT_SEASON = String(CURRENT_SEASON || '');
-
-  if (SHOULD_RUN_PRE_EVENT_ARTIFACTS) {
-    if (isSeedRunDir && parentHasRegression) {
-      console.log('ℹ️  Using existing course history regression outputs from parent post_event directory.');
-    } else {
-      console.log('🔄 Generating course history regression inputs...');
-      try {
-        const scriptPath = path.resolve(__dirname, '..', 'scripts', 'analyze_course_history_impact.js');
-        const result = spawnSync(process.execPath, [scriptPath], {
-          env: process.env,
-          stdio: 'inherit'
-        });
-        if (result.error) {
-          console.warn(`ℹ️  Course history regression generation skipped: ${result.error.message}`);
-        } else if (result.status === 0) {
-          console.log('✓ Course history regression inputs generated.');
-        } else {
-          console.warn(`ℹ️  Course history regression generation skipped (exit ${result.status}).`);
-        }
-      } catch (error) {
-        console.warn(`ℹ️  Course history regression generation skipped: ${error.message}`);
-      }
-    }
-  } else {
-    console.log('ℹ️  Skipping course history regression (post-tournament mode).');
-  }
-
-  const rampSummary = SHOULD_RUN_PRE_EVENT_ARTIFACTS
-    ? ensureEarlySeasonRampSummary({
-        outputDir: analysisOutputDir || outputDir,
-        metric: 'sg_total',
-        dataDir: DATA_DIR || DATA_ROOT_DIR,
-        apiYears: OVERRIDE_API_YEARS
-      })
-    : null;
-  const rampPlayers = Array.isArray(rampSummary?.payload?.players)
-    ? rampSummary.payload.players
-    : [];
-  const rampById = rampPlayers.reduce((acc, entry) => {
-    const dgId = String(entry?.dgId || '').trim();
-    if (!dgId) return acc;
-    acc[dgId] = entry;
-    return acc;
-  }, {});
-  const rampWindow = rampSummary?.payload?.meta?.window || {};
-  const rampMaxEvents = Number.isFinite(rampWindow.maxEvents) ? rampWindow.maxEvents : 6;
-  const rampBaselineSeasons = Number.isFinite(rampWindow.baselineSeasons) ? rampWindow.baselineSeasons : null;
-  if (rampPlayers.length > 0) {
-    console.log(`✓ Loaded player ramp summary (${rampPlayers.length} players, maxEvents=${rampMaxEvents})`);
-  } else if (SHOULD_RUN_PRE_EVENT_ARTIFACTS) {
-    console.log('ℹ️  Player ramp summary unavailable (no ramp file found).');
-  } else {
-    console.log('ℹ️  Skipping early-season ramp summary (post-tournament mode).');
-  }
-  const regressionSnapshot = SHOULD_RUN_PRE_EVENT_ARTIFACTS
-    ? loadCourseHistoryRegressionMap({
-        outputDir: regressionOutputDir || outputDir
-      })
-    : null;
-  let courseContext = loadCourseContext(COURSE_CONTEXT_PATH);
-  let courseContextUpdateSummary = null;
-  if (courseContext && regressionSnapshot?.map) {
-    const upsertResult = upsertCourseContextPastPerformanceWeights(courseContext, regressionSnapshot.map);
-    courseContextUpdateSummary = {
-      source: regressionSnapshot.source || null,
-      path: regressionSnapshot.path || null,
-      updated: upsertResult.updated,
-      updatedCount: upsertResult.updates.length,
-      updates: upsertResult.updates
-    };
-    if (upsertResult.updated) {
-      writeJsonFile(COURSE_CONTEXT_PATH, courseContext);
-      console.log(`✓ Updated course_context past performance weights (${upsertResult.updates.length} entries, source=${regressionSnapshot.source}).`);
-    } else {
-      console.log('ℹ️  Course history regression loaded; no course_context updates needed.');
-    }
-  } else if (!courseContext) {
-    courseContextUpdateSummary = {
-      source: regressionSnapshot?.source || null,
-      path: regressionSnapshot?.path || null,
-      updated: false,
-      updatedCount: 0,
-      updates: [],
-      reason: 'course_context_missing'
-    };
-    console.warn('ℹ️  Course context not available for regression upsert.');
-  } else if (!regressionSnapshot?.map) {
-    courseContextUpdateSummary = {
-      source: regressionSnapshot?.source || null,
-      path: regressionSnapshot?.path || null,
-      updated: false,
-      updatedCount: 0,
-      updates: [],
-      reason: 'regression_unavailable'
-    };
-    if (SHOULD_RUN_PRE_EVENT_ARTIFACTS) {
-      console.warn('ℹ️  Course history regression unavailable; skipping course_context upsert.');
-    }
-  }
-
+function loadConfigAndTemplates({
+  currentEventId,
+  currentSeason,
+  configPath,
+  courseContextPath,
+  courseContextInput,
+  regressionSnapshot,
+  courseContextUpdateSummary,
+  currentEventRoundsDefaults,
+  includeCurrentEventRounds,
+  templateOverride,
+  weightTemplates,
+  rampSummary,
+  rampPlayers,
+  rampMaxEvents,
+  rampBaselineSeasons
+}) {
   console.log('\n🔄 Loading configuration...');
+  let courseContext = courseContextInput || loadCourseContext(courseContextPath);
   if (!courseContext) {
-    courseContext = loadCourseContext(COURSE_CONTEXT_PATH);
+    courseContext = loadCourseContext(courseContextPath);
   }
   const courseContextEntry = resolveCourseContextEntry(courseContext, {
-    eventId: CURRENT_EVENT_ID
+    eventId: currentEventId
   });
   // NOTE: We do not rely on configuration-sheet CSVs going forward.
   // `course_context.json.sourcePath` is treated as metadata only.
 
   let sharedConfig = null;
   if (courseContextEntry) {
-    sharedConfig = buildSharedConfigFromCourseContext(courseContextEntry, CURRENT_EVENT_ID);
+    sharedConfig = buildSharedConfigFromCourseContext(courseContextEntry, currentEventId);
     console.log('ℹ️  Using course_context.json as primary configuration source.');
   }
-  if (!sharedConfig && CONFIG_PATH && fs.existsSync(CONFIG_PATH)) {
-    sharedConfig = getSharedConfig(CONFIG_PATH);
+  if (!sharedConfig && configPath && fs.existsSync(configPath)) {
+    sharedConfig = getSharedConfig(configPath);
     console.log('ℹ️  Using Configuration Sheet as fallback configuration source.');
   }
   if (!sharedConfig) {
@@ -8592,7 +7596,7 @@ async function runAdaptiveOptimizer() {
   }
   console.log('✓ Configuration loaded');
   const courseContextEntryWithCourse = courseContextEntry || resolveCourseContextEntry(courseContext, {
-    eventId: CURRENT_EVENT_ID,
+    eventId: currentEventId,
     courseNum: sharedConfig.courseNum
   });
   const courseContextEntryFinal = courseContextEntryWithCourse;
@@ -8630,8 +7634,8 @@ async function runAdaptiveOptimizer() {
       baselineSeasons: rampBaselineSeasons
     }
   };
-  const resolvedSeason = parseInt(sharedConfig.currentSeason || sharedConfig.currentYear || CURRENT_SEASON);
-  const effectiveSeason = Number.isNaN(resolvedSeason) ? CURRENT_SEASON : resolvedSeason;
+  const resolvedSeason = parseInt(sharedConfig.currentSeason || sharedConfig.currentYear || currentSeason);
+  const effectiveSeason = Number.isNaN(resolvedSeason) ? currentSeason : resolvedSeason;
 
   const historicalYear = (() => {
     const parsed = parseInt(DATAGOLF_HISTORICAL_YEAR_RAW, 10);
@@ -8639,46 +7643,46 @@ async function runAdaptiveOptimizer() {
   })();
   let courseTemplateKey = null;
 
-  const currentEventRoundsPolicy = INCLUDE_CURRENT_EVENT_ROUNDS === null
+  const currentEventRoundsPolicy = includeCurrentEventRounds === null
     ? 'default'
-    : (INCLUDE_CURRENT_EVENT_ROUNDS ? 'include' : 'exclude');
+    : (includeCurrentEventRounds ? 'include' : 'exclude');
   console.log(`ℹ️  Current-event rounds policy: ${currentEventRoundsPolicy}`);
   console.log(`   Defaults: metrics=${currentEventRoundsDefaults.currentSeasonMetrics ? 'include' : 'exclude'}, baseline=${currentEventRoundsDefaults.currentSeasonBaseline ? 'include' : 'exclude'}, optimization=${currentEventRoundsDefaults.currentSeasonOptimization ? 'include' : 'exclude'}, historical=${currentEventRoundsDefaults.historicalEvaluation ? 'include' : 'exclude'}`);
-  
+
   // Load base metricConfig structure
   console.log('🔄 Building metric config...');
   const baseMetricConfig = buildMetricGroupsFromConfig({
     getCell: sharedConfig.getCell,
     pastPerformanceEnabled: sharedConfig.pastPerformanceEnabled,
     pastPerformanceWeight: sharedConfig.pastPerformanceWeight,
-    currentEventId: CURRENT_EVENT_ID
+    currentEventId: currentEventId
   });
   console.log('✓ Metric config built');
-  
+
   // Load templates
   const templateConfigs = {};
-  
+
   console.log('\n--- LOADING ALL AVAILABLE TEMPLATES ---');
-  Object.entries(WEIGHT_TEMPLATES).forEach(([templateName, template]) => {
+  Object.entries(weightTemplates).forEach(([templateName, template]) => {
     if (!template) return;
     const normalized = normalizeTemplateWeights(template, baseMetricConfig);
     templateConfigs[templateName] = normalized;
     console.log(`✓ Loaded ${templateName} template`);
   });
 
-  if (TEMPLATE) {
-    if (!templateConfigs[TEMPLATE]) {
-      console.error(`\n❌ Template not found or not available for event ${CURRENT_EVENT_ID}: ${TEMPLATE}`);
+  if (templateOverride) {
+    if (!templateConfigs[templateOverride]) {
+      console.error(`\n❌ Template not found or not available for event ${currentEventId}: ${templateOverride}`);
       console.error(`   Available: ${Object.keys(templateConfigs).join(', ') || 'none'}`);
       process.exit(1);
     }
     Object.keys(templateConfigs).forEach(name => {
-      if (name !== TEMPLATE) delete templateConfigs[name];
+      if (name !== templateOverride) delete templateConfigs[name];
     });
-    console.log(`✓ Using template override: ${TEMPLATE}`);
+    console.log(`✓ Using template override: ${templateOverride}`);
   }
 
-  if (!templateConfigs[CURRENT_EVENT_ID]) {
+  if (!templateConfigs[currentEventId]) {
     // Prefer course_context-derived defaults rather than zeroed baseMetricConfig weights.
     const templateKeyRaw = courseContextEntry?.templateKey || courseContextEntry?.courseType || null;
     const templateKey = templateKeyRaw ? String(templateKeyRaw).trim() : null;
@@ -8687,11 +7691,11 @@ async function runAdaptiveOptimizer() {
       : (templateConfigs.BALANCED ? 'BALANCED' : (templateConfigs.POWER ? 'POWER' : (templateConfigs.TECHNICAL ? 'TECHNICAL' : null)));
 
     if (fallbackTemplateKey) {
-      templateConfigs[CURRENT_EVENT_ID] = {
+      templateConfigs[currentEventId] = {
         groupWeights: { ...templateConfigs[fallbackTemplateKey].groupWeights },
         metricWeights: { ...templateConfigs[fallbackTemplateKey].metricWeights }
       };
-      console.log(`✓ Loaded event-specific weights (eventId: ${CURRENT_EVENT_ID}) from template: ${fallbackTemplateKey}`);
+      console.log(`✓ Loaded event-specific weights (eventId: ${currentEventId}) from template: ${fallbackTemplateKey}`);
     } else {
       const groupWeights = {};
       const metricWeights = {};
@@ -8701,20 +7705,52 @@ async function runAdaptiveOptimizer() {
           metricWeights[`${group.name}::${metric.name}`] = metric.weight;
         });
       });
-      templateConfigs[CURRENT_EVENT_ID] = { groupWeights, metricWeights };
-      console.warn(`⚠️  Loaded event-specific weights (eventId: ${CURRENT_EVENT_ID}) from base metric config (no templateKey/courseType found in course_context).`);
+      templateConfigs[currentEventId] = { groupWeights, metricWeights };
+      console.warn(`⚠️  Loaded event-specific weights (eventId: ${currentEventId}) from base metric config (no templateKey/courseType found in course_context).`);
     }
   }
 
   const metricConfig = baseMetricConfig;
 
-  const shouldAutoRunValidation = !RUN_VALIDATION_ONLY
-    && !RUN_RESULTS_ONLY
-    && (FORCE_RUN_MODE === 'post' || (!FORCE_RUN_MODE && POST_TOURNAMENT_HINT));
-  const normalizedValidationSlug = normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback) || baseName;
+  return {
+    courseContext,
+    courseContextEntry,
+    courseContextEntryFinal,
+    sharedConfig,
+    pastPerformanceWeightSummary,
+    effectiveSeason,
+    historicalYear,
+    courseTemplateKey,
+    currentEventRoundsPolicy,
+    baseMetricConfig,
+    templateConfigs,
+    metricConfig
+  };
+}
+
+async function prepareValidationOutputs({
+  runContext,
+  currentSeason,
+  dataRootDir,
+  tournamentName,
+  tournamentNameFallback,
+  baseName,
+  validationOutputsDir,
+  validationOutputDirs,
+  outputNames,
+  metricConfig,
+  writeTemplates,
+  dryRun,
+  tournamentDir,
+  currentEventId
+}) {
+  const shouldAutoRunValidation = !runContext.isValidationOnly
+    && !runContext.isResultsOnly
+    && runContext.isPost;
+  const normalizedValidationSlug = normalizeTournamentSlug(tournamentName || tournamentNameFallback) || baseName;
   const shouldRefreshValidationOutputs = (() => {
     if (!shouldAutoRunValidation || !validationOutputsDir) return false;
-    const classificationPath = path.resolve(validationOutputsDir, `${OUTPUT_NAMES.courseTypeClassification}.json`);
+    const classificationPath = path.resolve(validationOutputsDir, `${outputNames.courseTypeClassification}.json`);
     const classificationPayload = readJsonFile(classificationPath);
     const entries = Array.isArray(classificationPayload?.entries) ? classificationPayload.entries : [];
     const matchesEntry = entries.some(entry => {
@@ -8722,7 +7758,7 @@ async function runAdaptiveOptimizer() {
         ? String(entry.eventId).trim()
         : '';
       const entrySlug = normalizeTournamentSlug(entry?.tournament || '');
-      return (entryEventId && entryEventId === String(CURRENT_EVENT_ID || '').trim())
+      return (entryEventId && entryEventId === String(currentEventId || '').trim())
         || (entrySlug && normalizedValidationSlug && entrySlug === normalizedValidationSlug);
     });
     if (!matchesEntry) return true;
@@ -8737,18 +7773,18 @@ async function runAdaptiveOptimizer() {
 
   if (shouldRefreshValidationOutputs) {
     try {
-      const { runValidation } = require('./validationRunner');
+      const { runValidation } = require('../utilities/validationRunner');
       if (typeof runValidation === 'function') {
         console.log(`🔄 Auto-running validation (post-tournament, slug=${normalizedValidationSlug})...`);
         await runValidation({
-          season: CURRENT_SEASON,
-          dataRootDir: DATA_ROOT_DIR,
-          tournamentName: TOURNAMENT_NAME,
+          season: currentSeason,
+          dataRootDir,
+          tournamentName,
           tournamentSlug: normalizedValidationSlug,
           tournamentDir,
-          eventId: CURRENT_EVENT_ID,
-          writeTemplates: WRITE_TEMPLATES,
-          dryRun: DRY_RUN,
+          eventId: currentEventId,
+          writeTemplates,
+          dryRun,
           dryRunDir: null
         });
       }
@@ -8759,24 +7795,24 @@ async function runAdaptiveOptimizer() {
 
   let validationData = loadValidationOutputs(metricConfig, [
     validationOutputsDir,
-    path.resolve(DATA_ROOT_DIR, 'validation_outputs'),
-    ...VALIDATION_OUTPUT_DIRS,
+    path.resolve(dataRootDir, 'validation_outputs'),
+    ...validationOutputDirs,
     DATA_DIR,
     DEFAULT_DATA_DIR
   ]);
-  const skipValidationOutputs = RUN_RESULTS_ONLY
+  const skipValidationOutputs = runContext.isResultsOnly
     || ['1', 'true', 'yes'].includes(String(process.env.SKIP_VALIDATION_OUTPUTS || '').trim().toLowerCase());
   if (!validationData?.weightTemplatesPath || !validationData?.deltaTrendsPath) {
     const missing = [];
     if (!validationData?.weightTemplatesPath) missing.push('validation weight templates CSV');
     if (!validationData?.deltaTrendsPath) missing.push('validation delta trends CSV');
-    if (!skipValidationOutputs && !RUN_RESULTS_ONLY) {
+    if (!skipValidationOutputs && !runContext.isResultsOnly) {
       console.error('\n❌ Validation outputs missing:');
       missing.forEach(item => console.error(`   - ${item}`));
       console.error('\nThis optimizer run requires the Algo Validation outputs (weight templates + delta trends).');
       console.error('Run the GAS validation workflow first, then place the resulting CSVs in:');
       console.error(`   - ${validationOutputsDir}`);
-      console.error(`   - ${path.resolve(DATA_ROOT_DIR, 'validation_outputs')}`);
+      console.error(`   - ${path.resolve(dataRootDir, 'validation_outputs')}`);
       console.error(`   - ${DATA_DIR}`);
       console.error(`   - ${DEFAULT_DATA_DIR}`);
       console.error('\nFix: re-run validation and copy the CSVs into one of those folders, or update filenames in optimizer.js.');
@@ -8795,22 +7831,44 @@ async function runAdaptiveOptimizer() {
   };
   validationData = validationDataSafe;
 
+  return {
+    validationData
+  };
+}
+
+async function prepareSnapshots({
+  runContext,
+  manifestEventDateInfo,
+  manifestEntries,
+  currentEventId,
+  currentSeason,
+  tournamentName,
+  tournamentNameFallback,
+  effectiveSeason,
+  historicalYear,
+  canonicalTournamentSlug,
+  canonicalTournamentName,
+  approachPath,
+  shouldFetchApi,
+  shouldFetchOptionalApi,
+  forceFieldUpdates
+}) {
   let rankingsSnapshot = { source: 'csv_primary', path: null, payload: null };
   const SHOULD_REFRESH_YTD = (() => {
-    const isPre = FORCE_RUN_MODE === 'pre' || (!FORCE_RUN_MODE && !POST_TOURNAMENT_HINT);
+    const isPre = runContext.isPre;
     if (!manifestEventDateInfo?.time) return isPre;
     const entries = Array.isArray(manifestEntries) ? manifestEntries : [];
     const currentEntry = resolveManifestEntryForEvent(entries, {
-      eventId: CURRENT_EVENT_ID,
-      tournamentSlug: normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
-      tournamentName: TOURNAMENT_NAME || tournamentNameFallback
+      eventId: currentEventId,
+      tournamentSlug: normalizeTournamentSlug(tournamentName || tournamentNameFallback),
+      tournamentName: tournamentName || tournamentNameFallback
     });
     const previousEntry = currentEntry ? resolvePreviousManifestEntry(entries, currentEntry) : null;
     const currentTime = manifestEventDateInfo.time;
     const previousTime = previousEntry?.date ? parseDateToUtcMs(previousEntry.date) : NaN;
     const ytdCandidates = buildApproachSnapshotCandidates({
       dataRootDir: DATA_ROOT_DIR,
-      season: CURRENT_SEASON,
+      season: currentSeason,
       manifestEntries: entries
     }).filter(entry => entry?.source === 'snapshot_archive' || entry?.source === 'snapshot_latest');
 
@@ -8828,13 +7886,13 @@ async function runAdaptiveOptimizer() {
     const hasPostSnapshot = ytdCandidates.some(entry => entry.time > currentTime);
     return !hasPostSnapshot;
   })();
-  const IS_POST_TOURNAMENT_RUN = FORCE_RUN_MODE === 'post' || (!FORCE_RUN_MODE && POST_TOURNAMENT_HINT);
-  const IS_PRE_TOURNAMENT_RUN = !IS_POST_TOURNAMENT_RUN;
+  const IS_POST_TOURNAMENT_RUN = runContext.isPost;
+  const IS_PRE_TOURNAMENT_RUN = runContext.isPre;
   const CACHE_FIRST_REFRESH = IS_POST_TOURNAMENT_RUN;
   const SHOULD_FETCH_APPROACH_ARCHIVES = (() => {
     if (!IS_POST_TOURNAMENT_RUN) return false;
     const seasonValue = parseInt(String(effectiveSeason || '').trim(), 10);
-    const eventIdValue = String(CURRENT_EVENT_ID || '').trim();
+    const eventIdValue = String(currentEventId || '').trim();
     const forceRefresh = APPROACH_L12_FORCE_REFRESH === '1' || APPROACH_L12_FORCE_REFRESH === 'true';
     const matchesRefreshSeason = APPROACH_L12_REFRESH_SEASON && seasonValue
       ? String(seasonValue) === APPROACH_L12_REFRESH_SEASON
@@ -8871,7 +7929,7 @@ async function runAdaptiveOptimizer() {
   logSnapshotFreshness({ label: 'DataGolf rankings', snapshot: rankingsSnapshot, ttlHours: DATAGOLF_RANKINGS_TTL_HOURS });
 
   let approachSkillSnapshot = { source: 'skipped', path: null, payload: null };
-  const hasApproachCsvFile = !!(APPROACH_PATH && fs.existsSync(APPROACH_PATH));
+  const hasApproachCsvFile = !!(approachPath && fs.existsSync(approachPath));
   const hasYtdSnapshotFile = !!(APPROACH_SNAPSHOT_YTD_LATEST_PATH && fs.existsSync(APPROACH_SNAPSHOT_YTD_LATEST_PATH));
   const shouldFetchApproachSkill = shouldFetchApi && !hasApproachCsvFile && !hasYtdSnapshotFile;
   if (shouldFetchApproachSkill) {
@@ -8932,9 +7990,9 @@ async function runAdaptiveOptimizer() {
           apiKey: DATAGOLF_API_KEY,
           cacheDir: null,
           ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
-          season: CURRENT_SEASON,
-          eventId: CURRENT_EVENT_ID,
-          isPostTournament: POST_TOURNAMENT_HINT,
+          season: currentSeason,
+          eventId: currentEventId,
+          isPostTournament: runContext.postTournamentHint,
           cacheFirst: IS_POST_TOURNAMENT_RUN
         });
         if (approachSnapshotL24?.payload?.last_updated) {
@@ -8953,9 +8011,9 @@ async function runAdaptiveOptimizer() {
           apiKey: DATAGOLF_API_KEY,
           cacheDir: null,
           ttlMs: DATAGOLF_APPROACH_TTL_HOURS * 60 * 60 * 1000,
-          season: CURRENT_SEASON,
-          eventId: CURRENT_EVENT_ID,
-          isPostTournament: POST_TOURNAMENT_HINT,
+          season: currentSeason,
+          eventId: currentEventId,
+          isPostTournament: runContext.postTournamentHint,
           cacheFirst: IS_POST_TOURNAMENT_RUN
         });
         if (approachSnapshotL12?.payload?.last_updated) {
@@ -9035,25 +8093,25 @@ async function runAdaptiveOptimizer() {
       const fieldTtlMs = IS_POST_TOURNAMENT_RUN
         ? DATAGOLF_FIELD_TTL_HOURS * 60 * 60 * 1000
         : 0;
-      const forceFieldUpdates = FORCE_FIELD_UPDATES
+      const forceFieldUpdatesResolved = forceFieldUpdates
         || ['1', 'true', 'yes'].includes(String(process.env.FORCE_FIELD_UPDATES || '').trim().toLowerCase());
       const fieldCacheSlug = canonicalTournamentSlug;
       fieldUpdatesSnapshot = await getDataGolfFieldUpdates({
         apiKey: DATAGOLF_API_KEY,
         cacheDir: DATAGOLF_CACHE_FIELD_DIR,
-        ttlMs: forceFieldUpdates ? 0 : fieldTtlMs,
-        allowStale: forceFieldUpdates ? false : true,
-        preferCache: forceFieldUpdates ? false : true,
+        ttlMs: forceFieldUpdatesResolved ? 0 : fieldTtlMs,
+        allowStale: forceFieldUpdatesResolved ? false : true,
+        preferCache: forceFieldUpdatesResolved ? false : true,
         tour: DATAGOLF_FIELD_TOUR,
         cacheSlug: fieldCacheSlug,
         fileFormat: 'json',
-        expectedEventId: CURRENT_EVENT_ID,
+        expectedEventId: currentEventId,
         expectedEventName: canonicalTournamentName,
         cacheFirst: CACHE_FIRST_REFRESH
       });
 
       if (fieldUpdatesSnapshot?.payload?.event_name) {
-        const forcedNote = forceFieldUpdates ? ', forced refresh' : '';
+        const forcedNote = forceFieldUpdatesResolved ? ', forced refresh' : '';
         console.log(`✓ DataGolf field updates loaded (${fieldUpdatesSnapshot.source}${forcedNote}, ${fieldUpdatesSnapshot.payload.event_name})`);
       } else if (fieldUpdatesSnapshot.source === 'missing-key') {
         console.warn('ℹ️  DataGolf field updates skipped (DATAGOLF_API_KEY not set).');
@@ -9066,66 +8124,6 @@ async function runAdaptiveOptimizer() {
       console.warn(`ℹ️  DataGolf field updates fetch failed: ${error.message}`);
     }
   }
-
-  let fieldUpdatesMismatch = false;
-  if (fieldUpdatesSnapshot?.payload?.event_id && CURRENT_EVENT_ID) {
-    const expectedId = String(CURRENT_EVENT_ID).trim();
-    const actualId = String(fieldUpdatesSnapshot.payload.event_id).trim();
-    if (expectedId && actualId && expectedId !== actualId) {
-      fieldUpdatesMismatch = true;
-      console.warn(`⚠️  Field updates event_id mismatch: expected ${expectedId}, got ${actualId}`);
-    }
-  }
-  if (!fieldUpdatesMismatch && fieldUpdatesSnapshot?.payload?.event_name && TOURNAMENT_NAME) {
-    const expected = normalizeNameForMatch(TOURNAMENT_NAME);
-    const actual = normalizeNameForMatch(fieldUpdatesSnapshot.payload.event_name);
-    if (expected && actual && expected !== actual) {
-      console.warn(`ℹ️  Field updates name differs but event_id matches: expected ${TOURNAMENT_NAME}, got ${fieldUpdatesSnapshot.payload.event_name}`);
-    }
-  }
-  if (fieldUpdatesMismatch && shouldFetchApi && DATAGOLF_API_KEY) {
-    console.warn('⚠️  Field updates cache mismatch; retrying DataGolf API for expected event.');
-    try {
-      const fieldCacheSlug = canonicalTournamentSlug;
-      const refreshed = await getDataGolfFieldUpdates({
-        apiKey: DATAGOLF_API_KEY,
-        cacheDir: DATAGOLF_CACHE_FIELD_DIR,
-        ttlMs: 0,
-        allowStale: false,
-        preferCache: false,
-        tour: DATAGOLF_FIELD_TOUR,
-        cacheSlug: fieldCacheSlug,
-        fileFormat: 'json',
-        expectedEventId: CURRENT_EVENT_ID,
-        expectedEventName: canonicalTournamentName
-      });
-      if (refreshed?.payload?.event_name) {
-        fieldUpdatesSnapshot = refreshed;
-        fieldUpdatesMismatch = false;
-        if (TOURNAMENT_NAME) {
-          const expected = normalizeNameForMatch(TOURNAMENT_NAME);
-          const actual = normalizeNameForMatch(refreshed.payload.event_name);
-          if (expected && actual && expected !== actual) fieldUpdatesMismatch = true;
-        }
-        if (refreshed?.payload?.event_id && CURRENT_EVENT_ID) {
-          const expectedId = String(CURRENT_EVENT_ID).trim();
-          const actualId = String(refreshed.payload.event_id).trim();
-          if (expectedId && actualId && expectedId !== actualId) fieldUpdatesMismatch = true;
-        }
-      }
-    } catch (error) {
-      console.warn(`ℹ️  Field updates API retry failed: ${error.message}`);
-    }
-  }
-  if (!fieldUpdatesMismatch && fieldUpdatesSnapshot?.source === 'api' && fieldUpdatesSnapshot?.path) {
-    fieldUpdatesUpdatedThisRun = true;
-  }
-  if (fieldUpdatesMismatch && (FORCE_RUN_MODE === 'pre' || !POST_TOURNAMENT_HINT)) {
-    console.warn('⚠️  Field updates mismatch during pre-tournament run; ignoring field updates payload for weather calculations.');
-    fieldUpdatesSnapshot = { ...fieldUpdatesSnapshot, payload: null };
-  }
-
-  logSnapshotFreshness({ label: 'DataGolf field updates', snapshot: fieldUpdatesSnapshot, ttlHours: DATAGOLF_FIELD_TTL_HOURS });
 
   const SHOULD_FETCH_VALIDATION_SNAPSHOTS = shouldFetchOptionalApi && IS_POST_TOURNAMENT_RUN;
   let playerDecompositionsSnapshot = { source: 'skipped', path: null, payload: null };
@@ -9242,6 +8240,1176 @@ async function runAdaptiveOptimizer() {
       console.warn(`ℹ️  DataGolf historical rounds fetch failed: ${error.message}`);
     }
   }
+
+  return {
+    rankingsSnapshot,
+    approachSkillSnapshot,
+    approachSnapshotL24,
+    approachSnapshotL12,
+    approachSnapshotYtd,
+    approachYtdUpdatedThisRun,
+    fieldUpdatesSnapshot,
+    fieldUpdatesUpdatedThisRun,
+    playerDecompositionsSnapshot,
+    skillRatingsValueSnapshot,
+    skillRatingsRankSnapshot,
+    historicalRoundsSnapshot,
+    IS_POST_TOURNAMENT_RUN,
+    IS_PRE_TOURNAMENT_RUN,
+    CACHE_FIRST_REFRESH
+  };
+}
+
+async function loadFieldAndWeather({
+  fieldPath,
+  fieldUpdatesSnapshot,
+  currentEventId,
+  tournamentName,
+  tournamentNameFallback,
+  datagolfFieldTour,
+  preEventOutputDir,
+  runContext,
+  courseContextEntryFinal,
+  effectiveSeason,
+  canonicalTournamentName
+}) {
+  console.log('\n🔄 Loading data...');
+  const fieldCsvRows = (fieldPath && fs.existsSync(fieldPath))
+    ? loadCsv(fieldPath, { skipFirstColumn: true })
+    : [];
+  const fieldApiRows = extractFieldRowsFromSnapshotPayload(fieldUpdatesSnapshot?.payload)
+    .map(normalizeFieldRow)
+    .filter(Boolean);
+  const fieldDataRaw = fieldApiRows.length > 0 ? fieldApiRows : fieldCsvRows;
+  const fieldData = fieldDataRaw.filter(row => {
+    const dgId = row && (row['dg_id'] || row.dg_id || row.dgId || row['DG ID']);
+    return String(dgId || '').trim().length > 0;
+  });
+  if (fieldApiRows.length === 0 && fieldCsvRows.length > 0) {
+    const normalizedCsvField = fieldCsvRows
+      .map(normalizeFieldRow)
+      .filter(Boolean);
+    const retainsFieldUpdatesPayload = !!(
+      fieldUpdatesSnapshot?.payload
+      && (fieldUpdatesSnapshot.payload.date_start
+        || fieldUpdatesSnapshot.payload.course_name
+        || fieldUpdatesSnapshot.payload.event_name)
+    );
+    if (retainsFieldUpdatesPayload) {
+      console.log(`✓ Field list loaded from Tournament Field CSV (${normalizedCsvField.length} players).`);
+      console.log('ℹ️  Retaining DataGolf field updates payload for weather calculations.');
+    } else {
+      fieldUpdatesSnapshot = {
+        source: 'csv_field',
+        path: fieldPath,
+        payload: {
+          event_id: currentEventId ? String(currentEventId).trim() : null,
+          event_name: tournamentName || tournamentNameFallback || null,
+          tour: datagolfFieldTour || null,
+          field: normalizedCsvField
+        }
+      };
+      console.log(`✓ Field updates sourced from Tournament Field CSV (${normalizedCsvField.length} players).`);
+    }
+  }
+  if (fieldApiRows.length > 0) {
+    console.log(`✓ Loaded field (cache/API): ${fieldData.length} players`);
+  } else if (fieldCsvRows.length > 0) {
+    console.log(`✓ Loaded field (CSV): ${fieldData.length} players`);
+  } else {
+    console.error('❌ Unable to load tournament field (CSV missing and API fallback empty).');
+    process.exit(1);
+  }
+
+  let weatherWaveSummary = null;
+  const weatherPenaltyCachePath = preEventOutputDir
+    ? path.resolve(preEventOutputDir, WEATHER_PENALTY_CACHE_FILENAME)
+    : null;
+  const applyCachedWeatherPenalties = (payload, sourceLabel) => {
+    if (!payload || typeof payload !== 'object') return false;
+    if (!payload.penalties || typeof payload.penalties !== 'object') return false;
+    const penalties = payload.penalties || {};
+    const r1Am = penalties.R1_AM?.total ?? 0;
+    const r1Pm = penalties.R1_PM?.total ?? 0;
+    const r2Am = penalties.R2_AM?.total ?? 0;
+    const r2Pm = penalties.R2_PM?.total ?? 0;
+
+    const basePenalties = getBaselineWavePenaltyAdjustments();
+    const weatherAdjustments = getNetWeatherWaveAdjustments({ r1Am, r1Pm, r2Am, r2Pm });
+    const combinedPenalties = {
+      R1_AM: (basePenalties.R1_AM || 0) + (weatherAdjustments.adjustments.R1_AM || 0),
+      R1_PM: (basePenalties.R1_PM || 0) + (weatherAdjustments.adjustments.R1_PM || 0),
+      R2_AM: (basePenalties.R2_AM || 0) + (weatherAdjustments.adjustments.R2_AM || 0),
+      R2_PM: (basePenalties.R2_PM || 0) + (weatherAdjustments.adjustments.R2_PM || 0)
+    };
+
+    process.env.MODEL_WEATHER_WAVE_ENABLED = '1';
+    process.env.MODEL_WEATHER_WAVE_R1_EARLY_PENALTY = String(combinedPenalties.R1_AM);
+    process.env.MODEL_WEATHER_WAVE_R1_LATE_PENALTY = String(combinedPenalties.R1_PM);
+    process.env.MODEL_WEATHER_WAVE_R2_EARLY_PENALTY = String(combinedPenalties.R2_AM);
+    process.env.MODEL_WEATHER_WAVE_R2_LATE_PENALTY = String(combinedPenalties.R2_PM);
+
+    weatherWaveSummary = {
+      ...payload,
+      enabled: true,
+      source: sourceLabel || payload.source || 'cache',
+      cachePath: weatherPenaltyCachePath || payload.cachePath || null,
+      basePenalties,
+      weatherAdjustments,
+      combinedPenalties
+    };
+    console.log(`ℹ️  Weather adjustments loaded from cache (weather-only: R1 AM=${r1Am}, R1 PM=${r1Pm}, R2 AM=${r2Am}, R2 PM=${r2Pm}; net: R1 AM=${weatherAdjustments.adjustments.R1_AM}, R1 PM=${weatherAdjustments.adjustments.R1_PM}, R2 AM=${weatherAdjustments.adjustments.R2_AM}, R2 PM=${weatherAdjustments.adjustments.R2_PM}; combined: R1 AM=${combinedPenalties.R1_AM}, R1 PM=${combinedPenalties.R1_PM}, R2 AM=${combinedPenalties.R2_AM}, R2 PM=${combinedPenalties.R2_PM}).`);
+    return true;
+  };
+
+  if (WEATHER_ENABLED) {
+    process.env.MODEL_WEATHER_WAVE_ENABLED = '0';
+    process.env.MODEL_WEATHER_WAVE_R1_EARLY_PENALTY = '0';
+    process.env.MODEL_WEATHER_WAVE_R1_LATE_PENALTY = '0';
+    process.env.MODEL_WEATHER_WAVE_R2_EARLY_PENALTY = '0';
+    process.env.MODEL_WEATHER_WAVE_R2_LATE_PENALTY = '0';
+
+    if (runContext.isPost) {
+      const cached = loadWeatherPenaltyCache(weatherPenaltyCachePath);
+      if (!applyCachedWeatherPenalties(cached, weatherPenaltyCachePath ? `cache:${path.basename(weatherPenaltyCachePath)}` : 'cache')) {
+        console.log('ℹ️  Weather penalties skipped for post-tournament run (no cached penalties found).');
+      }
+    } else {
+      try {
+        const weatherResult = await computeWeatherWavePenalties({
+          fieldUpdatesPayload: fieldUpdatesSnapshot?.payload,
+          courseContextEntry: courseContextEntryFinal,
+          cacheDir: DATAGOLF_CACHE_WEATHER_DIR,
+          apiKey: WEATHER_API_KEY,
+          eventId: currentEventId
+        });
+        if (weatherResult?.enabled) {
+          weatherWaveSummary = weatherResult;
+          const penalties = weatherResult.penalties || {};
+          const r1Am = penalties.R1_AM?.total ?? 0;
+          const r1Pm = penalties.R1_PM?.total ?? 0;
+          const r2Am = penalties.R2_AM?.total ?? 0;
+          const r2Pm = penalties.R2_PM?.total ?? 0;
+
+          const basePenalties = getBaselineWavePenaltyAdjustments();
+          const weatherAdjustments = getNetWeatherWaveAdjustments({ r1Am, r1Pm, r2Am, r2Pm });
+          const combinedPenalties = {
+            R1_AM: (basePenalties.R1_AM || 0) + (weatherAdjustments.adjustments.R1_AM || 0),
+            R1_PM: (basePenalties.R1_PM || 0) + (weatherAdjustments.adjustments.R1_PM || 0),
+            R2_AM: (basePenalties.R2_AM || 0) + (weatherAdjustments.adjustments.R2_AM || 0),
+            R2_PM: (basePenalties.R2_PM || 0) + (weatherAdjustments.adjustments.R2_PM || 0)
+          };
+
+          process.env.MODEL_WEATHER_WAVE_ENABLED = '1';
+          process.env.MODEL_WEATHER_WAVE_R1_EARLY_PENALTY = String(combinedPenalties.R1_AM);
+          process.env.MODEL_WEATHER_WAVE_R1_LATE_PENALTY = String(combinedPenalties.R1_PM);
+          process.env.MODEL_WEATHER_WAVE_R2_EARLY_PENALTY = String(combinedPenalties.R2_AM);
+          process.env.MODEL_WEATHER_WAVE_R2_LATE_PENALTY = String(combinedPenalties.R2_PM);
+
+          weatherWaveSummary = {
+            ...weatherResult,
+            basePenalties,
+            weatherAdjustments,
+            combinedPenalties
+          };
+
+          const cachePayload = {
+            ...weatherResult,
+            generatedAt: formatTimestamp(new Date()),
+            eventId: currentEventId || null,
+            season: effectiveSeason || null,
+            tournamentName: canonicalTournamentName || tournamentName || tournamentNameFallback || null,
+            cachePath: weatherPenaltyCachePath || null,
+            basePenalties,
+            weatherAdjustments,
+            combinedPenalties
+          };
+          writeWeatherPenaltyCache(weatherPenaltyCachePath, cachePayload);
+
+          console.log(`✓ Weather adjustments computed (weather-only: R1 AM=${r1Am}, R1 PM=${r1Pm}, R2 AM=${r2Am}, R2 PM=${r2Pm}; net: R1 AM=${weatherAdjustments.adjustments.R1_AM}, R1 PM=${weatherAdjustments.adjustments.R1_PM}, R2 AM=${weatherAdjustments.adjustments.R2_AM}, R2 PM=${weatherAdjustments.adjustments.R2_PM}; combined: R1 AM=${combinedPenalties.R1_AM}, R1 PM=${combinedPenalties.R1_PM}, R2 AM=${combinedPenalties.R2_AM}, R2 PM=${combinedPenalties.R2_PM}).`);
+        } else {
+          console.warn(`ℹ️  Weather penalties unavailable (${weatherResult?.reason || 'unknown'}).`);
+        }
+      } catch (error) {
+        console.warn(`ℹ️  Weather penalty computation failed: ${error.message}`);
+      }
+    }
+  }
+
+  return {
+    fieldData,
+    fieldUpdatesSnapshot,
+    weatherWaveSummary
+  };
+}
+
+async function prepareHistoricalRounds({
+  isPreTournamentRun,
+  isPostTournamentRun,
+  cacheFirstRefresh,
+  effectiveSeason,
+  currentEventId,
+  tournamentName,
+  tournamentNameFallback,
+  datagolfApiKey
+}) {
+  // Use robust, merged-source loader for historical rounds
+  const historyAnchorSeason = isPreTournamentRun ? (effectiveSeason - 1) : effectiveSeason;
+  const historyYears = buildRecentYears(historyAnchorSeason, 5);
+  if (isPreTournamentRun && !historyYears.includes(effectiveSeason)) {
+    historyYears.push(effectiveSeason);
+  }
+  const lastFiveYears = historyYears.sort((a, b) => a - b);
+  // Dynamically determine tours from course context (event-specific or default)
+  const context = loadCourseContext(COURSE_CONTEXT_PATH);
+  const contextEntry = resolveCourseContextEntry(context, currentEventId);
+  // Robustly determine tours: check event, then course, then default
+  let tours = [];
+  if (contextEntry && Array.isArray(contextEntry.tours) && contextEntry.tours.length > 0) {
+    tours = contextEntry.tours.map(t => t.toLowerCase());
+  } else if (contextEntry && contextEntry.courseNum && context.byCourseNum && context.byCourseNum[contextEntry.courseNum] && Array.isArray(context.byCourseNum[contextEntry.courseNum].tours) && context.byCourseNum[contextEntry.courseNum].tours.length > 0) {
+    tours = context.byCourseNum[contextEntry.courseNum].tours.map(t => t.toLowerCase());
+  } else if (Array.isArray(context.defaultTours) && context.defaultTours.length > 0) {
+    tours = context.defaultTours.map(t => t.toLowerCase());
+  } else {
+    tours = ['pga'];
+  }
+  const historyPreferCache = true;
+  let skipHistoricalApiRefresh = hasHistoricalResultsInCache({
+    cacheDir: DATAGOLF_CACHE_OTHER_DIR,
+    tour: DATAGOLF_HISTORICAL_TOUR,
+    eventId: currentEventId,
+    season: effectiveSeason
+  });
+  if (isPreTournamentRun) {
+    const manifestEntriesForHistory = loadSeasonManifestEntries(DATA_ROOT_DIR, effectiveSeason);
+    const currentManifestEntry = resolveManifestEntryForEvent(manifestEntriesForHistory, {
+      eventId: currentEventId,
+      tournamentSlug: normalizeTournamentSlug(tournamentName || tournamentNameFallback),
+      tournamentName: tournamentName || tournamentNameFallback
+    });
+    const previousManifestEntry = currentManifestEntry
+      ? resolvePreviousManifestEntry(manifestEntriesForHistory, currentManifestEntry)
+      : null;
+    const previousEventId = previousManifestEntry?.eventId || null;
+    if (!previousManifestEntry?.date || !previousEventId) {
+      console.error('❌ Pre-tournament requires prior event in manifest to validate cache-based historical rounds.');
+      console.error('   Fix: add the previous event to manifest.json (with date + eventId).');
+      process.exit(1);
+    }
+    const hasPriorEventCache = hasHistoricalResultsInCache({
+      cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
+      tour: DATAGOLF_HISTORICAL_TOUR,
+      eventId: previousEventId,
+      season: effectiveSeason
+    });
+    if (hasPriorEventCache) {
+      skipHistoricalApiRefresh = true;
+      console.log(`ℹ️  Pre-tournament: confirmed cached historical rounds for prior event ${previousEventId} (${previousManifestEntry.date}).`);
+    } else {
+      let apiHasPriorEvent = false;
+      if (!datagolfApiKey) {
+        console.error(`❌ Pre-tournament requires prior event ${previousEventId} in cache or API, but DATAGOLF_API_KEY is not set.`);
+        process.exit(1);
+      }
+      try {
+        const snapshot = await getDataGolfHistoricalRounds({
+          apiKey: datagolfApiKey,
+          cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
+          ttlMs: 0,
+          allowStale: true,
+          preferCache: false,
+          tour: DATAGOLF_HISTORICAL_TOUR,
+          eventId: 'all',
+          year: effectiveSeason,
+          fileFormat: 'json'
+        });
+        const apiRows = extractHistoricalRowsFromSnapshotPayload(snapshot?.payload)
+          .map(normalizeHistoricalRoundRow)
+          .filter(Boolean);
+        apiHasPriorEvent = apiRows.some(row => String(row?.event_id || '').trim() === String(previousEventId));
+      } catch (error) {
+        console.error(`❌ Pre-tournament historical rounds API fetch failed: ${error.message}`);
+        process.exit(1);
+      }
+      if (!apiHasPriorEvent) {
+        console.error(`❌ Pre-tournament requires prior event ${previousEventId} (${previousManifestEntry.date}) in API/cache, but it was not found.`);
+        process.exit(1);
+      }
+      console.log(`ℹ️  Pre-tournament: prior event ${previousEventId} found via API; cache updated.`);
+      skipHistoricalApiRefresh = true;
+    }
+  } else if (skipHistoricalApiRefresh) {
+    console.log('ℹ️  Historical rounds refresh skipped (results already present in cache).');
+  }
+  const historyTtlMs = isPostTournamentRun
+    ? 0
+    : DATAGOLF_HISTORICAL_TTL_HOURS * 60 * 60 * 1000;
+  const historyCollection = await collectRecords({
+    years: lastFiveYears,
+    tours,
+    dataDir: DATA_DIR || DATA_ROOT_DIR,
+    datagolfApiKey: datagolfApiKey,
+    datagolfCacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
+    datagolfHistoricalTtlMs: historyTtlMs,
+    getDataGolfHistoricalRounds,
+    preferApi: !skipHistoricalApiRefresh,
+    preferCache: historyPreferCache,
+    returnMeta: true
+  });
+  let historyData = extractHistoricalRowsFromSnapshotPayload(historyCollection?.rows || historyCollection);
+  const historyMeta = historyCollection?.meta || null;
+  if (!historyData || historyData.length === 0) {
+    console.error('❌ Unable to load historical rounds (no data found in JSON, CSV, or API).');
+    process.exit(1);
+  }
+  console.log(`✓ Loaded history (robust merged-source): ${historyData.length} rounds`);
+  if (historyMeta) {
+    console.log(`ℹ️  History source: refreshPolicy=${historyMeta.refreshPolicy}, api(cache=${historyMeta.api.cache}, stale=${historyMeta.api.cacheStale}, api=${historyMeta.api.api}, missingKey=${historyMeta.api.missingKey}, missingYear=${historyMeta.api.missingYear}, errors=${historyMeta.api.errors}), csv(files=${historyMeta.csv.files}, rows=${historyMeta.csv.rows})`);
+  }
+
+  const eventIdStr = String(currentEventId);
+  const seasonStr = String(effectiveSeason);
+  let historyEventCount = historyData.filter(row => String(row['event_id'] || '').trim() === eventIdStr).length;
+  let historyEventSeasonCount = historyData.filter(row => {
+    const eventMatch = String(row['event_id'] || '').trim() === eventIdStr;
+    if (!eventMatch) return false;
+    const seasonValue = String(row['season'] || row['year'] || '').trim();
+    return seasonValue === seasonStr;
+  }).length;
+
+  const mergeEventYearRows = (rows, sourceLabel) => {
+    if (!Array.isArray(rows) || rows.length === 0) return false;
+    const existingKeys = new Set(
+      historyData.map(row => [
+        String(row['dg_id'] || '').trim(),
+        String(row['event_id'] || '').trim(),
+        String(row['year'] || row['season'] || '').trim(),
+        String(row['round_num'] || row['round'] || '').trim()
+      ].join('|'))
+    );
+
+    rows.forEach(row => {
+      const key = [
+        String(row['dg_id'] || '').trim(),
+        String(row['event_id'] || '').trim(),
+        String(row['year'] || row['season'] || '').trim(),
+        String(row['round_num'] || row['round'] || '').trim()
+      ].join('|');
+      if (!existingKeys.has(key)) {
+        historyData.push(row);
+        existingKeys.add(key);
+      }
+    });
+
+    historyEventCount = historyData.filter(row => String(row['event_id'] || '').trim() === eventIdStr).length;
+    historyEventSeasonCount = historyData.filter(row => {
+      const eventMatch = String(row['event_id'] || '').trim() === eventIdStr;
+      if (!eventMatch) return false;
+      const seasonValue = String(row['season'] || row['year'] || '').trim();
+      return seasonValue === seasonStr;
+    }).length;
+
+    console.log(`✓ Loaded ${rows.length} rounds for event ${eventIdStr} (${seasonStr}) via ${sourceLabel}.`);
+    return true;
+  };
+
+  if (historyEventSeasonCount === 0) {
+    const allEventsCachePath = resolveHistoricalCachePath({
+      cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
+      tour: DATAGOLF_HISTORICAL_TOUR,
+      eventId: 'all',
+      year: effectiveSeason,
+      fileFormat: 'json'
+    });
+    if (allEventsCachePath && fs.existsSync(allEventsCachePath)) {
+      const cachedPayload = readJsonFile(allEventsCachePath);
+      const eventYearRows = extractEventHistoricalRows({
+        payload: cachedPayload,
+        eventId: eventIdStr,
+        season: seasonStr
+      });
+      if (eventYearRows.length > 0) {
+        mergeEventYearRows(eventYearRows, 'all-events cache');
+      }
+    }
+  }
+
+  if (historyEventSeasonCount === 0 && !skipHistoricalApiRefresh) {
+    try {
+      if (!datagolfApiKey) {
+        console.warn('ℹ️  Historical rounds API refresh skipped (missing DATAGOLF_API_KEY).');
+      } else {
+        const snapshot = await getDataGolfHistoricalRounds({
+          apiKey: datagolfApiKey,
+          cacheDir: null,
+          ttlMs: 0,
+          allowStale: true,
+          preferCache: false,
+          tour: DATAGOLF_HISTORICAL_TOUR,
+          eventId: 'all',
+          year: effectiveSeason,
+          fileFormat: 'json'
+        });
+        const eventYearRows = extractEventHistoricalRows({
+          payload: snapshot?.payload,
+          eventId: eventIdStr,
+          season: seasonStr
+        });
+
+        if (eventYearRows.length > 0) {
+          const allEventsCachePath = buildHistoricalCachePath({
+            cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
+            tour: DATAGOLF_HISTORICAL_TOUR,
+            eventId: 'all',
+            year: effectiveSeason,
+            fileFormat: 'json'
+          });
+          if (allEventsCachePath) {
+            writeJsonFile(allEventsCachePath, snapshot?.payload || {});
+            console.log(`ℹ️  Historical rounds cache updated for event ${eventIdStr} (${seasonStr}) in all-events cache.`);
+          }
+          mergeEventYearRows(eventYearRows, 'API payload');
+        } else {
+          console.warn(`ℹ️  Historical rounds missing for event ${eventIdStr} (${seasonStr}) after API check.`);
+        }
+      }
+    } catch (error) {
+      console.warn(`ℹ️  Historical rounds lookup failed: ${error.message}`);
+    }
+  } else if (historyEventSeasonCount === 0 && skipHistoricalApiRefresh) {
+    console.warn(`ℹ️  Skipping event-year historical rounds API fetch (refresh disabled; event ${eventIdStr}, season ${seasonStr}).`);
+  }
+
+  let liveResultsFallback = null;
+  if (!isPreTournamentRun && historyEventSeasonCount === 0) {
+    if (!datagolfApiKey) {
+      console.warn('ℹ️  Live results fallback skipped (missing DATAGOLF_API_KEY).');
+    } else {
+      try {
+        const liveSnapshot = await getDataGolfLiveTournamentStats({
+          apiKey: datagolfApiKey,
+          cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
+          ttlMs: 0,
+          allowStale: true,
+          cacheFirst: cacheFirstRefresh
+        });
+        liveResultsFallback = deriveResultsFromLiveStats(liveSnapshot?.payload);
+        if (liveResultsFallback.length > 0) {
+          console.log(`✓ Loaded ${liveResultsFallback.length} live results from DataGolf (source: ${liveSnapshot?.source || 'unknown'}).`);
+        } else {
+          console.warn('ℹ️  Live tournament stats returned no results for fallback.');
+        }
+      } catch (error) {
+        console.warn(`ℹ️  Live tournament stats fallback failed: ${error.message}`);
+      }
+    }
+  }
+
+  if (!isPreTournamentRun && historyEventSeasonCount === 0) {
+    if (liveResultsFallback && liveResultsFallback.length > 0) {
+      console.warn('⚠️  Historical rounds missing; proceeding with live results fallback.');
+    } else {
+      console.error('\n❌ Post/results/validation mode requires current-event historical rounds, but none were found.');
+      console.error(`   Event: ${eventIdStr} | Season: ${seasonStr}`);
+      console.error('   Fix: ensure the historical rounds cache/API includes current-event results before running post/results/validation.');
+      process.exit(1);
+    }
+  }
+
+  console.log(`ℹ️  History rows for event ${eventIdStr}: ${historyEventCount} (season ${seasonStr}: ${historyEventSeasonCount})`);
+
+  return {
+    historyData,
+    historyMeta,
+    lastFiveYears,
+    tours,
+    liveResultsFallback
+  };
+}
+
+async function runAdaptiveOptimizer() {
+  const requiredFiles = [
+    { name: 'Configuration Sheet', path: null },
+    { name: 'Tournament Field', path: null },
+    { name: 'Historical Data', path: null },
+    { name: 'Approach Skill', path: null }
+  ];
+
+  const tournamentNameFallback = TOURNAMENT_NAME;
+  let resultsJsonPath = null;
+  let resultsTextPath = null;
+  let preEventRankingPath = null;
+  let preEventRankingCsvPath = null;
+  let signalReportPath = null;
+  let dryRunTemplatePath = null;
+  let dryRunDeltaScoresPath = null;
+  let validationRunSummary = null;
+  let optimizationObjectiveWeights = null;
+  let summaryOutputBaseName = null;
+  let summaryTournamentSlug = null;
+  let seedRunsParentDir = null;
+  const emitCleanSummaryLog = (extraOptions = {}) => writeCleanRunSummaryLog({
+    summaryOutputBaseName,
+    summaryTournamentSlug,
+    isPostRun: IS_POST_TOURNAMENT_RUN,
+    outputDir: seedRunsParentDir || OUTPUT_DIR,
+    tournamentName: TOURNAMENT_NAME,
+    tournamentNameFallback,
+    canonicalTournamentName,
+    currentEventId: CURRENT_EVENT_ID,
+    currentSeason: CURRENT_SEASON,
+    runContext: runContext.label,
+    courseContextEntryFinal,
+    sharedConfig,
+    courseTemplateKey,
+    shouldRunPreEventArtifacts: SHOULD_RUN_PRE_EVENT_ARTIFACTS,
+    regressionSnapshot,
+    rampSummary,
+    rampPlayers,
+    rampMaxEvents,
+    validationData,
+    validationOutputsDir,
+    validationTemplateName,
+    applyValidationOutputs,
+    rankingsSnapshot,
+    approachSkillSnapshot,
+    playerDecompositionsSnapshot,
+    skillRatingsValueSnapshot,
+    skillRatingsRankSnapshot,
+    datagolfApproachPeriod: DATAGOLF_APPROACH_PERIOD,
+    approachDataCurrentSource,
+    approachDataCurrentCount: Array.isArray(approachDataCurrent) ? approachDataCurrent.length : null,
+    approachSnapshotYtd,
+    approachSnapshotL12,
+    approachSnapshotL24,
+    approachBlendWeights,
+    approachBlendWeightsRaw: APPROACH_BLEND_WEIGHTS_RAW,
+    approachEventOnlyMeta,
+    approachYtdUpdatedThisRun,
+    fieldUpdatesSnapshot,
+    fieldUpdatesUpdatedThisRun,
+    fieldDataLength: fieldData?.length || 0,
+    weatherEnabled: WEATHER_ENABLED,
+    weatherWaveSummary,
+    lastFiveYears,
+    effectiveSeason,
+    tours,
+    datagolfHistoricalEventId: DATAGOLF_HISTORICAL_EVENT_ID,
+    datagolfCacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
+    step1cUsedRounds,
+    historyData,
+    allEventRounds,
+    roundsByYear,
+    hasCurrentResults: HAS_CURRENT_RESULTS,
+    trainingMetricNotes,
+    validationYears,
+    approachDeltaPriorMode,
+    approachDeltaPriorFiles,
+    approachDeltaPriorMeta,
+    approachDeltaRowsUsed: Array.isArray(approachDeltaRows) ? approachDeltaRows.length : null,
+    approachDeltaRowsTotal: Array.isArray(approachDeltaRowsAll) ? approachDeltaRowsAll.length : null,
+    approachDeltaPriorWeight: APPROACH_DELTA_PRIOR_WEIGHT,
+    approachDeltaPriorLabel: APPROACH_DELTA_PRIOR_LABEL,
+    optimizationObjectiveWeights,
+    optimizationApproachCap: APPROACH_GROUP_CAP,
+    optimizationLoeoPenalty: OPT_LOEO_PENALTY,
+    optimizationLoeoTopN: OPT_LOEO_TOP_N,
+    validationRunSummary,
+    resultsJsonPath,
+    resultsTextPath,
+    preEventRankingPath,
+    preEventRankingCsvPath,
+    signalReportPath,
+    dryRunTemplatePath,
+    dryRunDeltaScoresPath,
+    resolveFileTimestamp,
+    resolveCourseNumFromHistoryRow,
+    formatSnapshotUsageLine,
+    resolveSnapshotUpdatedAt,
+    buildHistoricalCachePaths,
+    courseContextPath: COURSE_CONTEXT_PATH,
+    templateFilePath: path.resolve(ROOT_DIR, 'utilities', 'weightTemplates.js'),
+    ...extraOptions
+  });
+  const {
+    CURRENT_EVENT_ID,
+    CURRENT_SEASON,
+    manifestEntries,
+    manifestEntry,
+    canonicalTournamentName,
+    canonicalTournamentSlug,
+    manifestEventDateInfo,
+    runContext: runContextBase,
+    seasonDir,
+    tournamentDir,
+    tournamentInputsDir,
+    preEventOutputDir,
+    postEventOutputDir,
+    validationOutputsDir
+  } = resolveInputsAndDirs({
+    overrideEventId: OVERRIDE_EVENT_ID,
+    overrideSeason: OVERRIDE_SEASON,
+    tournamentName: TOURNAMENT_NAME,
+    tournamentNameFallback,
+    forceRunMode: FORCE_RUN_MODE,
+    forcePreFlag: FORCE_PRE_FLAG,
+    forcePostFlag: FORCE_POST_FLAG,
+    runResultsOnly: RUN_RESULTS_ONLY,
+    runValidationOnly: RUN_VALIDATION_ONLY,
+    runDeltaOnly: RUN_DELTA_ONLY,
+    overrideOutputDir: OVERRIDE_OUTPUT_DIR,
+    dataRootDir: DATA_ROOT_DIR,
+    rootDir: ROOT_DIR
+  });
+  let runContext = runContextBase;
+
+  if (runContext.isValidationOnly) {
+    try {
+      const { runValidation, runSeasonValidation } = require('../utilities/validationRunner');
+      if (runContext.isSeasonValidation && typeof runSeasonValidation === 'function') {
+        console.log('🧪 Running validation pipeline for all season tournaments...');
+        const validationResult = await runSeasonValidation({
+          season: CURRENT_SEASON,
+          dataRootDir: DATA_ROOT_DIR,
+          logger: console,
+          writeTemplates: WRITE_TEMPLATES,
+          dryRun: DRY_RUN,
+          dryRunDir: null
+        });
+        console.log(`✅ Validation outputs written to: ${validationResult.outputDir}`);
+        return;
+      }
+      if (typeof runValidation !== 'function') {
+        throw new Error('validation module is unavailable');
+      }
+      console.log('🧪 Running validation pipeline (standalone mode)...');
+      const validationResult = await runValidation({
+        season: CURRENT_SEASON,
+        dataRootDir: DATA_ROOT_DIR,
+        tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
+        tournamentSlug: null,
+        tournamentDir,
+        eventId: CURRENT_EVENT_ID,
+        writeTemplates: WRITE_TEMPLATES,
+        dryRun: DRY_RUN,
+        dryRunDir: null
+      });
+      console.log(`✅ Validation outputs written to: ${validationResult.outputDir}`);
+
+      if (typeof runSeasonValidation === 'function') {
+        console.log('🧪 Running validation season rollup...');
+        const seasonResult = await runSeasonValidation({
+          season: CURRENT_SEASON,
+          dataRootDir: DATA_ROOT_DIR,
+          logger: console,
+          writeTemplates: WRITE_TEMPLATES,
+          dryRun: DRY_RUN,
+          dryRunDir: null
+        });
+        if (seasonResult?.outputDir) {
+          console.log(`✅ Season validation outputs written to: ${seasonResult.outputDir}`);
+        }
+      }
+      return;
+    } catch (error) {
+      console.error(`\n❌ Validation pipeline failed: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  let APPROACH_DELTA_PATH = findApproachDeltaFile(
+    buildApproachDeltaSearchDirs(CURRENT_SEASON, [OUTPUT_DIR, DATA_DIR, DEFAULT_DATA_DIR]),
+    TOURNAMENT_NAME,
+    tournamentNameFallback,
+    CURRENT_SEASON
+  );
+  if (runContext.isDeltaOnly) {
+    APPROACH_DELTA_PATH = null;
+    console.log('ℹ️  Delta-only mode: forcing approach delta auto-generation.');
+  }
+  if (OVERRIDE_APPROACH_DELTA_CURRENT || OVERRIDE_APPROACH_DELTA_PREVIOUS) {
+    APPROACH_DELTA_PATH = null;
+    console.log('ℹ️  Approach delta overrides provided; will auto-generate delta JSON.');
+  }
+  let CONFIG_PATH = resolveTournamentFile('Configuration Sheet', TOURNAMENT_NAME, CURRENT_SEASON, tournamentNameFallback);
+  if (CONFIG_PATH && tournamentInputsDir) {
+    const normalizedInputsDir = path.resolve(tournamentInputsDir);
+    const normalizedConfigPath = path.resolve(CONFIG_PATH);
+    if (!normalizedConfigPath.startsWith(normalizedInputsDir + path.sep)) {
+      CONFIG_PATH = null;
+    }
+  }
+  let FIELD_PATH = resolveTournamentFile('Tournament Field', TOURNAMENT_NAME, CURRENT_SEASON, tournamentNameFallback);
+  if (FIELD_PATH && tournamentInputsDir) {
+    const normalizedInputsDir = path.resolve(tournamentInputsDir) + path.sep;
+    const normalizedFieldPath = path.resolve(FIELD_PATH);
+    if (!normalizedFieldPath.startsWith(normalizedInputsDir)) {
+      FIELD_PATH = null;
+    }
+  }
+  const HISTORY_PATH = resolveTournamentFile('Historical Data', TOURNAMENT_NAME, CURRENT_SEASON, tournamentNameFallback);
+  let APPROACH_PATH = resolveTournamentFile('Approach Skill', TOURNAMENT_NAME, CURRENT_SEASON, tournamentNameFallback);
+  const manifestApproach = manifestEntry
+    ? resolveApproachCsvForEntry(manifestEntry, CURRENT_SEASON)
+    : null;
+  if (manifestApproach?.path && fs.existsSync(manifestApproach.path)) {
+    APPROACH_PATH = manifestApproach.path;
+  }
+  if (APPROACH_PATH && tournamentInputsDir) {
+    const normalizedInputsDir = path.resolve(tournamentInputsDir) + path.sep;
+    const normalizedApproachPath = path.resolve(APPROACH_PATH);
+    if (!normalizedApproachPath.startsWith(normalizedInputsDir)) {
+      APPROACH_PATH = null;
+    }
+  }
+  const POST_TOURNAMENT_HINT = FORCE_RUN_MODE === 'post'
+    ? true
+    : (FORCE_RUN_MODE === 'pre'
+      ? false
+      : detectPostTournamentFromHistory(
+          HISTORY_PATH,
+          CURRENT_EVENT_ID,
+          CURRENT_SEASON
+        ));
+  runContext = buildRunContext({
+    forceMode: FORCE_RUN_MODE,
+    forcePreFlag: FORCE_PRE_FLAG,
+    forcePostFlag: FORCE_POST_FLAG,
+    runResultsOnly: RUN_RESULTS_ONLY,
+    runValidationOnly: RUN_VALIDATION_ONLY,
+    validationRequested: RUN_VALIDATION_REQUESTED,
+    runDeltaOnly: RUN_DELTA_ONLY,
+    tournamentName: TOURNAMENT_NAME,
+    postTournamentHint: POST_TOURNAMENT_HINT
+  });
+  if (runContext.requireTournamentName && !runContext.normalizedTournamentName) {
+    console.error('\n❌ Run requires --name (tournament name).');
+    console.error('   Required for pre, post, results-only, and validation runs.');
+    console.error('   Use --name "all" only for season validation runs.');
+    console.error('   Example: node core/optimizer.js --event 9 --season 2026 --name "Arnold Palmer Invitational" --pre');
+    process.exit(1);
+  }
+  if (runContext.isSeasonValidation && !runContext.isSeasonValidationName) {
+    console.error('\n❌ Season validation requires --name "all" to indicate full-season scope.');
+    console.error('   Example: node core/optimizer.js --season 2026 --name "all" --validation --season');
+    process.exit(1);
+  }
+  if (runContext.isValidationOnly && !runContext.isSeasonValidation && runContext.isSeasonValidationName) {
+    console.error('\n❌ "all" is reserved for season validation runs.');
+    console.error('   Use --name "<tournament name>" for single-tournament validation.');
+    process.exit(1);
+  }
+  const currentEventRoundsDefaults = { ...CURRENT_EVENT_ROUNDS_DEFAULTS };
+  if (runContext.postTournamentHint) {
+    currentEventRoundsDefaults.currentSeasonBaseline = true;
+    currentEventRoundsDefaults.currentSeasonOptimization = true;
+  }
+  if (runContext.forceMode === 'pre') {
+    console.log('ℹ️  Forced pre-tournament mode (--pre).');
+  } else if (runContext.forceMode === 'post') {
+    console.log('ℹ️  Forced post-tournament mode (--post).');
+  }
+
+  const preferPostEventOutputDir = runContext.preferPostOutputDir;
+  const preferredOutputDir = preferPostEventOutputDir
+    ? postEventOutputDir
+    : preEventOutputDir;
+  if (preferredOutputDir) {
+    OUTPUT_DIR = preferredOutputDir;
+  }
+
+  const seedRunsDir = (!OVERRIDE_OUTPUT_DIR && OPT_SEED_RAW && preferPostEventOutputDir && postEventOutputDir)
+    ? resolveSeedRunRoot({
+      modeRoot: postEventOutputDir,
+      mode: 'post_event',
+      isSeeded: true
+    })
+    : null;
+  if (seedRunsDir) {
+    ensureDirectory(seedRunsDir);
+    OUTPUT_DIR = seedRunsDir;
+  }
+
+  requiredFiles[0].path = CONFIG_PATH;
+  requiredFiles[1].path = FIELD_PATH;
+  requiredFiles[2].path = HISTORY_PATH;
+  requiredFiles[3].path = APPROACH_PATH;
+
+  const missingFiles = requiredFiles.filter(file => !file.path || !fs.existsSync(file.path));
+  const missingCoreCsv = missingFiles.filter(file => ['Tournament Field', 'Historical Data', 'Approach Skill'].includes(file.name));
+  if (missingFiles.length > 0) {
+    console.log('\n⚠️  Missing input CSVs (these were migration-only; API/cache is primary):');
+    missingFiles.forEach(file => {
+      const fileExists = file.path ? fs.existsSync(file.path) : false;
+      const fileLabel = file.path
+        ? `${file.path}${fileExists ? '' : ' (missing)'}`
+        : 'n/a';
+      console.log(`   - ${file.name}: ${fileLabel}`);
+    });
+    console.warn('\nExpected locations:');
+    console.warn(`   - ${tournamentInputsDir}`);
+    console.warn(`   - ${seasonDir}`);
+    console.warn(`   - ${DATA_DIR}`);
+    console.warn(`   - ${DEFAULT_DATA_DIR}`);
+  }
+
+  const shouldFetchApi = missingCoreCsv.length > 0;
+  const optionalApiFlag = String(process.env.DATAGOLF_FETCH_OPTIONAL || '').trim().toLowerCase();
+  const shouldFetchOptionalApi = optionalApiFlag
+    ? !['false', '0', 'no', 'off'].includes(optionalApiFlag)
+    : true;
+  if (!shouldFetchApi) {
+    console.log('ℹ️  CSV inputs present: ; skipping DataGolf core fetches (API fallback mode).');
+  }
+  if (!shouldFetchOptionalApi) {
+    console.log('ℹ️  Optional DataGolf snapshots disabled (skill ratings / decompositions).');
+  }
+
+  const fallbackDirName = CONFIG_PATH ? path.basename(path.dirname(CONFIG_PATH)) : null;
+  const outputDir = OUTPUT_DIR
+    || preEventOutputDir
+    || (fallbackDirName ? path.resolve(ROOT_DIR, 'data', fallbackDirName) : null);
+  if (LOGGING_ENABLED && !LOGGING_INITIALIZED) {
+    const loggingDir = typeof OVERRIDE_OUTPUT_DIR === 'string' && OVERRIDE_OUTPUT_DIR.length > 0
+      ? OVERRIDE_OUTPUT_DIR
+      : outputDir;
+    if (loggingDir) {
+      const outputTagRaw = String(process.env.OUTPUT_TAG || '').trim();
+      const outputTagSuffix = outputTagRaw
+        ? `_${outputTagRaw.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_\-]/g, '')}`
+        : '';
+      const seedSuffix = OPT_SEED_RAW
+        ? `_seed-${String(OPT_SEED_RAW).toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_\-]/g, '')}`
+        : '';
+      const kfoldTag = resolveKFoldTag(process.env.EVENT_KFOLD_K);
+      const kfoldTagSuffix = (runContext.label === 'post_event' && !OPT_SEED_RAW)
+        ? `_${String(kfoldTag.tag || 'LOEO')}`
+        : '';
+      const logContext = `${runContext.label}${seedSuffix}${kfoldTagSuffix}${outputTagSuffix}`;
+      LOGGING_HANDLE = setupLogging(
+        loggingDir,
+        canonicalTournamentSlug || TOURNAMENT_NAME || OVERRIDE_EVENT_ID || 'event',
+        logContext
+      );
+      LOGGING_INITIALIZED = true;
+      console.log(`Command: ${process.argv.join(' ')}`);
+      const envKeysForLog = [
+        'OUTPUT_TAG',
+        'OPT_SEED',
+        'OPT_TESTS',
+        'WRITE_TEMPLATES',
+        'WRITE_VALIDATION_TEMPLATES',
+        'APPLY_VALIDATION_OUTPUTS',
+        'EVENT_KFOLD_K',
+        'EVENT_KFOLD_SEED',
+        'VALIDATION_APPROACH_MODE',
+        'APPROACH_BLEND_WEIGHTS',
+        'APPROACH_DELTA_ROLLING_EVENTS',
+        'APPROACH_DELTA_MIN_DAYS',
+        'APPROACH_DELTA_SNAPSHOT_ONLY_EVENTS',
+        'MODEL_APPROACH_DELTA_TREND_ROLLING_WEIGHT',
+        'MODEL_APPROACH_DELTA_TREND_PRIOR_WEIGHT',
+        'MODEL_APPROACH_CAP_MIN',
+        'MODEL_APPROACH_CAP_MAX',
+        'DATAGOLF_APPROACH_PERIOD',
+        'WEATHER_ENABLED',
+        'WEATHER_BASE_LATE_EARLY_ADV',
+        'MODEL_FIELD_MIN_PLAYERS',
+        'MODEL_FIELD_MIN_APPROACH_OVERLAP'
+      ];
+      const envPairs = envKeysForLog
+        .map(key => [key, process.env[key]])
+        .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
+        .map(([key, value]) => `${key}=${String(value).trim()}`);
+      if (envPairs.length > 0) {
+        console.log(`Env: ${envPairs.join(', ')}`);
+      }
+
+      // Ensure we always restore stdio overrides even if the script exits early.
+      if (LOGGING_HANDLE && typeof LOGGING_HANDLE.teardown === 'function') {
+        process.once('exit', () => {
+          try {
+            LOGGING_HANDLE.teardown();
+          } catch {
+            // Ignore
+          }
+        });
+      }
+    }
+  }
+  const isSeedRunDir = outputDir && path.basename(outputDir) === 'seed_runs';
+  seedRunsParentDir = isSeedRunDir ? path.dirname(outputDir) : null;
+  const parentRegressionDir = seedRunsParentDir ? path.resolve(seedRunsParentDir, 'course_history_regression') : null;
+  const parentHasRegression = parentRegressionDir && fs.existsSync(path.resolve(parentRegressionDir, 'course_history_regression.json'));
+  const SHOULD_RUN_PRE_EVENT_ARTIFACTS = runContext.isPre;
+  const analysisOutputDir = (tournamentDir && SHOULD_RUN_PRE_EVENT_ARTIFACTS)
+    ? resolveAnalysisRoot({ tournamentRoot: tournamentDir, mode: 'pre_event' })
+    : null;
+  const regressionOutputDir = (tournamentDir && SHOULD_RUN_PRE_EVENT_ARTIFACTS)
+    ? resolveRegressionRoot({ tournamentRoot: tournamentDir, mode: 'pre_event' })
+    : null;
+  const dryRunBaseDir = preferPostEventOutputDir ? postEventOutputDir : preEventOutputDir;
+  const dryRunOutputDir = dryRunBaseDir
+    ? resolveDryRunRoot({ modeRoot: dryRunBaseDir })
+    : null;
+  if (analysisOutputDir) ensureDirectory(analysisOutputDir);
+  if (regressionOutputDir) ensureDirectory(regressionOutputDir);
+  if (dryRunOutputDir) ensureDirectory(dryRunOutputDir);
+  if (regressionOutputDir) {
+    process.env.PRE_TOURNAMENT_OUTPUT_DIR = regressionOutputDir;
+  } else if (outputDir) {
+    process.env.PRE_TOURNAMENT_OUTPUT_DIR = outputDir;
+  }
+  if (WRITE_TEMPLATES) {
+    process.env.WRITE_TEMPLATES = 'true';
+  }
+  process.env.PRE_TOURNAMENT_EVENT_ID = String(CURRENT_EVENT_ID || '');
+  process.env.PRE_TOURNAMENT_SEASON = String(CURRENT_SEASON || '');
+
+  if (SHOULD_RUN_PRE_EVENT_ARTIFACTS) {
+    if (isSeedRunDir && parentHasRegression) {
+      console.log('ℹ️  Using existing course history regression outputs from parent post_event directory.');
+    } else {
+      console.log('🔄 Generating course history regression inputs...');
+      try {
+        const scriptPath = path.resolve(__dirname, '..', 'scripts', 'analyze_course_history_impact.js');
+        const result = spawnSync(process.execPath, [scriptPath], {
+          env: process.env,
+          stdio: 'inherit'
+        });
+        if (result.error) {
+          console.warn(`ℹ️  Course history regression generation skipped: ${result.error.message}`);
+        } else if (result.status === 0) {
+          console.log('✓ Course history regression inputs generated.');
+        } else {
+          console.warn(`ℹ️  Course history regression generation skipped (exit ${result.status}).`);
+        }
+      } catch (error) {
+        console.warn(`ℹ️  Course history regression generation skipped: ${error.message}`);
+      }
+    }
+  } else {
+    console.log('ℹ️  Skipping course history regression (post-tournament mode).');
+  }
+
+  const rampSummary = SHOULD_RUN_PRE_EVENT_ARTIFACTS
+    ? ensureEarlySeasonRampSummary({
+        outputDir: analysisOutputDir || outputDir,
+        metric: 'sg_total',
+        dataDir: DATA_DIR || DATA_ROOT_DIR,
+        apiYears: OVERRIDE_API_YEARS
+      })
+    : null;
+  const rampPlayers = Array.isArray(rampSummary?.payload?.players)
+    ? rampSummary.payload.players
+    : [];
+  const rampById = rampPlayers.reduce((acc, entry) => {
+    const dgId = String(entry?.dgId || '').trim();
+    if (!dgId) return acc;
+    acc[dgId] = entry;
+    return acc;
+  }, {});
+  const rampWindow = rampSummary?.payload?.meta?.window || {};
+  const rampMaxEvents = Number.isFinite(rampWindow.maxEvents) ? rampWindow.maxEvents : 6;
+  const rampBaselineSeasons = Number.isFinite(rampWindow.baselineSeasons) ? rampWindow.baselineSeasons : null;
+  if (rampPlayers.length > 0) {
+    console.log(`✓ Loaded player ramp summary (${rampPlayers.length} players, maxEvents=${rampMaxEvents})`);
+  } else if (SHOULD_RUN_PRE_EVENT_ARTIFACTS) {
+    console.log('ℹ️  Player ramp summary unavailable (no ramp file found).');
+  } else {
+    console.log('ℹ️  Skipping early-season ramp summary (post-tournament mode).');
+  }
+  const regressionSnapshot = SHOULD_RUN_PRE_EVENT_ARTIFACTS
+    ? loadCourseHistoryRegressionMap({
+        outputDir: regressionOutputDir || outputDir
+      })
+    : null;
+  let courseContextInitial = loadCourseContext(COURSE_CONTEXT_PATH);
+  let courseContextUpdateSummary = null;
+  if (courseContextInitial && regressionSnapshot?.map) {
+    const upsertResult = upsertCourseContextPastPerformanceWeights(courseContextInitial, regressionSnapshot.map);
+    courseContextUpdateSummary = {
+      source: regressionSnapshot.source || null,
+      path: regressionSnapshot.path || null,
+      updated: upsertResult.updated,
+      updatedCount: upsertResult.updates.length,
+      updates: upsertResult.updates
+    };
+    if (upsertResult.updated) {
+      writeJsonFile(COURSE_CONTEXT_PATH, courseContextInitial);
+      console.log(`✓ Updated course_context past performance weights (${upsertResult.updates.length} entries, source=${regressionSnapshot.source}).`);
+    } else {
+      console.log('ℹ️  Course history regression loaded; no course_context updates needed.');
+    }
+  } else if (!courseContextInitial) {
+    courseContextUpdateSummary = {
+      source: regressionSnapshot?.source || null,
+      path: regressionSnapshot?.path || null,
+      updated: false,
+      updatedCount: 0,
+      updates: [],
+      reason: 'course_context_missing'
+    };
+    console.warn('ℹ️  Course context not available for regression upsert.');
+  } else if (!regressionSnapshot?.map) {
+    courseContextUpdateSummary = {
+      source: regressionSnapshot?.source || null,
+      path: regressionSnapshot?.path || null,
+      updated: false,
+      updatedCount: 0,
+      updates: [],
+      reason: 'regression_unavailable'
+    };
+    if (SHOULD_RUN_PRE_EVENT_ARTIFACTS) {
+      console.warn('ℹ️  Course history regression unavailable; skipping course_context upsert.');
+    }
+  }
+
+  const configAndTemplates = loadConfigAndTemplates({
+    currentEventId: CURRENT_EVENT_ID,
+    currentSeason: CURRENT_SEASON,
+    tournamentName: TOURNAMENT_NAME,
+    tournamentNameFallback,
+    configPath: CONFIG_PATH,
+    courseContextPath: COURSE_CONTEXT_PATH,
+    courseContextInput: courseContextInitial,
+    regressionSnapshot,
+    courseContextUpdateSummary,
+    currentEventRoundsDefaults,
+    includeCurrentEventRounds: INCLUDE_CURRENT_EVENT_ROUNDS,
+    templateOverride: TEMPLATE,
+    weightTemplates: WEIGHT_TEMPLATES,
+    rampSummary,
+    rampPlayers,
+    rampMaxEvents,
+    rampBaselineSeasons
+  });
+  const {
+    courseContextEntry,
+    courseContextEntryFinal,
+    sharedConfig,
+    pastPerformanceWeightSummary,
+    effectiveSeason,
+    historicalYear,
+    templateConfigs,
+    metricConfig
+  } = configAndTemplates;
+  let courseTemplateKey = configAndTemplates.courseTemplateKey;
+
+  const baseName = normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback)
+    || `event-${CURRENT_EVENT_ID}`;
+
+  const { validationData } = await prepareValidationOutputs({
+    runContext,
+    currentSeason: CURRENT_SEASON,
+    dataRootDir: DATA_ROOT_DIR,
+    tournamentName: TOURNAMENT_NAME,
+    tournamentNameFallback,
+    baseName,
+    validationOutputsDir,
+    validationOutputDirs: VALIDATION_OUTPUT_DIRS,
+    outputNames: OUTPUT_NAMES,
+    metricConfig,
+    writeTemplates: WRITE_TEMPLATES,
+    dryRun: DRY_RUN,
+    tournamentDir,
+    currentEventId: CURRENT_EVENT_ID
+  });
+
+  let {
+    rankingsSnapshot,
+    approachSkillSnapshot,
+    approachSnapshotL24,
+    approachSnapshotL12,
+    approachSnapshotYtd,
+    approachYtdUpdatedThisRun,
+    fieldUpdatesSnapshot,
+    fieldUpdatesUpdatedThisRun,
+    playerDecompositionsSnapshot,
+    skillRatingsValueSnapshot,
+    skillRatingsRankSnapshot,
+    historicalRoundsSnapshot,
+    IS_POST_TOURNAMENT_RUN,
+    IS_PRE_TOURNAMENT_RUN,
+    CACHE_FIRST_REFRESH
+  } = await prepareSnapshots({
+    runContext,
+    manifestEventDateInfo,
+    manifestEntries,
+    currentEventId: CURRENT_EVENT_ID,
+    currentSeason: CURRENT_SEASON,
+    tournamentName: TOURNAMENT_NAME,
+    tournamentNameFallback,
+    effectiveSeason,
+    historicalYear,
+    canonicalTournamentSlug,
+    canonicalTournamentName,
+    approachPath: APPROACH_PATH,
+    shouldFetchApi,
+    shouldFetchOptionalApi,
+    forceFieldUpdates: FORCE_FIELD_UPDATES
+  });
+
+  let fieldUpdatesMismatch = false;
+  if (fieldUpdatesSnapshot?.payload?.event_id && CURRENT_EVENT_ID) {
+    const expectedId = String(CURRENT_EVENT_ID).trim();
+    const actualId = String(fieldUpdatesSnapshot.payload.event_id).trim();
+    if (expectedId && actualId && expectedId !== actualId) {
+      fieldUpdatesMismatch = true;
+      console.warn(`⚠️  Field updates event_id mismatch: expected ${expectedId}, got ${actualId}`);
+    }
+  }
+  if (!fieldUpdatesMismatch && fieldUpdatesSnapshot?.payload?.event_name && TOURNAMENT_NAME) {
+    const expected = normalizeNameForMatch(TOURNAMENT_NAME);
+    const actual = normalizeNameForMatch(fieldUpdatesSnapshot.payload.event_name);
+    if (expected && actual && expected !== actual) {
+      console.warn(`ℹ️  Field updates name differs but event_id matches: expected ${TOURNAMENT_NAME}, got ${fieldUpdatesSnapshot.payload.event_name}`);
+    }
+  }
+  if (fieldUpdatesMismatch && shouldFetchApi && DATAGOLF_API_KEY) {
+    console.warn('⚠️  Field updates cache mismatch; retrying DataGolf API for expected event.');
+    try {
+      const fieldCacheSlug = canonicalTournamentSlug;
+      const refreshed = await getDataGolfFieldUpdates({
+        apiKey: DATAGOLF_API_KEY,
+        cacheDir: DATAGOLF_CACHE_FIELD_DIR,
+        ttlMs: 0,
+        allowStale: false,
+        preferCache: false,
+        tour: DATAGOLF_FIELD_TOUR,
+        cacheSlug: fieldCacheSlug,
+        fileFormat: 'json',
+        expectedEventId: CURRENT_EVENT_ID,
+        expectedEventName: canonicalTournamentName
+      });
+      if (refreshed?.payload?.event_name) {
+        fieldUpdatesSnapshot = refreshed;
+        fieldUpdatesMismatch = false;
+        if (TOURNAMENT_NAME) {
+          const expected = normalizeNameForMatch(TOURNAMENT_NAME);
+          const actual = normalizeNameForMatch(refreshed.payload.event_name);
+          if (expected && actual && expected !== actual) fieldUpdatesMismatch = true;
+        }
+        if (refreshed?.payload?.event_id && CURRENT_EVENT_ID) {
+          const expectedId = String(CURRENT_EVENT_ID).trim();
+          const actualId = String(refreshed.payload.event_id).trim();
+          if (expectedId && actualId && expectedId !== actualId) fieldUpdatesMismatch = true;
+        }
+      }
+    } catch (error) {
+      console.warn(`ℹ️  Field updates API retry failed: ${error.message}`);
+    }
+  }
+  if (!fieldUpdatesMismatch && fieldUpdatesSnapshot?.source === 'api' && fieldUpdatesSnapshot?.path) {
+    fieldUpdatesUpdatedThisRun = true;
+  }
+  if (fieldUpdatesMismatch && runContext.isPre) {
+    console.warn('⚠️  Field updates mismatch during pre-tournament run; ignoring field updates payload for weather calculations.');
+    fieldUpdatesSnapshot = { ...fieldUpdatesSnapshot, payload: null };
+  }
+
+  logSnapshotFreshness({ label: 'DataGolf field updates', snapshot: fieldUpdatesSnapshot, ttlHours: DATAGOLF_FIELD_TTL_HOURS });
   const applyValidationOutputsEnv = String(process.env.APPLY_VALIDATION_OUTPUTS || '').trim().toLowerCase();
   let applyValidationOutputs = applyValidationOutputsEnv
     ? ['1', 'true', 'yes', 'on'].includes(applyValidationOutputsEnv)
@@ -9350,169 +9518,20 @@ async function runAdaptiveOptimizer() {
     ]
   });
 
-  console.log('\n🔄 Loading data...');
-  const fieldCsvRows = (FIELD_PATH && fs.existsSync(FIELD_PATH))
-    ? loadCsv(FIELD_PATH, { skipFirstColumn: true })
-    : [];
-  const fieldApiRows = extractFieldRowsFromSnapshotPayload(fieldUpdatesSnapshot?.payload)
-    .map(normalizeFieldRow)
-    .filter(Boolean);
-  const fieldDataRaw = fieldApiRows.length > 0 ? fieldApiRows : fieldCsvRows;
-  const fieldData = fieldDataRaw.filter(row => {
-    const dgId = row && (row['dg_id'] || row.dg_id || row.dgId || row['DG ID']);
-    return String(dgId || '').trim().length > 0;
+  const { fieldData, fieldUpdatesSnapshot: resolvedFieldUpdatesSnapshot, weatherWaveSummary } = await loadFieldAndWeather({
+    fieldPath: FIELD_PATH,
+    fieldUpdatesSnapshot,
+    currentEventId: CURRENT_EVENT_ID,
+    tournamentName: TOURNAMENT_NAME,
+    tournamentNameFallback,
+    datagolfFieldTour: DATAGOLF_FIELD_TOUR,
+    preEventOutputDir,
+    runContext,
+    courseContextEntryFinal,
+    effectiveSeason,
+    canonicalTournamentName
   });
-  if (fieldApiRows.length === 0 && fieldCsvRows.length > 0) {
-    const normalizedCsvField = fieldCsvRows
-      .map(normalizeFieldRow)
-      .filter(Boolean);
-    const retainsFieldUpdatesPayload = !!(
-      fieldUpdatesSnapshot?.payload
-      && (fieldUpdatesSnapshot.payload.date_start
-        || fieldUpdatesSnapshot.payload.course_name
-        || fieldUpdatesSnapshot.payload.event_name)
-    );
-    if (retainsFieldUpdatesPayload) {
-      console.log(`✓ Field list loaded from Tournament Field CSV (${normalizedCsvField.length} players).`);
-      console.log('ℹ️  Retaining DataGolf field updates payload for weather calculations.');
-    } else {
-      fieldUpdatesSnapshot = {
-        source: 'csv_field',
-        path: FIELD_PATH,
-        payload: {
-          event_id: CURRENT_EVENT_ID ? String(CURRENT_EVENT_ID).trim() : null,
-          event_name: TOURNAMENT_NAME || tournamentNameFallback || null,
-          tour: DATAGOLF_FIELD_TOUR || null,
-          field: normalizedCsvField
-        }
-      };
-      console.log(`✓ Field updates sourced from Tournament Field CSV (${normalizedCsvField.length} players).`);
-    }
-    fieldUpdatesMismatch = false;
-  }
-  if (fieldApiRows.length > 0) {
-    console.log(`✓ Loaded field (cache/API): ${fieldData.length} players`);
-  } else if (fieldCsvRows.length > 0) {
-    console.log(`✓ Loaded field (CSV): ${fieldData.length} players`);
-  } else {
-    console.error('❌ Unable to load tournament field (CSV missing and API fallback empty).');
-    process.exit(1);
-  }
-
-  let weatherWaveSummary = null;
-  const weatherPenaltyCachePath = preEventOutputDir
-    ? path.resolve(preEventOutputDir, WEATHER_PENALTY_CACHE_FILENAME)
-    : null;
-  const applyCachedWeatherPenalties = (payload, sourceLabel) => {
-    if (!payload || typeof payload !== 'object') return false;
-    if (!payload.penalties || typeof payload.penalties !== 'object') return false;
-    const penalties = payload.penalties || {};
-    const r1Am = penalties.R1_AM?.total ?? 0;
-    const r1Pm = penalties.R1_PM?.total ?? 0;
-    const r2Am = penalties.R2_AM?.total ?? 0;
-    const r2Pm = penalties.R2_PM?.total ?? 0;
-
-    const basePenalties = getBaselineWavePenaltyAdjustments();
-    const weatherAdjustments = getNetWeatherWaveAdjustments({ r1Am, r1Pm, r2Am, r2Pm });
-    const combinedPenalties = {
-      R1_AM: (basePenalties.R1_AM || 0) + (weatherAdjustments.adjustments.R1_AM || 0),
-      R1_PM: (basePenalties.R1_PM || 0) + (weatherAdjustments.adjustments.R1_PM || 0),
-      R2_AM: (basePenalties.R2_AM || 0) + (weatherAdjustments.adjustments.R2_AM || 0),
-      R2_PM: (basePenalties.R2_PM || 0) + (weatherAdjustments.adjustments.R2_PM || 0)
-    };
-
-    process.env.MODEL_WEATHER_WAVE_ENABLED = '1';
-    process.env.MODEL_WEATHER_WAVE_R1_EARLY_PENALTY = String(combinedPenalties.R1_AM);
-    process.env.MODEL_WEATHER_WAVE_R1_LATE_PENALTY = String(combinedPenalties.R1_PM);
-    process.env.MODEL_WEATHER_WAVE_R2_EARLY_PENALTY = String(combinedPenalties.R2_AM);
-    process.env.MODEL_WEATHER_WAVE_R2_LATE_PENALTY = String(combinedPenalties.R2_PM);
-
-    weatherWaveSummary = {
-      ...payload,
-      enabled: true,
-      source: sourceLabel || payload.source || 'cache',
-      cachePath: weatherPenaltyCachePath || payload.cachePath || null,
-      basePenalties,
-      weatherAdjustments,
-      combinedPenalties
-    };
-    console.log(`ℹ️  Weather adjustments loaded from cache (weather-only: R1 AM=${r1Am}, R1 PM=${r1Pm}, R2 AM=${r2Am}, R2 PM=${r2Pm}; net: R1 AM=${weatherAdjustments.adjustments.R1_AM}, R1 PM=${weatherAdjustments.adjustments.R1_PM}, R2 AM=${weatherAdjustments.adjustments.R2_AM}, R2 PM=${weatherAdjustments.adjustments.R2_PM}; combined: R1 AM=${combinedPenalties.R1_AM}, R1 PM=${combinedPenalties.R1_PM}, R2 AM=${combinedPenalties.R2_AM}, R2 PM=${combinedPenalties.R2_PM}).`);
-    return true;
-  };
-
-  if (WEATHER_ENABLED) {
-    process.env.MODEL_WEATHER_WAVE_ENABLED = '0';
-    process.env.MODEL_WEATHER_WAVE_R1_EARLY_PENALTY = '0';
-    process.env.MODEL_WEATHER_WAVE_R1_LATE_PENALTY = '0';
-    process.env.MODEL_WEATHER_WAVE_R2_EARLY_PENALTY = '0';
-    process.env.MODEL_WEATHER_WAVE_R2_LATE_PENALTY = '0';
-
-    if (IS_POST_TOURNAMENT_RUN) {
-      const cached = loadWeatherPenaltyCache(weatherPenaltyCachePath);
-      if (!applyCachedWeatherPenalties(cached, weatherPenaltyCachePath ? `cache:${path.basename(weatherPenaltyCachePath)}` : 'cache')) {
-        console.log('ℹ️  Weather penalties skipped for post-tournament run (no cached penalties found).');
-      }
-    } else {
-      try {
-        const weatherResult = await computeWeatherWavePenalties({
-          fieldUpdatesPayload: fieldUpdatesSnapshot?.payload,
-          courseContextEntry: courseContextEntryFinal,
-          cacheDir: DATAGOLF_CACHE_WEATHER_DIR,
-          apiKey: WEATHER_API_KEY,
-          eventId: CURRENT_EVENT_ID
-        });
-        if (weatherResult?.enabled) {
-          weatherWaveSummary = weatherResult;
-          const penalties = weatherResult.penalties || {};
-          const r1Am = penalties.R1_AM?.total ?? 0;
-          const r1Pm = penalties.R1_PM?.total ?? 0;
-          const r2Am = penalties.R2_AM?.total ?? 0;
-          const r2Pm = penalties.R2_PM?.total ?? 0;
-
-          const basePenalties = getBaselineWavePenaltyAdjustments();
-          const weatherAdjustments = getNetWeatherWaveAdjustments({ r1Am, r1Pm, r2Am, r2Pm });
-          const combinedPenalties = {
-            R1_AM: (basePenalties.R1_AM || 0) + (weatherAdjustments.adjustments.R1_AM || 0),
-            R1_PM: (basePenalties.R1_PM || 0) + (weatherAdjustments.adjustments.R1_PM || 0),
-            R2_AM: (basePenalties.R2_AM || 0) + (weatherAdjustments.adjustments.R2_AM || 0),
-            R2_PM: (basePenalties.R2_PM || 0) + (weatherAdjustments.adjustments.R2_PM || 0)
-          };
-
-          process.env.MODEL_WEATHER_WAVE_ENABLED = '1';
-          process.env.MODEL_WEATHER_WAVE_R1_EARLY_PENALTY = String(combinedPenalties.R1_AM);
-          process.env.MODEL_WEATHER_WAVE_R1_LATE_PENALTY = String(combinedPenalties.R1_PM);
-          process.env.MODEL_WEATHER_WAVE_R2_EARLY_PENALTY = String(combinedPenalties.R2_AM);
-          process.env.MODEL_WEATHER_WAVE_R2_LATE_PENALTY = String(combinedPenalties.R2_PM);
-
-          weatherWaveSummary = {
-            ...weatherResult,
-            basePenalties,
-            weatherAdjustments,
-            combinedPenalties
-          };
-
-          const cachePayload = {
-            ...weatherResult,
-            generatedAt: formatTimestamp(new Date()),
-            eventId: CURRENT_EVENT_ID || null,
-            season: effectiveSeason || null,
-            tournamentName: canonicalTournamentName || TOURNAMENT_NAME || tournamentNameFallback || null,
-            cachePath: weatherPenaltyCachePath || null,
-            basePenalties,
-            weatherAdjustments,
-            combinedPenalties
-          };
-          writeWeatherPenaltyCache(weatherPenaltyCachePath, cachePayload);
-
-          console.log(`✓ Weather adjustments computed (weather-only: R1 AM=${r1Am}, R1 PM=${r1Pm}, R2 AM=${r2Am}, R2 PM=${r2Pm}; net: R1 AM=${weatherAdjustments.adjustments.R1_AM}, R1 PM=${weatherAdjustments.adjustments.R1_PM}, R2 AM=${weatherAdjustments.adjustments.R2_AM}, R2 PM=${weatherAdjustments.adjustments.R2_PM}; combined: R1 AM=${combinedPenalties.R1_AM}, R1 PM=${combinedPenalties.R1_PM}, R2 AM=${combinedPenalties.R2_AM}, R2 PM=${combinedPenalties.R2_PM}).`);
-        } else {
-          console.warn(`ℹ️  Weather penalties unavailable (${weatherResult?.reason || 'unknown'}).`);
-        }
-      } catch (error) {
-        console.warn(`ℹ️  Weather penalty computation failed: ${error.message}`);
-      }
-    }
-  }
+  fieldUpdatesSnapshot = resolvedFieldUpdatesSnapshot;
   const fieldIdSetForDelta = new Set(
     fieldData
       .map(row => normalizeDgIdValue(row?.['dg_id'] ?? row?.dg_id ?? row?.dgId ?? row?.['DG ID']))
@@ -9557,271 +9576,22 @@ async function runAdaptiveOptimizer() {
     };
   
 
-  // Use robust, merged-source loader for historical rounds
-  const historyAnchorSeason = IS_PRE_TOURNAMENT_RUN ? (effectiveSeason - 1) : effectiveSeason;
-  const historyYears = buildRecentYears(historyAnchorSeason, 5);
-  if (IS_PRE_TOURNAMENT_RUN && !historyYears.includes(effectiveSeason)) {
-    historyYears.push(effectiveSeason);
-  }
-  const lastFiveYears = historyYears.sort((a, b) => a - b);
-  // Dynamically determine tours from course context (event-specific or default)
-  const context = loadCourseContext(COURSE_CONTEXT_PATH);
-  const contextEntry = resolveCourseContextEntry(context, CURRENT_EVENT_ID);
-  // Robustly determine tours: check event, then course, then default
-  let tours = [];
-  if (contextEntry && Array.isArray(contextEntry.tours) && contextEntry.tours.length > 0) {
-    tours = contextEntry.tours.map(t => t.toLowerCase());
-  } else if (contextEntry && contextEntry.courseNum && context.byCourseNum && context.byCourseNum[contextEntry.courseNum] && Array.isArray(context.byCourseNum[contextEntry.courseNum].tours) && context.byCourseNum[contextEntry.courseNum].tours.length > 0) {
-    tours = context.byCourseNum[contextEntry.courseNum].tours.map(t => t.toLowerCase());
-  } else if (Array.isArray(context.defaultTours) && context.defaultTours.length > 0) {
-    tours = context.defaultTours.map(t => t.toLowerCase());
-  } else {
-    tours = ['pga'];
-  }
-  const historyPreferCache = true;
-  let skipHistoricalApiRefresh = hasHistoricalResultsInCache({
-    cacheDir: DATAGOLF_CACHE_OTHER_DIR,
-    tour: DATAGOLF_HISTORICAL_TOUR,
-    eventId: CURRENT_EVENT_ID,
-    season: effectiveSeason
-  });
-  if (IS_PRE_TOURNAMENT_RUN) {
-    const manifestEntriesForHistory = loadSeasonManifestEntries(DATA_ROOT_DIR, effectiveSeason);
-    const currentManifestEntry = resolveManifestEntryForEvent(manifestEntriesForHistory, {
-      eventId: CURRENT_EVENT_ID,
-      tournamentSlug: normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
-      tournamentName: TOURNAMENT_NAME || tournamentNameFallback
-    });
-    const previousManifestEntry = currentManifestEntry
-      ? resolvePreviousManifestEntry(manifestEntriesForHistory, currentManifestEntry)
-      : null;
-    const previousEventId = previousManifestEntry?.eventId || null;
-    if (!previousManifestEntry?.date || !previousEventId) {
-      console.error('❌ Pre-tournament requires prior event in manifest to validate cache-based historical rounds.');
-      console.error('   Fix: add the previous event to manifest.json (with date + eventId).');
-      process.exit(1);
-    }
-    const hasPriorEventCache = hasHistoricalResultsInCache({
-      cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
-      tour: DATAGOLF_HISTORICAL_TOUR,
-      eventId: previousEventId,
-      season: effectiveSeason
-    });
-    if (hasPriorEventCache) {
-      skipHistoricalApiRefresh = true;
-      console.log(`ℹ️  Pre-tournament: confirmed cached historical rounds for prior event ${previousEventId} (${previousManifestEntry.date}).`);
-    } else {
-      let apiHasPriorEvent = false;
-      if (!DATAGOLF_API_KEY) {
-        console.error(`❌ Pre-tournament requires prior event ${previousEventId} in cache or API, but DATAGOLF_API_KEY is not set.`);
-        process.exit(1);
-      }
-      try {
-        const snapshot = await getDataGolfHistoricalRounds({
-          apiKey: DATAGOLF_API_KEY,
-          cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
-          ttlMs: 0,
-          allowStale: true,
-          preferCache: false,
-          tour: DATAGOLF_HISTORICAL_TOUR,
-          eventId: 'all',
-          year: effectiveSeason,
-          fileFormat: 'json'
-        });
-        const apiRows = extractHistoricalRowsFromSnapshotPayload(snapshot?.payload)
-          .map(normalizeHistoricalRoundRow)
-          .filter(Boolean);
-        apiHasPriorEvent = apiRows.some(row => String(row?.event_id || '').trim() === String(previousEventId));
-      } catch (error) {
-        console.error(`❌ Pre-tournament historical rounds API fetch failed: ${error.message}`);
-        process.exit(1);
-      }
-      if (!apiHasPriorEvent) {
-        console.error(`❌ Pre-tournament requires prior event ${previousEventId} (${previousManifestEntry.date}) in API/cache, but it was not found.`);
-        process.exit(1);
-      }
-      console.log(`ℹ️  Pre-tournament: prior event ${previousEventId} found via API; cache updated.`);
-      skipHistoricalApiRefresh = true;
-    }
-  } else if (skipHistoricalApiRefresh) {
-    console.log('ℹ️  Historical rounds refresh skipped (results already present in cache).');
-  }
-  const historyTtlMs = IS_POST_TOURNAMENT_RUN
-    ? 0
-    : DATAGOLF_HISTORICAL_TTL_HOURS * 60 * 60 * 1000;
-  const historyCollection = await collectRecords({
-    years: lastFiveYears,
+  const {
+    historyData,
+    historyMeta,
+    lastFiveYears,
     tours,
-    dataDir: DATA_DIR || DATA_ROOT_DIR,
-    datagolfApiKey: DATAGOLF_API_KEY,
-    datagolfCacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
-    datagolfHistoricalTtlMs: historyTtlMs,
-    getDataGolfHistoricalRounds,
-    preferApi: !skipHistoricalApiRefresh,
-    preferCache: historyPreferCache,
-    returnMeta: true
+    liveResultsFallback
+  } = await prepareHistoricalRounds({
+    isPreTournamentRun: IS_PRE_TOURNAMENT_RUN,
+    isPostTournamentRun: IS_POST_TOURNAMENT_RUN,
+    cacheFirstRefresh: CACHE_FIRST_REFRESH,
+    effectiveSeason,
+    currentEventId: CURRENT_EVENT_ID,
+    tournamentName: TOURNAMENT_NAME,
+    tournamentNameFallback,
+    datagolfApiKey: DATAGOLF_API_KEY
   });
-  let historyData = extractHistoricalRowsFromSnapshotPayload(historyCollection?.rows || historyCollection);
-  const historyMeta = historyCollection?.meta || null;
-  if (!historyData || historyData.length === 0) {
-    console.error('❌ Unable to load historical rounds (no data found in JSON, CSV, or API).');
-    process.exit(1);
-  }
-  console.log(`✓ Loaded history (robust merged-source): ${historyData.length} rounds`);
-  if (historyMeta) {
-    console.log(`ℹ️  History source: refreshPolicy=${historyMeta.refreshPolicy}, api(cache=${historyMeta.api.cache}, stale=${historyMeta.api.cacheStale}, api=${historyMeta.api.api}, missingKey=${historyMeta.api.missingKey}, missingYear=${historyMeta.api.missingYear}, errors=${historyMeta.api.errors}), csv(files=${historyMeta.csv.files}, rows=${historyMeta.csv.rows})`);
-  }
-
-  const eventIdStr = String(CURRENT_EVENT_ID);
-  const seasonStr = String(effectiveSeason);
-  let historyEventCount = historyData.filter(row => String(row['event_id'] || '').trim() === eventIdStr).length;
-  let historyEventSeasonCount = historyData.filter(row => {
-    const eventMatch = String(row['event_id'] || '').trim() === eventIdStr;
-    if (!eventMatch) return false;
-    const seasonValue = String(row['season'] || row['year'] || '').trim();
-    return seasonValue === seasonStr;
-  }).length;
-
-  const mergeEventYearRows = (rows, sourceLabel) => {
-    if (!Array.isArray(rows) || rows.length === 0) return false;
-    const existingKeys = new Set(
-      historyData.map(row => [
-        String(row['dg_id'] || '').trim(),
-        String(row['event_id'] || '').trim(),
-        String(row['year'] || row['season'] || '').trim(),
-        String(row['round_num'] || row['round'] || '').trim()
-      ].join('|'))
-    );
-
-    rows.forEach(row => {
-      const key = [
-        String(row['dg_id'] || '').trim(),
-        String(row['event_id'] || '').trim(),
-        String(row['year'] || row['season'] || '').trim(),
-        String(row['round_num'] || row['round'] || '').trim()
-      ].join('|');
-      if (!existingKeys.has(key)) {
-        historyData.push(row);
-        existingKeys.add(key);
-      }
-    });
-
-    historyEventCount = historyData.filter(row => String(row['event_id'] || '').trim() === eventIdStr).length;
-    historyEventSeasonCount = historyData.filter(row => {
-      const eventMatch = String(row['event_id'] || '').trim() === eventIdStr;
-      if (!eventMatch) return false;
-      const seasonValue = String(row['season'] || row['year'] || '').trim();
-      return seasonValue === seasonStr;
-    }).length;
-
-    console.log(`✓ Loaded ${rows.length} rounds for event ${eventIdStr} (${seasonStr}) via ${sourceLabel}.`);
-    return true;
-  };
-
-  if (historyEventSeasonCount === 0) {
-    const allEventsCachePath = resolveHistoricalCachePath({
-      cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
-      tour: DATAGOLF_HISTORICAL_TOUR,
-      eventId: 'all',
-      year: effectiveSeason,
-      fileFormat: 'json'
-    });
-    if (allEventsCachePath && fs.existsSync(allEventsCachePath)) {
-      const cachedPayload = readJsonFile(allEventsCachePath);
-      const eventYearRows = extractEventHistoricalRows({
-        payload: cachedPayload,
-        eventId: eventIdStr,
-        season: seasonStr
-      });
-      if (eventYearRows.length > 0) {
-        mergeEventYearRows(eventYearRows, 'all-events cache');
-      }
-    }
-  }
-
-  if (historyEventSeasonCount === 0 && !skipHistoricalApiRefresh) {
-    try {
-      if (!DATAGOLF_API_KEY) {
-        console.warn('ℹ️  Historical rounds API refresh skipped (missing DATAGOLF_API_KEY).');
-      } else {
-        const snapshot = await getDataGolfHistoricalRounds({
-          apiKey: DATAGOLF_API_KEY,
-          cacheDir: null,
-          ttlMs: 0,
-          allowStale: true,
-          preferCache: false,
-          tour: DATAGOLF_HISTORICAL_TOUR,
-          eventId: 'all',
-          year: effectiveSeason,
-          fileFormat: 'json'
-        });
-        const eventYearRows = extractEventHistoricalRows({
-          payload: snapshot?.payload,
-          eventId: eventIdStr,
-          season: seasonStr
-        });
-
-        if (eventYearRows.length > 0) {
-          const allEventsCachePath = buildHistoricalCachePath({
-            cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
-            tour: DATAGOLF_HISTORICAL_TOUR,
-            eventId: 'all',
-            year: effectiveSeason,
-            fileFormat: 'json'
-          });
-          if (allEventsCachePath) {
-            writeJsonFile(allEventsCachePath, snapshot?.payload || {});
-            console.log(`ℹ️  Historical rounds cache updated for event ${eventIdStr} (${seasonStr}) in all-events cache.`);
-          }
-          mergeEventYearRows(eventYearRows, 'API payload');
-        } else {
-          console.warn(`ℹ️  Historical rounds missing for event ${eventIdStr} (${seasonStr}) after API check.`);
-        }
-      }
-    } catch (error) {
-      console.warn(`ℹ️  Historical rounds lookup failed: ${error.message}`);
-    }
-  } else if (historyEventSeasonCount === 0 && skipHistoricalApiRefresh) {
-    console.warn(`ℹ️  Skipping event-year historical rounds API fetch (refresh disabled; event ${eventIdStr}, season ${seasonStr}).`);
-  }
-
-  let liveResultsFallback = null;
-  if (!IS_PRE_TOURNAMENT_RUN && historyEventSeasonCount === 0) {
-    if (!DATAGOLF_API_KEY) {
-      console.warn('ℹ️  Live results fallback skipped (missing DATAGOLF_API_KEY).');
-    } else {
-      try {
-        const liveSnapshot = await getDataGolfLiveTournamentStats({
-          apiKey: DATAGOLF_API_KEY,
-          cacheDir: DATAGOLF_CACHE_HISTORICAL_DIR,
-          ttlMs: 0,
-          allowStale: true,
-          cacheFirst: CACHE_FIRST_REFRESH
-        });
-        liveResultsFallback = deriveResultsFromLiveStats(liveSnapshot?.payload);
-        if (liveResultsFallback.length > 0) {
-          console.log(`✓ Loaded ${liveResultsFallback.length} live results from DataGolf (source: ${liveSnapshot?.source || 'unknown'}).`);
-        } else {
-          console.warn('ℹ️  Live tournament stats returned no results for fallback.');
-        }
-      } catch (error) {
-        console.warn(`ℹ️  Live tournament stats fallback failed: ${error.message}`);
-      }
-    }
-  }
-
-  if (!IS_PRE_TOURNAMENT_RUN && historyEventSeasonCount === 0) {
-    if (liveResultsFallback && liveResultsFallback.length > 0) {
-      console.warn('⚠️  Historical rounds missing; proceeding with live results fallback.');
-    } else {
-      console.error('\n❌ Post/results/validation mode requires current-event historical rounds, but none were found.');
-      console.error(`   Event: ${eventIdStr} | Season: ${seasonStr}`);
-      console.error('   Fix: ensure the historical rounds cache/API includes current-event results before running post/results/validation.');
-      process.exit(1);
-    }
-  }
-
-  console.log(`ℹ️  History rows for event ${eventIdStr}: ${historyEventCount} (season ${seasonStr}: ${historyEventSeasonCount})`);
   
   const approachCsvRows = (APPROACH_PATH && fs.existsSync(APPROACH_PATH))
     ? loadCsv(APPROACH_PATH, { skipFirstColumn: true })
@@ -10147,13 +9917,18 @@ async function runAdaptiveOptimizer() {
     }
   }
 
-  if (FORCE_RUN_MODE === 'pre') {
+  if (runContext.forceMode === 'pre') {
     resultsCurrent = [];
     console.log('ℹ️  Pre-tournament override active: ignoring results for mode selection.');
   }
 
   const HAS_CURRENT_RESULTS = resultsCurrent.length > 0;
-  if (FORCE_RUN_MODE === 'post' && !HAS_CURRENT_RESULTS) {
+  if (!FORCE_PRE_FLAG && !FORCE_POST_FLAG) {
+    console.error('\n❌ Missing required mode flag.');
+    console.error('   Please rerun with an explicit mode flag: --post (recommended when results exist) or --pre.');
+    process.exit(1);
+  }
+  if (runContext.forceMode === 'post' && !HAS_CURRENT_RESULTS) {
     console.error('\n❌ Forced post-tournament mode but no results were found for the current season/event.');
     process.exit(1);
   }
@@ -10165,7 +9940,7 @@ async function runAdaptiveOptimizer() {
     ensureDirectory(OUTPUT_DIR);
   }
 
-  if (RUN_RESULTS_ONLY) {
+  if (runContext.isResultsOnly) {
     const outputBaseName = buildOutputBaseName({
       tournamentSlug: canonicalTournamentSlug || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
       tournamentName: canonicalTournamentName || TOURNAMENT_NAME || tournamentNameFallback,
@@ -10523,30 +10298,45 @@ async function runAdaptiveOptimizer() {
       approachDeltaById
     });
 
-    const resultsCsvPath = buildArtifactPath({
-      artifactType: OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_CSV,
+    const resultsArtifacts = new OutputArtifactManager({
       outputBaseName,
       tournamentSlug: canonicalTournamentSlug || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
       tournamentName: canonicalTournamentName || TOURNAMENT_NAME || tournamentNameFallback,
       modeRoot: postEventOutputDir || OUTPUT_DIR
     });
+    const resultsCsvPath = resultsArtifacts.buildPath({
+      artifactType: OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_CSV
+    });
     fs.writeFileSync(resultsCsvPath, resultsCsv);
     console.log(`✅ Post-event results CSV saved to: ${resultsCsvPath}`);
 
+    const resultsSnapshotRows = buildTournamentResultsSnapshotRows({
+      results: resultsCurrent,
+      modelById: rankingsById,
+      actualMetricsById
+    });
+    const resultsSnapshotMetricStats = computeSnapshotMetricStats(resultsSnapshotRows);
+    const resultsSnapshotZScores = buildSnapshotZScores(resultsSnapshotRows, resultsSnapshotMetricStats);
+
     const resultsJsonPayload = {
-      timestamp: formatTimestamp(new Date()),
+      generatedAt: formatTimestamp(new Date()),
       eventId: CURRENT_EVENT_ID || null,
       season: effectiveSeason || null,
       tournament: TOURNAMENT_NAME || tournamentNameFallback || null,
       mode: 'results_only',
+      source: 'optimizer',
       sources: {
         rankingsJson: rankingJsonPath || null,
         rankingsCsv: rankingCsvPath || null,
         approachDeltaPrimary: approachDeltaPathForResults || null,
         approachDeltaFallback: approachDeltaPathFallback || null
       },
+      results: resultsSnapshotRows,
+      metricStats: resultsSnapshotMetricStats,
+      zScores: resultsSnapshotZScores,
+      resultsSheetCsv: resultsCsv,
       rankings: rankingPlayers,
-      results: resultsCurrent,
+      resultsRaw: resultsCurrent,
       resultsById: Object.fromEntries(resultsById.entries()),
       actualMetricsById: Object.fromEntries(actualMetricsById.entries()),
       actualTrendsById: Object.fromEntries(actualTrendsById.entries())
@@ -10565,7 +10355,6 @@ async function runAdaptiveOptimizer() {
   }
 
   let approachDataForTop20 = approachDataCurrent;
-  let approachDataForTop20Source = approachDataCurrentSource;
   let approachEventOnlyMeta = null;
 
   if (HAS_CURRENT_RESULTS) {
@@ -10659,7 +10448,7 @@ async function runAdaptiveOptimizer() {
               time: (() => {
                 try {
                   return fs.statSync(previousCsvPath).mtimeMs || 0;
-                } catch (error) {
+                } catch {
                   return 0;
                 }
               })(),
@@ -10674,7 +10463,7 @@ async function runAdaptiveOptimizer() {
               time: (() => {
                 try {
                   return fs.statSync(currentCsvPath).mtimeMs || 0;
-                } catch (error) {
+                } catch {
                   return 0;
                 }
               })(),
@@ -10723,7 +10512,6 @@ async function runAdaptiveOptimizer() {
         if (eventOnlyResult.rows.length > 0 && overlapPct >= minApproachOverlapPct && eventOnlyResult.playersWithShots >= minPlayers) {
           approachEventOnlyAvailable = true;
           approachDataForTop20 = eventOnlyResult.rows;
-          approachDataForTop20Source = 'event_only';
           console.log(`✓ Event-only approach metrics enabled (pre=${path.basename(pre.path)}, post=${path.basename(post.path)}, overlap ${(overlapPct * 100).toFixed(1)}%).`);
         } else {
           console.log(`ℹ️  Event-only approach metrics unavailable (overlap ${(overlapPct * 100).toFixed(1)}%, players ${eventOnlyResult.playersWithShots}).`);
@@ -10794,7 +10582,6 @@ async function runAdaptiveOptimizer() {
             if (eventOnlyResult.rows.length > 0 && overlapPct >= minApproachOverlapPct && eventOnlyResult.playersWithShots >= minPlayers) {
               approachEventOnlyAvailable = true;
               approachDataForTop20 = eventOnlyResult.rows;
-              approachDataForTop20Source = 'event_only';
               console.log(`✓ Event-only approach metrics enabled after snapshot refresh (pre=${path.basename(pre.path)}, post=${path.basename(post.path)}, overlap ${(overlapPct * 100).toFixed(1)}%).`);
             }
           }
@@ -11040,7 +10827,7 @@ async function runAdaptiveOptimizer() {
     }
   }
 
-  if (RUN_DELTA_ONLY) {
+  if (runContext.isDeltaOnly) {
     if (APPROACH_DELTA_PATH) {
       console.log(`✅ Approach delta ready: ${APPROACH_DELTA_PATH}`);
       return;
@@ -11852,9 +11639,6 @@ async function runAdaptiveOptimizer() {
   });
   let eventOnlyGeneratedMetricCorrelations = [];
   let eventOnlyGeneratedTop20Correlations = [];
-  let eventOnlyGeneratedTop20Logistic = null;
-  let eventOnlyGeneratedTop20CvSummary = null;
-  let step1bUsedRounds = [];
   let step1cUsedRounds = [];
   let currentGeneratedMetricCorrelations = [];
   let currentGeneratedTop20Correlations = [];
@@ -11883,9 +11667,7 @@ async function runAdaptiveOptimizer() {
   let cvReliability = 0;
   let cvReliabilityKFold = null;
   let tunedTop20GroupWeights = null;
-  let currentGeneratedCorrelationMap = new Map();
   let currentGeneratedTop20AlignmentMap = new Map();
-  const HISTORICAL_METRIC_LABELS = GENERATED_METRIC_LABELS.slice(0, 17);
   const HISTORICAL_CORE_TOP20_BLEND = 0.65;
   const HISTORICAL_CORE_METRIC_LABELS = [
     'SG Total',
@@ -11909,11 +11691,6 @@ async function runAdaptiveOptimizer() {
   ];
   const TRAINING_EXCLUDED_SET = new Set(TRAINING_EXCLUDED_LABELS);
   const STEP1C_APPROACH_ROUNDS_THRESHOLD = 500;
-  const STEP1C_APPROACH_ROUNDS_THRESHOLD_EVENT = (() => {
-    const raw = parseInt(String(process.env.MODEL_STEP1C_APPROACH_ROUNDS_THRESHOLD_EVENT || '').trim(), 10);
-    if (Number.isNaN(raw)) return 300;
-    return Math.max(50, raw);
-  })();
   const STEP1C_CV_APPROACH_CORR_MIN = 0.2;
   const STEP1C_PUTTING_LABELS = new Set(['SG Putting']);
   let trainingMetricNotes = {
@@ -12040,7 +11817,7 @@ async function runAdaptiveOptimizer() {
     };
   };
 
-  const resolveStep1cApproachRows = ({ eventId, season, roundsCount, allowApproach }) => {
+  const resolveStep1cApproachRows = ({ eventId, season, allowApproach }) => {
     if (!allowApproach) {
       return { rows: [], source: 'disabled', path: null, reason: 'approach_gate' };
     }
@@ -12235,7 +12012,6 @@ async function runAdaptiveOptimizer() {
           : resolveStep1cApproachRows({
               eventId,
               season,
-              roundsCount: group.rounds.length,
               allowApproach: scopeEntry.allowApproach
             });
         const fieldDataOverride = buildFieldDataFromHistory(group.rounds, null);
@@ -12405,13 +12181,6 @@ async function runAdaptiveOptimizer() {
           eventOnlyMetricSpecs,
           20
         );
-        eventOnlyGeneratedTop20Logistic = trainTopNLogisticModel(
-          eventOnlyRanking.players,
-          resultsCurrent,
-          eventOnlyMetricSpecs,
-          { topN: 20 }
-        );
-        step1bUsedRounds = eventOnlyRounds;
         console.log(`✓ Computed ${eventOnlyGeneratedMetricCorrelations.length} event-only metric correlations (${CURRENT_SEASON}).`);
       }
     } else if (eventOnlyRounds.length === 0) {
@@ -12694,9 +12463,6 @@ async function runAdaptiveOptimizer() {
         fullCorr: GROUP_SIGNAL_CORR_FULL,
         maxShare: GROUP_SIGNAL_BLEND_MAX
       };
-      currentGeneratedCorrelationMap = new Map(
-        currentGeneratedMetricCorrelations.map(entry => [normalizeGeneratedMetricLabel(entry.label), entry.correlation])
-      );
       const signalMap = buildAlignmentMapFromTop20Signal(currentGeneratedTop20Correlations);
       const logisticMap = buildAlignmentMapFromTop20Logistic(metricLabelsForTraining, currentGeneratedTop20Logistic);
       currentGeneratedTop20AlignmentMap = blendAlignmentMaps([signalMap, logisticMap], [0.5, 0.5]);
@@ -12711,7 +12477,6 @@ async function runAdaptiveOptimizer() {
       const puttingCourseIds = normalizeIdList(sharedConfig.puttingCourseIds);
       const similarCourseBlend = clamp01(sharedConfig.similarCoursesWeight, 0.3);
       const puttingCourseBlend = clamp01(sharedConfig.puttingCoursesWeight, 0.35);
-      const fieldIdSet = field2026DgIds;
       const eventIdSetForMetrics = new Set([
         String(CURRENT_EVENT_ID),
         ...similarCourseIds.map(String),
@@ -12913,9 +12678,6 @@ async function runAdaptiveOptimizer() {
         fullCorr: GROUP_SIGNAL_CORR_FULL,
         maxShare: GROUP_SIGNAL_BLEND_MAX
       };
-      currentGeneratedCorrelationMap = new Map(
-        currentGeneratedMetricCorrelations.map(entry => [normalizeGeneratedMetricLabel(entry.label), entry.correlation])
-      );
       const signalMap = buildAlignmentMapFromTop20Signal(currentGeneratedTop20Correlations);
       const logisticMap = buildAlignmentMapFromTop20Logistic(TOP20_METRIC_LABELS, currentGeneratedTop20Logistic);
       currentGeneratedTop20AlignmentMap = blendAlignmentMaps([signalMap, logisticMap], [0.5, 0.5]);
@@ -12949,13 +12711,15 @@ async function runAdaptiveOptimizer() {
               tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
               eventId: CURRENT_EVENT_ID
             });
-            const outputPath = buildArtifactPath({
-              artifactType: OUTPUT_ARTIFACTS.TOP20_TEMPLATE_BLEND_JSON,
+            const top20BlendArtifacts = new OutputArtifactManager({
               outputBaseName,
               tournamentSlug: blendSlug,
               tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
               validationSubdirs: { top20Blend: top20BlendOutputDir },
               validationRoot: validationOutputsDir
+            });
+            const outputPath = top20BlendArtifacts.buildPath({
+              artifactType: OUTPUT_ARTIFACTS.TOP20_TEMPLATE_BLEND_JSON
             });
             if (outputPath) {
               writeJsonFile(outputPath, { ...top20BlendPayload, meta: blendMeta });
@@ -13219,32 +12983,27 @@ async function runAdaptiveOptimizer() {
       { limit: Math.max(10, Math.floor(getEnvNumberValue('MODEL_SIGNAL_REPORT_PLAYERS', 50))) }
     );
 
-    signalReportPath = signalContributionReport
-      ? buildArtifactPath({
-        artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_SIGNAL_CONTRIBUTIONS_JSON,
-        outputBaseName,
-        tournamentSlug: manifestSlug || canonicalTournamentSlug,
-        tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
-        modeRoot: preEventModeRoot
-      })
-      : null;
-    if (signalContributionReport && signalReportPath) {
-      fs.writeFileSync(signalReportPath, JSON.stringify(signalContributionReport, null, 2));
-    }
-
-    preEventRankingPath = buildArtifactPath({
-      artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_RANKINGS_JSON,
+    const preEventArtifacts = new OutputArtifactManager({
       outputBaseName,
       tournamentSlug: manifestSlug || canonicalTournamentSlug,
       tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
       modeRoot: preEventModeRoot
     });
-    preEventRankingCsvPath = buildArtifactPath({
-      artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_RANKINGS_CSV,
-      outputBaseName,
-      tournamentSlug: manifestSlug || canonicalTournamentSlug,
-      tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
-      modeRoot: preEventModeRoot
+
+    signalReportPath = signalContributionReport
+      ? preEventArtifacts.buildPath({
+          artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_SIGNAL_CONTRIBUTIONS_JSON
+        })
+      : null;
+    if (signalContributionReport && signalReportPath) {
+      fs.writeFileSync(signalReportPath, JSON.stringify(signalContributionReport, null, 2));
+    }
+
+    preEventRankingPath = preEventArtifacts.buildPath({
+      artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_RANKINGS_JSON
+    });
+    preEventRankingCsvPath = preEventArtifacts.buildPath({
+      artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_RANKINGS_CSV
     });
     fs.writeFileSync(preEventRankingPath, JSON.stringify({
       timestamp: formatTimestamp(new Date()),
@@ -13423,12 +13182,8 @@ async function runAdaptiveOptimizer() {
       }
     };
 
-    const outputPath = buildArtifactPath({
-      artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_RESULTS_JSON,
-      outputBaseName,
-      tournamentSlug: manifestSlug || canonicalTournamentSlug,
-      tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
-      modeRoot: preEventModeRoot
+    const outputPath = preEventArtifacts.buildPath({
+      artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_RESULTS_JSON
     });
     const backupJsonPath = backupIfExists(outputPath);
     if (backupJsonPath) {
@@ -13685,12 +13440,8 @@ async function runAdaptiveOptimizer() {
     });
     textLines.push('');
 
-    const textOutputPath = buildArtifactPath({
-      artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_RESULTS_TXT,
-      outputBaseName,
-      tournamentSlug: manifestSlug || canonicalTournamentSlug,
-      tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
-      modeRoot: preEventModeRoot
+    const textOutputPath = preEventArtifacts.buildPath({
+      artifactType: OUTPUT_ARTIFACTS.PRE_EVENT_RESULTS_TXT
     });
     const backupTextPath = backupIfExists(textOutputPath);
     if (backupTextPath) {
@@ -13926,7 +13677,8 @@ async function runAdaptiveOptimizer() {
     const preferredResult = templateResults.find(result => result.name === preferredTemplateName);
     if (preferredResult) {
       baselineTemplate = preferredResult;
-      console.log(`ℹ️  Using course-context template: ${preferredTemplateName}`);
+      optimizationTemplate = preferredResult;
+      console.log(`ℹ️  Using course-context template: ${preferredTemplateName} (baseline + optimization seed)`);
     } else {
       console.warn(`ℹ️  Course-context template not found in weightTemplates: ${preferredTemplateName}`);
     }
@@ -14481,15 +14233,15 @@ async function runAdaptiveOptimizer() {
     const eventKey = String(eventId || '').trim();
     if (!eventKey) return null;
     let entry = null;
-    if (courseContext && typeof courseContext === 'object') {
-      if (courseContext.byEventId && courseContext.byEventId[eventKey]) {
-        entry = courseContext.byEventId[eventKey];
-      } else if (courseContext[eventKey]) {
-        entry = courseContext[eventKey];
+    if (courseContextInitial && typeof courseContextInitial === 'object') {
+      if (courseContextInitial.byEventId && courseContextInitial.byEventId[eventKey]) {
+        entry = courseContextInitial.byEventId[eventKey];
+      } else if (courseContextInitial[eventKey]) {
+        entry = courseContextInitial[eventKey];
       }
     }
     if (!entry) {
-      entry = resolveCourseContextEntry(courseContext, { eventId: eventKey });
+      entry = resolveCourseContextEntry(courseContextInitial, { eventId: eventKey });
     }
     const raw = entry?.courseType || entry?.templateKey || null;
     return normalizeCourseTypeKey(raw);
@@ -15655,8 +15407,6 @@ async function runAdaptiveOptimizer() {
     }
   };
 
-  const baseName = normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback)
-    || `event-${CURRENT_EVENT_ID}`;
   const outputTagRaw = String(process.env.OUTPUT_TAG || '').trim();
   const kfoldTag = resolveKFoldTag(process.env.EVENT_KFOLD_K);
   const outputTagForBase = IS_POST_TOURNAMENT_RUN
@@ -15671,13 +15421,104 @@ async function runAdaptiveOptimizer() {
   });
   summaryOutputBaseName = outputBaseName;
   summaryTournamentSlug = canonicalTournamentSlug || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback) || null;
-
-  const outputPath = buildArtifactPath({
-    artifactType: OUTPUT_ARTIFACTS.POST_EVENT_RESULTS_JSON,
+  const postEventArtifacts = new OutputArtifactManager({
     outputBaseName,
     tournamentSlug: canonicalTournamentSlug || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
     tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
     modeRoot: OUTPUT_DIR
+  });
+
+  let tournamentResultsSnapshotMeta = null;
+  if (IS_POST_TOURNAMENT_RUN && HAS_CURRENT_RESULTS) {
+    const rankingCsvCandidates = [
+      preEventOutputDir ? path.resolve(preEventOutputDir, `${outputBaseName}_pre_event_rankings.csv`) : null,
+      postEventOutputDir ? path.resolve(postEventOutputDir, `${outputBaseName}_pre_event_rankings.csv`) : null,
+      preEventOutputDir ? path.resolve(preEventOutputDir, `${outputBaseName}_pre_event_rankings.csv`.toLowerCase()) : null,
+      postEventOutputDir ? path.resolve(postEventOutputDir, `${outputBaseName}_pre_event_rankings.csv`.toLowerCase()) : null
+    ];
+    const rankingCsvPathForResults = findFirstExisting(rankingCsvCandidates);
+
+    let modelById = new Map();
+    if (rankingCsvPathForResults) {
+      const resultMetricSpecs = resultsCsvUtils.buildResultsMetricSpecs();
+      const csvModelById = resultsCsvUtils.parseRankingCsvModelValues(rankingCsvPathForResults, resultMetricSpecs);
+      csvModelById.forEach((entry, dgId) => modelById.set(dgId, entry));
+    }
+    if (modelById.size === 0 && optimizedRankingCurrent?.players?.length) {
+      modelById = buildModelByIdFromRankingPlayers(optimizedRankingCurrent.players);
+    }
+
+    const actualMetricsById = resultsCsvUtils.buildActualMetricsFromHistory(historyData, CURRENT_EVENT_ID, effectiveSeason);
+    const actualTrendsById = resultsCsvUtils.buildActualTrendsFromHistory(historyData, CURRENT_EVENT_ID, effectiveSeason);
+    const resultsRows = buildTournamentResultsSnapshotRows({
+      results: resultsCurrent,
+      modelById,
+      actualMetricsById
+    });
+    const metricStats = computeSnapshotMetricStats(resultsRows);
+    const zScores = buildSnapshotZScores(resultsRows, metricStats);
+
+    const resultsSlug = canonicalTournamentSlug
+      || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback)
+      || outputBaseName;
+    const resultsJsonPath = postEventArtifacts.buildPath({
+      artifactType: OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_JSON,
+      tournamentSlug: resultsSlug,
+      tournamentName: TOURNAMENT_NAME || tournamentNameFallback
+    });
+    const resultsCsvPath = postEventArtifacts.buildPath({
+      artifactType: OUTPUT_ARTIFACTS.TOURNAMENT_RESULTS_CSV,
+      tournamentSlug: resultsSlug,
+      tournamentName: TOURNAMENT_NAME || tournamentNameFallback
+    });
+
+    let resultsSheetCsv = null;
+    if (resultsRows.length > 0) {
+      const rankingsById = modelById;
+      const resultsById = new Map(
+        resultsCurrent
+          .filter(entry => entry && entry.dgId)
+          .map(entry => [String(entry.dgId).trim(), entry.finishPosition])
+      );
+      const approachDeltaById = resultsCsvUtils.buildApproachDeltaMap(Array.isArray(approachDeltaRows) ? approachDeltaRows : []);
+      resultsSheetCsv = resultsCsvUtils.buildPostEventResultsCsv({
+        rankingsById,
+        resultsById,
+        actualMetricsById,
+        actualTrendsById,
+        approachDeltaById
+      });
+      fs.writeFileSync(resultsCsvPath, resultsSheetCsv);
+    }
+
+    const resultsPayload = {
+      generatedAt: formatTimestamp(new Date()),
+      tournament: TOURNAMENT_NAME || tournamentNameFallback || null,
+      eventId: CURRENT_EVENT_ID || null,
+      season: effectiveSeason || null,
+      source: 'optimizer',
+      results: resultsRows,
+      metricStats,
+      zScores,
+      resultsSheetCsv: resultsSheetCsv || undefined,
+      sources: {
+        rankingsCsv: rankingCsvPathForResults || null
+      }
+    };
+
+    fs.writeFileSync(resultsJsonPath, JSON.stringify(resultsPayload, null, 2));
+    tournamentResultsSnapshotMeta = {
+      path: resultsJsonPath,
+      csvPath: resultsSheetCsv ? resultsCsvPath : null,
+      rankingsCsv: rankingCsvPathForResults || null,
+      totalRows: resultsRows.length
+    };
+  }
+
+  output.tournamentResultsSnapshot = tournamentResultsSnapshotMeta;
+
+  const outputPath = postEventArtifacts.buildPath({
+    artifactType: OUTPUT_ARTIFACTS.POST_EVENT_RESULTS_JSON
   });
   const backupJsonPath = backupIfExists(outputPath);
   if (backupJsonPath) {
@@ -15835,6 +15676,7 @@ async function runAdaptiveOptimizer() {
     return lines;
   };
   const humanSummaryLines = buildHumanSummaryLines();
+  let validationRunStatus = null;
 
   const textLines = [];
   textLines.push('='.repeat(100));
@@ -16598,12 +16440,8 @@ async function runAdaptiveOptimizer() {
   textLines.push('');
   humanSummaryLines.forEach(line => textLines.push(line));
   textLines.push('');
-  const textOutputPath = buildArtifactPath({
-    artifactType: OUTPUT_ARTIFACTS.POST_EVENT_RESULTS_TXT,
-    outputBaseName,
-    tournamentSlug: canonicalTournamentSlug || normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback),
-    tournamentName: TOURNAMENT_NAME || tournamentNameFallback,
-    modeRoot: OUTPUT_DIR
+  const textOutputPath = postEventArtifacts.buildPath({
+    artifactType: OUTPUT_ARTIFACTS.POST_EVENT_RESULTS_TXT
   });
   const backupTextPath = backupIfExists(textOutputPath);
   if (backupTextPath) {
@@ -16799,31 +16637,103 @@ async function runAdaptiveOptimizer() {
   console.log(`✅ JSON results also saved to: ${outputPath}`);
   console.log(`✅ Text results saved to: ${textOutputPath}\n`);
 
-  try {
-    const { runValidation } = require('./validationRunner');
-    if (typeof runValidation === 'function') {
-      const validationSlug = normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback) || baseName;
-      console.log(`🔄 Running validation runner (post-tournament, slug=${validationSlug})...`);
-      const validationWriteTemplates = WRITE_VALIDATION_TEMPLATES;
-      const validationDryRun = validationWriteTemplates && DRY_RUN;
-      const validationResult = await runValidation({
-        season: CURRENT_SEASON,
-        dataRootDir: DATA_ROOT_DIR,
-        tournamentName: TOURNAMENT_NAME,
-        tournamentSlug: validationSlug,
-        tournamentDir,
-        eventId: CURRENT_EVENT_ID,
-        writeTemplates: validationWriteTemplates,
-        dryRun: validationDryRun,
-        dryRunDir: null
+  if (!runContext.isResultsOnly) {
+    const shouldAutoRunValidation = runContext.isPost
+      && !runContext.isResultsOnly
+      && !runContext.isValidationOnly;
+    const validationSlug = normalizeTournamentSlug(TOURNAMENT_NAME || tournamentNameFallback) || baseName;
+    const overrideGate = runContext.validationRequested;
+    const hasExistingValidation = (() => {
+      if (!validationOutputsDir) return false;
+      const classificationPath = path.resolve(
+        validationOutputsDir,
+        `${OUTPUT_NAMES.courseTypeClassification}.json`
+      );
+      const classificationPayload = readJsonFile(classificationPath);
+      const entries = Array.isArray(classificationPayload?.entries) ? classificationPayload.entries : [];
+      if (!entries.length) return false;
+      const eventKey = String(CURRENT_EVENT_ID || '').trim();
+      const normalizedSlug = validationSlug;
+      return entries.some(entry => {
+        const entryEventId = entry?.eventId !== undefined && entry?.eventId !== null
+          ? String(entry.eventId).trim()
+          : '';
+        const entrySlug = normalizeTournamentSlug(entry?.tournament || '');
+        return (eventKey && entryEventId && entryEventId === eventKey)
+          || (normalizedSlug && entrySlug && entrySlug === normalizedSlug);
       });
-      if (validationResult?.inputSummary) {
-        validationRunSummary = validationResult.inputSummary;
+    })();
+
+    if (shouldAutoRunValidation && hasExistingValidation && !overrideGate) {
+      const reasonText = 'outputs already exist for this tournament';
+      console.log(`ℹ️  Validation skipped: ${reasonText}.`);
+      validationRunStatus = { status: 'skipped', reason: reasonText };
+    } else if (shouldAutoRunValidation) {
+      try {
+        const { runValidation, runSeasonValidation } = require('../utilities/validationRunner');
+        const validationWriteTemplates = WRITE_VALIDATION_TEMPLATES;
+        const validationDryRun = validationWriteTemplates && DRY_RUN;
+
+        validationRunStatus = {
+          status: 'ran',
+          reason: overrideGate ? 'gate override' : null
+        };
+
+        if (typeof runValidation === 'function') {
+          const overrideNote = overrideGate ? ' (gate override)' : '';
+          console.log(`🔄 Running validation pipeline (post-tournament, slug=${validationSlug})${overrideNote}...`);
+          const validationResult = await runValidation({
+            season: CURRENT_SEASON,
+            dataRootDir: DATA_ROOT_DIR,
+            tournamentName: TOURNAMENT_NAME,
+            tournamentSlug: validationSlug,
+            tournamentDir,
+            eventId: CURRENT_EVENT_ID,
+            writeTemplates: validationWriteTemplates,
+            dryRun: validationDryRun,
+            dryRunDir: null
+          });
+          if (validationResult?.inputSummary) {
+            validationRunSummary = validationResult.inputSummary;
+          }
+          console.log(`✅ Validation outputs written to: ${validationResult.outputDir}`);
+        }
+
+        if (typeof runSeasonValidation === 'function') {
+          const overrideNote = overrideGate ? ' (gate override)' : '';
+          console.log(`🔄 Running validation season rollup${overrideNote}...`);
+          const seasonResult = await runSeasonValidation({
+            season: CURRENT_SEASON,
+            dataRootDir: DATA_ROOT_DIR,
+            logger: console,
+            writeTemplates: validationWriteTemplates,
+            dryRun: validationDryRun,
+            dryRunDir: null
+          });
+          if (seasonResult?.outputDir) {
+            console.log(`✅ Season validation outputs written to: ${seasonResult.outputDir}`);
+          }
+        }
+      } catch (error) {
+        console.warn(`⚠️  Validation pipeline failed: ${error.message}`);
+        validationRunStatus = { status: 'failed', reason: error.message };
       }
-      console.log(`✅ Validation outputs written to: ${validationResult.outputDir}`);
     }
-  } catch (error) {
-    console.warn(`⚠️  Validation runner failed: ${error.message}`);
+  }
+
+  if (validationRunStatus) {
+    humanSummaryLines.push('');
+    humanSummaryLines.push('Validation orchestration');
+    if (validationRunStatus.status === 'ran') {
+      const reasonSuffix = validationRunStatus.reason
+        ? ` (${validationRunStatus.reason})`
+        : '';
+      humanSummaryLines.push(`  - Auto validation: ran (tournament + season rollup)${reasonSuffix}`);
+    } else if (validationRunStatus.status === 'skipped') {
+      humanSummaryLines.push(`  - Auto validation: skipped (${validationRunStatus.reason})`);
+    } else if (validationRunStatus.status === 'failed') {
+      humanSummaryLines.push(`  - Auto validation: failed (${validationRunStatus.reason})`);
+    }
   }
 
   emitCleanSummaryLog({ humanSummaryLines });

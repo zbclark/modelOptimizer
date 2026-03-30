@@ -1,6 +1,6 @@
 # WAGERING_README
 
-> **Project status (2026‑03‑25):** Live wagering pipeline produces a **10‑bet probability‑first card** (7 non‑matchups + 3 matchups) with edge‑z filtering and a fallback fill to preserve volume. Betting‑card validation outputs are written to `data/wagering/validation/` (see `betting_card_validation_{season|all}.*`).
+> **Project status (2026‑03‑25):** Live wagering pipeline produces a **10‑bet edge‑ranked card** (7 non‑matchups + 3 matchups). Candidates require valid $p_{model}$ **and** positive edge; selection is edge‑first with a max‑odds cap and matchup edge floor, while $p_{model}$ is used for live stake weighting. Historical runs backfill settled fields only. Betting‑card validation outputs are written to `data/wagering/validation/` (see `betting_card_validation_{season|all}.*`).
 > **Note:** This document describes a *technical evaluation* workflow for comparing model probabilities vs market odds. It is **not** wagering advice.
 
 ---
@@ -67,124 +67,50 @@ Validation is a separate step:
 ### Live vs Historical behavior
 
 - **Live mode** (odds source `live`):
-  - Uses **edge shrink** by default (`edgeShrink = 0.5`), optionally bucketed by odds.
-  - Defaults to **probability‑first** selection and **edge‑z filtering**.
-  - Applies **fallback fill** if edge‑z filtering reduces the card below target size.
+  - Builds candidates from odds_eval rows with valid $p_{model}$, $p_{implied}$, and **positive edge**.
+  - Applies a **max‑odds cap** (default `101`) before selection.
+  - Splits **non‑matchups vs matchups**, dedupes by player (keeps highest odds), then selects top edges.
+  - Uses `liveTopN` (default 7) for non‑matchups and `matchupTopN` (default 3) for matchups, with a `matchupMinEdge` floor (default `0.02`).
+  - If the final card is short, the script **returns fewer bets** (no fallback fill).
 
 - **Historical mode** (odds source `historical`):
-  - Uses **no shrink** by default (`edgeShrink = 1`).
-  - Selection defaults to **edge‑first** unless overridden.
+  - Runs odds_eval joins/evaluations upstream (via `run_wagering_pipeline.js`) but the **betting card is update‑only**.
+  - Uses odds_eval rows to **update existing betting‑card rows** (settled fields + metadata).
+  - **Does not create new bets** in historical mode; it’s a grading/backfill path.
 
 ---
 
 ## Selection logic (betting card)
 
-### Selection modes
+### Candidate construction (all modes)
 
-- `--selectionMode probability | edge | hybrid` (default live: `probability`, historical: `edge`)
-  - **probability**: rank by $p_{model}$ descending; edge is a tiebreaker.
-  - **edge**: rank by edge descending.
-  - **hybrid**: mixed comparator (currently aligns with comparator defaults).
-  - **Step up/down:**
-    - Move toward `edge` to chase value at the cost of hit‑rate stability.
-    - Move toward `probability` to maximize hit‑rate stability at the cost of average edge.
+- Pull odds_eval rows from `data/wagering/<tournament_slug>/inputs/`.
+- Keep rows with valid `p_model`, `p_implied`, `odds_decimal > 0`, and **edge > 0**.
+- Require a non‑empty player name.
 
-### Volume targets
+> **Probability vs edge (explicit):**
+>
+> - **Both are used.** A row must have a valid $p_{model}$ and a **positive edge** to be eligible.
+> - **Selection order is edge‑first** (sorted by edge within each pool). Probability is **not** the ranking key.
+> - **Probability is used for staking** in live mode when `stakeMode=edge_scaled` (weights by $p_{model}$, fallback to edge).
 
-- `--liveTopN 7` (default: 7 non‑matchups)
-- `--matchupTopN 3` (default: 3 matchups)
-- **Target total = 10 bets** (7 + 3)
-  - **Step up/down:**
-    - Increase `liveTopN` to favor outrights/top‑finish markets.
-    - Increase `matchupTopN` to favor matchups (often higher hit‑rate).
+### Live selection (odds source `live`)
 
-### Edge shrink (live‑only by default)
+- Apply **max odds** cap (default `101`) before selection.
+- Split into **matchups** vs **non‑matchups**.
+  - Matchup markets include `tournament_matchups`, `round_matchups`, and `3_balls` (and variants like `3ball`, `3-ball`).
+- **Dedupe by player** within each pool, keeping the row with the highest odds.
+- Select:
+  - Top `liveTopN` by edge for **non‑matchups** (default `7`).
+  - Top `matchupTopN` by edge for **matchups** (default `3`), filtered by `matchupMinEdge` (default `0.02`).
+- Combine the two pools while avoiding duplicate bet keys (`event + market + book + dg_id`).
+- If you end up under the target count, the script returns fewer bets (there is **no** fallback fill in the current implementation).
 
-- `--edgeShrink` (default live: `0.5`, historical: `1.0`)
-- `--edgeShrinkMode bucket | flat` (default live: `bucket`)
-  - **bucket** applies market/odds‑specific shrink factors (see `EDGE_SHRINK_BUCKETS` in `run_weekly_simulation.js`).
-  - **flat** applies one shrink value to all edges.
-  - **Step up/down:**
-    - Increase `edgeShrink` toward `1.0` to trust model edges more (higher variance).
-    - Decrease `edgeShrink` toward `0.0` to dampen edges (lower variance, more conservative).
+### Historical mode (odds source `historical`)
 
-**Clarification (live vs historical):**
+- Does **not** create new bets. It only updates existing betting‑card rows with settled fields/outcomes.
 
-- **Live**: edge shrink is a **card‑construction control** to dampen noisy, time‑sensitive edges. It helps avoid over‑confident live selections.
-- **Historical**: we use `edgeShrink=1.0` because the goal is **grading/validating already‑selected bets**, not re‑optimizing the edge. Shrinking historical edges would blur the signal you’re trying to validate.
-
-**Does changing shrink create noise/leakage?**
-
-- For **live selection**, shrink is a **design choice** (a risk control), not leakage.
-- For **historical grading**, changing shrink **would** introduce bias because it changes the edge basis you’re validating. That’s why historical grading uses `edgeShrink=1.0` and focuses on updating settled fields, not re‑selecting bets.
-
-### Edge‑z filtering
-
-- `--edgeZPercentile` (default: `0.2`)
-  - Keeps the top X% of candidates by **edge_z**.
-- `--edgeZScope market | all` (default: `market`)
-  - `market` = apply percentile inside each market type.
-  - `all` = apply percentile across all markets.
-- `--edgeZRelaxToFill true | false` (default: `true`)
-  - If edge‑z filtering leaves the card short of target size, **relax** edge‑z and fill using base candidates.
-  - **Step up/down:**
-    - Raise `edgeZPercentile` (e.g., 0.3 → 0.4) to be stricter (fewer bets, higher edge concentration).
-    - Lower `edgeZPercentile` (e.g., 0.2 → 0.1) to be looser (more bets, lower edge concentration).
-    - Set `edgeZRelaxToFill=false` for strict filtering (may return fewer than 10 bets).
-
-### Market gates (quality filters)
-
-Outrights:
-
-- `--outrightMinModel 0.015` (default)
-- `--outrightMaxOdds 25` (default)
-  - **Step up/down:** raise min model / lower max odds to tighten quality; lower min model / raise max odds to increase volume.
-
-Top‑5:
-
-- `--top5MinModel 0.50` (default)
-- `--top5MaxOdds 6` (default)
-  - **Step up/down:** same as above.
-
-Top‑10:
-
-- `--top10MinModel 0.20` (default)
-- `--top10MaxOdds 10` (default)
-  - **Step up/down:** same as above.
-
-Top‑20:
-
-- `--top20MinModel 0.25` (default)
-- `--top20MaxOdds 20` (default)
-  - **Step up/down:** same as above.
-
-Matchups:
-
-- `--matchupMinModel 0.56` (default; round matchups)
-- `--tournamentMatchupMinModel 0.52` (default; tournament matchups)
-- `--matchupMinModel3Balls 0.80` (default; 3‑balls)
-- `--matchupEdgeFloor` (default: equals `edgeFloor`)
-  - **Step up/down:** raise matchup mins to tighten quality; lower mins to increase volume (especially if you’re under 10 bets).
-
-### Edge floors
-
-- `--edgeFloor 0` (default) applies to non‑matchups.
-- `--matchupEdgeFloor` defaults to `edgeFloor` unless overridden.
-  - **Step up/down:** raise floors to reduce bet count and increase average edge; lower floors to preserve volume.
-
-### Dedupe + tie‑breakers
-
-- **Dedupe by player**: if a player appears multiple times in a candidate pool, keep the **highest‑odds** version.
-- **Tie preference**: when edges and $p_{model}$ are within small deltas, matchups can be preferred during fill.
-  - `--edgeTieDelta` default `0.01`
-  - `--pModelTieDelta` default `0.02`
-  - **Step up/down:** increase deltas to favor matchups more often; decrease to make tie‑breakers rarer.
-
-### Fill logic
-
-1. Select top `liveTopN` non‑matchups and `matchupTopN` matchups.
-2. If short, fill with remaining ranked candidates.
-3. If still short **and** `edgeZRelaxToFill=true`, fill from **edge‑floor‑only** candidates (no edge‑z filter).
+> Note: `edge_z` is computed in odds_eval files but **not** used in the current betting‑card selection.
 
 ---
 
@@ -193,9 +119,9 @@ Matchups:
 ### Stake modes
 
 - `--stakeMode edge_scaled | flat` (default: `edge_scaled`)
-  - **edge_scaled** (default): weights by $p_{model}$ (or edge if missing).
+  - **edge_scaled** (default): weights by $p_{model}$ (fallback to edge when $p_{model}$ is missing).
   - **flat**: equal stakes across the card.
-  - **Step up/down:** move to `flat` to remove weighting; keep `edge_scaled` to emphasize higher $p_{model}$ bets.
+  - **Note:** stake weighting is applied **only in live mode**. Historical mode does not re‑allocate stake.
 
 ### Total stake
 
@@ -204,8 +130,7 @@ Matchups:
 
 ### Max stake cap
 
-- `--maxStakePct` optional. If omitted, a **dynamic cap** is applied in live mode:
-  - `cap_pct = clamp(2 / bet_count, 0.2, 0.5)`
+- `--maxStakePct` optional (live only). If omitted, the live allocation uses a **fixed 0.2 cap** per bet.
   - **Step up/down:** lower maxStakePct to reduce concentration; higher maxStakePct to allow bigger single bets.
 
 ### Allocation behavior
@@ -228,7 +153,8 @@ Matchups:
 
 **`betting-card.csv` columns** (exact):
 
-> Note: The raw `betting-card.csv` includes one intentionally blank header (column 248). This unnamed column is reserved as a positional placeholder for future use and for compatibility with existing ingestion code. If you do not need this column, you may safely drop it when loading the file.
+> Note: The raw `betting-card.csv` includes one intentionally blank header column.
+
 ```text
 season,
 book,
@@ -410,13 +336,9 @@ node scripts/run_wagering_pipeline.js --season 2026 --event 20 --oddsSource live
 - `oddsFormat=decimal`
 - `oddsPoint=current`
 - `books=bet365, caesars, draftkings, sportsbook`
-- `selectionMode=probability`
-- `edgeFloor=0`
-- `edgeZPercentile=0.2`
-- `edgeZScope=market`
-- `edgeZRelaxToFill=true`
 - `liveTopN=7`, `matchupTopN=3`
-- `edgeShrink=0.5`, `edgeShrinkMode=bucket`
+- `matchupMinEdge=0.02`
+- `maxOdds=101`
 
 ### Live betting card (direct builder, optional)
 
@@ -432,13 +354,9 @@ node scripts/run_weekly_simulation.js --season 2026 --oddsSource live
 **Implied defaults (selection):**
 
 - `market=all`
-- `selectionMode=probability`
-- `edgeFloor=0`
-- `edgeZPercentile=0.2`
-- `edgeZScope=market`
-- `edgeZRelaxToFill=true`
 - `liveTopN=7`, `matchupTopN=3`
-- `edgeShrink=0.5`, `edgeShrinkMode=bucket`
+- `matchupMinEdge=0.02`
+- `maxOdds=101`
 
 ### Historical: regenerate odds_eval with outcomes
 
@@ -455,8 +373,7 @@ node scripts/run_wagering_pipeline.js --season 2026 --event 475 --oddsSource his
 **Defaults used by this command (historical selection):**
 
 - `market=all`
-- `selectionMode=edge`
-- `edgeShrink=1.0`
+- Historical mode does not create new bets; it updates existing betting-card rows only.
 
 ### Historical: update settled fields on the betting card
 
@@ -793,5 +710,4 @@ Buckets: **A** $\ge 0.80$, **B** $0.65$–$0.79$, **C** $0.50$–$0.64$, **D** $
 
 ### Utilities
 
-- `utilities/wageringSelectionUtils.js` — Selection helpers (edge‑z filters, ranking comparators, mode normalization). Insertion points: `scripts/run_weekly_simulation.js` during candidate ranking and filtering.
 - `utilities/dataGolfClient.js` — DataGolf API + cache wrappers (live odds, historical odds, fantasy projections). Insertion points: `fetch_live_odds.js`, `fetch_live_matchups.js`, `fetch_historical_odds.js`, `run_dk_lineup_optimizer.js`.

@@ -1,0 +1,14 @@
+{
+  "event_id": "475",
+  "season": "2026",
+  "odds_year": "2026",
+  "book": "draftkings",
+  "market": "top_20",
+  "total_rows": 135,
+  "rows_with_outcomes": 113,
+  "avg_edge": 0.2783647142800586,
+  "median_edge": 0.29379863005440005,
+  "hit_rate": 0.04424778761061947,
+  "brier": 0.22528620472058042,
+  "log_loss": 0.6435564867886513
+}

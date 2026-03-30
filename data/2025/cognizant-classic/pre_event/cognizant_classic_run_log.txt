@@ -1,0 +1,75 @@
+Logging to /workspaces/modelOptimizer/data/2025/cognizant-classic/pre_event/cognizant_classic_run_log.txt
+🔄 Generating course history regression inputs...
+✓ Course history regression inputs generated.
+ℹ️  Early-season ramp summary missing; generating (sg_total).
+ℹ️  Player ramp summary unavailable (no ramp file found).
+ℹ️  Course history regression loaded; no course_context updates needed.
+
+🔄 Loading configuration...
+ℹ️  Using course_context.json as primary configuration source.
+✓ Configuration loaded
+✓ Applied course context overrides (eventId)
+ℹ️  Current-event rounds policy: default
+   Defaults: metrics=include, baseline=exclude, optimization=exclude, historical=exclude
+🔄 Building metric config...
+✓ Metric config built
+
+--- LOADING ALL AVAILABLE TEMPLATES ---
+✓ Loaded POWER template
+✓ Loaded TECHNICAL template
+✓ Loaded BALANCED template
+✓ Loaded TPC_SAWGRASS template
+✓ Loaded TPC_LOUISIANA template
+✓ Loaded PEBBLE_BEACH_GOLF_LINKS template
+✓ Loaded WAIALAE_COUNTRY_CLUB template
+✓ Loaded THE_RIVIERA_COUNTRY_CLUB template
+✓ Loaded PETE_DYE_STADIUM_COURSE template
+✓ Loaded TORREY_PINES_GOLF_COURSE template
+✓ Loaded WM_PHOENIX_OPEN_STADIUM_COURSE template
+✓ Loaded PGA_NATIONAL_RESORT_CHAMPION_COURSE template
+✓ Loaded BAY_HILL_CLUB_AND_LODGE template
+✓ Loaded event-specific weights (eventId: 10) from template: PGA_NATIONAL_RESORT_CHAMPION_COURSE
+ℹ️  Validation course type selection unavailable (missing summary CSVs).
+ℹ️  Validation weight templates CSV not found; skipping validation weight constraints.
+
+⚠️  Validation outputs missing, but SKIP_VALIDATION_OUTPUTS is enabled. Proceeding without validation priors.
+✓ DataGolf rankings loaded (api, updated 2026-03-09 11:49:22 UTC)
+ℹ️  Loaded L12 approach snapshot from archive (approach_l12_2026-02-23.json).
+✓ Approach snapshot l24 ready (snapshot, updated 2026-02-23 14:52:29 UTC)
+ℹ️  Skipping L12 approach snapshot refresh (not end-of-season post-tournament run; cached snapshot found).
+✓ Approach snapshot ytd ready (api, updated 2026-03-09 14:01:55 UTC)
+✓ DataGolf field updates loaded (cache-stale, Cognizant Classic)
+✓ DataGolf historical rounds loaded (cache, pga 2025)
+
+🔄 Loading data...
+✓ Loaded field (cache/API): 123 players
+ℹ️  Weather penalties unavailable (missing-location).
+ℹ️  Pre-tournament: prior event 7 found via API; cache updated.
+✓ Loaded history (robust merged-source): 107221 rounds
+ℹ️  History source: refreshPolicy=prefer-cache, api(cache=6, stale=0, api=0, missingKey=0, missingYear=0, errors=0), csv(files=0, rows=0)
+ℹ️  History rows for event 10: 2573 (season 2025: 424)
+✓ Loaded approach: 344 rows (source: CSV Cognizant Classic (2025) - Approach Skill.csv)
+✓ Using approach CSV as primary for current season (344 rows, field overlap 102/123)
+ℹ️  Approach usage summary:
+   - Current-season rankings (baseline/optimization): csv_primary
+   - Step 1b (event-only correlations): latest_snapshot_fallback
+   - Step 1c (event+similar+putting correlations): csv_primary
+ℹ️  Derived 144 results from historical data.
+ℹ️  Manifest approach entries: current=10:cognizant-classic@2025-02-27, next=9:arnold-palmer-invitational@2025-03-06.
+ℹ️  Manifest approach CSVs: pre=Cognizant Classic (2025) - Approach Skill.csv (approach_csv_manifest), post=Arnold Palmer Invitational (2025) - Approach Skill.csv (approach_csv_manifest).
+ℹ️  Event-only snapshot selection: pre=Cognizant Classic (2025) - Approach Skill.csv (approach_csv_manifest), post=Arnold Palmer Invitational (2025) - Approach Skill.csv (approach_csv_manifest).
+✓ Event-only approach metrics enabled (pre=Cognizant Classic (2025) - Approach Skill.csv, post=Arnold Palmer Invitational (2025) - Approach Skill.csv, overlap 84.6%).
+ℹ️  No approach delta JSON found; attempting auto-generation (post-tournament).
+✓ Refreshed YTD approach snapshot for delta generation.
+ℹ️  Approach delta pre/post selection: pre=Cognizant Classic (2025) - Approach Skill.csv (override_previous), post=Arnold Palmer Invitational (2025) - Approach Skill.csv (override_current).
+ℹ️  Approach delta sources resolved: current=/workspaces/modelOptimizer/data/2025/arnold-palmer-invitational/inputs/Arnold Palmer Invitational (2025) - Approach Skill.csv (347 rows), previous=/workspaces/modelOptimizer/data/2025/cognizant-classic/inputs/Cognizant Classic (2025) - Approach Skill.csv (344 rows)
+✓ Approach delta JSON generated: /workspaces/modelOptimizer/data/approach_deltas/2025/approach_deltas_cognizant-classic_2026_03_11.json
+✅ Approach delta ready: /workspaces/modelOptimizer/data/approach_deltas/2025/approach_deltas_cognizant-classic_2026_03_11.json
+✓ Loaded historical rounds from API: 107221 rows (pga, 2020, 2021, 2022, 2023, 2024, 2025)
+✅ Early-season ramp analysis complete.
+   Metric: sg_total
+   Window: first 6 events (min 3)
+   Baseline: last 5 seasons
+   Players: 584
+   Output JSON: /workspaces/modelOptimizer/data/2025/cognizant-classic/pre_event/analysis/early_season_ramp_sg_total.json
+   Output CSV: /workspaces/modelOptimizer/data/2025/cognizant-classic/pre_event/analysis/early_season_ramp_sg_total.csv

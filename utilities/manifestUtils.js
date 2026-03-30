@@ -200,7 +200,7 @@ const readManifestRaw = manifestPath => {
   if (!manifestPath || !fs.existsSync(manifestPath)) return null;
   try {
     return JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  } catch (error) {
+  } catch {
     return null;
   }
 };

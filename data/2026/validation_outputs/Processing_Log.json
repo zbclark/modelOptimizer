@@ -1,29 +1,29 @@
 {
-  "generatedAt": "2026-03-23T16:11:53-05:00",
-  "tournament": "the-valspar",
-  "eventId": "475",
+  "generatedAt": "2026-03-30T13:48:30-05:00",
+  "tournament": "wm-phoenix-open",
+  "eventId": "3",
   "season": 2026,
   "skipMetricAnalysis": true,
   "dataProcessed": {
-    "predictionsCount": 135,
-    "resultsCount": 135,
+    "predictionsCount": 123,
+    "resultsCount": 123,
     "metricAnalysis": null,
     "modelDeltaTrends": {
-      "metrics": 11,
-      "totalSamples": 12650,
-      "tournamentCount": 10,
+      "metrics": 16,
+      "totalSamples": 16932,
+      "tournamentCount": 11,
       "source": "season_aggregate"
     }
   },
   "inputs": {
-    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/the-valspar/pre_event/the-valspar_pre_event_rankings.json",
-    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/the-valspar/pre_event/the-valspar_pre_event_rankings.csv",
-    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/the-valspar/post_event/the-valspar_results.json",
-    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/the-valspar/post_event/the-valspar_results.csv",
+    "rankingsJsonPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/pre_event/wm-phoenix-open_pre_event_rankings.json",
+    "rankingsCsvPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/pre_event/wm-phoenix-open_pre_event_rankings.csv",
+    "resultsJsonPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/post_event/wm-phoenix-open_results.json",
+    "resultsCsvPath": "/workspaces/modelOptimizer/data/2026/wm-phoenix-open/post_event/wm-phoenix-open_results.csv",
     "configCsvPath": null
   },
   "sources": {
-    "rankings": "json",
+    "rankings": "rankings_json",
     "results": "json",
     "resultsGeneratedFrom": "existing_json",
     "config": "course_context"

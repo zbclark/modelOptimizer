@@ -1,0 +1,2 @@
+event_id,season,odds_year,book,market,total_rows,rows_with_outcomes,avg_edge,median_edge,hit_rate,brier,log_loss
+2,2026,2026,draftkings,tournament_matchups,191,191,0,0,0.39267015706806285,0.24147715260792488,0.6760792232107402

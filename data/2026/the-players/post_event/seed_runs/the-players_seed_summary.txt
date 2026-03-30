@@ -3,17 +3,23 @@ MODEL OPTIMIZER SEED SUMMARY
 ====================================================================================================
 Base: the-players
 Directory: /workspaces/modelOptimizer/data/2026/the-players/post_event/seed_runs
-Seeds analyzed: 2
+Seeds analyzed: 3
 
 Top seed ranking (sorted by correlation, then Top-20, then Top-20 Weighted):
 
-1. seed=a | corr=0.8187 | top20=80.0% | top20W=81.8% | rmse=22.74 | mae=18.62 | players=123 | rec=optimized | baseline=TPC_SAWGRASS | file=the-players_seed-a_loeo_post_event_results.json
-2. seed=a | corr=0.8113 | top20=80.0% | top20W=81.6% | rmse=22.95 | mae=18.74 | players=123 | rec=optimized | baseline=TPC_SAWGRASS | file=the-players_seed-a_kfold3_post_event_results.json
+1. seed=a | corr=0.8187 | top20=80.0% | top20W=81.8% | rmse=22.74 | mae=18.62 | players=123 | rec=optimized | baseline=TPC_SAWGRASS | templateRec=unknown | file=the-players_seed-a_loeo_post_event_results.json
+2. seed=seed-b | corr=0.7993 | top20=70.0% | top20W=76.4% | rmse=23.53 | mae=19.18 | players=123 | rec=optimized | baseline=TPC_SAWGRASS | templateRec=optimized | file=the-players_seed-seed-b_phase6-2026-03-27-post-seed-b_post_event_results.json
+3. seed=seed-a | corr=0.7879 | top20=70.0% | top20W=76.7% | rmse=23.89 | mae=19.35 | players=123 | rec=optimized | baseline=TPC_SAWGRASS | templateRec=optimized | file=the-players_seed-seed-a_phase6-2026-03-27-post-seed-a_post_event_results.json
 
 Best seed:
 seed=a | file=the-players_seed-a_loeo_post_event_results.json
 Recommendation for best seed: Use optimized weights | baseline=TPC_SAWGRASS
+Template recommendation for best seed: n/a
 Note: Optimized weights recommended over baseline template.
 
 Recommendation rollup (from results.json):
-- optimized: Use optimized weights | baseline=TPC_SAWGRASS | seeds=a, a | count=2
+- optimized: Use optimized weights | baseline=TPC_SAWGRASS | seeds=a, seed-b, seed-a | count=3
+
+Template recommendation rollup (from results.json):
+- unknown: n/a | seeds=a | count=1
+- optimized: Use optimized weights | seeds=seed-b, seed-a | count=2

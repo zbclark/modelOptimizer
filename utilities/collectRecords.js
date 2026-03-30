@@ -83,7 +83,7 @@ const collectRecords = async ({
             allRows.push(...apiRows);
             meta.rowsFromApi += apiRows.length;
           }
-        } catch (error) {
+        } catch {
           meta.api.errors += 1;
         }
       }
@@ -104,7 +104,7 @@ const collectRecords = async ({
         allRows.push(...rows);
         meta.csv.rows += rows.length;
         meta.rowsFromCsv += rows.length;
-      } catch (err) {
+      } catch {
         // Ignore
       }
     }
@@ -124,7 +124,7 @@ const collectRecords = async ({
         allRows.push(...rows);
         meta.csv.rows += rows.length;
         meta.rowsFromCsv += rows.length;
-      } catch (err) {
+      } catch {
         // Ignore
       }
     }

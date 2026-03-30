@@ -1,0 +1,14 @@
+{
+  "event_id": "10",
+  "season": "2026",
+  "odds_year": "2026",
+  "book": "draftkings",
+  "market": "round_matchups",
+  "total_rows": 378,
+  "rows_with_outcomes": 378,
+  "avg_edge": 0,
+  "median_edge": 0,
+  "hit_rate": 0.3492063492063492,
+  "brier": 0.24057661615111173,
+  "log_loss": 0.6803926044999483
+}

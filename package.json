@@ -3,5 +3,9 @@
     "csv-parse": "^6.1.0",
     "dotenv": "^16.4.5",
     "javascript-lp-solver": "^0.4.24"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.4",
+    "eslint-plugin-import": "^2.32.0"
   }
 }
